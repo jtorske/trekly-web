@@ -37,6 +37,14 @@ export default function Navbar() {
       </Link>
 
       <div className={styles.links}>
+        <Link href="/trail-list" className={styles.link}>
+          Explore
+        </Link>
+
+        <Link href="/featured" className={styles.link}>
+          Featured
+        </Link>
+
         <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
           Sign up
         </Link>
