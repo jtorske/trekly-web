@@ -85,3 +85,99 @@
 .signup:hover {
   color: var(--color-cream);
 }
+
+.menuToggle,
+.mobileMenu {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    padding: 0.08rem 0.75rem;
+  }
+
+  .logo {
+    width: 80px;
+    margin-top: 0;
+  }
+
+  .links {
+    gap: 0.5rem;
+  }
+
+  .link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-size: 0.75rem;
+  }
+
+  .login {
+    display: none;
+  }
+
+  .links .link {
+    display: none;
+  }
+
+  .menuToggle {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-left: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-cream) 75%, transparent);
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--color-cream);
+  }
+
+  .menuToggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+
+  .mobileMenu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0.75rem;
+    display: flex;
+    min-width: 11rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-cream) 20%, transparent);
+    border-radius: 0.75rem;
+    background: var(--color-dark-olive);
+  }
+
+  .mobileMenuLink {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 0.75rem;
+    border-radius: 0.5rem;
+    color: var(--color-cream);
+    font-weight: 600;
+  }
+
+  .mobileMenuLink:hover {
+    background: color-mix(in srgb, var(--color-cream) 10%, transparent);
+    color: var(--color-cream);
+  }
+
+  .mobileMenuSignup {
+    background: var(--color-rust);
+  }
+
+  .mobileMenuSignup:hover {
+    background: color-mix(in srgb, var(--color-rust) 90%, transparent);
+  }
+}

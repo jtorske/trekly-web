@@ -131,3 +131,44 @@
     font-size: 1.25rem;
   }
 }
+
+@media (max-width: 767px) {
+  .section {
+    padding: 5.5rem 1.5rem 4rem;
+  }
+
+  .content {
+    width: 100%;
+  }
+
+  .headline {
+    margin-top: 3rem;
+    font-size: 2.25rem;
+    line-height: 1.08;
+  }
+
+  .subtext {
+    margin-top: 0.75rem;
+    padding: 0 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .searchForm {
+    width: 100%;
+    margin-top: 2rem;
+    min-height: 48px;
+  }
+
+  .searchInput {
+    min-height: 44px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .searchButton {
+    min-height: 44px;
+    white-space: nowrap;
+    padding: 0.7rem 1rem;
+  }
+}
