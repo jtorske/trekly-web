@@ -1,0 +1,41 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-dark-olive) 55%, transparent),
+    transparent
+  );
+  padding: 0.57rem 2.5rem 0.57rem 1.75rem;
+  transition: background 200ms ease;
+}
+
+.scrolled {
+  background: var(--color-dark-olive);
+}
+
+.logo {
+  display: block;
+  width: 66px;
+  height: auto;
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+}
+
+.link {
+  color: var(--color-cream);
+  transition: color 150ms ease;
+}
+
+.link:hover {
+  color: var(--color-rust);
+}

@@ -3,7 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "TrailQ",
+  title: "Trekly",
   description: "Discover hiking trails and adventures",
 };
 

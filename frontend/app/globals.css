@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-olive: #606c38;
+  --color-dark-olive: #283618;
+  --color-cream: #fefae0;
+  --color-tan: #dda15e;
+  --color-rust: #bc6c25;
+  --background: var(--color-cream);
+  --foreground: var(--color-dark-olive);
 }
 
 @theme inline {
@@ -12,41 +17,8 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
-
-.trail-backdrop {
-  transition: opacity 700ms ease;
-  backface-visibility: hidden;
-  will-change: opacity;
-}
-
-.trail-blackout {
-  transition: opacity 650ms ease-in-out;
-  will-change: opacity;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .trail-backdrop {
-    animation: none;
-    opacity: 0;
-  }
-
-  .trail-blackout {
-    transition: none;
-  }
-
-  .trail-backdrop:first-child {
-    opacity: 1;
-  }
 }

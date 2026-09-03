@@ -1,0 +1,109 @@
+.hero {
+  position: relative;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.backdropContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: brightness(0.9) saturate(0.85);
+  opacity: 1;
+}
+
+.incoming {
+  transition: opacity 950ms ease-in-out;
+}
+
+.visible {
+  opacity: 1;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, #000000 35%, transparent) 0%,
+    color-mix(in srgb, #000000 48%, transparent) 50%,
+    color-mix(in srgb, #000000 18%, transparent) 100%
+  );
+}
+
+.section {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  color: var(--color-cream);
+  text-align: center;
+}
+
+.content {
+  max-width: 56rem;
+}
+
+.logo {
+  display: block;
+  width: 260px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.headline {
+  margin-top: 10.75rem;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.subtext {
+  max-width: 42rem;
+  margin: 0.5rem auto 0;
+  color: color-mix(in srgb, var(--color-cream) 80%, transparent);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.cta {
+  margin-top: 1.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--color-rust);
+  padding: 0.75rem 1.75rem;
+  color: var(--color-cream);
+  font-weight: 600;
+  transition: background-color 150ms ease;
+}
+
+.cta:hover {
+  background: color-mix(in srgb, var(--color-rust) 90%, transparent);
+}
+
+@media (min-width: 640px) {
+  .headline {
+    font-size: 3.75rem;
+  }
+
+  .subtext {
+    font-size: 1.25rem;
+  }
+}
