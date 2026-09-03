@@ -30,19 +30,15 @@ export default function Navbar() {
         <Image
           src="/TreklyLogoW.svg"
           alt="Trekly"
-          width={66}
-          height={65}
+          width={82}
+          height={81}
           className={styles.logo}
         />
       </Link>
 
       <div className={styles.links}>
-        <Link href="/trails" className={styles.link}>
-          Explore Trails
-        </Link>
-
-        <Link href="/saved" className={styles.link}>
-          Saved
+        <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
+          Sign up
         </Link>
 
         <Link href="/login" className={`${styles.link} ${styles.login}`}>

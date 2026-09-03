@@ -115,8 +115,8 @@ export default function LandingPage() {
           <h1 className={styles.headline}>Your next trail is waiting</h1>
 
           <p className={styles.subtext}>
-            Find backpacking routes by duration and location. Log your gear,
-            and get a calculated packing plan for your trip.
+            Find backpacking routes by duration and location. Log your gear, and
+            get a calculated packing plan for your trip.
           </p>
 
           <form className={styles.searchForm} action="/trails" method="get">
