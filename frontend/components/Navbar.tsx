@@ -58,7 +58,9 @@ export default function Navbar() {
       <button
         type="button"
         className={styles.menuToggle}
-        aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-label={
+          isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+        }
         aria-expanded={isMenuOpen}
         aria-controls="mobile-navigation"
         onClick={() => setIsMenuOpen((open) => !open)}
