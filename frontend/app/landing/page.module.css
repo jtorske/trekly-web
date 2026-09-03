@@ -16,7 +16,7 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  filter: brightness(0.9) saturate(0.85);
+  filter: brightness(1.05) saturate(0.95);
   opacity: 1;
 }
 
@@ -36,11 +36,11 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, #000000 35%, transparent) 0%,
-    color-mix(in srgb, #000000 48%, transparent) 50%,
-    color-mix(in srgb, #000000 18%, transparent) 100%
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-dark-olive) 38%, transparent) 0%,
+    color-mix(in srgb, var(--color-dark-olive) 20%, transparent) 42%,
+    transparent 74%
   );
 }
 
@@ -83,8 +83,32 @@
   line-height: 1.75;
 }
 
-.cta {
-  margin-top: 1.5rem;
+.searchForm {
+  display: flex;
+  width: min(100%, 36rem);
+  margin: 1.5rem auto 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-cream) 45%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-cream) 94%, transparent);
+}
+
+.searchInput {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0.75rem 1.25rem;
+  color: var(--color-dark-olive);
+  font: inherit;
+}
+
+.searchInput::placeholder {
+  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+}
+
+.searchButton {
   border: 0;
   border-radius: 9999px;
   background: var(--color-rust);
@@ -94,7 +118,7 @@
   transition: background-color 150ms ease;
 }
 
-.cta:hover {
+.searchButton:hover {
   background: color-mix(in srgb, var(--color-rust) 90%, transparent);
 }
 

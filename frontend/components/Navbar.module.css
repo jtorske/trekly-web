@@ -29,9 +29,16 @@
 
 .link {
   color: var(--color-cream);
+  font-weight: 600;
   transition: color 150ms ease;
 }
 
 .link:hover {
   color: var(--color-rust);
+}
+
+.login {
+  border: 1px solid color-mix(in srgb, var(--color-cream) 75%, transparent);
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
 }

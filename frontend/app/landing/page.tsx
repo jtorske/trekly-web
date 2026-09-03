@@ -114,9 +114,23 @@ export default function LandingPage() {
         <div className={styles.content}>
           <h1 className={styles.headline}>Your next trail is waiting</h1>
 
-          <p className={styles.subtext}>Planning your journey begins here.</p>
+          <p className={styles.subtext}>
+            Find backpacking routes by duration and location. Log your gear,
+            and get a calculated packing plan for your trip.
+          </p>
 
-          <button className={styles.cta}>Explore Trails</button>
+          <form className={styles.searchForm} action="/trails" method="get">
+            <input
+              className={styles.searchInput}
+              type="search"
+              name="q"
+              placeholder="Where do you want to backpack?"
+              aria-label="Search for a city or park"
+            />
+            <button className={styles.searchButton} type="submit">
+              Search
+            </button>
+          </form>
         </div>
       </section>
     </main>

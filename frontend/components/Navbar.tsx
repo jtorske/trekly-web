@@ -45,7 +45,7 @@ export default function Navbar() {
           Saved
         </Link>
 
-        <Link href="/login" className={styles.link}>
+        <Link href="/login" className={`${styles.link} ${styles.login}`}>
           Login
         </Link>
       </div>
