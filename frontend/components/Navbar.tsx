@@ -11,7 +11,11 @@ export default function Navbar() {
   useEffect(() => {
     const updateNavbar = () => {
       const hero = document.querySelector("main");
-      setIsScrolled(hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY > window.innerHeight);
+      setIsScrolled(
+        hero
+          ? hero.getBoundingClientRect().bottom <= 0
+          : window.scrollY > window.innerHeight,
+      );
     };
 
     updateNavbar();
