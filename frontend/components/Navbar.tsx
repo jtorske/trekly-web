@@ -46,6 +46,10 @@ export default function Navbar() {
           Featured
         </Link>
 
+        <Link href="/packplanner" className={styles.link}>
+          Pack
+        </Link>
+
         <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
           Sign up
         </Link>
@@ -85,6 +89,13 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             Featured
+          </Link>
+          <Link
+            href="/packplanner"
+            className={styles.mobileMenuLink}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Pack
           </Link>
           <Link
             href="/signup"
