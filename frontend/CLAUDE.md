@@ -1,1 +1,1 @@
-@AGENTS.md
+Trekly is an application to help backpackers plan their next adventure. It has features like pack planning, campsite and trail finding. It should serve as a central hub for outdoors enthusiasts and provide useful preperation tools.
