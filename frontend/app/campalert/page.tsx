@@ -62,7 +62,13 @@ function firstWeekday(year: number, monthIndex: number) {
   return new Date(year, monthIndex, 1).getDay();
 }
 
-function SuccessPanel({ trail, onReset }: { trail: Trail; onReset: () => void }) {
+function SuccessPanel({
+  trail,
+  onReset,
+}: {
+  trail: Trail;
+  onReset: () => void;
+}) {
   return (
     <div className={styles.success}>
       <CheckBadgeIcon className={styles.successIcon} />
@@ -223,7 +229,11 @@ export default function CampAlertPage() {
         </div>
 
         {!selectedTrail && query.trim() && (
-          <div className={styles.results} role="listbox" aria-label="Matching campsites">
+          <div
+            className={styles.results}
+            role="listbox"
+            aria-label="Matching campsites"
+          >
             {isSearching ? (
               <p className={styles.resultEmpty}>Searching…</p>
             ) : results.length === 0 ? (
@@ -258,7 +268,9 @@ export default function CampAlertPage() {
             <TrailPinIcon className={styles.selectedIcon} />
             <span>
               <span className={styles.selectedName}>{selectedTrail.name}</span>
-              <span className={styles.selectedMeta}>{selectedTrail.region}</span>
+              <span className={styles.selectedMeta}>
+                {selectedTrail.region}
+              </span>
             </span>
           </div>
           <button
@@ -275,8 +287,7 @@ export default function CampAlertPage() {
         <div className={styles.emptyState}>
           <CampsiteIcon className={styles.emptyMark} />
           <p>
-            Search above to set up an alert for a specific campground, hut, or
-            backcountry site.
+            Search above to set up an alert for a specific backcountry site.
           </p>
         </div>
       ) : (
@@ -294,7 +305,9 @@ export default function CampAlertPage() {
                 <span>What days can you arrive?*</span>
                 <span
                   className={`${styles.fieldCount} ${
-                    selectedDates.size >= MAX_ARRIVAL_DATES ? styles.fieldCountLimit : ""
+                    selectedDates.size >= MAX_ARRIVAL_DATES
+                      ? styles.fieldCountLimit
+                      : ""
                   }`}
                 >
                   {selectedDates.size} selected
@@ -312,7 +325,10 @@ export default function CampAlertPage() {
                     <option
                       key={month}
                       value={index}
-                      disabled={viewYear === today.getFullYear() && index < today.getMonth()}
+                      disabled={
+                        viewYear === today.getFullYear() &&
+                        index < today.getMonth()
+                      }
                     >
                       {month}
                     </option>
@@ -324,8 +340,12 @@ export default function CampAlertPage() {
                   aria-label="Year"
                   onChange={(event) => setViewYear(Number(event.target.value))}
                 >
-                  <option value={today.getFullYear()}>{today.getFullYear()}</option>
-                  <option value={today.getFullYear() + 1}>{today.getFullYear() + 1}</option>
+                  <option value={today.getFullYear()}>
+                    {today.getFullYear()}
+                  </option>
+                  <option value={today.getFullYear() + 1}>
+                    {today.getFullYear() + 1}
+                  </option>
                 </select>
               </div>
 
@@ -338,32 +358,40 @@ export default function CampAlertPage() {
                   ))}
                 </div>
                 <div className={styles.calendarGrid}>
-                  {Array.from({ length: firstWeekday(viewYear, viewMonth) }).map((_, index) => (
-                    <span key={`pad-${index}`} className={styles.calendarCell} aria-hidden="true" />
+                  {Array.from({
+                    length: firstWeekday(viewYear, viewMonth),
+                  }).map((_, index) => (
+                    <span
+                      key={`pad-${index}`}
+                      className={styles.calendarCell}
+                      aria-hidden="true"
+                    />
                   ))}
-                  {Array.from({ length: daysInMonth(viewYear, viewMonth) }).map((_, index) => {
-                    const day = index + 1;
-                    const iso = isoDate(viewYear, viewMonth, day);
-                    const isPast = iso < todayISO;
-                    const isSelected = selectedDates.has(iso);
+                  {Array.from({ length: daysInMonth(viewYear, viewMonth) }).map(
+                    (_, index) => {
+                      const day = index + 1;
+                      const iso = isoDate(viewYear, viewMonth, day);
+                      const isPast = iso < todayISO;
+                      const isSelected = selectedDates.has(iso);
 
-                    return (
-                      <span key={iso} className={styles.calendarCell}>
-                        <button
-                          type="button"
-                          className={`${styles.calendarDay} ${
-                            isSelected ? styles.calendarDaySelected : ""
-                          }`}
-                          disabled={isPast}
-                          aria-pressed={isSelected}
-                          aria-label={iso}
-                          onClick={() => toggleDate(iso)}
-                        >
-                          {day}
-                        </button>
-                      </span>
-                    );
-                  })}
+                      return (
+                        <span key={iso} className={styles.calendarCell}>
+                          <button
+                            type="button"
+                            className={`${styles.calendarDay} ${
+                              isSelected ? styles.calendarDaySelected : ""
+                            }`}
+                            disabled={isPast}
+                            aria-pressed={isSelected}
+                            aria-label={iso}
+                            onClick={() => toggleDate(iso)}
+                          >
+                            {day}
+                          </button>
+                        </span>
+                      );
+                    },
+                  )}
                 </div>
               </div>
               <p className={styles.calendarHint}>
@@ -433,14 +461,21 @@ export default function CampAlertPage() {
 
               <p className={styles.consent}>
                 We&apos;ll create a free account when you submit this request —
-                no password and no credit card needed. Already have an
-                account? <Link href="/login" className={styles.consentLink}>Log in</Link>.
+                no password and no credit card needed. Already have an account?{" "}
+                <Link href="/login" className={styles.consentLink}>
+                  Log in
+                </Link>
+                .
               </p>
             </div>
           </section>
 
           <div className={styles.submitRow}>
-            <button type="submit" className={styles.submitButton} disabled={!canSubmit || isSubmitting}>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={!canSubmit || isSubmitting}
+            >
               {isSubmitting ? "Creating alert…" : "Create alert"}
             </button>
             <p className={styles.terms}>
