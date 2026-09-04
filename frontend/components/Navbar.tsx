@@ -50,6 +50,10 @@ export default function Navbar() {
           Pack
         </Link>
 
+        <Link href="/campalert" className={styles.link}>
+          CampAlert
+        </Link>
+
         <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
           Sign up
         </Link>
@@ -96,6 +100,13 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             Pack
+          </Link>
+          <Link
+            href="/campalert"
+            className={styles.mobileMenuLink}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            CampAlert
           </Link>
           <Link
             href="/signup"
