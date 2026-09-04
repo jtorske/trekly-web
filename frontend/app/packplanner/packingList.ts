@@ -1,5 +1,12 @@
 export type Season = "spring" | "summer" | "fall" | "winter";
-export type Terrain = "easy" | "moderate" | "strenuous";
+export type Terrain = "easy" | "moderate" | "difficult" | "extreme";
+
+export const TERRAIN_LABELS: Record<Terrain, string> = {
+  easy: "Easy",
+  moderate: "Moderate",
+  difficult: "Difficult",
+  extreme: "Extreme",
+};
 
 export interface TripInputs {
   nights: number;
@@ -62,7 +69,7 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
   const days = nights + 1;
   const isCold = season === "winter" || season === "fall";
   const isHot = season === "summer";
-  const rugged = terrain === "strenuous";
+  const rugged = terrain === "difficult" || terrain === "extreme";
   const group = Math.max(1, groupSize);
   const pooled = group > 1 && shareGear;
 

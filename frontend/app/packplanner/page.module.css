@@ -136,6 +136,66 @@
   font-weight: 500;
 }
 
+.trailField {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.trailResults {
+  position: absolute;
+  top: calc(100% + 0.85rem);
+  left: -0.5rem;
+  right: -0.5rem;
+  z-index: 20;
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 97%, var(--paper));
+  padding: 0.4rem;
+  box-shadow: 0 12px 24px -12px rgba(37, 57, 71, 0.25);
+}
+
+.trailOption {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.trailOption:hover,
+.trailOption:focus-visible {
+  background: color-mix(in srgb, var(--slate) 12%, transparent);
+}
+
+.trailOptionName {
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.trailOptionTerrain {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.78rem;
+}
+
+.trailStatus {
+  padding: 0.65rem 0.75rem;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.88rem;
+}
+
 .primarySelect {
   appearance: none;
   border: 0;
@@ -200,19 +260,6 @@
   color: color-mix(in srgb, var(--ink) 58%, transparent);
   font-size: 0.75rem;
   font-weight: 500;
-}
-
-.secondarySelect {
-  appearance: none;
-  border: 1px solid var(--hair);
-  border-radius: 9999px;
-  background: color-mix(in srgb, white 88%, var(--paper))
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23283618' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    right 0.9rem center / 0.6rem no-repeat;
-  padding: 0.5rem 2rem 0.5rem 1rem;
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.9rem;
 }
 
 .stepper {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Fraunces, Work_Sans } from "next/font/google";
@@ -9,10 +9,12 @@ import { CompassMark, TrailMark } from "./icons";
 import {
   generatePackingList,
   perPersonQty,
+  TERRAIN_LABELS,
   type PackingCategory,
   type Season,
   type Terrain,
 } from "./packingList";
+import { getTrail, searchTrails, type TrailSummary } from "./trailsApi";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -89,30 +91,168 @@ function Stepper({
   );
 }
 
+function TrailSearchField({
+  selectedTrail,
+  onSelect,
+}: {
+  selectedTrail: TrailSummary | null;
+  onSelect: (trail: TrailSummary | null) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<TrailSummary[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const trimmedQuery = query.trim();
+
+  useEffect(() => {
+    if (trimmedQuery.length < 2) return;
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setIsSearching(true);
+      searchTrails(trimmedQuery, controller.signal)
+        .then((trails) => setResults(trails))
+        .catch((error: unknown) => {
+          if ((error as { name?: string }).name !== "AbortError") setResults([]);
+        })
+        .finally(() => setIsSearching(false));
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [trimmedQuery]);
+
+  const displayValue = selectedTrail
+    ? `${selectedTrail.name}, ${selectedTrail.region}`
+    : query;
+
+  const handleSelect = (trail: TrailSummary) => {
+    setQuery("");
+    onSelect(trail);
+    setIsOpen(false);
+  };
+
+  const handleChange = (value: string) => {
+    setQuery(value);
+    setIsOpen(true);
+    if (selectedTrail) onSelect(null);
+  };
+
+  const handleFocus = () => {
+    setIsOpen(true);
+    if (selectedTrail) {
+      setQuery("");
+      onSelect(null);
+    }
+  };
+
+  const showDropdown = isOpen && trimmedQuery.length >= 2 && !selectedTrail;
+  const showNoMatch = showDropdown && !isSearching && results.length === 0;
+
+  return (
+    <div className={styles.trailField}>
+      <input
+        id="location"
+        className={
+          selectedTrail
+            ? `${styles.primaryInput} ${styles.trailInputWithTag}`
+            : styles.primaryInput
+        }
+        type="text"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-controls="trail-results"
+        aria-autocomplete="list"
+        autoComplete="off"
+        placeholder="Search trails…"
+        value={displayValue}
+        onChange={(event) => handleChange(event.target.value)}
+        onFocus={handleFocus}
+        onBlur={() => setIsOpen(false)}
+      />
+
+      {selectedTrail && (
+        <span className={styles.trailTerrainTag}>
+          {TERRAIN_LABELS[selectedTrail.terrain]}
+        </span>
+      )}
+
+      {showDropdown && (isSearching || results.length > 0 || showNoMatch) && (
+        <ul id="trail-results" role="listbox" className={styles.trailResults}>
+          {isSearching && <li className={styles.trailStatus}>Searching…</li>}
+          {!isSearching &&
+            results.map((trail) => (
+              <li key={trail.id} role="option" aria-selected={false}>
+                <button
+                  type="button"
+                  className={styles.trailOption}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    handleSelect(trail);
+                  }}
+                >
+                  <span className={styles.trailOptionName}>
+                    {trail.name}, {trail.region}
+                  </span>
+                  <span className={styles.trailOptionTerrain}>
+                    {TERRAIN_LABELS[trail.terrain]}
+                  </span>
+                </button>
+              </li>
+            ))}
+          {showNoMatch && (
+            <li className={styles.trailStatus}>
+              We don&apos;t have data for this trail yet.
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function TripForm({
   initialNights,
-  initialLocation,
+  initialTrailId,
   isLoading,
   onSubmit,
 }: {
   initialNights: number;
-  initialLocation: string;
+  initialTrailId: string | null;
   isLoading: boolean;
   onSubmit: (values: TripValues) => void;
 }) {
   const [nights, setNights] = useState(initialNights);
-  const [location, setLocation] = useState(initialLocation);
+  const [selectedTrail, setSelectedTrail] = useState<TrailSummary | null>(null);
   const [season, setSeason] = useState<Season>("summer");
-  const [terrain, setTerrain] = useState<Terrain>("moderate");
   const [groupSize, setGroupSize] = useState(1);
   const [shareGear, setShareGear] = useState(true);
+
+  useEffect(() => {
+    if (!initialTrailId) return;
+    getTrail(initialTrailId).then((trail) => {
+      if (trail) setSelectedTrail(trail);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <form
       className={styles.form}
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({ nights, location, season, terrain, groupSize, shareGear });
+        if (!selectedTrail) return;
+        onSubmit({
+          nights,
+          location: `${selectedTrail.name}, ${selectedTrail.region}`,
+          season,
+          terrain: selectedTrail.terrain,
+          groupSize,
+          shareGear,
+        });
       }}
     >
       <div className={styles.primaryBar}>
@@ -129,14 +269,7 @@ function TripForm({
           <label className={styles.primaryLabel} htmlFor="location">
             Where to
           </label>
-          <input
-            id="location"
-            className={styles.primaryInput}
-            type="text"
-            placeholder="Enchantments, WA"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-          />
+          <TrailSearchField selectedTrail={selectedTrail} onSelect={setSelectedTrail} />
         </div>
 
         <div className={styles.primaryDivider} aria-hidden="true" />
@@ -158,28 +291,16 @@ function TripForm({
           </select>
         </div>
 
-        <button className={styles.calculateButton} type="submit" disabled={isLoading}>
+        <button
+          className={styles.calculateButton}
+          type="submit"
+          disabled={isLoading || !selectedTrail}
+        >
           {isLoading ? "Calculating…" : "Calculate"}
         </button>
       </div>
 
       <div className={styles.secondaryRow}>
-        <div className={styles.secondaryField}>
-          <label className={styles.secondaryLabel} htmlFor="terrain">
-            Terrain
-          </label>
-          <select
-            id="terrain"
-            className={styles.secondarySelect}
-            value={terrain}
-            onChange={(event) => setTerrain(event.target.value as Terrain)}
-          >
-            <option value="easy">Easy</option>
-            <option value="moderate">Moderate</option>
-            <option value="strenuous">Strenuous</option>
-          </select>
-        </div>
-
         <div className={styles.secondaryField}>
           <label className={styles.secondaryLabel} htmlFor="groupSize">
             Group size
@@ -193,31 +314,40 @@ function TripForm({
           />
         </div>
 
-        {groupSize > 1 && (
-          <div className={styles.secondaryField}>
-            <span className={styles.secondaryLabel}>Shared gear</span>
-            <div className={styles.segmented} role="radiogroup" aria-label="Shared or individual gear">
-              <button
-                type="button"
-                role="radio"
-                aria-checked={shareGear}
-                className={shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
-                onClick={() => setShareGear(true)}
-              >
-                We&apos;ll share
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={!shareGear}
-                className={!shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
-                onClick={() => setShareGear(false)}
-              >
-                Carry our own
-              </button>
-            </div>
+        <div className={styles.secondaryField}>
+          <span className={styles.secondaryLabel}>Shared gear</span>
+          <div
+            className={
+              groupSize > 1
+                ? styles.segmented
+                : `${styles.segmented} ${styles.segmentedDisabled}`
+            }
+            role="radiogroup"
+            aria-label="Shared or individual gear"
+            aria-disabled={groupSize <= 1}
+          >
+            <button
+              type="button"
+              role="radio"
+              aria-checked={shareGear}
+              disabled={groupSize <= 1}
+              className={shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
+              onClick={() => setShareGear(true)}
+            >
+              We&apos;ll share
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!shareGear}
+              disabled={groupSize <= 1}
+              className={!shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
+              onClick={() => setShareGear(false)}
+            >
+              Carry our own
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </form>
   );
@@ -311,7 +441,7 @@ function AddItemForm({
 function PackPlannerContent() {
   const searchParams = useSearchParams();
   const initialNights = Number(searchParams.get("nights")) || 3;
-  const initialLocation = searchParams.get("location") ?? "";
+  const initialTrailId = searchParams.get("trailId");
 
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<PackingCategory[] | null>(null);
@@ -411,7 +541,7 @@ function PackPlannerContent() {
 
       <TripForm
         initialNights={initialNights}
-        initialLocation={initialLocation}
+        initialTrailId={initialTrailId}
         isLoading={isLoading}
         onSubmit={handleSubmit}
       />

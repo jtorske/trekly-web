@@ -47,7 +47,7 @@ export default function Navbar() {
         </Link>
 
         <Link href="/packplanner" className={styles.link}>
-          Pack
+          PackPlan
         </Link>
 
         <Link href="/campalert" className={styles.link}>
