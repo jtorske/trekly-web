@@ -21,7 +21,8 @@ export interface PackingItem {
   id: string;
   name: string;
   qty: number;
-  weightOz: number;
+  /** Per-unit weight in pounds. Total = weightLb * qty, computed at render time. */
+  weightLb: number;
   checked: boolean;
   /** Group-level item (one tent for everyone) vs. one each person carries. */
   shared: boolean;
@@ -33,6 +34,8 @@ export interface PackingCategory {
   id: string;
   name: string;
   items: PackingItem[];
+  /** Optional summary line shown under the category title (e.g. trip-total calories). */
+  summary?: string;
 }
 
 const slugify = (value: string) =>
@@ -46,7 +49,7 @@ let itemCounter = 0;
 const makeItem = (
   name: string,
   qty: number,
-  weightOz: number,
+  weightLb: number,
   shared = false,
   reason?: string,
 ): PackingItem => {
@@ -55,7 +58,7 @@ const makeItem = (
     id: `${slugify(name)}-${itemCounter}`,
     name,
     qty: Math.max(1, Math.round(qty)),
-    weightOz,
+    weightLb,
     checked: false,
     shared,
     reason,
@@ -69,9 +72,7 @@ export function perPersonQty(item: PackingItem, groupSize: number) {
 }
 
 export function generatePackingList(input: TripInputs): PackingCategory[] {
-  const { nights, season, terrain, groupSize, shareGear } = input;
-  const days = nights + 1;
-  const isHot = season === "summer";
+  const { nights, terrain, groupSize, shareGear } = input;
   const rugged = terrain === "difficult" || terrain === "extreme";
   const group = Math.max(1, groupSize);
   const pooled = group > 1 && shareGear;
@@ -81,55 +82,46 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
       name: "Shelter",
       items: pooled
         ? [
-            makeItem("Tent", Math.max(1, Math.ceil(group / 2)), 80, true),
-            makeItem("Tent footprint", 1, 6, true),
-            makeItem("Guy lines & stakes", 1, 4, true),
+            makeItem("Tent", Math.max(1, Math.ceil(group / 2)), 5, true),
+            makeItem("Tent footprint", 1, 0.375, true),
+            makeItem("Guy lines & stakes", 1, 0.25, true),
           ]
         : [
-            makeItem("Tent", group, 80),
-            makeItem("Tent footprint", group, 6),
-            makeItem("Guy lines & stakes", group, 4),
+            makeItem("Tent", group, 5),
+            makeItem("Tent footprint", group, 0.375),
+            makeItem("Guy lines & stakes", group, 0.25),
           ],
     },
     {
       name: "Sleep",
       // Sleeping bag & pad are added by the caller from generatePackingList()
       // in gearRecommendation.ts, which picks a temperature-appropriate variant.
-      items: [makeItem("Pillow (or stuff sack)", group, 3)],
+      items: [makeItem("Pillow (or stuff sack)", group, 0.1875)],
     },
     {
       name: "Kitchen",
       items: pooled
         ? [
-            makeItem("Backpacking stove", Math.max(1, Math.ceil(group / 4)), 3, true),
+            makeItem("Backpacking stove", Math.max(1, Math.ceil(group / 4)), 0.1875, true),
             makeItem(
               "Fuel canister",
-              Math.max(1, Math.ceil((days * group) / 6)),
-              8,
+              Math.max(1, Math.ceil(((nights + 1) * group) / 6)),
+              0.5,
               true,
             ),
-            makeItem("Cookpot", Math.max(1, Math.ceil(group / 4)), 8, true),
-            makeItem("Spork / utensil", group, 1),
-            makeItem("Water filter", 1, 3, true),
-            makeItem("Water bottles / bladder", group * 2, 4),
+            makeItem("Cookpot", Math.max(1, Math.ceil(group / 4)), 0.5, true),
+            makeItem("Spork / utensil", group, 0.0625),
+            makeItem("Water filter", 1, 0.1875, true),
+            makeItem("Water bottles / bladder", group * 2, 0.25),
           ]
         : [
-            makeItem("Backpacking stove", group, 3),
-            makeItem("Fuel canister", Math.max(1, Math.ceil((days * group) / 3)), 8),
-            makeItem("Cookpot", group, 8),
-            makeItem("Spork / utensil", group, 1),
-            makeItem("Water filter", Math.max(1, Math.ceil(group / 2)), 3, true),
-            makeItem("Water bottles / bladder", group * 2, 4),
+            makeItem("Backpacking stove", group, 0.1875),
+            makeItem("Fuel canister", Math.max(1, Math.ceil(((nights + 1) * group) / 3)), 0.5),
+            makeItem("Cookpot", group, 0.5),
+            makeItem("Spork / utensil", group, 0.0625),
+            makeItem("Water filter", Math.max(1, Math.ceil(group / 2)), 0.1875, true),
+            makeItem("Water bottles / bladder", group * 2, 0.25),
           ],
-    },
-    {
-      name: "Food",
-      items: [
-        makeItem("Breakfast", days * group, 4),
-        makeItem("Lunch", days * group, 5),
-        makeItem("Dinner", days * group, 6),
-        makeItem("Snacks", days * group * 2, 2),
-      ],
     },
     {
       name: "Clothing",
@@ -137,37 +129,18 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
       // caller from generatePackingList() in gearRecommendation.ts, which
       // picks a temperature-appropriate variant for each.
       items: [
-        makeItem("Rain shell", group, 12),
-        makeItem("Hiking pants / shorts", group, 8),
-        makeItem("Wool socks", group * Math.max(2, nights), 2),
-        ...(rugged ? [makeItem("Trekking poles", group, 16)] : []),
-        ...(isHot ? [makeItem("Sun hat", group, 3)] : []),
-      ],
-    },
-    {
-      name: "Navigation",
-      items: [
-        makeItem("Map", 1, 2, true),
-        makeItem("Compass / GPS", 1, 3, true),
-        makeItem("Headlamp", group, 3),
-        makeItem("Backup batteries", group, 2),
-      ],
-    },
-    {
-      name: "First aid & safety",
-      items: [
-        makeItem("First aid kit", Math.max(1, Math.ceil(group / 4)), 8, true),
-        makeItem("Emergency whistle", group, 1),
-        makeItem("Multi-tool / knife", Math.max(1, Math.ceil(group / 2)), 3, true),
-        makeItem("Sunscreen & bug spray", 1, 6, true),
+        makeItem("Rain shell", group, 0.75),
+        makeItem("Hiking pants / shorts", group, 0.5),
+        makeItem("Wool socks", group * Math.max(2, nights), 0.125),
+        ...(rugged ? [makeItem("Trekking poles", group, 1)] : []),
       ],
     },
     {
       name: "Tools & extras",
       items: [
-        makeItem("Backpack", group, 64),
-        makeItem("Trash bag / pack liner", group, 1),
-        makeItem("Repair kit / duct tape", 1, 2, true),
+        makeItem("Backpack", group, 4),
+        makeItem("Multi-tool / knife", Math.max(1, Math.ceil(group / 2)), 0.1875, true),
+        makeItem("Emergency whistle", group, 0.0625),
       ],
     },
   ];

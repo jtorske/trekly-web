@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,
@@ -22,6 +23,10 @@ class TrailSeasonalCondition(Base):
             "season in ('spring','summer','fall','winter')",
             name="trail_seasonal_conditions_season_check",
         ),
+        CheckConstraint(
+            "precip_likelihood in ('low','moderate','high')",
+            name="precip_likelihood_check",
+        ),
         UniqueConstraint("trail_id", "season", name="trail_seasonal_conditions_trail_season_key"),
     )
 
@@ -30,5 +35,10 @@ class TrailSeasonalCondition(Base):
     season = Column(Text, nullable=False)
     avg_low_c = Column(Numeric(4, 1), nullable=False)
     avg_high_c = Column(Numeric(4, 1), nullable=False)
-    precip_likelihood = Column(Numeric(4, 1))
+    precip_likelihood = Column(Text)
+    notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Whether this trail/season combo is prone to sustained high winds
+    # (e.g. exposed coastal or alpine ridge terrain) — drives wind-specific
+    # gear rules (extra-secure stakes, etc.) independent of precipitation.
+    high_wind = Column(Boolean)

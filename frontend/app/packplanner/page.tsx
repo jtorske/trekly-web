@@ -20,6 +20,7 @@ import {
   generatePackingList as generateGearPackingList,
   type PackingListCategory as GearPackingCategory,
 } from "./gearRecommendation";
+import { buildFoodWaterCategory } from "./foodWater";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -36,42 +37,61 @@ const body = Work_Sans({
 
 const CATEGORY_ACCENTS = ["rust", "slate", "olive"] as const;
 
-function ozToLbs(oz: number) {
-  return Math.round((oz / 16) * 10) / 10;
+function round1(value: number) {
+  return Math.round(value * 10) / 10;
 }
 
-function gramsToOz(grams: number) {
-  return grams / 28.3495;
+function categoryDisplayName(categoryId: string) {
+  return categoryId
+    .split(/[_-]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 let gearItemCounter = 0;
 
+function toPackingItems(gearCategory: GearPackingCategory, idPrefix: string): PackingItem[] {
+  return gearCategory.items.map((item) => {
+    gearItemCounter += 1;
+    return {
+      id: `gear-${idPrefix}-${gearItemCounter}`,
+      name: item.itemName,
+      qty: item.quantity,
+      weightLb: item.weightLb ?? 0,
+      checked: false,
+      shared: item.shared,
+      reason: item.reason,
+    };
+  });
+}
+
 /** Merges Supabase-backed gear recommendations into the sync base categories,
  * matching on category id (e.g. "sleep", "clothing") and prepending items so
- * temperature-driven picks lead each category. */
+ * temperature-driven picks lead each category. Gear categories with no
+ * matching base category (essentials, safety) are appended as new ones. */
 function mergeGearCategories(
   baseCategories: PackingCategory[],
   gearCategories: GearPackingCategory[],
 ): PackingCategory[] {
-  return baseCategories.map((category) => {
+  const merged = baseCategories.map((category) => {
     const gearCategory = gearCategories.find((g) => g.category === category.id);
     if (!gearCategory) return category;
-
-    const gearItems: PackingItem[] = gearCategory.items.map((item) => {
-      gearItemCounter += 1;
-      return {
-        id: `gear-${category.id}-${gearItemCounter}`,
-        name: item.itemName,
-        qty: item.quantity,
-        weightOz: item.weightG ? gramsToOz(item.weightG) : 0,
-        checked: false,
-        shared: item.shared,
-        reason: item.reason,
-      };
-    });
-
-    return { ...category, items: [...gearItems, ...category.items] };
+    return {
+      ...category,
+      items: [...toPackingItems(gearCategory, category.id), ...category.items],
+    };
   });
+
+  const matchedIds = new Set(baseCategories.map((c) => c.id));
+  const extraCategories: PackingCategory[] = gearCategories
+    .filter((g) => !matchedIds.has(g.category))
+    .map((g) => ({
+      id: g.category,
+      name: categoryDisplayName(g.category),
+      items: toPackingItems(g, g.category),
+    }));
+
+  return [...merged, ...extraCategories];
 }
 
 interface TripValues {
@@ -488,29 +508,36 @@ function PackPlannerContent() {
   const [trip, setTrip] = useState<TripValues | null>(null);
   const [view, setView] = useState<"combined" | "perPerson">("combined");
   const [gearError, setGearError] = useState<string | null>(null);
+  const [insufficientDataMessage, setInsufficientDataMessage] = useState<string | null>(null);
+  const [climateZone, setClimateZone] = useState<string | null>(null);
+  const [canFilterAtCamp, setCanFilterAtCamp] = useState(false);
+  const [filterAtCamp, setFilterAtCamp] = useState(false);
 
   const { combinedLbs, perPersonLbs } = useMemo(() => {
     if (!categories || !trip) return { combinedLbs: 0, perPersonLbs: 0 };
-    let totalOz = 0;
-    let perPersonOz = 0;
+    let totalLb = 0;
+    let perPersonLb = 0;
     for (const category of categories) {
       for (const item of category.items) {
-        totalOz += item.qty * item.weightOz;
-        perPersonOz += item.shared
-          ? (item.qty * item.weightOz) / trip.groupSize
-          : (perPersonQty(item, trip.groupSize) ?? 0) * item.weightOz;
+        totalLb += item.qty * item.weightLb;
+        perPersonLb += item.shared
+          ? (item.qty * item.weightLb) / trip.groupSize
+          : (perPersonQty(item, trip.groupSize) ?? 0) * item.weightLb;
       }
     }
-    return { combinedLbs: ozToLbs(totalOz), perPersonLbs: ozToLbs(perPersonOz) };
+    return { combinedLbs: round1(totalLb), perPersonLbs: round1(perPersonLb) };
   }, [categories, trip]);
 
   const handleSubmit = async (values: TripValues) => {
     setIsLoading(true);
     setGearError(null);
+    setInsufficientDataMessage(null);
     setCategories(null);
     setTrip(values);
+    setFilterAtCamp(false);
 
     const baseCategories = generatePackingList(values);
+    const days = values.nights + 1;
 
     try {
       const gearResult = await generateGearPackingList(
@@ -520,17 +547,68 @@ function PackPlannerContent() {
         values.groupSize,
         values.shareGear,
       );
-      setCategories(mergeGearCategories(baseCategories, gearResult.categories));
+
+      setClimateZone(gearResult.conditions.climateZone);
+      setCanFilterAtCamp(gearResult.canFilterAtCamp);
+      if (gearResult.conditions.insufficientData && gearResult.conditions.message) {
+        setInsufficientDataMessage(gearResult.conditions.message);
+      }
+
+      const merged = mergeGearCategories(baseCategories, gearResult.categories);
+      const { category: foodWaterCategory } = buildFoodWaterCategory({
+        days,
+        groupSize: values.groupSize,
+        terrain: values.terrain,
+        climateZone: gearResult.conditions.climateZone,
+        filterAtCamp: false,
+      });
+      setCategories([...merged, foodWaterCategory]);
     } catch (error) {
       setGearError(
         error instanceof Error
           ? error.message
           : "Couldn't load gear recommendations for this trail.",
       );
-      setCategories(baseCategories);
+      const { category: foodWaterCategory } = buildFoodWaterCategory({
+        days,
+        groupSize: values.groupSize,
+        terrain: values.terrain,
+        climateZone: null,
+        filterAtCamp: false,
+      });
+      setCategories([...baseCategories, foodWaterCategory]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFilterToggle = (nextFilterAtCamp: boolean) => {
+    setFilterAtCamp(nextFilterAtCamp);
+    if (!trip) return;
+    const { category: freshFoodWater } = buildFoodWaterCategory({
+      days: trip.nights + 1,
+      groupSize: trip.groupSize,
+      terrain: trip.terrain,
+      climateZone,
+      filterAtCamp: nextFilterAtCamp,
+    });
+    const freshWater = freshFoodWater.items.find((item) => item.name === "Water");
+    setCategories(
+      (current) =>
+        current?.map((category) =>
+          category.id === "food-water"
+            ? {
+                ...category,
+                summary: freshFoodWater.summary,
+                items: category.items.map((item) =>
+                  item.name === "Water" && freshWater
+                    ? { ...freshWater, checked: item.checked }
+                    : item,
+                ),
+              }
+            : category,
+        ) ?? null,
+    );
   };
 
   const toggleItem = (categoryId: string, itemId: string) => {
@@ -573,7 +651,7 @@ function PackPlannerContent() {
                     id: `${categoryId}-custom-${Date.now()}`,
                     name,
                     qty,
-                    weightOz: 0,
+                    weightLb: 0,
                     checked: false,
                     shared: false,
                   },
@@ -617,6 +695,10 @@ function PackPlannerContent() {
                 Couldn&apos;t load temperature-based gear recommendations
                 ({gearError}) — showing the rest of your list instead.
               </p>
+            )}
+
+            {insufficientDataMessage && (
+              <p className={styles.gearErrorBanner}>{insufficientDataMessage}</p>
             )}
 
             <div className={styles.resultsHeader}>
@@ -667,6 +749,59 @@ function PackPlannerContent() {
                   key={category.id}
                 >
                   <h3 className={styles.categoryTitle}>{category.name}</h3>
+                  {category.summary && (
+                    <p className={styles.categorySummary}>{category.summary}</p>
+                  )}
+
+                  {category.id === "food-water" && (
+                    <div className={styles.waterToggleRow}>
+                      <span className={styles.secondaryLabel}>Water source</span>
+                      <div
+                        className={
+                          canFilterAtCamp
+                            ? styles.segmented
+                            : `${styles.segmented} ${styles.segmentedDisabled}`
+                        }
+                        role="radiogroup"
+                        aria-label="Water carrying strategy"
+                        aria-disabled={!canFilterAtCamp}
+                      >
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={!filterAtCamp}
+                          className={
+                            !filterAtCamp
+                              ? `${styles.segment} ${styles.segmentActive}`
+                              : styles.segment
+                          }
+                          onClick={() => handleFilterToggle(false)}
+                        >
+                          Carry all water
+                        </button>
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={filterAtCamp}
+                          disabled={!canFilterAtCamp}
+                          className={
+                            filterAtCamp
+                              ? `${styles.segment} ${styles.segmentActive}`
+                              : styles.segment
+                          }
+                          onClick={() => handleFilterToggle(true)}
+                        >
+                          Filter at camp
+                        </button>
+                      </div>
+                      {!canFilterAtCamp && (
+                        <span className={styles.waterToggleHint}>
+                          No known campsites with water access on this trail yet.
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <ul className={styles.itemList}>
                     {category.items.map((item) => {
                       const displayQty = showPerPerson
@@ -676,9 +811,9 @@ function PackPlannerContent() {
                         : item.qty;
                       const displayWeight = showPerPerson
                         ? item.shared
-                          ? item.weightOz * item.qty
-                          : displayQty * item.weightOz
-                        : item.weightOz * item.qty;
+                          ? item.weightLb * item.qty
+                          : displayQty * item.weightLb
+                        : item.weightLb * item.qty;
 
                       return (
                         <li className={styles.item} key={item.id}>
@@ -705,7 +840,7 @@ function PackPlannerContent() {
                             <span className={styles.itemQty}>×{displayQty}</span>
                             {displayWeight > 0 && (
                               <span className={styles.itemWeight}>
-                                {Math.round(displayWeight * 10) / 10} oz
+                                {Math.round(displayWeight * 100) / 100} lb
                               </span>
                             )}
                             <button

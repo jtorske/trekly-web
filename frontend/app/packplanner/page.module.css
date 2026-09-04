@@ -491,12 +491,32 @@
 }
 
 .categoryTitle {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.3rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--hair-soft);
   color: var(--accent);
   font-weight: 600;
   font-size: 1rem;
+}
+
+.categorySummary {
+  margin: -0.2rem 0 0.55rem;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  font-size: 0.82rem;
+}
+
+.waterToggleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.waterToggleHint {
+  flex-basis: 100%;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
+  font-size: 0.76rem;
 }
 
 .itemList {
