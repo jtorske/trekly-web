@@ -146,7 +146,12 @@ export async function recommendVariant(
     ? `${variant.variant_name} — the warmest option available; expected lows around ${avgLowC}°C may exceed its rating`
     : `${variant.variant_name} — expected lows around ${avgLowC}°C`;
 
-  return { itemName: gearItemName, variantName: variant.variant_name, reason };
+  return {
+    itemName: gearItemName,
+    variantName: variant.variant_name,
+    reason,
+    weightG: variant.weight_g,
+  };
 }
 
 /**
@@ -185,7 +190,7 @@ export async function recommendSleepingPad(
       ? `${chosen.variant_name} — bumped up an R-value tier for ${terrainDifficulty} terrain (cold ground saps heat regardless of air temp)`
       : `${chosen.variant_name} — expected lows around ${avgLowC}°C`;
 
-  return { itemName, variantName: chosen.variant_name, reason };
+  return { itemName, variantName: chosen.variant_name, reason, weightG: chosen.weight_g };
 }
 
 /**
@@ -335,7 +340,11 @@ export async function generatePackingList(
       const quantity = shared ? 1 : Math.max(1, groupSize);
       // Quantity multiplication happens once, here, entirely in pounds —
       // weightLb is per-unit and is never itself scaled by quantity.
-      const weightLb = item?.weight_g ? gramsToLb(item.weight_g) : undefined;
+      // Prefer the chosen variant's own weight (a winter bag weighs more
+      // than a summer one) — only fall back to the base item weight if this
+      // particular variant has no weight_g set.
+      const gramsForItem = rec.weightG ?? item?.weight_g ?? null;
+      const weightLb = gramsForItem ? gramsToLb(gramsForItem) : undefined;
       addItem(category, {
         itemName: rec.itemName,
         quantity,

@@ -519,6 +519,12 @@
   font-size: 0.76rem;
 }
 
+.waterWarning {
+  flex-basis: 100%;
+  color: color-mix(in srgb, var(--color-rust) 85%, var(--ink));
+  font-size: 0.76rem;
+}
+
 .itemList {
   display: flex;
   flex-direction: column;
@@ -527,7 +533,7 @@
 .item {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   border-bottom: 1px solid var(--hair-soft);
@@ -548,21 +554,23 @@
 
 .itemLabel {
   display: flex;
+  flex: 1 1 0%;
   min-width: 0;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
 }
 
 .itemLabel input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
   accent-color: var(--color-rust);
   width: 1rem;
   height: 1rem;
 }
 
 .itemName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .itemChecked {

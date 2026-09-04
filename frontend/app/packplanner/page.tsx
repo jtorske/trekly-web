@@ -799,6 +799,10 @@ function PackPlannerContent() {
                           No known campsites with water access on this trail yet.
                         </span>
                       )}
+                      <span className={styles.waterWarning}>
+                        ⚠️ Water sources may be seasonal/unreliable. Check
+                        current conditions before departure.
+                      </span>
                     </div>
                   )}
 
