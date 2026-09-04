@@ -1,10 +1,15 @@
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Season, Terrain } from "./packingList";
+import { gramsToLb, pickAdequateVariant, type RatedVariant } from "./gearMatching";
+
+export { gramsToLb, pickAdequateVariant };
 
 export interface VariantRecommendation {
   itemName: string;
   variantName: string;
   reason: string;
+  /** The chosen variant's own weight in grams, when set on gear_variants. */
+  weightG: number | null;
 }
 
 export interface PackingListItem {
@@ -12,8 +17,9 @@ export interface PackingListItem {
   quantity: number;
   variantName?: string;
   reason?: string;
-  /** Per-unit weight in grams, from gear_items.weight_g, when known. */
-  weightG?: number;
+  /** Per-unit weight in pounds. Total display weight = weightLb * quantity,
+   * computed by the caller — quantity is never folded into this value. */
+  weightLb?: number;
   /** True when quantity is a single group-wide total rather than per-person. */
   shared: boolean;
 }
@@ -27,54 +33,52 @@ export interface GeneratedPackingList {
   categories: PackingListCategory[];
   conditions: {
     season: Season;
-    avgLowC: number;
-    avgHighC: number;
+    avgLowC: number | null;
+    avgHighC: number | null;
     isEstimate: boolean;
+    insufficientData: boolean;
+    message?: string;
+    climateZone: string | null;
+    precipLikelihood: "low" | "moderate" | "high" | null;
+    highWind: boolean;
   };
+  /** Whether this trail has at least one linked campsite, as a rough proxy
+   * for "you can plausibly filter water at camp instead of carrying it all." */
+  canFilterAtCamp: boolean;
 }
-
-interface RatedVariant {
-  variant_name: string;
-  min_temp_c: number;
-  min_r_value: number | null;
-}
-
-/** Seasonal fallback ranges used when a trail has no recorded seasonal conditions. */
-const SEASON_DEFAULT_RANGE_C: Record<Season, { low: number; high: number }> = {
-  summer: { low: 5, high: 20 },
-  spring: { low: -5, high: 10 },
-  fall: { low: -5, high: 10 },
-  winter: { low: -20, high: -5 },
-};
 
 /**
- * Pure matching logic, split out from the Supabase fetch so it can be unit
- * tested without a live client: pick the lightest/warmest-adequate variant
- * (highest min_temp_c at or below the target), falling back to the
- * warmest-rated variant overall if nothing is adequate.
+ * Seasonal fallback ranges, branched by climate zone, used only when a trail
+ * has no trail_seasonal_conditions row for the requested season. A climate
+ * zone not listed here (or missing entirely) is NOT guessed at — the caller
+ * gets insufficientData: true instead of a made-up number.
  */
-export function pickAdequateVariant(
-  variants: RatedVariant[],
-  targetTempC: number,
-): { variant: RatedVariant; isFallback: boolean } {
-  if (variants.length === 0) {
-    throw new Error("No temperature-rated variants to choose from");
-  }
-
-  const sorted = [...variants].sort((a, b) => a.min_temp_c - b.min_temp_c);
-  const adequate = sorted.filter((v) => v.min_temp_c <= targetTempC);
-
-  if (adequate.length > 0) {
-    const warmestAdequate = adequate.reduce((best, v) =>
-      v.min_temp_c > best.min_temp_c ? v : best,
-    );
-    return { variant: warmestAdequate, isFallback: false };
-  }
-
-  // Nothing is rated cold enough for the target: fall back to the
-  // warmest-rated variant available (lowest min_temp_c = most protective).
-  return { variant: sorted[0], isFallback: true };
-}
+const CLIMATE_SEASON_DEFAULTS_C: Record<string, Record<Season, { low: number; high: number }>> = {
+  alpine: {
+    spring: { low: -10, high: 5 },
+    summer: { low: 2, high: 18 },
+    fall: { low: -8, high: 8 },
+    winter: { low: -20, high: -5 },
+  },
+  coastal_temperate: {
+    spring: { low: 2, high: 14 },
+    summer: { low: 10, high: 24 },
+    fall: { low: 2, high: 14 },
+    winter: { low: -2, high: 8 },
+  },
+  desert: {
+    spring: { low: 5, high: 24 },
+    summer: { low: 15, high: 38 },
+    fall: { low: 5, high: 24 },
+    winter: { low: -2, high: 16 },
+  },
+  temperate: {
+    spring: { low: -2, high: 12 },
+    summer: { low: 12, high: 26 },
+    fall: { low: 0, high: 14 },
+    winter: { low: -8, high: 4 },
+  },
+};
 
 async function fetchRatedVariants(gearItemName: string): Promise<RatedVariant[]> {
   const supabase = getSupabaseClient();
@@ -94,7 +98,7 @@ async function fetchRatedVariants(gearItemName: string): Promise<RatedVariant[]>
 
   const { data: variants, error: variantsError } = await supabase
     .from("gear_variants")
-    .select("variant_name, min_temp_c, min_r_value")
+    .select("variant_name, min_temp_c, min_r_value, weight_g")
     .eq("gear_item_id", item.id);
 
   if (variantsError) {
@@ -110,6 +114,7 @@ async function fetchRatedVariants(gearItemName: string): Promise<RatedVariant[]>
       variant_name: v.variant_name,
       min_temp_c: Number(v.min_temp_c),
       min_r_value: v.min_r_value !== null ? Number(v.min_r_value) : null,
+      weight_g: v.weight_g !== null ? Number(v.weight_g) : null,
     }));
 
   if (rated.length === 0) {
@@ -211,8 +216,9 @@ function evaluateQuantityFormula(
 /**
  * Builds the full categorized packing list for a trip: resolves graduated
  * gear (bag, pad, jacket, footwear, base layer, gloves) via temperature
- * matching, combines it with boolean gear_rules items, and groups everything
- * by gear category.
+ * matching, combines it with boolean gear_rules items (including baseline
+ * essentials and region/wind/precip-gated extras), and groups everything by
+ * gear category.
  */
 export async function generatePackingList(
   trailId: string,
@@ -225,7 +231,7 @@ export async function generatePackingList(
 
   const { data: trail, error: trailError } = await supabase
     .from("trails")
-    .select("terrain_difficulty")
+    .select("terrain_difficulty, climate_zone")
     .eq("id", trailId)
     .maybeSingle();
 
@@ -236,10 +242,11 @@ export async function generatePackingList(
     throw new Error(`No trail found with id ${trailId}`);
   }
   const terrainDifficulty = trail.terrain_difficulty as Terrain;
+  const climateZone: string | null = trail.climate_zone ?? null;
 
   const { data: seasonalConditions, error: conditionsError } = await supabase
     .from("trail_seasonal_conditions")
-    .select("avg_low_c, avg_high_c")
+    .select("avg_low_c, avg_high_c, precip_likelihood, high_wind")
     .eq("trail_id", trailId)
     .eq("season", season)
     .maybeSingle();
@@ -250,22 +257,46 @@ export async function generatePackingList(
     );
   }
 
-  const isEstimate = !seasonalConditions;
-  const fallbackRange = SEASON_DEFAULT_RANGE_C[season];
-  const avgLowC = seasonalConditions ? Number(seasonalConditions.avg_low_c) : fallbackRange.low;
-  const avgHighC = seasonalConditions
-    ? Number(seasonalConditions.avg_high_c)
-    : fallbackRange.high;
+  let avgLowC: number | null;
+  let avgHighC: number | null;
+  let isEstimate: boolean;
+  let insufficientData = false;
+  let message: string | undefined;
+  let precipLikelihood: "low" | "moderate" | "high" | null = null;
+  let highWind = false;
 
-  const [sleepingBag, sleepingPad, insulatedJacket, footwear, baseLayer, gloves] =
-    await Promise.all([
-      recommendVariant("Sleeping bag", avgLowC, terrainDifficulty),
-      recommendSleepingPad(avgLowC, terrainDifficulty),
-      recommendVariant("Insulated jacket", avgLowC, terrainDifficulty),
-      recommendVariant("Hiking footwear", avgLowC, terrainDifficulty),
-      recommendVariant("Base layer top", avgLowC, terrainDifficulty),
-      recommendVariant("Gloves", avgLowC, terrainDifficulty),
-    ]);
+  if (seasonalConditions) {
+    avgLowC = Number(seasonalConditions.avg_low_c);
+    avgHighC = Number(seasonalConditions.avg_high_c);
+    isEstimate = false;
+    precipLikelihood = seasonalConditions.precip_likelihood ?? null;
+    highWind = Boolean(seasonalConditions.high_wind);
+  } else {
+    const zoneDefaults = climateZone ? CLIMATE_SEASON_DEFAULTS_C[climateZone] : undefined;
+    if (zoneDefaults) {
+      avgLowC = zoneDefaults[season].low;
+      avgHighC = zoneDefaults[season].high;
+      isEstimate = true;
+    } else {
+      avgLowC = null;
+      avgHighC = null;
+      isEstimate = true;
+      insufficientData = true;
+      message = climateZone
+        ? `We don't have a temperature model for the "${climateZone}" climate zone yet — please confirm expected lows/highs yourself before relying on the sleep/clothing recommendations below.`
+        : "This trail has no recorded seasonal data or climate zone, so we can't estimate expected temperatures — please confirm expected lows/highs yourself before relying on the sleep/clothing recommendations below.";
+    }
+  }
+
+  const { count: campsiteCount, error: campsiteError } = await supabase
+    .from("campsites")
+    .select("id", { count: "exact", head: true })
+    .eq("trail_id", trailId);
+
+  if (campsiteError) {
+    throw new Error(`Failed to check campsites for trail ${trailId}: ${campsiteError.message}`);
+  }
+  const canFilterAtCamp = (campsiteCount ?? 0) > 0;
 
   const { data: gearItems, error: gearItemsError } = await supabase
     .from("gear_items")
@@ -285,25 +316,40 @@ export async function generatePackingList(
     categoryMap.set(category, list);
   };
 
-  const graduated = [sleepingBag, sleepingPad, insulatedJacket, footwear, baseLayer, gloves];
-  for (const rec of graduated) {
-    const item = itemByName.get(rec.itemName);
-    const category = item?.category ?? "gear";
-    const shared = Boolean(item?.is_shareable) && sharingTentStove;
-    const quantity = shared ? 1 : Math.max(1, groupSize);
-    addItem(category, {
-      itemName: rec.itemName,
-      quantity,
-      variantName: rec.variantName,
-      reason: rec.reason,
-      weightG: item?.weight_g ?? undefined,
-      shared,
-    });
+  if (!insufficientData && avgLowC !== null) {
+    const [sleepingBag, sleepingPad, insulatedJacket, footwear, baseLayer, gloves] =
+      await Promise.all([
+        recommendVariant("Sleeping bag", avgLowC, terrainDifficulty),
+        recommendSleepingPad(avgLowC, terrainDifficulty),
+        recommendVariant("Insulated jacket", avgLowC, terrainDifficulty),
+        recommendVariant("Hiking footwear", avgLowC, terrainDifficulty),
+        recommendVariant("Base layer top", avgLowC, terrainDifficulty),
+        recommendVariant("Gloves", avgLowC, terrainDifficulty),
+      ]);
+
+    const graduated = [sleepingBag, sleepingPad, insulatedJacket, footwear, baseLayer, gloves];
+    for (const rec of graduated) {
+      const item = itemByName.get(rec.itemName);
+      const category = item?.category ?? "gear";
+      const shared = Boolean(item?.is_shareable) && sharingTentStove;
+      const quantity = shared ? 1 : Math.max(1, groupSize);
+      // Quantity multiplication happens once, here, entirely in pounds —
+      // weightLb is per-unit and is never itself scaled by quantity.
+      const weightLb = item?.weight_g ? gramsToLb(item.weight_g) : undefined;
+      addItem(category, {
+        itemName: rec.itemName,
+        quantity,
+        variantName: rec.variantName,
+        reason: rec.reason,
+        weightLb,
+        shared,
+      });
+    }
   }
 
   const days = nights + 1;
   const { data: rules, error: rulesError } = await supabase.from("gear_rules").select(
-    "gear_item_id, condition_terrain, condition_season, condition_min_nights, condition_min_temp_c, condition_max_temp_c, quantity_per_person, quantity_formula",
+    "gear_item_id, condition_terrain, condition_season, condition_min_nights, condition_min_temp_c, condition_max_temp_c, quantity_per_person, quantity_formula, condition_climate_zone, condition_requires_high_precip, condition_requires_high_wind",
   );
 
   if (rulesError) {
@@ -314,11 +360,20 @@ export async function generatePackingList(
     if (rule.condition_terrain && rule.condition_terrain !== terrainDifficulty) continue;
     if (rule.condition_season && rule.condition_season !== season) continue;
     if (rule.condition_min_nights != null && nights < rule.condition_min_nights) continue;
-    if (rule.condition_min_temp_c != null && avgLowC < Number(rule.condition_min_temp_c)) {
-      continue;
-    }
-    if (rule.condition_max_temp_c != null && avgLowC > Number(rule.condition_max_temp_c)) {
-      continue;
+    if (rule.condition_climate_zone && rule.condition_climate_zone !== climateZone) continue;
+    if (rule.condition_requires_high_wind && !highWind) continue;
+    if (rule.condition_requires_high_precip && precipLikelihood !== "high") continue;
+
+    if (rule.condition_min_temp_c != null || rule.condition_max_temp_c != null) {
+      // Temperature-gated rule, but we have no temperature to evaluate it
+      // against — skip rather than guess.
+      if (avgLowC === null) continue;
+      if (rule.condition_min_temp_c != null && avgLowC < Number(rule.condition_min_temp_c)) {
+        continue;
+      }
+      if (rule.condition_max_temp_c != null && avgLowC > Number(rule.condition_max_temp_c)) {
+        continue;
+      }
     }
 
     const item = itemById.get(rule.gear_item_id);
@@ -336,7 +391,7 @@ export async function generatePackingList(
     addItem(item.category, {
       itemName: item.name,
       quantity,
-      weightG: item.weight_g ?? undefined,
+      weightLb: item.weight_g ? gramsToLb(item.weight_g) : undefined,
       shared,
     });
   }
@@ -347,6 +402,17 @@ export async function generatePackingList(
 
   return {
     categories,
-    conditions: { season, avgLowC, avgHighC, isEstimate },
+    conditions: {
+      season,
+      avgLowC,
+      avgHighC,
+      isEstimate,
+      insufficientData,
+      message,
+      climateZone,
+      precipLikelihood,
+      highWind,
+    },
+    canFilterAtCamp,
   };
 }
