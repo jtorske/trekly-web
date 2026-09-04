@@ -47,24 +47,6 @@ export function CampsiteIcon({ className }: { className?: string }) {
   );
 }
 
-export function CompassMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 64 64"
-      fill="none"
-      stroke="currentColor"
-      aria-hidden="true"
-    >
-      <circle cx="32" cy="32" r="27" strokeWidth="1.4" />
-      <circle cx="32" cy="32" r="1.8" fill="currentColor" stroke="none" />
-      <path d="M32 8v7M32 49v7M8 32h7M49 32h7" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M32 16l6 17-6 15-6-15z" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M32 16l6 17-6-4-6 4z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 export function CheckBadgeIcon({ className }: { className?: string }) {
   return (
     <svg

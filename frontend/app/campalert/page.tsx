@@ -2,15 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Fraunces, Work_Sans } from "next/font/google";
 import styles from "./page.module.css";
 import { searchTrails, type Trail } from "./campsites";
 import {
   CampsiteIcon,
   CheckBadgeIcon,
-  CompassMark,
   SearchIcon,
   TrailPinIcon,
 } from "./icons";
+
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
+
+const body = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
+
+const pageFontClass = `${styles.page} ${display.variable} ${body.variable}`;
 
 const MONTH_NAMES = [
   "January",
@@ -163,7 +178,7 @@ export default function CampAlertPage() {
 
   if (submitted && selectedTrail) {
     return (
-      <main className={styles.page}>
+      <main className={pageFontClass}>
         <div className={styles.texture} aria-hidden="true" />
         <SuccessPanel trail={selectedTrail} onReset={handleReset} />
       </main>
@@ -171,11 +186,10 @@ export default function CampAlertPage() {
   }
 
   return (
-    <main className={styles.page}>
+    <main className={pageFontClass}>
       <div className={styles.texture} aria-hidden="true" />
 
       <div className={styles.intro}>
-        <CompassMark className={styles.introCompass} />
         <h1 className={styles.title}>CampAlert</h1>
         <p className={styles.subtitle}>
           Get notified the moment a spot opens up at the campground, hut, or
@@ -189,7 +203,7 @@ export default function CampAlertPage() {
           <input
             className={styles.searchInput}
             type="search"
-            placeholder="Search for a campground, caravan park, hut, backcountry site, or shuttle"
+            placeholder="Search for a backcountry site"
             aria-label="Search for a campground, caravan park, hut, backcountry site, or shuttle"
             value={query}
             onChange={(event) => {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Fraunces, Work_Sans } from "next/font/google";
 import styles from "./page.module.css";
-import { CompassMark, TrailMark } from "./icons";
+import { TrailMark } from "./icons";
 import {
   generatePackingList,
   perPersonQty,
@@ -365,7 +365,7 @@ function EmptyState() {
 function LoadingState() {
   return (
     <div className={styles.placeholder}>
-      <CompassMark className={styles.spinner} spin />
+      <div className={styles.spinner} aria-hidden="true" />
       <p>Calculating your packing list…</p>
     </div>
   );
@@ -531,8 +531,7 @@ function PackPlannerContent() {
       <div className={styles.texture} aria-hidden="true" />
 
       <div className={styles.intro}>
-        <CompassMark className={styles.introCompass} />
-        <h1 className={styles.title}>Pack planner</h1>
+        <h1 className={styles.title}>PackPlan</h1>
         <p className={styles.subtitle}>
           Tell us about your trip and get a categorized packing list to check
           off as you go.

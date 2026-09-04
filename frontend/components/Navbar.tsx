@@ -42,10 +42,6 @@ export default function Navbar() {
           Explore
         </Link>
 
-        <Link href="/featured" className={styles.link}>
-          Featured
-        </Link>
-
         <Link href="/packplanner" className={styles.link}>
           PackPlan
         </Link>
