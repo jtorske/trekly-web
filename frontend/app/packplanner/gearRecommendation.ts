@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Season, Terrain } from "./packingList";
 
 export interface VariantRecommendation {
@@ -12,6 +12,10 @@ export interface PackingListItem {
   quantity: number;
   variantName?: string;
   reason?: string;
+  /** Per-unit weight in grams, from gear_items.weight_g, when known. */
+  weightG?: number;
+  /** True when quantity is a single group-wide total rather than per-person. */
+  shared: boolean;
 }
 
 export interface PackingListCategory {
@@ -73,6 +77,8 @@ export function pickAdequateVariant(
 }
 
 async function fetchRatedVariants(gearItemName: string): Promise<RatedVariant[]> {
+  const supabase = getSupabaseClient();
+
   const { data: item, error: itemError } = await supabase
     .from("gear_items")
     .select("id")
@@ -215,6 +221,8 @@ export async function generatePackingList(
   groupSize: number,
   sharingTentStove: boolean,
 ): Promise<GeneratedPackingList> {
+  const supabase = getSupabaseClient();
+
   const { data: trail, error: trailError } = await supabase
     .from("trails")
     .select("terrain_difficulty")
@@ -261,7 +269,7 @@ export async function generatePackingList(
 
   const { data: gearItems, error: gearItemsError } = await supabase
     .from("gear_items")
-    .select("id, name, category, is_shareable");
+    .select("id, name, category, is_shareable, weight_g");
 
   if (gearItemsError) {
     throw new Error(`Failed to load gear items: ${gearItemsError.message}`);
@@ -281,13 +289,15 @@ export async function generatePackingList(
   for (const rec of graduated) {
     const item = itemByName.get(rec.itemName);
     const category = item?.category ?? "gear";
-    const quantity =
-      item?.is_shareable && sharingTentStove ? 1 : Math.max(1, groupSize);
+    const shared = Boolean(item?.is_shareable) && sharingTentStove;
+    const quantity = shared ? 1 : Math.max(1, groupSize);
     addItem(category, {
       itemName: rec.itemName,
       quantity,
       variantName: rec.variantName,
       reason: rec.reason,
+      weightG: item?.weight_g ?? undefined,
+      shared,
     });
   }
 
@@ -318,12 +328,17 @@ export async function generatePackingList(
       ? evaluateQuantityFormula(rule.quantity_formula, { nights, days, groupSize })
       : Number(rule.quantity_per_person ?? 1);
 
-    const quantity =
-      item.is_shareable && sharingTentStove
-        ? Math.max(1, Math.round(basePerPerson))
-        : Math.max(1, Math.round(basePerPerson * groupSize));
+    const shared = Boolean(item.is_shareable) && sharingTentStove;
+    const quantity = shared
+      ? Math.max(1, Math.round(basePerPerson))
+      : Math.max(1, Math.round(basePerPerson * groupSize));
 
-    addItem(item.category, { itemName: item.name, quantity });
+    addItem(item.category, {
+      itemName: item.name,
+      quantity,
+      weightG: item.weight_g ?? undefined,
+      shared,
+    });
   }
 
   const categories: PackingListCategory[] = Array.from(categoryMap.entries()).map(

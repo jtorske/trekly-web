@@ -25,6 +25,8 @@ export interface PackingItem {
   checked: boolean;
   /** Group-level item (one tent for everyone) vs. one each person carries. */
   shared: boolean;
+  /** Short explanation shown under the item name, e.g. why this variant was picked. */
+  reason?: string;
 }
 
 export interface PackingCategory {
@@ -46,6 +48,7 @@ const makeItem = (
   qty: number,
   weightOz: number,
   shared = false,
+  reason?: string,
 ): PackingItem => {
   itemCounter += 1;
   return {
@@ -55,6 +58,7 @@ const makeItem = (
     weightOz,
     checked: false,
     shared,
+    reason,
   };
 };
 
@@ -67,7 +71,6 @@ export function perPersonQty(item: PackingItem, groupSize: number) {
 export function generatePackingList(input: TripInputs): PackingCategory[] {
   const { nights, season, terrain, groupSize, shareGear } = input;
   const days = nights + 1;
-  const isCold = season === "winter" || season === "fall";
   const isHot = season === "summer";
   const rugged = terrain === "difficult" || terrain === "extreme";
   const group = Math.max(1, groupSize);
@@ -90,11 +93,9 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
     },
     {
       name: "Sleep",
-      items: [
-        makeItem("Sleeping bag", group, isCold ? 48 : isHot ? 24 : 32),
-        makeItem("Sleeping pad", group, 16),
-        makeItem("Pillow (or stuff sack)", group, 3),
-      ],
+      // Sleeping bag & pad are added by the caller from generatePackingList()
+      // in gearRecommendation.ts, which picks a temperature-appropriate variant.
+      items: [makeItem("Pillow (or stuff sack)", group, 3)],
     },
     {
       name: "Kitchen",
@@ -132,19 +133,14 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
     },
     {
       name: "Clothing",
+      // Base layer, insulated jacket, footwear & gloves are added by the
+      // caller from generatePackingList() in gearRecommendation.ts, which
+      // picks a temperature-appropriate variant for each.
       items: [
-        makeItem("Moisture-wicking base layers", group * (isCold ? 2 : 1), 6),
-        makeItem("Insulating layer", group, isCold ? 18 : 10),
         makeItem("Rain shell", group, 12),
         makeItem("Hiking pants / shorts", group, 8),
         makeItem("Wool socks", group * Math.max(2, nights), 2),
         ...(rugged ? [makeItem("Trekking poles", group, 16)] : []),
-        makeItem(
-          rugged ? "Trail boots" : "Trail runners",
-          group,
-          rugged ? 32 : 22,
-        ),
-        ...(isCold ? [makeItem("Gloves & beanie", group, 6)] : []),
         ...(isHot ? [makeItem("Sun hat", group, 3)] : []),
       ],
     },

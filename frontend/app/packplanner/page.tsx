@@ -11,10 +11,15 @@ import {
   perPersonQty,
   TERRAIN_LABELS,
   type PackingCategory,
+  type PackingItem,
   type Season,
   type Terrain,
 } from "./packingList";
 import { getTrail, searchTrails, type TrailSummary } from "./trailsApi";
+import {
+  generatePackingList as generateGearPackingList,
+  type PackingListCategory as GearPackingCategory,
+} from "./gearRecommendation";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -29,11 +34,44 @@ const body = Work_Sans({
   variable: "--font-body",
 });
 
-const CALCULATE_DELAY_MS = 550;
 const CATEGORY_ACCENTS = ["rust", "slate", "olive"] as const;
 
 function ozToLbs(oz: number) {
   return Math.round((oz / 16) * 10) / 10;
+}
+
+function gramsToOz(grams: number) {
+  return grams / 28.3495;
+}
+
+let gearItemCounter = 0;
+
+/** Merges Supabase-backed gear recommendations into the sync base categories,
+ * matching on category id (e.g. "sleep", "clothing") and prepending items so
+ * temperature-driven picks lead each category. */
+function mergeGearCategories(
+  baseCategories: PackingCategory[],
+  gearCategories: GearPackingCategory[],
+): PackingCategory[] {
+  return baseCategories.map((category) => {
+    const gearCategory = gearCategories.find((g) => g.category === category.id);
+    if (!gearCategory) return category;
+
+    const gearItems: PackingItem[] = gearCategory.items.map((item) => {
+      gearItemCounter += 1;
+      return {
+        id: `gear-${category.id}-${gearItemCounter}`,
+        name: item.itemName,
+        qty: item.quantity,
+        weightOz: item.weightG ? gramsToOz(item.weightG) : 0,
+        checked: false,
+        shared: item.shared,
+        reason: item.reason,
+      };
+    });
+
+    return { ...category, items: [...gearItems, ...category.items] };
+  });
 }
 
 interface TripValues {
@@ -43,6 +81,7 @@ interface TripValues {
   terrain: Terrain;
   groupSize: number;
   shareGear: boolean;
+  trailId: string;
 }
 
 function Stepper({
@@ -252,6 +291,7 @@ function TripForm({
           terrain: selectedTrail.terrain,
           groupSize,
           shareGear,
+          trailId: selectedTrail.id,
         });
       }}
     >
@@ -447,6 +487,7 @@ function PackPlannerContent() {
   const [categories, setCategories] = useState<PackingCategory[] | null>(null);
   const [trip, setTrip] = useState<TripValues | null>(null);
   const [view, setView] = useState<"combined" | "perPerson">("combined");
+  const [gearError, setGearError] = useState<string | null>(null);
 
   const { combinedLbs, perPersonLbs } = useMemo(() => {
     if (!categories || !trip) return { combinedLbs: 0, perPersonLbs: 0 };
@@ -463,14 +504,33 @@ function PackPlannerContent() {
     return { combinedLbs: ozToLbs(totalOz), perPersonLbs: ozToLbs(perPersonOz) };
   }, [categories, trip]);
 
-  const handleSubmit = (values: TripValues) => {
+  const handleSubmit = async (values: TripValues) => {
     setIsLoading(true);
+    setGearError(null);
     setCategories(null);
     setTrip(values);
-    window.setTimeout(() => {
-      setCategories(generatePackingList(values));
+
+    const baseCategories = generatePackingList(values);
+
+    try {
+      const gearResult = await generateGearPackingList(
+        values.trailId,
+        values.season,
+        values.nights,
+        values.groupSize,
+        values.shareGear,
+      );
+      setCategories(mergeGearCategories(baseCategories, gearResult.categories));
+    } catch (error) {
+      setGearError(
+        error instanceof Error
+          ? error.message
+          : "Couldn't load gear recommendations for this trail.",
+      );
+      setCategories(baseCategories);
+    } finally {
       setIsLoading(false);
-    }, CALCULATE_DELAY_MS);
+    }
   };
 
   const toggleItem = (categoryId: string, itemId: string) => {
@@ -551,6 +611,13 @@ function PackPlannerContent() {
         {!isLoading && categories && trip && (
           <>
             <SaveBanner />
+
+            {gearError && (
+              <p className={styles.gearErrorBanner}>
+                Couldn&apos;t load temperature-based gear recommendations
+                ({gearError}) — showing the rest of your list instead.
+              </p>
+            )}
 
             <div className={styles.resultsHeader}>
               <h2 className={styles.resultsTitle}>Your packing list</h2>
@@ -650,6 +717,9 @@ function PackPlannerContent() {
                               ×
                             </button>
                           </div>
+                          {item.reason && (
+                            <p className={styles.itemReason}>{item.reason}</p>
+                          )}
                         </li>
                       );
                     })}
