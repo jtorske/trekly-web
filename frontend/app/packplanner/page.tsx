@@ -3,18 +3,90 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Fraunces, Work_Sans } from "next/font/google";
 import styles from "./page.module.css";
+import { CompassMark, TrailMark } from "./icons";
 import {
   generatePackingList,
+  perPersonQty,
   type PackingCategory,
   type Season,
   type Terrain,
 } from "./packingList";
 
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
+
+const body = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
+
 const CALCULATE_DELAY_MS = 550;
+const CATEGORY_ACCENTS = ["rust", "slate", "olive"] as const;
 
 function ozToLbs(oz: number) {
   return Math.round((oz / 16) * 10) / 10;
+}
+
+interface TripValues {
+  nights: number;
+  location: string;
+  season: Season;
+  terrain: Terrain;
+  groupSize: number;
+  shareGear: boolean;
+}
+
+function Stepper({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className={styles.stepper}>
+      <button
+        type="button"
+        className={styles.stepperButton}
+        aria-label={`Decrease ${label}`}
+        onClick={() => onChange(Math.max(min, value - 1))}
+      >
+        −
+      </button>
+      <input
+        className={styles.stepperInput}
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        aria-label={label}
+        onChange={(event) =>
+          onChange(Math.min(max, Math.max(min, Number(event.target.value) || min)))
+        }
+      />
+      <button
+        type="button"
+        className={styles.stepperButton}
+        aria-label={`Increase ${label}`}
+        onClick={() => onChange(Math.min(max, value + 1))}
+      >
+        +
+      </button>
+    </div>
+  );
 }
 
 function TripForm({
@@ -26,148 +98,127 @@ function TripForm({
   initialNights: number;
   initialLocation: string;
   isLoading: boolean;
-  onSubmit: (values: {
-    nights: number;
-    location: string;
-    season: Season;
-    terrain: Terrain;
-    groupSize: number;
-  }) => void;
+  onSubmit: (values: TripValues) => void;
 }) {
   const [nights, setNights] = useState(initialNights);
   const [location, setLocation] = useState(initialLocation);
   const [season, setSeason] = useState<Season>("summer");
   const [terrain, setTerrain] = useState<Terrain>("moderate");
   const [groupSize, setGroupSize] = useState(1);
+  const [shareGear, setShareGear] = useState(true);
 
   return (
     <form
       className={styles.form}
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({ nights, location, season, terrain, groupSize });
+        onSubmit({ nights, location, season, terrain, groupSize, shareGear });
       }}
     >
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="nights">
-          Nights
-        </label>
-        <div className={styles.stepper}>
-          <button
-            type="button"
-            className={styles.stepperButton}
-            aria-label="Decrease nights"
-            onClick={() => setNights((value) => Math.max(1, value - 1))}
-          >
-            −
-          </button>
-          <input
-            id="nights"
-            className={styles.stepperInput}
-            type="number"
-            min={1}
-            max={30}
-            value={nights}
-            onChange={(event) =>
-              setNights(Math.max(1, Number(event.target.value) || 1))
-            }
-          />
-          <button
-            type="button"
-            className={styles.stepperButton}
-            aria-label="Increase nights"
-            onClick={() => setNights((value) => Math.min(30, value + 1))}
-          >
-            +
-          </button>
+      <div className={styles.primaryBar}>
+        <div className={styles.primaryField}>
+          <label className={styles.primaryLabel} htmlFor="nights">
+            Nights out
+          </label>
+          <Stepper label="nights" value={nights} min={1} max={30} onChange={setNights} />
         </div>
-      </div>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="location">
-          Location / region
-        </label>
-        <input
-          id="location"
-          className={styles.input}
-          type="text"
-          placeholder="e.g. Enchantments, WA"
-          value={location}
-          onChange={(event) => setLocation(event.target.value)}
-        />
-      </div>
+        <div className={styles.primaryDivider} aria-hidden="true" />
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="season">
-          Season
-        </label>
-        <select
-          id="season"
-          className={styles.input}
-          value={season}
-          onChange={(event) => setSeason(event.target.value as Season)}
-        >
-          <option value="spring">Spring</option>
-          <option value="summer">Summer</option>
-          <option value="fall">Fall</option>
-          <option value="winter">Winter</option>
-        </select>
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="terrain">
-          Terrain / difficulty
-        </label>
-        <select
-          id="terrain"
-          className={styles.input}
-          value={terrain}
-          onChange={(event) => setTerrain(event.target.value as Terrain)}
-        >
-          <option value="easy">Easy</option>
-          <option value="moderate">Moderate</option>
-          <option value="strenuous">Strenuous</option>
-        </select>
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="groupSize">
-          Group size
-        </label>
-        <div className={styles.stepper}>
-          <button
-            type="button"
-            className={styles.stepperButton}
-            aria-label="Decrease group size"
-            onClick={() => setGroupSize((value) => Math.max(1, value - 1))}
-          >
-            −
-          </button>
+        <div className={`${styles.primaryField} ${styles.primaryFieldGrow}`}>
+          <label className={styles.primaryLabel} htmlFor="location">
+            Where to
+          </label>
           <input
-            id="groupSize"
-            className={styles.stepperInput}
-            type="number"
+            id="location"
+            className={styles.primaryInput}
+            type="text"
+            placeholder="Enchantments, WA"
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+          />
+        </div>
+
+        <div className={styles.primaryDivider} aria-hidden="true" />
+
+        <div className={styles.primaryField}>
+          <label className={styles.primaryLabel} htmlFor="season">
+            Season
+          </label>
+          <select
+            id="season"
+            className={styles.primarySelect}
+            value={season}
+            onChange={(event) => setSeason(event.target.value as Season)}
+          >
+            <option value="spring">Spring</option>
+            <option value="summer">Summer</option>
+            <option value="fall">Fall</option>
+            <option value="winter">Winter</option>
+          </select>
+        </div>
+
+        <button className={styles.calculateButton} type="submit" disabled={isLoading}>
+          {isLoading ? "Calculating…" : "Calculate"}
+        </button>
+      </div>
+
+      <div className={styles.secondaryRow}>
+        <div className={styles.secondaryField}>
+          <label className={styles.secondaryLabel} htmlFor="terrain">
+            Terrain
+          </label>
+          <select
+            id="terrain"
+            className={styles.secondarySelect}
+            value={terrain}
+            onChange={(event) => setTerrain(event.target.value as Terrain)}
+          >
+            <option value="easy">Easy</option>
+            <option value="moderate">Moderate</option>
+            <option value="strenuous">Strenuous</option>
+          </select>
+        </div>
+
+        <div className={styles.secondaryField}>
+          <label className={styles.secondaryLabel} htmlFor="groupSize">
+            Group size
+          </label>
+          <Stepper
+            label="group size"
+            value={groupSize}
             min={1}
             max={20}
-            value={groupSize}
-            onChange={(event) =>
-              setGroupSize(Math.max(1, Number(event.target.value) || 1))
-            }
+            onChange={setGroupSize}
           />
-          <button
-            type="button"
-            className={styles.stepperButton}
-            aria-label="Increase group size"
-            onClick={() => setGroupSize((value) => Math.min(20, value + 1))}
-          >
-            +
-          </button>
         </div>
-      </div>
 
-      <button className={styles.calculateButton} type="submit" disabled={isLoading}>
-        {isLoading ? "Calculating…" : "Calculate"}
-      </button>
+        {groupSize > 1 && (
+          <div className={styles.secondaryField}>
+            <span className={styles.secondaryLabel}>Shared gear</span>
+            <div className={styles.segmented} role="radiogroup" aria-label="Shared or individual gear">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={shareGear}
+                className={shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
+                onClick={() => setShareGear(true)}
+              >
+                We&apos;ll share
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!shareGear}
+                className={!shareGear ? `${styles.segment} ${styles.segmentActive}` : styles.segment}
+                onClick={() => setShareGear(false)}
+              >
+                Carry our own
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </form>
   );
 }
@@ -175,7 +226,7 @@ function TripForm({
 function EmptyState() {
   return (
     <div className={styles.placeholder}>
-      <div className={styles.placeholderMark} aria-hidden="true" />
+      <TrailMark className={styles.placeholderMark} />
       <p>Fill in your trip details to get a packing plan.</p>
     </div>
   );
@@ -184,7 +235,7 @@ function EmptyState() {
 function LoadingState() {
   return (
     <div className={styles.placeholder}>
-      <div className={styles.spinner} aria-hidden="true" />
+      <CompassMark className={styles.spinner} spin />
       <p>Calculating your packing list…</p>
     </div>
   );
@@ -264,26 +315,28 @@ function PackPlannerContent() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<PackingCategory[] | null>(null);
+  const [trip, setTrip] = useState<TripValues | null>(null);
+  const [view, setView] = useState<"combined" | "perPerson">("combined");
 
-  const totalWeightLbs = useMemo(() => {
-    if (!categories) return 0;
-    const totalOz = categories.reduce(
-      (sum, category) =>
-        sum + category.items.reduce((s, item) => s + item.qty * item.weightOz, 0),
-      0,
-    );
-    return ozToLbs(totalOz);
-  }, [categories]);
+  const { combinedLbs, perPersonLbs } = useMemo(() => {
+    if (!categories || !trip) return { combinedLbs: 0, perPersonLbs: 0 };
+    let totalOz = 0;
+    let perPersonOz = 0;
+    for (const category of categories) {
+      for (const item of category.items) {
+        totalOz += item.qty * item.weightOz;
+        perPersonOz += item.shared
+          ? (item.qty * item.weightOz) / trip.groupSize
+          : (perPersonQty(item, trip.groupSize) ?? 0) * item.weightOz;
+      }
+    }
+    return { combinedLbs: ozToLbs(totalOz), perPersonLbs: ozToLbs(perPersonOz) };
+  }, [categories, trip]);
 
-  const handleSubmit = (values: {
-    nights: number;
-    location: string;
-    season: Season;
-    terrain: Terrain;
-    groupSize: number;
-  }) => {
+  const handleSubmit = (values: TripValues) => {
     setIsLoading(true);
     setCategories(null);
+    setTrip(values);
     window.setTimeout(() => {
       setCategories(generatePackingList(values));
       setIsLoading(false);
@@ -332,6 +385,7 @@ function PackPlannerContent() {
                     qty,
                     weightOz: 0,
                     checked: false,
+                    shared: false,
                   },
                 ],
               }
@@ -340,9 +394,14 @@ function PackPlannerContent() {
     );
   };
 
+  const showPerPerson = view === "perPerson" && (trip?.groupSize ?? 1) > 1;
+
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${display.variable} ${body.variable}`}>
+      <div className={styles.texture} aria-hidden="true" />
+
       <div className={styles.intro}>
+        <CompassMark className={styles.introCompass} />
         <h1 className={styles.title}>Pack planner</h1>
         <p className={styles.subtitle}>
           Tell us about your trip and get a categorized packing list to check
@@ -360,58 +419,111 @@ function PackPlannerContent() {
       <div className={styles.results}>
         {isLoading && <LoadingState />}
         {!isLoading && !categories && <EmptyState />}
-        {!isLoading && categories && (
+        {!isLoading && categories && trip && (
           <>
             <SaveBanner />
 
             <div className={styles.resultsHeader}>
               <h2 className={styles.resultsTitle}>Your packing list</h2>
-              <span className={styles.totalWeight}>
-                Estimated total: {totalWeightLbs} lb
-              </span>
+
+              <div className={styles.resultsControls}>
+                {trip.groupSize > 1 && (
+                  <div className={styles.segmented} role="radiogroup" aria-label="List view">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={view === "combined"}
+                      className={
+                        view === "combined"
+                          ? `${styles.segment} ${styles.segmentActive}`
+                          : styles.segment
+                      }
+                      onClick={() => setView("combined")}
+                    >
+                      Whole group
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={view === "perPerson"}
+                      className={
+                        view === "perPerson"
+                          ? `${styles.segment} ${styles.segmentActive}`
+                          : styles.segment
+                      }
+                      onClick={() => setView("perPerson")}
+                    >
+                      Per person
+                    </button>
+                  </div>
+                )}
+                <span className={styles.totalWeight}>
+                  {showPerPerson ? "Per person" : "Total"}: {showPerPerson ? perPersonLbs : combinedLbs} lb
+                </span>
+              </div>
             </div>
 
             <div className={styles.categoryGrid}>
-              {categories.map((category) => (
-                <section className={styles.category} key={category.id}>
+              {categories.map((category, index) => (
+                <section
+                  className={styles.category}
+                  data-accent={CATEGORY_ACCENTS[index % CATEGORY_ACCENTS.length]}
+                  key={category.id}
+                >
                   <h3 className={styles.categoryTitle}>{category.name}</h3>
                   <ul className={styles.itemList}>
-                    {category.items.map((item) => (
-                      <li className={styles.item} key={item.id}>
-                        <label className={styles.itemLabel}>
-                          <input
-                            type="checkbox"
-                            checked={item.checked}
-                            onChange={() => toggleItem(category.id, item.id)}
-                          />
-                          <span
-                            className={
-                              item.checked
-                                ? `${styles.itemName} ${styles.itemChecked}`
-                                : styles.itemName
-                            }
-                          >
-                            {item.name}
-                          </span>
-                        </label>
-                        <div className={styles.itemMeta}>
-                          <span className={styles.itemQty}>×{item.qty}</span>
-                          {item.weightOz > 0 && (
-                            <span className={styles.itemWeight}>
-                              {item.weightOz * item.qty} oz
+                    {category.items.map((item) => {
+                      const displayQty = showPerPerson
+                        ? item.shared
+                          ? item.qty
+                          : perPersonQty(item, trip.groupSize) ?? item.qty
+                        : item.qty;
+                      const displayWeight = showPerPerson
+                        ? item.shared
+                          ? item.weightOz * item.qty
+                          : displayQty * item.weightOz
+                        : item.weightOz * item.qty;
+
+                      return (
+                        <li className={styles.item} key={item.id}>
+                          <label className={styles.itemLabel}>
+                            <input
+                              type="checkbox"
+                              checked={item.checked}
+                              onChange={() => toggleItem(category.id, item.id)}
+                            />
+                            <span
+                              className={
+                                item.checked
+                                  ? `${styles.itemName} ${styles.itemChecked}`
+                                  : styles.itemName
+                              }
+                            >
+                              {item.name}
                             </span>
-                          )}
-                          <button
-                            type="button"
-                            className={styles.itemRemove}
-                            aria-label={`Remove ${item.name}`}
-                            onClick={() => removeItem(category.id, item.id)}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </li>
-                    ))}
+                          </label>
+                          <div className={styles.itemMeta}>
+                            {showPerPerson && item.shared && (
+                              <span className={styles.sharedTag}>shared</span>
+                            )}
+                            <span className={styles.itemQty}>×{displayQty}</span>
+                            {displayWeight > 0 && (
+                              <span className={styles.itemWeight}>
+                                {Math.round(displayWeight * 10) / 10} oz
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              className={styles.itemRemove}
+                              aria-label={`Remove ${item.name}`}
+                              onClick={() => removeItem(category.id, item.id)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </section>
               ))}
@@ -427,7 +539,7 @@ function PackPlannerContent() {
 
 export default function PackPlannerPage() {
   return (
-    <Suspense fallback={<main className={styles.page} />}>
+    <Suspense fallback={<main className={`${styles.page} ${display.variable} ${body.variable}`} />}>
       <PackPlannerContent />
     </Suspense>
   );
