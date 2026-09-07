@@ -119,7 +119,7 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
             makeItem("Fuel canister", Math.max(1, Math.ceil(((nights + 1) * group) / 3)), 0.5),
             makeItem("Cookpot", group, 0.5),
             makeItem("Spork / utensil", group, 0.0625),
-            makeItem("Water filter", Math.max(1, Math.ceil(group / 2)), 0.1875, true),
+            makeItem("Water filter", group, 0.1875),
             makeItem("Water bottles / bladder", group * 2, 0.25),
           ],
     },
@@ -139,7 +139,9 @@ export function generatePackingList(input: TripInputs): PackingCategory[] {
       name: "Tools & extras",
       items: [
         makeItem("Backpack", group, 4),
-        makeItem("Multi-tool / knife", Math.max(1, Math.ceil(group / 2)), 0.1875, true),
+        ...(pooled
+          ? [makeItem("Multi-tool / knife", Math.max(1, Math.ceil(group / 2)), 0.1875, true)]
+          : [makeItem("Multi-tool / knife", group, 0.1875)]),
         makeItem("Emergency whistle", group, 0.0625),
       ],
     },

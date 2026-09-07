@@ -27,6 +27,24 @@ function round1(value: number) {
   return Math.round(value * 10) / 10;
 }
 
+function round2(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+/** Renders qty and unit weight as distinct, unambiguous fields — e.g.
+ * "1× 5 lb", or "6× 0.05 lb ea (0.3 lb)" once qty > 1 — instead of
+ * concatenating the numbers together with no separator. */
+function formatQtyWeight(qty: number, unitWeightLb: number): string {
+  const q = round2(qty);
+  if (unitWeightLb <= 0) return `${q}×`;
+  const unit = round2(unitWeightLb);
+  if (q > 1) {
+    const total = round2(qty * unitWeightLb);
+    return `${q}× ${unit} lb ea (${total} lb)`;
+  }
+  return `${q}× ${unit} lb`;
+}
+
 function categoryDisplayName(categoryId: string) {
   return categoryId
     .split(/[_-]/)
@@ -499,11 +517,23 @@ function PackPlannerContent() {
   const [canFilterAtCamp, setCanFilterAtCamp] = useState(false);
   const [filterAtCamp, setFilterAtCamp] = useState(false);
 
+  // Carrying all water makes a packed water filter redundant weight — hide
+  // it from the list (and from totals) until "Filter at camp" is selected.
+  const effectiveCategories = useMemo(() => {
+    if (!categories) return null;
+    if (filterAtCamp) return categories;
+    return categories.map((category) =>
+      category.items.some((item) => item.name === "Water filter")
+        ? { ...category, items: category.items.filter((item) => item.name !== "Water filter") }
+        : category,
+    );
+  }, [categories, filterAtCamp]);
+
   const { combinedLbs, perPersonLbs } = useMemo(() => {
-    if (!categories || !trip) return { combinedLbs: 0, perPersonLbs: 0 };
+    if (!effectiveCategories || !trip) return { combinedLbs: 0, perPersonLbs: 0 };
     let totalLb = 0;
     let perPersonLb = 0;
-    for (const category of categories) {
+    for (const category of effectiveCategories) {
       for (const item of category.items) {
         totalLb += item.qty * item.weightLb;
         perPersonLb += item.shared
@@ -512,7 +542,7 @@ function PackPlannerContent() {
       }
     }
     return { combinedLbs: round1(totalLb), perPersonLbs: round1(perPersonLb) };
-  }, [categories, trip]);
+  }, [effectiveCategories, trip]);
 
   const handleSubmit = async (values: TripValues) => {
     setIsLoading(true);
@@ -520,7 +550,6 @@ function PackPlannerContent() {
     setInsufficientDataMessage(null);
     setCategories(null);
     setTrip(values);
-    setFilterAtCamp(false);
 
     const baseCategories = generatePackingList(values);
     const days = values.nights + 1;
@@ -540,13 +569,22 @@ function PackPlannerContent() {
         setInsufficientDataMessage(gearResult.conditions.message);
       }
 
+      // Default to filtering at camp whenever a reliable water source is
+      // known to exist on this trail — defaulting to "carry all" while also
+      // packing a filter double-pays for the same problem. Only fall back to
+      // carrying everything when no reliable source is known, and that's
+      // already surfaced as an explicit warning next to the toggle.
+      const defaultFilterAtCamp = gearResult.canFilterAtCamp;
+      setFilterAtCamp(defaultFilterAtCamp);
+
       const merged = mergeGearCategories(baseCategories, gearResult.categories);
       const { category: foodWaterCategory } = buildFoodWaterCategory({
         days,
         groupSize: values.groupSize,
         terrain: values.terrain,
         climateZone: gearResult.conditions.climateZone,
-        filterAtCamp: false,
+        filterAtCamp: defaultFilterAtCamp,
+        canFilterAtCamp: gearResult.canFilterAtCamp,
       });
       setCategories([...merged, foodWaterCategory]);
     } catch (error) {
@@ -555,12 +593,15 @@ function PackPlannerContent() {
           ? error.message
           : "Couldn't load gear recommendations for this trail.",
       );
+      setCanFilterAtCamp(false);
+      setFilterAtCamp(false);
       const { category: foodWaterCategory } = buildFoodWaterCategory({
         days,
         groupSize: values.groupSize,
         terrain: values.terrain,
         climateZone: null,
         filterAtCamp: false,
+        canFilterAtCamp: false,
       });
       setCategories([...baseCategories, foodWaterCategory]);
     } finally {
@@ -577,6 +618,7 @@ function PackPlannerContent() {
       terrain: trip.terrain,
       climateZone,
       filterAtCamp: nextFilterAtCamp,
+      canFilterAtCamp,
     });
     const freshWater = freshFoodWater.items.find((item) => item.name === "Water");
     setCategories(
@@ -672,7 +714,7 @@ function PackPlannerContent() {
       <div className={styles.results}>
         {isLoading && <LoadingState />}
         {!isLoading && !categories && <EmptyState />}
-        {!isLoading && categories && trip && (
+        {!isLoading && categories && effectiveCategories && trip && (
           <>
             <SaveBanner />
 
@@ -728,7 +770,7 @@ function PackPlannerContent() {
             </div>
 
             <div className={styles.categoryGrid}>
-              {categories.map((category, index) => (
+              {effectiveCategories.map((category, index) => (
                 <section
                   className={styles.category}
                   data-accent={CATEGORY_ACCENTS[index % CATEGORY_ACCENTS.length]}
@@ -799,11 +841,7 @@ function PackPlannerContent() {
                           ? item.qty
                           : perPersonQty(item, trip.groupSize) ?? item.qty
                         : item.qty;
-                      const displayWeight = showPerPerson
-                        ? item.shared
-                          ? item.weightLb * item.qty
-                          : displayQty * item.weightLb
-                        : item.weightLb * item.qty;
+                      const unitWeight = item.weightLb;
 
                       return (
                         <li className={styles.item} key={item.id}>
@@ -827,12 +865,9 @@ function PackPlannerContent() {
                             {showPerPerson && item.shared && (
                               <span className={styles.sharedTag}>shared</span>
                             )}
-                            <span className={styles.itemQty}>×{displayQty}</span>
-                            {displayWeight > 0 && (
-                              <span className={styles.itemWeight}>
-                                {Math.round(displayWeight * 100) / 100} lb
-                              </span>
-                            )}
+                            <span className={styles.itemQty}>
+                              {formatQtyWeight(displayQty, unitWeight)}
+                            </span>
                             <button
                               type="button"
                               className={styles.itemRemove}
