@@ -1,6 +1,4 @@
 .page {
-  --display: var(--font-display), Georgia, serif;
-  --sans: var(--font-body), system-ui, -apple-system, sans-serif;
   --ink: var(--color-dark-olive);
   --paper: var(--color-cream);
   --slate: #3d5866;

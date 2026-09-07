@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Fraunces, Work_Sans } from "next/font/google";
 import styles from "./page.module.css";
 import { searchTrails, type Trail } from "./campsites";
 import {
@@ -11,21 +10,6 @@ import {
   SearchIcon,
   TrailPinIcon,
 } from "./icons";
-
-const display = Fraunces({
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
-});
-
-const body = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-});
-
-const pageFontClass = `${styles.page} ${display.variable} ${body.variable}`;
 
 const MONTH_NAMES = [
   "January",
@@ -184,7 +168,7 @@ export default function CampAlertPage() {
 
   if (submitted && selectedTrail) {
     return (
-      <main className={pageFontClass}>
+      <main className={styles.page}>
         <div className={styles.texture} aria-hidden="true" />
         <SuccessPanel trail={selectedTrail} onReset={handleReset} />
       </main>
@@ -192,7 +176,7 @@ export default function CampAlertPage() {
   }
 
   return (
-    <main className={pageFontClass}>
+    <main className={styles.page}>
       <div className={styles.texture} aria-hidden="true" />
 
       <div className={styles.intro}>

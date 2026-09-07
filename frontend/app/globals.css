@@ -8,17 +8,23 @@
   --color-rust: #bc6c25;
   --background: var(--color-cream);
   --foreground: var(--color-dark-olive);
+
+  /* Trekly typography system: Fraunces for display/headings (organic,
+     editorial, pairs with the hand-drawn logo), DM Sans for UI/body
+     (clean, readable, stays out of the way). */
+  --display: var(--font-display), Georgia, serif;
+  --sans: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--sans);
+  --font-display: var(--display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--sans);
 }

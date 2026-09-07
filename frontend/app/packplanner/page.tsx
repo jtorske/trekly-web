@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Fraunces, Work_Sans } from "next/font/google";
 import styles from "./page.module.css";
 import { TrailMark } from "./icons";
 import {
@@ -21,19 +20,6 @@ import {
   type PackingListCategory as GearPackingCategory,
 } from "./gearRecommendation";
 import { buildFoodWaterCategory } from "./foodWater";
-
-const display = Fraunces({
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
-});
-
-const body = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-});
 
 const CATEGORY_ACCENTS = ["rust", "slate", "olive"] as const;
 
@@ -665,7 +651,7 @@ function PackPlannerContent() {
   const showPerPerson = view === "perPerson" && (trip?.groupSize ?? 1) > 1;
 
   return (
-    <main className={`${styles.page} ${display.variable} ${body.variable}`}>
+    <main className={styles.page}>
       <div className={styles.texture} aria-hidden="true" />
 
       <div className={styles.intro}>
@@ -877,7 +863,7 @@ function PackPlannerContent() {
 
 export default function PackPlannerPage() {
   return (
-    <Suspense fallback={<main className={`${styles.page} ${display.variable} ${body.variable}`} />}>
+    <Suspense fallback={<main className={styles.page} />}>
       <PackPlannerContent />
     </Suspense>
   );
