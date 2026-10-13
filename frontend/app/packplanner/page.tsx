@@ -14,7 +14,7 @@ import {
   type Season,
   type Terrain,
 } from "./packingList";
-import { getTrail, searchTrails, type TrailSummary } from "./trailsApi";
+import { getTrail, searchTrails, type TrailSummary } from "@/lib/trailsApi";
 import {
   generatePackingList as generateGearPackingList,
   type PackingListCategory as GearPackingCategory,

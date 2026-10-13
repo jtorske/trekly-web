@@ -1,0 +1,272 @@
+.page {
+  --ink: var(--color-dark-olive);
+  --paper: var(--color-cream);
+  --slate: #3d5866;
+  --slate-deep: #253947;
+  --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  --hair-soft: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
+
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 auto;
+  min-height: 100%;
+  overflow: hidden;
+  padding-bottom: 4rem;
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.texture {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    repeating-radial-gradient(
+      circle at 8% 0%,
+      transparent 0 38px,
+      color-mix(in srgb, var(--color-olive) 6%, transparent) 38px 40px
+    ),
+    repeating-radial-gradient(
+      circle at 100% 55%,
+      transparent 0 46px,
+      color-mix(in srgb, var(--slate) 6%, transparent) 46px 48px
+    );
+  background-color: var(--paper);
+}
+
+.wrap {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 6.5rem 1.5rem 0;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  color: var(--color-rust);
+}
+
+.status {
+  padding: 3rem 0;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  text-align: center;
+}
+
+.notFoundTitle {
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Header */
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.region {
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--display);
+  font-size: clamp(2.1rem, 1.6rem + 2vw, 3rem);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+}
+
+.terrainTag {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.easy {
+  background: color-mix(in srgb, var(--color-olive) 18%, transparent);
+  color: var(--color-dark-olive);
+}
+
+.moderate {
+  background: color-mix(in srgb, var(--color-tan) 28%, transparent);
+  color: #6b4613;
+}
+
+.difficult {
+  background: color-mix(in srgb, var(--color-rust) 20%, transparent);
+  color: #7a3f0d;
+}
+
+.extreme {
+  background: color-mix(in srgb, var(--slate-deep) 85%, transparent);
+  color: var(--color-cream);
+}
+
+/* Stats */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+
+.stat {
+  border: 1px solid var(--hair);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  padding: 0.85rem 1rem;
+}
+
+.statLabel {
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statValue {
+  margin-top: 0.2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Actions */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.primaryAction,
+.secondaryAction {
+  border-radius: 9999px;
+  padding: 0.65rem 1.4rem;
+  font-weight: 600;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.primaryAction {
+  background: var(--color-rust);
+  color: var(--color-cream);
+}
+
+.primaryAction:hover {
+  background: color-mix(in srgb, var(--color-rust) 88%, black);
+}
+
+.secondaryAction {
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.secondaryAction:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Sections */
+
+.section {
+  margin-top: 2.5rem;
+}
+
+.sectionTitle {
+  margin-bottom: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.description {
+  color: color-mix(in srgb, var(--ink) 88%, transparent);
+  line-height: 1.7;
+}
+
+.muted {
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.inlineLink {
+  color: var(--color-rust);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.seasons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.season {
+  border: 1px solid var(--hair);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  padding: 1rem;
+}
+
+.seasonHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.seasonName {
+  font-weight: 600;
+}
+
+.seasonTemps {
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.seasonFacts {
+  margin-top: 0.5rem;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.seasonNotes {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--hair-soft);
+  padding-top: 0.5rem;
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 6rem 1rem 0;
+  }
+}

@@ -1,0 +1,222 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { TERRAIN_LABELS } from "@/app/packplanner/packingList";
+import { getTrail, type SeasonalCondition, type TrailDetail } from "@/lib/trailsApi";
+import { celsiusToFahrenheit, metersToFeet } from "@/lib/units";
+import styles from "./page.module.css";
+
+const SEASON_LABELS: Record<SeasonalCondition["season"], string> = {
+  spring: "Spring",
+  summer: "Summer",
+  fall: "Fall",
+  winter: "Winter",
+};
+
+const PRECIP_LABELS: Record<NonNullable<SeasonalCondition["precip_likelihood"]>, string> = {
+  low: "Low chance of precipitation",
+  moderate: "Moderate chance of precipitation",
+  high: "High chance of precipitation",
+};
+
+function formatClimateZone(zone: string): string {
+  const words = zone.replace(/[_-]+/g, " ").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className={styles.stat}>
+      <dt className={styles.statLabel}>{label}</dt>
+      <dd className={styles.statValue}>{value}</dd>
+    </div>
+  );
+}
+
+function SeasonCard({ condition }: { condition: SeasonalCondition }) {
+  return (
+    <li className={styles.season}>
+      <div className={styles.seasonHeader}>
+        <h3 className={styles.seasonName}>{SEASON_LABELS[condition.season]}</h3>
+        <span className={styles.seasonTemps}>
+          {celsiusToFahrenheit(condition.avg_low_c)}° /{" "}
+          {celsiusToFahrenheit(condition.avg_high_c)}°F
+        </span>
+      </div>
+      <ul className={styles.seasonFacts}>
+        {condition.precip_likelihood && (
+          <li>{PRECIP_LABELS[condition.precip_likelihood]}</li>
+        )}
+        {condition.high_wind && <li>Prone to high winds</li>}
+      </ul>
+      {condition.notes && <p className={styles.seasonNotes}>{condition.notes}</p>}
+    </li>
+  );
+}
+
+function TrailView({ trail }: { trail: TrailDetail }) {
+  const nights = trail.typical_duration_nights;
+  const packPlanHref = `/packplanner?trailId=${encodeURIComponent(trail.id)}${
+    nights ? `&nights=${nights}` : ""
+  }`;
+  const hasLocation = trail.latitude != null && trail.longitude != null;
+
+  const stats: { label: string; value: string }[] = [
+    { label: "Difficulty", value: TERRAIN_LABELS[trail.terrain] },
+  ];
+  if (nights != null) {
+    stats.push({
+      label: "Typical trip",
+      value: `${nights} ${nights === 1 ? "night" : "nights"}`,
+    });
+  }
+  if (trail.elevation_gain_m != null) {
+    stats.push({
+      label: "Elevation gain",
+      value: `${metersToFeet(trail.elevation_gain_m).toLocaleString()} ft`,
+    });
+  }
+  if (trail.max_elevation_m != null) {
+    stats.push({
+      label: "High point",
+      value: `${metersToFeet(trail.max_elevation_m).toLocaleString()} ft`,
+    });
+  }
+  if (trail.climate_zone) {
+    stats.push({ label: "Climate", value: formatClimateZone(trail.climate_zone) });
+  }
+
+  return (
+    <article className={styles.article}>
+      <header className={styles.header}>
+        <p className={styles.region}>{trail.region}</p>
+        <h1 className={styles.title}>{trail.name}</h1>
+        <span className={`${styles.terrainTag} ${styles[trail.terrain]}`}>
+          {TERRAIN_LABELS[trail.terrain]}
+        </span>
+      </header>
+
+      <dl className={styles.stats}>
+        {stats.map((stat) => (
+          <Stat key={stat.label} label={stat.label} value={stat.value} />
+        ))}
+      </dl>
+
+      <div className={styles.actions}>
+        <Link href={packPlanHref} className={styles.primaryAction}>
+          Plan your pack
+        </Link>
+        <Link href="/campalert" className={styles.secondaryAction}>
+          Find campsites
+        </Link>
+      </div>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>About this trail</h2>
+        {trail.description ? (
+          <p className={styles.description}>{trail.description}</p>
+        ) : (
+          <p className={styles.muted}>We don&apos;t have a description for this trail yet.</p>
+        )}
+      </section>
+
+      {trail.seasonal_conditions.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Seasonal conditions</h2>
+          <ul className={styles.seasons}>
+            {trail.seasonal_conditions.map((condition) => (
+              <SeasonCard key={condition.season} condition={condition} />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {hasLocation && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Location</h2>
+          <p className={styles.description}>
+            {trail.latitude!.toFixed(4)}, {trail.longitude!.toFixed(4)}{" "}
+            <a
+              className={styles.inlineLink}
+              href={`https://www.openstreetmap.org/?mlat=${trail.latitude}&mlon=${trail.longitude}#map=12/${trail.latitude}/${trail.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on map
+            </a>
+          </p>
+        </section>
+      )}
+    </article>
+  );
+}
+
+function TrailContent() {
+  const id = useSearchParams().get("id");
+  const [result, setResult] = useState<{
+    id: string;
+    trail: TrailDetail | null;
+    failed: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    const controller = new AbortController();
+    getTrail(id, controller.signal)
+      .then((trail) => setResult({ id, trail, failed: false }))
+      .catch((error: unknown) => {
+        if ((error as { name?: string }).name !== "AbortError") {
+          setResult({ id, trail: null, failed: true });
+        }
+      });
+    return () => controller.abort();
+  }, [id]);
+
+  const isLoading = id !== null && result?.id !== id;
+
+  let body;
+  if (isLoading) {
+    body = <p className={styles.status}>Loading trail…</p>;
+  } else if (result?.failed) {
+    body = (
+      <p className={styles.status}>
+        We couldn&apos;t load this trail right now. Check that the trail service
+        is running and try again.
+      </p>
+    );
+  } else if (!result?.trail) {
+    body = (
+      <div className={styles.status}>
+        <h1 className={styles.notFoundTitle}>Trail not found</h1>
+        <p>This trail doesn&apos;t exist or may have been removed.</p>
+        <Link href="/trail-list" className={styles.inlineLink}>
+          Browse all trails
+        </Link>
+      </div>
+    );
+  } else {
+    body = <TrailView trail={result.trail} />;
+  }
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.texture} aria-hidden="true" />
+      <div className={styles.wrap}>
+        <Link href="/trail-list" className={styles.backLink}>
+          ← Explore trails
+        </Link>
+        {body}
+      </div>
+    </main>
+  );
+}
+
+export default function TrailPage() {
+  return (
+    <Suspense fallback={<main className={styles.page} />}>
+      <TrailContent />
+    </Suspense>
+  );
+}

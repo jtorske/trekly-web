@@ -85,10 +85,15 @@
   line-height: 1.75;
 }
 
-.searchForm {
-  display: flex;
+.searchWrap {
+  position: relative;
   width: min(100%, 36rem);
   margin: 1.5rem auto 0;
+}
+
+.searchForm {
+  display: flex;
+  width: 100%;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--color-cream) 45%, transparent);
   border-radius: 9999px;
@@ -122,6 +127,62 @@
 
 .searchButton:hover {
   background: color-mix(in srgb, var(--color-rust) 90%, transparent);
+}
+
+.trailResults {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 18rem;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  border-radius: 1rem;
+  background: var(--color-cream);
+  padding: 0.4rem;
+  box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.45);
+  text-align: left;
+}
+
+.trailOption {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.trailOptionActive {
+  background: color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+}
+
+.trailOptionName {
+  overflow: hidden;
+  color: var(--color-dark-olive);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.trailOptionTerrain {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  font-size: 0.8rem;
+}
+
+.trailStatus {
+  padding: 0.65rem 0.75rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  font-size: 0.9rem;
 }
 
 @media (min-width: 640px) {
@@ -169,9 +230,12 @@
     line-height: 1.5;
   }
 
-  .searchForm {
+  .searchWrap {
     width: 100%;
     margin-top: 2rem;
+  }
+
+  .searchForm {
     min-height: 48px;
   }
 

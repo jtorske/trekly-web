@@ -1,4 +1,4 @@
-import type { Terrain } from "./packingList";
+import type { Terrain } from "@/app/packplanner/packingList";
 
 export interface TrailSummary {
   id: string;
@@ -7,23 +7,56 @@ export interface TrailSummary {
   terrain: Terrain;
 }
 
+export interface TrailListItem extends TrailSummary {
+  typical_duration_nights: number | null;
+  elevation_gain_m: number | null;
+}
+
+export type Season = "spring" | "summer" | "fall" | "winter";
+
+export interface SeasonalCondition {
+  season: Season;
+  avg_low_c: number;
+  avg_high_c: number;
+  precip_likelihood: "low" | "moderate" | "high" | null;
+  high_wind: boolean | null;
+  notes: string | null;
+}
+
+export interface TrailDetail extends TrailListItem {
+  max_elevation_m: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  climate_zone: string | null;
+  description: string | null;
+  seasonal_conditions: SeasonalCondition[];
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export async function searchTrails(
   query: string,
   signal?: AbortSignal,
-): Promise<TrailSummary[]> {
-  const res = await fetch(
-    `${API_BASE}/api/trails?q=${encodeURIComponent(query)}`,
-    { signal },
-  );
+  options: { terrain?: Terrain; limit?: number } = {},
+): Promise<TrailListItem[]> {
+  const params = new URLSearchParams({ q: query });
+  if (options.terrain) params.set("terrain", options.terrain);
+  if (options.limit) params.set("limit", String(options.limit));
+
+  const res = await fetch(`${API_BASE}/api/trails?${params}`, { signal });
   if (!res.ok) throw new Error("Failed to search trails");
   return res.json();
 }
 
-export async function getTrail(id: string): Promise<TrailSummary | null> {
-  const res = await fetch(`${API_BASE}/api/trails/${encodeURIComponent(id)}`);
-  if (res.status === 404) return null;
+export async function getTrail(
+  id: string,
+  signal?: AbortSignal,
+): Promise<TrailDetail | null> {
+  const res = await fetch(`${API_BASE}/api/trails/${encodeURIComponent(id)}`, {
+    signal,
+  });
+  // 422 means the id isn't a valid UUID — treat it the same as a missing trail.
+  if (res.status === 404 || res.status === 422) return null;
   if (!res.ok) throw new Error("Failed to load trail");
   return res.json();
 }
