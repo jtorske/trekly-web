@@ -3,11 +3,21 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "@/lib/auth";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { session } = useSession();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    setIsMenuOpen(false);
+    await signOut();
+    router.push("/landing");
+  };
 
   useEffect(() => {
     const updateNavbar = () => {
@@ -42,6 +52,10 @@ export default function Navbar() {
           Explore
         </Link>
 
+        <Link href="/gear" className={styles.link}>
+          Gear
+        </Link>
+
         <Link href="/packplanner" className={styles.link}>
           PackPlan
         </Link>
@@ -50,13 +64,25 @@ export default function Navbar() {
           CampAlert
         </Link>
 
-        <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
-          Sign up
-        </Link>
+        {session ? (
+          <button
+            type="button"
+            className={`${styles.link} ${styles.login} ${styles.logout}`}
+            onClick={handleSignOut}
+          >
+            Log out
+          </button>
+        ) : (
+          <>
+            <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
+              Sign up
+            </Link>
 
-        <Link href="/login" className={`${styles.link} ${styles.login}`}>
-          Login
-        </Link>
+            <Link href="/login" className={`${styles.link} ${styles.login}`}>
+              Login
+            </Link>
+          </>
+        )}
       </div>
 
       <button
@@ -91,6 +117,13 @@ export default function Navbar() {
             Featured
           </Link>
           <Link
+            href="/gear"
+            className={styles.mobileMenuLink}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Gear
+          </Link>
+          <Link
             href="/packplanner"
             className={styles.mobileMenuLink}
             onClick={() => setIsMenuOpen(false)}
@@ -104,20 +137,32 @@ export default function Navbar() {
           >
             CampAlert
           </Link>
-          <Link
-            href="/signup"
-            className={`${styles.mobileMenuLink} ${styles.mobileMenuSignup}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Sign up
-          </Link>
-          <Link
-            href="/login"
-            className={styles.mobileMenuLink}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Login
-          </Link>
+          {session ? (
+            <button
+              type="button"
+              className={styles.mobileMenuLink}
+              onClick={handleSignOut}
+            >
+              Log out
+            </button>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className={`${styles.mobileMenuLink} ${styles.mobileMenuSignup}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign up
+              </Link>
+              <Link
+                href="/login"
+                className={styles.mobileMenuLink}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>

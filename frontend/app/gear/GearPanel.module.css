@@ -1,0 +1,240 @@
+.panel {
+  --ink: var(--color-dark-olive);
+  --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+
+  width: min(100vw, 30rem);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  border: 0;
+  background: var(--color-cream);
+  padding: 0;
+  color: var(--ink);
+  box-shadow: -20px 0 40px -20px rgba(0, 0, 0, 0.4);
+}
+
+.panel::backdrop {
+  background: rgba(20, 28, 12, 0.45);
+}
+
+.panel :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.inner {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.close {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 9999px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.close:hover {
+  background: var(--hair);
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 1.25rem;
+}
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.25rem;
+}
+
+.suggestion {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.suggestion:hover {
+  background: color-mix(in srgb, var(--color-dark-olive) 8%, transparent);
+}
+
+.suggestionMeta {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.8rem;
+}
+
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--hair);
+  border-radius: 0.6rem;
+  background: white;
+  padding: 0.55rem 0.7rem;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+
+.hint {
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  font-size: 0.85rem;
+}
+
+.error {
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--color-rust) 14%, transparent);
+  padding: 0.6rem 0.8rem;
+  color: #7a3f0d;
+  font-size: 0.88rem;
+}
+
+.authPrompt {
+  border: 1px solid color-mix(in srgb, var(--color-rust) 35%, transparent);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--color-rust) 8%, var(--color-cream));
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.authActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--hair);
+  padding-top: 1rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.primaryButton,
+.secondaryButton,
+.dangerButton {
+  border-radius: 9999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.primaryButton {
+  background: var(--color-rust);
+  color: var(--color-cream);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-rust) 88%, black);
+}
+
+.primaryButton:disabled,
+.dangerButton:disabled {
+  opacity: 0.6;
+}
+
+.secondaryButton {
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.secondaryButton:hover {
+  background: var(--ink);
+  color: var(--color-cream);
+}
+
+.dangerButton {
+  background: #8a2f17;
+  color: var(--color-cream);
+}
+
+.textButton {
+  color: #8a2f17;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.textButton:hover {
+  text-decoration: underline;
+}
+
+.confirmDelete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -181,3 +181,18 @@
     background: color-mix(in srgb, var(--color-rust) 90%, transparent);
   }
 }
+
+.logout {
+  margin-left: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mobileMenuLink:is(button) {
+  width: 100%;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
