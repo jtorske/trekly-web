@@ -3,3 +3,5 @@ uvicorn[standard]
 sqlalchemy
 alembic
 python-dotenv
+psycopg2-binary
+pyjwt[crypto]>=2.10

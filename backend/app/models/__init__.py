@@ -1,6 +1,38 @@
+from app.models.account import Profile, SavedTrail
+from app.models.catalog import (
+    CatalogBrand,
+    CatalogBrandAlias,
+    CatalogCategory,
+    CatalogIngestionRun,
+    CatalogProduct,
+    CatalogProductAlias,
+    CatalogProductImage,
+    CatalogProductSource,
+    CatalogProductVariant,
+    CatalogSource,
+)
 from app.models.gear_item import GearItem
 from app.models.gear_rule import GearRule
 from app.models.trail import Trail
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
+from app.models.user_gear import UserGearItem
 
-__all__ = ["Trail", "TrailSeasonalCondition", "GearRule", "GearItem"]
+__all__ = [
+    "CatalogBrand",
+    "CatalogBrandAlias",
+    "CatalogCategory",
+    "CatalogIngestionRun",
+    "CatalogProduct",
+    "CatalogProductAlias",
+    "CatalogProductImage",
+    "CatalogProductSource",
+    "CatalogProductVariant",
+    "CatalogSource",
+    "GearItem",
+    "Profile",
+    "SavedTrail",
+    "GearRule",
+    "Trail",
+    "TrailSeasonalCondition",
+    "UserGearItem",
+]

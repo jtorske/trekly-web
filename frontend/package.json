@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test app/**/*.test.ts"
+    "test": "node --test app/**/*.test.ts lib/**/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
