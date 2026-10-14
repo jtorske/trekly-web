@@ -1,0 +1,1626 @@
+{
+  "source": {
+    "slug": "trekly-curated-official-page-excerpts",
+    "name": "Trekly curated specifications from official pages (search-index excerpts)",
+    "kind": "manual",
+    "terms_notes": "These brands' sites block automated page fetches, so each record was checked against the brand's own official product page as indexed by a web search engine on verified_at, using only figures the result attributed to that official page. No retailer, review or marketing copy is used, and no images. Values are manufacturer claims; where a brand's own listings conflicted, the value was left unknown and the conflict noted in specs.published_weight. Treat this source as one tier below directly-read pages and re-verify when a permitted feed or direct access becomes available."
+  },
+  "records": [
+    {
+      "source_record_id": "osprey:atmos-ag-65",
+      "brand": "Osprey",
+      "name": "Atmos AG 65",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/atmos-ag-65-atmos65s22-415",
+      "source_url": "https://www.osprey.com/atmos-ag-65-atmos65s22-415",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 18,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "2.092",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "65",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "2.18",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "68",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:atmos-ag-lt-65",
+      "brand": "Osprey",
+      "name": "Atmos AG LT 65",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/atmos-ag-lt-65-atmos65lt-476",
+      "source_url": "https://www.osprey.com/atmos-ag-lt-65-atmos65lt-476",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 18,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "1.85",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "65",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "1.93",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "68",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:aura-ag-65",
+      "brand": "Osprey",
+      "name": "Aura AG 65",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/aura-ag-65",
+      "source_url": "https://www.osprey.com/aura-ag-65",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "womens"
+      },
+      "variants": [
+        {
+          "name": "WXS/S",
+          "weight": {
+            "value": "2.026",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "62",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "WM/L",
+          "weight": {
+            "value": "2.085",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "65",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:exos-58",
+      "brand": "Osprey",
+      "name": "Exos 58",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/exos-58-exos58s22-224",
+      "source_url": "https://www.osprey.com/exos-58-exos58s22-224",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 16,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "1.288",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "58",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "1.334",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "61",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:exos-38",
+      "brand": "Osprey",
+      "name": "Exos 38",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/exos-38-exos38s22-224",
+      "source_url": "https://www.osprey.com/exos-38-exos38s22-224",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 11,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "2.695",
+            "unit": "lb",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "38",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "2.827",
+            "unit": "lb",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "41",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:exos-pro-55",
+      "brand": "Osprey",
+      "name": "Exos Pro 55",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/exos-pro-55-exospro55s23-482",
+      "source_url": "https://www.osprey.com/exos-pro-55-exospro55s23-482",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 18,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "0.94",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "55",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "0.98",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "58",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:eja-58",
+      "brand": "Osprey",
+      "name": "Eja 58",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/eja-58-eja58s22-419",
+      "source_url": "https://www.osprey.com/eja-58-eja58s22-419",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "womens"
+      },
+      "variants": [
+        {
+          "name": "WXS/S",
+          "weight": {
+            "value": "1.23",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "55",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "WM/L",
+          "capacity": {
+            "value": "58",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:aether-65",
+      "brand": "Osprey",
+      "name": "Aether 65",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/aether-trade-65",
+      "source_url": "https://www.osprey.com/aether-trade-65",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 27,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "4.919",
+            "unit": "lb",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "65",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "2.25",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "68",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:ariel-65",
+      "brand": "Osprey",
+      "name": "Ariel 65",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/10006683",
+      "source_url": "https://www.osprey.com/10006683",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 27,
+        "gender_fit": "womens"
+      },
+      "variants": [
+        {
+          "name": "WXS/S",
+          "weight": {
+            "value": "2.2",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "62",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "WM/L",
+          "weight": {
+            "value": "4.891",
+            "unit": "lb",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "65",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:kestrel-58",
+      "brand": "Osprey",
+      "name": "Kestrel 58",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/kestrel-58-kestrel58s23-550",
+      "source_url": "https://www.osprey.com/kestrel-58-kestrel58s23-550",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 20,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "S/M",
+          "weight": {
+            "value": "2.13",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "56",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "L/XL",
+          "weight": {
+            "value": "2.21",
+            "unit": "kg",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "58",
+            "unit": "l"
+          }
+        }
+      ],
+      "brand_aliases": [
+        "Osprey Packs"
+      ],
+      "brand_website": "https://www.osprey.com"
+    },
+    {
+      "source_record_id": "osprey:talon-22",
+      "brand": "Osprey",
+      "name": "Talon 22",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/talontm-2",
+      "source_url": "https://www.osprey.com/talontm-2",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.38",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "22",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "2.38 lbs (US listing)",
+        "max_load_kg": 13.6,
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "osprey:stratos-24",
+      "brand": "Osprey",
+      "name": "Stratos 24",
+      "category": "backpacks",
+      "official_url": "https://www.osprey.com/stratos-1",
+      "source_url": "https://www.osprey.com/stratos-1",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.95",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "24",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "2.95 LBS (US listing)",
+        "max_load_kg": 13.6,
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "gregory:focal-48",
+      "brand": "Gregory",
+      "name": "Focal 48",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/focal-48/141FOC48.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/focal-48/141FOC48.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.54",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "44",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 13.6,
+        "published_weight": "2.54 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:facet-45",
+      "brand": "Gregory",
+      "name": "Facet 45",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/facet-45/1413215586.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/facet-45/1413215586.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.38",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "42",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 13.6,
+        "published_weight": "2.38 lbs (size shown on the product page)",
+        "gender_fit": "womens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:paragon-58",
+      "brand": "Gregory",
+      "name": "Paragon 58",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/paragon-58/1268466397.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/paragon-58/1268466397.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "3.47",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "55",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 22.7,
+        "published_weight": "3.47 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:maven-55",
+      "brand": "Gregory",
+      "name": "Maven 55",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/maven-55/1268390604.html",
+      "source_url": "https://www.gregory.com/maven-55/1268390604.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "3.41",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "55",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 22.7,
+        "published_weight": "3.41 lbs (size shown on the product page)",
+        "gender_fit": "womens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:zulu-55",
+      "brand": "Gregory",
+      "name": "Zulu 55",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/zulu-55/1452930527.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/zulu-55/1452930527.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "4.18",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "55",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 22.7,
+        "published_weight": "4.18 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:zulu-65",
+      "brand": "Gregory",
+      "name": "Zulu 65",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/zulu-65/1452940527.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/zulu-65/1452940527.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "4.28",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "4.28 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:jade-53",
+      "brand": "Gregory",
+      "name": "Jade 53",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/jade-53/145JAD53.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/jade-53/145JAD53.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "4.02",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "53",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 22.7,
+        "published_weight": "4.02 lbs (size shown on the product page)",
+        "gender_fit": "womens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:katmai-55",
+      "brand": "Gregory",
+      "name": "Katmai 55",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/katmai-55/1369547411.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/katmai-55/1369547411.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "4.68",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "55",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 22.7,
+        "published_weight": "4.68 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:katmai-65",
+      "brand": "Gregory",
+      "name": "Katmai 65",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/katmai-65/1369KAT65.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/katmai-65/1369KAT65.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "4.74",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "4.74 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:stout-45",
+      "brand": "Gregory",
+      "name": "Stout 45",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/stout-45/149375XXXX.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/stout-45/149375XXXX.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.95",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "45",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "2.95 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:amber-44",
+      "brand": "Gregory",
+      "name": "Amber 44",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/amber-44/149385XXXX.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/amber-44/149385XXXX.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "2.8",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "44",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "2.8 lbs (size shown on the product page)",
+        "gender_fit": "womens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:miwok-24",
+      "brand": "Gregory",
+      "name": "Miwok 24",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/miwok-24/111481XXXX.html",
+      "source_url": "https://www.gregory.com/miwok-24/111481XXXX.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1.85",
+        "unit": "lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "24",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "1.85 lbs (size shown on the product page)",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:baltoro-65",
+      "brand": "Gregory",
+      "name": "Baltoro 65",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/baltoro-65/1412991002.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/baltoro-65/1412991002.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "Gregory's listings for this model give conflicting weights (4.84-5.25 lb) across versions; weight left unknown",
+        "gender_fit": "mens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "gregory:deva-60",
+      "brand": "Gregory",
+      "name": "Deva 60",
+      "category": "backpacks",
+      "official_url": "https://www.gregory.com/packs/backpacking/deva-60/141DEV60.html",
+      "source_url": "https://www.gregory.com/packs/backpacking/deva-60/141DEV60.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "published_weight": "Gregory's listings give conflicting volumes and weights across sizes; left unknown",
+        "gender_fit": "womens"
+      },
+      "brand_aliases": [
+        "Gregory Mountain Products"
+      ],
+      "brand_website": "https://www.gregory.com"
+    },
+    {
+      "source_record_id": "deuter:futura-32",
+      "brand": "Deuter",
+      "name": "Futura 32",
+      "category": "backpacks",
+      "official_url": "https://deuter.com/us-en/shop/backpacks/p611915-hiking-backpack-futura-32",
+      "source_url": "https://deuter.com/us-en/shop/backpacks/p611915-hiking-backpack-futura-32",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1350",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "32",
+        "unit": "l"
+      },
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 8,
+        "published_weight": "1350 g"
+      },
+      "brand_website": "https://www.deuter.com"
+    },
+    {
+      "source_record_id": "deuter:aircontact-core-50-10",
+      "brand": "Deuter",
+      "name": "Aircontact Core 50+10",
+      "category": "backpacks",
+      "official_url": "https://www.deuter.com/us-en/shop/backpacks/p842271-trekking-backpack-aircontact-core-50-10",
+      "source_url": "https://www.deuter.com/us-en/shop/backpacks/p842271-trekking-backpack-aircontact-core-50-10",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 20,
+        "published_weight": "Deuter's regional pages list 2310 g and 2160 g; weight left unknown"
+      }
+    },
+    {
+      "source_record_id": "rei-co-op:flash-55-mens",
+      "brand": "REI Co-op",
+      "name": "Flash 55 Pack (Men's)",
+      "category": "backpacks",
+      "official_url": "https://www.rei.com/product/216571/rei-co-op-flash-55-pack-mens",
+      "source_url": "https://www.rei.com/product/216571/rei-co-op-flash-55-pack-mens",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 15.9,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "text": "2 lb 12 oz",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "53",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Medium",
+          "capacity": {
+            "value": "55",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "text": "2 lb 14 oz",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "57",
+            "unit": "l"
+          }
+        }
+      ],
+      "aliases": [
+        "Flash 55"
+      ],
+      "brand_aliases": [
+        "REI"
+      ],
+      "brand_website": "https://www.rei.com"
+    },
+    {
+      "source_record_id": "rei-co-op:traverse-60-womens",
+      "brand": "REI Co-op",
+      "name": "Traverse 60 Pack (Women's)",
+      "category": "backpacks",
+      "official_url": "https://www.rei.com/product/242873/rei-co-op-traverse-60-pack-womens",
+      "source_url": "https://www.rei.com/product/242873/rei-co-op-traverse-60-pack-womens",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "womens"
+      },
+      "variants": [
+        {
+          "name": "XS-S hip, 15-18 in torso",
+          "weight": {
+            "text": "4 lb 5 oz",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "60",
+            "unit": "l"
+          }
+        }
+      ],
+      "aliases": [
+        "Traverse 60"
+      ]
+    },
+    {
+      "source_record_id": "kelty:redwing-50",
+      "brand": "Kelty",
+      "name": "Redwing 50",
+      "category": "backpacks",
+      "official_url": "https://kelty.com/products/redwing-50-usa",
+      "source_url": "https://kelty.com/products/redwing-50-usa",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1.66",
+        "unit": "kg",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "51",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "1.66 kg (3 lb 11 oz)",
+        "frame_type": "internal",
+        "torso_range": "39-53 cm"
+      },
+      "brand_website": "https://www.kelty.com"
+    },
+    {
+      "source_record_id": "nemo:dagger-osmo-2p",
+      "brand": "NEMO",
+      "name": "Dagger OSMO 2P",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/dagger-osmo-lightweight-backpacking-tent",
+      "source_url": "https://www.nemoequipment.com/products/dagger-osmo-lightweight-backpacking-tent",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "3 lb 5 oz",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "3 lb 5 oz / 1.51 kg",
+        "packaged_weight_g": 1780,
+        "capacity_persons": 2,
+        "peak_height_cm": 109.22,
+        "floor_area_m2": 2.8
+      },
+      "aliases": [
+        "Dagger OSMO"
+      ],
+      "brand_aliases": [
+        "NEMO Equipment"
+      ],
+      "brand_website": "https://www.nemoequipment.com"
+    },
+    {
+      "source_record_id": "nemo:hornet-osmo-2p",
+      "brand": "NEMO",
+      "name": "Hornet OSMO 2P",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/hornet-osmo",
+      "source_url": "https://support.nemoequipment.com/hc/en-us/articles/360061247992-What-is-the-difference-between-the-Hornet-OSMO-Dragonfly-OSMO-and-Dagger-OSMO",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "948",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "2 lb 1 oz (948 g)",
+        "packaged_weight_g": 1140,
+        "capacity_persons": 2,
+        "peak_height_cm": 99.1,
+        "floor_area_m2": 2.573
+      },
+      "aliases": [
+        "Hornet OSMO"
+      ]
+    },
+    {
+      "source_record_id": "rei-co-op:half-dome-sl-2-plus",
+      "brand": "REI Co-op",
+      "name": "Half Dome SL 2+ Tent",
+      "category": "tents",
+      "official_url": "https://www.rei.com/product/185632/rei-co-op-half-dome-sl-2-tent-with-footprint",
+      "source_url": "https://www.rei.com/product/185632/rei-co-op-half-dome-sl-2-tent-with-footprint",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "3 lb 15 oz",
+        "basis": "trail"
+      },
+      "specs": {
+        "published_weight": "Minimum trail weight 3 lbs. 15 oz.",
+        "capacity_persons": 2,
+        "floor_area_m2": 3.135,
+        "peak_height_cm": 106.7
+      },
+      "aliases": [
+        "Half Dome SL 2+"
+      ]
+    },
+    {
+      "source_record_id": "rei-co-op:trail-hut-2",
+      "brand": "REI Co-op",
+      "name": "Trail Hut 2 Tent",
+      "category": "tents",
+      "official_url": "https://www.rei.com/product/164366/rei-co-op-trail-hut-2-tent-with-footprint",
+      "source_url": "https://www.rei.com/product/164366/rei-co-op-trail-hut-2-tent-with-footprint",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "5 lb 1.44 oz",
+        "basis": "trail"
+      },
+      "specs": {
+        "published_weight": "Minimum trail weight 5 lbs. 1.44 oz.",
+        "capacity_persons": 2,
+        "floor_area_m2": 2.951,
+        "peak_height_cm": 101.6
+      },
+      "aliases": [
+        "Trail Hut 2"
+      ]
+    },
+    {
+      "source_record_id": "naturehike:cloud-up-2",
+      "brand": "Naturehike",
+      "name": "Cloud Up 2",
+      "category": "tents",
+      "official_url": "https://www.naturehike.com/products/cloud-up-2-person-ultralight-backpacking-tent",
+      "source_url": "https://www.naturehike.com/products/cloud-up-2-person-ultralight-backpacking-tent",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1.38",
+        "unit": "kg",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "1.38 kg (3.04 lb)",
+        "packaged_weight_g": 1800,
+        "capacity_persons": 2
+      },
+      "brand_website": "https://www.naturehike.com"
+    },
+    {
+      "source_record_id": "sea-to-summit:spark",
+      "brand": "Sea to Summit",
+      "name": "Spark Down Sleeping Bag",
+      "category": "sleeping-bags",
+      "official_url": "https://seatosummit.com/products/spark-down-sleeping-bag",
+      "source_url": "https://seatosummit.com/products/spark-down-sleeping-bag",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "45°F Regular",
+          "weight": {
+            "value": "363",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 150
+          }
+        },
+        {
+          "name": "0°F Regular",
+          "weight": {
+            "value": "1113",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 840
+          }
+        }
+      ],
+      "aliases": [
+        "Spark"
+      ]
+    },
+    {
+      "source_record_id": "exped:ultra-3r-mummy",
+      "brand": "Exped",
+      "name": "Ultra 3R Mummy",
+      "category": "sleeping-pads",
+      "official_url": "https://www.exped.com/en/products/sleeping-mats/ultra-3r-mummy",
+      "source_url": "https://www.exped.com/en/products/sleeping-mats/ultra-3r-mummy",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "pad_type": "air",
+        "thickness_cm": 7
+      },
+      "variants": [
+        {
+          "name": "M",
+          "weight": {
+            "value": "365",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "MW",
+          "weight": {
+            "value": "415",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "LW",
+          "weight": {
+            "value": "455",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ],
+      "brand_website": "https://www.exped.com"
+    },
+    {
+      "source_record_id": "soto:windmaster",
+      "brand": "SOTO",
+      "name": "WindMaster Stove with 4Flex",
+      "category": "stoves",
+      "official_url": "https://sotooutdoors.com/product/windmaster-stove-with-4flex/",
+      "source_url": "https://sotooutdoors.com/product/windmaster-stove-with-4flex/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "87",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "With 4Flex support: 3.0 oz (87g)",
+        "fuel_type": "canister"
+      },
+      "aliases": [
+        "WindMaster"
+      ],
+      "brand_website": "https://sotooutdoors.com",
+      "model_number": "OD-1RXN"
+    },
+    {
+      "source_record_id": "hoka:speedgoat-6-mens",
+      "brand": "HOKA",
+      "name": "Speedgoat 6",
+      "category": "trail-runners",
+      "official_url": "https://www.hoka.com/en/us/mens-trail/speedgoat-6/1147791.html",
+      "source_url": "https://www.hoka.com/en/gb/men-trail/speedgoat-6/1147791.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "278",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "278 g (men's, per shoe)",
+        "gender_fit": "mens",
+        "drop_mm": 5,
+        "stack_height_mm": 40
+      },
+      "brand_aliases": [
+        "Hoka One One"
+      ],
+      "brand_website": "https://www.hoka.com"
+    },
+    {
+      "source_record_id": "merrell:moab-3-mid-waterproof-mens",
+      "brand": "Merrell",
+      "name": "Moab 3 Mid Waterproof",
+      "category": "hiking-boots",
+      "official_url": "https://www.merrell.com/US/en/moab-3-mid-waterproof/52470M.html",
+      "source_url": "https://www.merrell.com/US/en/moab-3-mid-waterproof/52470M.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "495",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "Half pair weight: 1lbs-1.45oz, 495g",
+        "gender_fit": "mens",
+        "waterproof": true,
+        "drop_mm": 11.5
+      },
+      "brand_website": "https://www.merrell.com"
+    },
+    {
+      "source_record_id": "la-sportiva:spire-gtx",
+      "brand": "La Sportiva",
+      "name": "Spire GTX",
+      "category": "hiking-boots",
+      "official_url": "https://sportiva.com/spire-gtx.html",
+      "source_url": "https://sportiva.com/spire-gtx.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "440",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "15.50 oz / 440 g",
+        "waterproof": true
+      },
+      "brand_website": "https://www.sportiva.com"
+    },
+    {
+      "source_record_id": "altra:lone-peak-9-gtx-mens",
+      "brand": "Altra",
+      "name": "Lone Peak 9 GTX",
+      "category": "trail-runners",
+      "official_url": "https://www.altrarunning.com/en-us/products/mens-lone-peak-9-gtx-al0a85uj",
+      "source_url": "https://www.altrarunning.com/en-us/products/mens-lone-peak-9-gtx-al0a85uj",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "344.4",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "12.15 oz / 344.4 g",
+        "gender_fit": "mens",
+        "waterproof": true,
+        "drop_mm": 0,
+        "stack_height_mm": 25
+      },
+      "brand_website": "https://www.altrarunning.com"
+    },
+    {
+      "source_record_id": "altra:lone-peak-9-plus-mens",
+      "brand": "Altra",
+      "name": "Lone Peak 9+",
+      "category": "trail-runners",
+      "official_url": "https://www.altrarunning.com/en-ca/trail/mens-lone-peak-9%2B/AL0A85RG.html",
+      "source_url": "https://www.altrarunning.com/en-ca/trail/mens-lone-peak-9%2B/AL0A85RG.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "327.4",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "11.55 oz / 327.4 g",
+        "gender_fit": "mens",
+        "drop_mm": 0,
+        "stack_height_mm": 25
+      }
+    },
+    {
+      "source_record_id": "keen:targhee-iv-mid-waterproof-mens",
+      "brand": "KEEN",
+      "name": "Targhee IV Mid Waterproof",
+      "category": "hiking-boots",
+      "official_url": "https://www.keenfootwear.com/products/mens-targhee-iv-mid-waterproof-bison-black",
+      "source_url": "https://www.keenfootwear.com/products/mens-targhee-iv-mid-waterproof-bison-black",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "570",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "20.11oz / 570g",
+        "gender_fit": "mens",
+        "waterproof": true
+      },
+      "brand_website": "https://www.keenfootwear.com"
+    },
+    {
+      "source_record_id": "outdoor-research:helium-ul-mens",
+      "brand": "Outdoor Research",
+      "name": "Helium UL Jacket",
+      "category": "rainwear",
+      "official_url": "https://www.outdoorresearch.com/products/mens-helium-ul-jacket-322681",
+      "source_url": "https://www.outdoorresearch.com/products/mens-helium-ul-jacket-322681",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "162",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "5.7 oz/ 162 g",
+        "gender_fit": "mens",
+        "membrane": "Toray Dermizax 2.75L"
+      },
+      "brand_aliases": [
+        "OR"
+      ],
+      "brand_website": "https://www.outdoorresearch.com",
+      "model_number": "322681"
+    },
+    {
+      "source_record_id": "arcteryx:beta-jacket-mens",
+      "brand": "Arc'teryx",
+      "name": "Beta Jacket",
+      "category": "rainwear",
+      "official_url": "https://arcteryx.com/us/en/shop/mens/beta-jacket-0868",
+      "source_url": "https://arcteryx.com/us/en/shop/mens/beta-jacket-0868",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "375",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "375 g (13.2 oz)",
+        "gender_fit": "mens",
+        "waterproof_rating_mm": 28000,
+        "membrane": "GORE-TEX ePE"
+      },
+      "brand_aliases": [
+        "Arcteryx"
+      ],
+      "brand_website": "https://arcteryx.com"
+    },
+    {
+      "source_record_id": "arcteryx:beta-sl-jacket-mens",
+      "brand": "Arc'teryx",
+      "name": "Beta SL Jacket",
+      "category": "rainwear",
+      "official_url": "https://arcteryx.com/us/en/shop/mens/beta-sl-jacket-0553",
+      "source_url": "https://arcteryx.com/us/en/shop/mens/beta-sl-jacket-0553",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "340",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "340 g",
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "patagonia:torrentshell-3l-rain-jacket-mens",
+      "brand": "Patagonia",
+      "name": "Torrentshell 3L Rain Jacket",
+      "category": "rainwear",
+      "official_url": "https://www.patagonia.com/product/mens-torrentshell-3-layer-rain-jacket/85241.html",
+      "source_url": "https://www.patagonia.com/product/mens-torrentshell-3-layer-rain-jacket/85241.html",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "400",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "400 g (14.1 oz)",
+        "gender_fit": "mens"
+      },
+      "brand_website": "https://www.patagonia.com",
+      "model_number": "85241"
+    },
+    {
+      "source_record_id": "rab:downpour-mens",
+      "brand": "Rab",
+      "name": "Downpour Waterproof Jacket",
+      "category": "rainwear",
+      "official_url": "https://rab.equipment/us/mens-downpour-waterproof-jacket",
+      "source_url": "https://rab.equipment/us/mens-downpour-waterproof-jacket",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "377",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "377g (13.3oz), size M",
+        "gender_fit": "mens",
+        "waterproof_rating_mm": 20000,
+        "membrane": "Pertex Shield 2.5L"
+      },
+      "aliases": [
+        "Downpour"
+      ],
+      "brand_website": "https://rab.equipment"
+    },
+    {
+      "source_record_id": "rab:kinetic-2-mens",
+      "brand": "Rab",
+      "name": "Kinetic 2.0 Waterproof Jacket",
+      "category": "rainwear",
+      "official_url": "https://rab.equipment/us/kinetic-2-0-jacket",
+      "source_url": "https://rab.equipment/us/kinetic-2-0-jacket",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "336",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "336g (11.8oz), size M",
+        "gender_fit": "mens",
+        "waterproof_rating_mm": 10000
+      },
+      "aliases": [
+        "Kinetic 2.0"
+      ]
+    },
+    {
+      "source_record_id": "the-north-face:alta-vista-mens",
+      "brand": "The North Face",
+      "name": "Alta Vista Jacket",
+      "category": "rainwear",
+      "official_url": "https://www.thenorthface.com/en-us/p/shop-all/jackets-701295/mens-alta-vista-jacket-NF0A7QAW",
+      "source_url": "https://www.thenorthface.com/en-us/p/shop-all/jackets-701295/mens-alta-vista-jacket-NF0A7QAW",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "260",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "Average weight 9.2 oz (260 g), size M",
+        "gender_fit": "mens",
+        "membrane": "DRYVENT 2.5L"
+      },
+      "brand_aliases": [
+        "TNF",
+        "North Face"
+      ],
+      "brand_website": "https://www.thenorthface.com",
+      "model_number": "NF0A7QAW"
+    },
+    {
+      "source_record_id": "gossamer-gear:lt5",
+      "brand": "Gossamer Gear",
+      "name": "LT5 Three Piece Carbon Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://www.gossamergear.com/products/lt5-three-piece-carbon-trekking-poles-pair",
+      "source_url": "https://www.gossamergear.com/products/lt5-three-piece-carbon-trekking-poles-pair",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "278",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "4.9 oz / 139 g per pole (pair = 278 g)",
+        "pole_material": "carbon"
+      },
+      "aliases": [
+        "LT5"
+      ]
+    },
+    {
+      "source_record_id": "durston:iceline-gen-2",
+      "brand": "Durston Gear",
+      "name": "Iceline Trekking Poles (Gen 2)",
+      "category": "trekking-poles",
+      "official_url": "https://durstongear.com/products/iceline-trekking-poles",
+      "source_url": "https://durstongear.com/products/iceline-trekking-poles",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "266",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "133 g (4.7 oz) per pole without straps (pair = 266 g); 144 g per pole with straps"
+      },
+      "aliases": [
+        "Iceline"
+      ]
+    },
+    {
+      "source_record_id": "black-diamond:trail-ergo-cork",
+      "brand": "Black Diamond",
+      "name": "Trail Ergo Cork Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://www.blackdiamondequipment.com/fr_DE/product/trail-ergo-cork-trek-poles/",
+      "source_url": "https://www.blackdiamondequipment.com/fr_DE/product/trail-ergo-cork-trek-poles/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "512",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "512 g (1 lb 2 oz) per pair",
+        "adjustable_length": "100-140 cm",
+        "collapsed_length_cm": 69
+      }
+    },
+    {
+      "source_record_id": "black-diamond:trail-cork",
+      "brand": "Black Diamond",
+      "name": "Trail Cork Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://blackdiamondequipment.com/products/trail-cork-trekking-poles",
+      "source_url": "https://blackdiamondequipment.com/products/trail-cork-trekking-poles",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "494",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "specs": {
+        "published_weight": "Weight Per Pair: 494 g",
+        "adjustable_length": "100-140 cm"
+      }
+    }
+  ]
+}

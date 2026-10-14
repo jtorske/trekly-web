@@ -166,8 +166,12 @@ export const listBrands = (category?: string, signal?: AbortSignal) =>
 export function searchProducts(
   params: { q?: string; category?: string; brand?: string; cursor?: string | null; limit?: number },
   signal?: AbortSignal,
+  filters: { max_weight_g?: number | null; min_capacity_ml?: number; max_capacity_ml?: number } = {},
 ) {
   const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value != null) search.set(key, String(value));
+  }
   if (params.q) search.set("q", params.q);
   if (params.category) search.set("category", params.category);
   if (params.brand) search.set("brand", params.brand);

@@ -1,0 +1,73 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 13%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 72%, var(--color-cream));
+  padding: 0.6rem 0.85rem;
+  color: var(--color-dark-olive);
+  text-align: left;
+}
+
+button.row:hover {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 40%, transparent);
+}
+
+.compact .row {
+  padding: 0.45rem 0.65rem;
+}
+
+.body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  font-size: 0.82rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.numbers {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.qty {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.weight {
+  color: color-mix(in srgb, var(--color-dark-olive) 75%, transparent);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}

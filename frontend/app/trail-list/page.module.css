@@ -173,6 +173,17 @@
   opacity: 0.55;
 }
 
+.cardItem {
+  position: relative;
+}
+
+.cardSave {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+}
+
 .card {
   display: flex;
   align-items: center;
@@ -181,7 +192,7 @@
   border: 1px solid var(--hair);
   border-radius: 1rem;
   background: color-mix(in srgb, white 70%, var(--paper));
-  padding: 1rem 1.25rem;
+  padding: 1rem 4.25rem 1rem 1.25rem;
   transition:
     border-color 120ms ease,
     box-shadow 120ms ease,
@@ -271,5 +282,10 @@
 
   .cardMeta {
     justify-content: flex-start;
+  }
+
+  .cardSave {
+    top: 1rem;
+    transform: none;
   }
 }

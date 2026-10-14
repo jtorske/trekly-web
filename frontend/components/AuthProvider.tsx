@@ -21,7 +21,8 @@ interface AuthContextValue {
   user: User | null;
   /** Set when the session was ended by the provider (e.g. refresh failed). */
   sessionExpired: boolean;
-  signOut: () => Promise<void>;
+  /** Clears the session; with `redirectTo`, finishes with a full-page navigation there. */
+  signOut: (redirectTo?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -57,13 +58,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
-  const signOut = useCallback(async () => {
+  const signOut = useCallback(async (redirectTo?: string) => {
     signingOut.current = true;
     try {
       const supabase = getSupabaseClient();
       // "local" clears this browser's session even if the network call fails.
       await supabase.auth.signOut({ scope: "local" });
     } finally {
+      if (redirectTo) {
+        // A full navigation drops every bit of in-memory signed-in state and
+        // can't race with route guards reacting to the sign-out.
+        window.location.replace(redirectTo);
+        return;
+      }
       signingOut.current = false;
       setSession(null);
       setStatus("signedOut");

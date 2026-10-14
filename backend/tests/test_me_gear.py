@@ -273,3 +273,24 @@ def test_discontinued_products_stay_in_inventory(client, auth_headers, alice):
     )
     assert item.status_code == 201
     assert item.json()["product"]["status"] == "discontinued"
+
+
+def test_custom_item_with_brand_can_be_replaced_by_catalogue_product(client, auth_headers, alice):
+    headers = auth_headers(alice)
+    item = client.post(
+        "/api/me/gear",
+        json={"custom_name": "Old stove", "custom_brand": "Unknown", "custom_model": "X", "category": "stoves", "notes": "keep me"},
+        headers=headers,
+    ).json()
+    stove = product(client, "pocketrocket")
+    replaced = client.patch(f"/api/me/gear/{item['id']}", json={"product_id": stove["id"]}, headers=headers)
+    assert replaced.status_code == 200, replaced.json()
+    body = replaced.json()
+    assert body["kind"] == "catalog" and body["custom_brand"] is None and body["notes"] == "keep me"
+
+
+def test_failed_save_creates_nothing(client, auth_headers, alice):
+    headers = auth_headers(alice)
+    bad = client.post("/api/me/gear", json={"product_id": str(uuid.uuid4())}, headers=headers)
+    assert bad.status_code == 422
+    assert client.get("/api/me/gear", headers=headers).json()["items"] == []

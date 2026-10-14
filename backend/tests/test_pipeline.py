@@ -4,7 +4,9 @@ from decimal import Decimal
 from sqlalchemy import func, select
 
 from app.catalog.pipeline import run_import
-from app.catalog.providers import CURATED_FILE, CuratedJsonProvider
+import pytest
+
+from app.catalog.providers import CURATED_FILES, CuratedJsonProvider
 from app.catalog.providers.base import SourceInfo
 from app.catalog.providers.csv_feed import CsvFeedProvider
 from app.catalog.taxonomy import ALL_SLUGS
@@ -161,10 +163,11 @@ def test_csv_feed_provider_groups_variants(tmp_path, db):
     assert pad.variants[0].specs["r_value"] == 4.2
 
 
-def test_curated_seed_file_is_valid(db):
-    """The committed seed catalogue must import cleanly and be re-runnable."""
-    provider = CuratedJsonProvider(CURATED_FILE)
-    payload = json.loads(CURATED_FILE.read_text(encoding="utf-8"))
+@pytest.mark.parametrize("seed_file", CURATED_FILES, ids=lambda path: path.name)
+def test_curated_seed_file_is_valid(db, seed_file):
+    """Every committed seed catalogue must import cleanly and be re-runnable."""
+    provider = CuratedJsonProvider(seed_file)
+    payload = json.loads(seed_file.read_text(encoding="utf-8"))
     for record in payload["records"]:
         assert record["source_url"].startswith("https://"), record["source_record_id"]
         assert record.get("verified_at"), record["source_record_id"]
@@ -173,6 +176,18 @@ def test_curated_seed_file_is_valid(db):
     assert first.status == "succeeded", first.errors[:5]
     assert first.counts["created"] + first.counts.get("merged", 0) == len(payload["records"])
 
-    second = run_import(db, CuratedJsonProvider(CURATED_FILE))
+    second = run_import(db, CuratedJsonProvider(seed_file))
     expected = {"unchanged": len(payload["records"])} if payload["records"] else {}
     assert dict(second.counts) == expected
+
+
+def test_all_seed_files_together_have_no_duplicate_products(db):
+    for seed_file in CURATED_FILES:
+        assert run_import(db, CuratedJsonProvider(seed_file)).status == "succeeded"
+    total_records = sum(len(json.loads(f.read_text(encoding="utf-8"))["records"]) for f in CURATED_FILES)
+    assert count(db, CatalogProduct) == total_records
+    # Re-running every provider changes nothing.
+    for seed_file in CURATED_FILES:
+        assert dict(run_import(db, CuratedJsonProvider(seed_file)).counts) == {
+            "unchanged": len(json.loads(seed_file.read_text(encoding="utf-8"))["records"])
+        }

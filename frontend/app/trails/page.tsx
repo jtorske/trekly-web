@@ -1,8 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import SaveTrailButton from "@/components/SaveTrailButton";
+import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/app/packplanner/packingList";
 import { getTrail, type SeasonalCondition, type TrailDetail } from "@/lib/trailsApi";
 import { celsiusToFahrenheit, metersToFeet } from "@/lib/units";
@@ -56,7 +59,17 @@ function SeasonCard({ condition }: { condition: SeasonalCondition }) {
   );
 }
 
-function TrailView({ trail }: { trail: TrailDetail }) {
+function TrailView({
+  trail,
+  saved,
+  pending,
+  onToggleSave,
+}: {
+  trail: TrailDetail;
+  saved: boolean;
+  pending: boolean;
+  onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
+}) {
   const nights = trail.typical_duration_nights;
   const packPlanHref = `/packplanner?trailId=${encodeURIComponent(trail.id)}${
     nights ? `&nights=${nights}` : ""
@@ -105,6 +118,14 @@ function TrailView({ trail }: { trail: TrailDetail }) {
       </dl>
 
       <div className={styles.actions}>
+        <SaveTrailButton
+          trailId={trail.id}
+          trailName={trail.name}
+          saved={saved}
+          pending={pending}
+          onToggle={onToggleSave}
+          returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
+        />
         <Link href={packPlanHref} className={styles.primaryAction}>
           Plan your pack
         </Link>
@@ -154,7 +175,12 @@ function TrailView({ trail }: { trail: TrailDetail }) {
 }
 
 function TrailContent() {
-  const id = useSearchParams().get("id");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const id = searchParams.get("id");
+  const { status: authStatus } = useAuth();
+  const savedTrails = useSavedTrails();
+  const pendingSave = useRef(false);
   const [result, setResult] = useState<{
     id: string;
     trail: TrailDetail | null;
@@ -175,6 +201,16 @@ function TrailContent() {
   }, [id]);
 
   const isLoading = id !== null && result?.id !== id;
+
+  // Returning from sign-in after clicking "Save trail" as a guest: finish the save.
+  const saveParam = searchParams.get("save");
+  useEffect(() => {
+    if (!id || saveParam !== id || authStatus !== "signedIn" || savedTrails.loading || pendingSave.current) return;
+    pendingSave.current = true;
+    const finish = () => router.replace(`/trails?id=${encodeURIComponent(id)}`, { scroll: false });
+    if (savedTrails.savedIds.has(id)) finish();
+    else savedTrails.toggle(id, true).catch(() => undefined).finally(finish);
+  }, [id, saveParam, authStatus, savedTrails, router]);
 
   let body;
   if (isLoading) {
@@ -197,7 +233,14 @@ function TrailContent() {
       </div>
     );
   } else {
-    body = <TrailView trail={result.trail} />;
+    body = (
+      <TrailView
+        trail={result.trail}
+        saved={savedTrails.savedIds.has(result.trail.id)}
+        pending={savedTrails.pending.has(result.trail.id) || (saveParam === result.trail.id && authStatus === "signedIn")}
+        onToggleSave={savedTrails.toggle}
+      />
+    );
   }
 
   return (

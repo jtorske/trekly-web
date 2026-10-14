@@ -1,0 +1,60 @@
+.summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.facts {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.facts dt {
+  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  font-size: 0.75rem;
+}
+
+.facts dd {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.unit {
+  width: 5.5rem;
+  flex-shrink: 0;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.confirmDelete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.confirmDelete span {
+  flex: 1 1 14rem;
+}
+
+@media (max-width: 520px) {
+  .summary {
+    flex-direction: column;
+  }
+}

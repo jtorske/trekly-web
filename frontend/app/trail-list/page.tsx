@@ -1,8 +1,11 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import SaveTrailButton from "@/components/SaveTrailButton";
+import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/app/packplanner/packingList";
 import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { metersToFeet } from "@/lib/units";
@@ -15,9 +18,21 @@ function isTerrain(value: string | null): value is Terrain {
   return value !== null && (TERRAINS as string[]).includes(value);
 }
 
-function TrailCard({ trail }: { trail: TrailListItem }) {
+function TrailCard({
+  trail,
+  saved,
+  pending,
+  onToggleSave,
+  returnTo,
+}: {
+  trail: TrailListItem;
+  saved: boolean;
+  pending: boolean;
+  onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
+  returnTo: string;
+}) {
   return (
-    <li>
+    <li className={styles.cardItem}>
       <Link
         href={`/trails?id=${encodeURIComponent(trail.id)}`}
         className={styles.card}
@@ -44,6 +59,17 @@ function TrailCard({ trail }: { trail: TrailListItem }) {
           )}
         </div>
       </Link>
+      <div className={styles.cardSave}>
+        <SaveTrailButton
+          trailId={trail.id}
+          trailName={trail.name}
+          saved={saved}
+          pending={pending}
+          onToggle={onToggleSave}
+          returnTo={returnTo}
+          compact
+        />
+      </div>
     </li>
   );
 }
@@ -56,6 +82,11 @@ function ExploreContent() {
   const terrain = isTerrain(terrainParam) ? terrainParam : undefined;
 
   const [input, setInput] = useState(q);
+  const savedTrails = useSavedTrails();
+  const { status: authStatus } = useAuth();
+  const resumedSave = useRef(false);
+  const saveParam = searchParams.get("save");
+  const returnTo = `/trail-list${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
   const [result, setResult] = useState<{
     key: string;
     trails: TrailListItem[] | null;
@@ -96,6 +127,15 @@ function ExploreContent() {
       });
     return () => controller.abort();
   }, [q, terrain, requestKey]);
+
+  // Back from sign-in after a guest clicked Save on a card: finish that save.
+  useEffect(() => {
+    if (!saveParam || authStatus !== "signedIn" || savedTrails.loading || resumedSave.current) return;
+    resumedSave.current = true;
+    const done = () => updateUrl(q, terrain);
+    if (savedTrails.savedIds.has(saveParam)) done();
+    else savedTrails.toggle(saveParam, true).catch(() => undefined).finally(done);
+  }, [saveParam, authStatus, savedTrails, updateUrl, q, terrain]);
 
   const isLoading = result?.key !== requestKey;
   const trails = result?.trails;
@@ -181,7 +221,14 @@ function ExploreContent() {
             </p>
             <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
               {trails.map((trail) => (
-                <TrailCard key={trail.id} trail={trail} />
+                <TrailCard
+                  key={trail.id}
+                  trail={trail}
+                  saved={savedTrails.savedIds.has(trail.id)}
+                  pending={savedTrails.pending.has(trail.id)}
+                  onToggleSave={savedTrails.toggle}
+                  returnTo={returnTo}
+                />
               ))}
             </ul>
           </>

@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import USERNAME_PATTERN, Profile, SavedTrail
+from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.schemas.trail import TrailListItemOut
@@ -245,6 +246,9 @@ def delete_account(
         raise HTTPException(
             status_code=422, detail=f'Type "{DELETE_CONFIRMATION}" to confirm.'
         )
+    for setup in db.scalars(select(GearSetup).where(GearSetup.user_id == user.id)):
+        db.delete(setup)
+    db.flush()
     db.execute(delete(UserGearItem).where(UserGearItem.user_id == user.id))
     db.execute(delete(SavedTrail).where(SavedTrail.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))

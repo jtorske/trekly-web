@@ -92,6 +92,12 @@ def _apply(db: Session, user_id: UUID, item: UserGearItem, data: dict) -> None:
                 variant = db.get(CatalogProductVariant, variant_id)
                 if variant is None or variant.product_id != product.id:
                     raise _invalid("That size or variant doesn't belong to the product.")
+            if item.product_id != product.id:
+                # Switching to a catalogue product: its brand/model/name
+                # replace any custom ones unless this request sets them.
+                for field in ("custom_name", "custom_brand", "custom_model"):
+                    if field not in data:
+                        setattr(item, field, None)
             item.product = product
             item.variant = variant
             item.category = product.category

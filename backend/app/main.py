@@ -1,14 +1,19 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import gear, me_account, me_gear, trails
+from app.routers import gear, me_account, me_gear, me_setups, trails
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
+    # Comma-separated list, e.g. "https://trekly.app,http://localhost:3000".
     allow_origins=[
-        "http://localhost:3000"
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -19,6 +24,7 @@ app.include_router(trails.router)
 app.include_router(gear.router)
 app.include_router(me_gear.router)
 app.include_router(me_account.router)
+app.include_router(me_setups.router)
 
 
 @app.get("/")

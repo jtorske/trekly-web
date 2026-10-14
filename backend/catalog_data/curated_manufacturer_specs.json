@@ -9,14 +9,20 @@
     {
       "source_record_id": "msr:pocketrocket-deluxe",
       "brand": "MSR",
-      "brand_aliases": ["Mountain Safety Research"],
+      "brand_aliases": [
+        "Mountain Safety Research"
+      ],
       "brand_website": "https://www.msrgear.com",
       "name": "PocketRocket Deluxe",
       "category": "stoves",
       "official_url": "https://cascadedesigns.com/products/pocketrocket-deluxe-stove",
       "source_url": "https://cascadedesigns.com/products/pocketrocket-deluxe-stove",
       "verified_at": "2026-10-13",
-      "weight": {"value": "83", "unit": "g", "basis": "minimum"},
+      "weight": {
+        "value": "83",
+        "unit": "g",
+        "basis": "minimum"
+      },
       "specs": {
         "published_weight": "2.9 oz (83 g)",
         "packaged_weight_g": 97,
@@ -35,7 +41,11 @@
       "official_url": "https://cascadedesigns.com/products/pocketrocket-2-stove",
       "source_url": "https://cascadedesigns.com/products/pocketrocket-2-stove",
       "verified_at": "2026-10-13",
-      "weight": {"value": "73", "unit": "g", "basis": "minimum"},
+      "weight": {
+        "value": "73",
+        "unit": "g",
+        "basis": "minimum"
+      },
       "specs": {
         "published_weight": "2.6 oz (73 g)",
         "packaged_weight_g": 105,
@@ -50,12 +60,21 @@
       "brand": "MSR",
       "name": "WindBurner Personal Stove System",
       "category": "stoves",
-      "aliases": ["WindBurner 1.0L"],
+      "aliases": [
+        "WindBurner 1.0L"
+      ],
       "official_url": "https://cascadedesigns.com/products/windburner-personal-stove-system",
       "source_url": "https://cascadedesigns.com/products/windburner-personal-stove-system",
       "verified_at": "2026-10-13",
-      "weight": {"value": "433", "unit": "g", "basis": "minimum"},
-      "capacity": {"value": "1", "unit": "l"},
+      "weight": {
+        "value": "433",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "capacity": {
+        "value": "1",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "15.3 oz (433 g)",
         "packaged_weight_g": 465,
@@ -71,11 +90,16 @@
       "brand": "MSR",
       "name": "Hubba Hubba HD 2",
       "category": "tents",
-      "aliases": ["Hubba Hubba 2"],
+      "aliases": [
+        "Hubba Hubba 2"
+      ],
       "official_url": "https://cascadedesigns.com/products/hubba-hubba-hd-2-person-backpacking-tent",
       "source_url": "https://cascadedesigns.com/products/hubba-hubba-hd-2-person-backpacking-tent",
       "verified_at": "2026-10-13",
-      "weight": {"text": "3 lb 9 oz", "basis": "minimum"},
+      "weight": {
+        "text": "3 lb 9 oz",
+        "basis": "minimum"
+      },
       "specs": {
         "published_weight": "3 lb 9 oz (1.61 kg)",
         "packaged_weight_g": 1786.0,
@@ -90,19 +114,70 @@
     {
       "source_record_id": "therm-a-rest:neoair-xlite-nxt",
       "brand": "Therm-a-Rest",
-      "brand_aliases": ["Thermarest", "Therm a Rest"],
+      "brand_aliases": [
+        "Thermarest",
+        "Therm a Rest"
+      ],
       "brand_website": "https://www.thermarest.com",
       "name": "NeoAir XLite NXT",
       "category": "sleeping-pads",
       "official_url": "https://cascadedesigns.com/products/neoair-xlite-nxt-sleeping-pad",
       "source_url": "https://cascadedesigns.com/products/neoair-xlite-nxt-sleeping-pad",
       "verified_at": "2026-10-13",
-      "specs": {"r_value": 4.5, "pad_type": "air", "thickness_cm": 7.6},
+      "specs": {
+        "r_value": 4.5,
+        "pad_type": "air",
+        "thickness_cm": 7.6
+      },
       "variants": [
-        {"name": "Regular Short", "weight": {"text": "11.5 oz", "basis": "claimed"}, "specs": {"length_cm": 168, "width_cm": 51, "packed_dimensions": "9 x 4.1 in (23 x 10 cm)"}},
-        {"name": "Regular", "weight": {"text": "13 oz", "basis": "claimed"}, "specs": {"length_cm": 183, "width_cm": 51, "packed_dimensions": "9 x 4.1 in (23 x 10 cm)"}},
-        {"name": "Regular Wide", "weight": {"text": "1 lb", "basis": "claimed"}, "specs": {"length_cm": 183, "width_cm": 64, "packed_dimensions": "11 x 4.6 in (28 x 12 cm)"}},
-        {"name": "Large", "weight": {"text": "1 lb 1 oz", "basis": "claimed"}, "specs": {"length_cm": 196, "width_cm": 64, "packed_dimensions": "11 x 4.6 in (28 x 12 cm)"}}
+        {
+          "name": "Regular Short",
+          "weight": {
+            "text": "11.5 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 168,
+            "width_cm": 51,
+            "packed_dimensions": "9 x 4.1 in (23 x 10 cm)"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "text": "13 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 51,
+            "packed_dimensions": "9 x 4.1 in (23 x 10 cm)"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "text": "1 lb",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 64,
+            "packed_dimensions": "11 x 4.6 in (28 x 12 cm)"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "text": "1 lb 1 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 196,
+            "width_cm": 64,
+            "packed_dimensions": "11 x 4.6 in (28 x 12 cm)"
+          }
+        }
       ]
     },
     {
@@ -113,11 +188,48 @@
       "official_url": "https://cascadedesigns.com/products/neoair-xtherm-nxt-sleeping-pad",
       "source_url": "https://cascadedesigns.com/products/neoair-xtherm-nxt-sleeping-pad",
       "verified_at": "2026-10-13",
-      "specs": {"r_value": 7.3, "pad_type": "air", "thickness_cm": 7.6},
+      "specs": {
+        "r_value": 7.3,
+        "pad_type": "air",
+        "thickness_cm": 7.6
+      },
       "variants": [
-        {"name": "Regular", "weight": {"text": "15.5 oz", "basis": "claimed"}, "specs": {"length_cm": 183, "width_cm": 51, "packed_dimensions": "9 x 4.5 in (23 x 11 cm)"}},
-        {"name": "Regular Wide", "weight": {"text": "1 lb 3 oz", "basis": "claimed"}, "specs": {"length_cm": 183, "width_cm": 64, "packed_dimensions": "11 x 5 in (28 x 13 cm)"}},
-        {"name": "Large", "weight": {"text": "1 lb 4 oz", "basis": "claimed"}, "specs": {"length_cm": 196, "width_cm": 64, "packed_dimensions": "11 x 5 in (28 x 13 cm)"}}
+        {
+          "name": "Regular",
+          "weight": {
+            "text": "15.5 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 51,
+            "packed_dimensions": "9 x 4.5 in (23 x 11 cm)"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "text": "1 lb 3 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 64,
+            "packed_dimensions": "11 x 5 in (28 x 13 cm)"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "text": "1 lb 4 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 196,
+            "width_cm": 64,
+            "packed_dimensions": "11 x 5 in (28 x 13 cm)"
+          }
+        }
       ]
     },
     {
@@ -128,10 +240,36 @@
       "official_url": "https://cascadedesigns.com/products/z-lite-sol-sleeping-pad",
       "source_url": "https://cascadedesigns.com/products/z-lite-sol-sleeping-pad",
       "verified_at": "2026-10-13",
-      "specs": {"r_value": 2, "pad_type": "foam", "thickness_cm": 2},
+      "specs": {
+        "r_value": 2,
+        "pad_type": "foam",
+        "thickness_cm": 2
+      },
       "variants": [
-        {"name": "Small", "weight": {"text": "10 oz", "basis": "claimed"}, "specs": {"length_cm": 130, "width_cm": 51, "packed_dimensions": "20 x 4 x 5.5 in (51 x 10 x 14 cm)"}},
-        {"name": "Regular", "weight": {"text": "14 oz", "basis": "claimed"}, "specs": {"length_cm": 183, "width_cm": 51, "packed_dimensions": "20 x 5 x 5.5 in (51 x 13 x 14 cm)"}}
+        {
+          "name": "Small",
+          "weight": {
+            "text": "10 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 130,
+            "width_cm": 51,
+            "packed_dimensions": "20 x 4 x 5.5 in (51 x 10 x 14 cm)"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "text": "14 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 51,
+            "packed_dimensions": "20 x 5 x 5.5 in (51 x 13 x 14 cm)"
+          }
+        }
       ]
     },
     {
@@ -143,7 +281,11 @@
       "source_url": "https://cascadedesigns.com/products/guardian-purifier",
       "verified_at": "2026-10-13",
       "model_number": "14003",
-      "weight": {"value": "490", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "490",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "1 lb 1 oz (490 g)",
         "treatment_type": "purifier",
@@ -162,7 +304,11 @@
       "official_url": "https://cascadedesigns.com/products/quickdraw-filter",
       "source_url": "https://cascadedesigns.com/products/quickdraw-filter",
       "verified_at": "2026-10-13",
-      "weight": {"value": "69", "unit": "g", "basis": "minimum"},
+      "weight": {
+        "value": "69",
+        "unit": "g",
+        "basis": "minimum"
+      },
       "specs": {
         "published_weight": "2.4 oz (69 g)",
         "treatment_type": "filter",
@@ -178,11 +324,17 @@
       "brand_website": "https://zpacks.com",
       "name": "Duplex Classic Tent",
       "category": "tents",
-      "aliases": ["Duplex"],
+      "aliases": [
+        "Duplex"
+      ],
       "official_url": "https://zpacks.com/products/duplex-tent",
       "source_url": "https://zpacks.com/products/duplex-tent",
       "verified_at": "2026-10-13",
-      "weight": {"value": "504", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "504",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "17.8 oz / 504 g",
         "capacity_persons": 2,
@@ -195,14 +347,20 @@
     {
       "source_record_id": "durston:x-mid-2",
       "brand": "Durston Gear",
-      "brand_aliases": ["Durston"],
+      "brand_aliases": [
+        "Durston"
+      ],
       "brand_website": "https://durstongear.com",
       "name": "X-Mid 2",
       "category": "tents",
       "official_url": "https://durstongear.com/products/x-mid-2",
       "source_url": "https://durstongear.com/products/x-mid-2",
       "verified_at": "2026-10-13",
-      "weight": {"value": "890", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "890",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "Complete Tent: 31.3 oz / 890 g",
         "capacity_persons": 2,
@@ -223,31 +381,86 @@
       "official_url": "https://www.gossamergear.com/products/mariposa-60-lightweight-backpack",
       "source_url": "https://www.gossamergear.com/products/mariposa-60-lightweight-backpack",
       "verified_at": "2026-10-13",
-      "capacity": {"value": "60", "unit": "l"},
+      "capacity": {
+        "value": "60",
+        "unit": "l"
+      },
       "specs": {
         "frame_type": "internal",
         "max_load_kg": 15.9,
         "materials": "100D and 210D recycled Robic nylon"
       },
       "variants": [
-        {"name": "Small, S/M curved hipbelt", "weight": {"value": "946", "unit": "g", "basis": "claimed"}, "specs": {"torso_range": "16-18 in", "published_weight": "33.4 oz / 946 g"}},
-        {"name": "Medium, S/M curved hipbelt", "weight": {"value": "983", "unit": "g", "basis": "claimed"}, "specs": {"torso_range": "18-20 in", "published_weight": "34.7 oz / 983 g"}},
-        {"name": "Medium, M/L curved hipbelt", "weight": {"value": "1011", "unit": "g", "basis": "claimed"}, "specs": {"torso_range": "18-20 in", "published_weight": "35.7 oz / 1011 g"}},
-        {"name": "Large, M/L curved hipbelt", "weight": {"value": "1068", "unit": "g", "basis": "claimed"}, "specs": {"torso_range": "20-22 in", "published_weight": "37.7 oz / 1068 g"}}
+        {
+          "name": "Small, S/M curved hipbelt",
+          "weight": {
+            "value": "946",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "torso_range": "16-18 in",
+            "published_weight": "33.4 oz / 946 g"
+          }
+        },
+        {
+          "name": "Medium, S/M curved hipbelt",
+          "weight": {
+            "value": "983",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "torso_range": "18-20 in",
+            "published_weight": "34.7 oz / 983 g"
+          }
+        },
+        {
+          "name": "Medium, M/L curved hipbelt",
+          "weight": {
+            "value": "1011",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "torso_range": "18-20 in",
+            "published_weight": "35.7 oz / 1011 g"
+          }
+        },
+        {
+          "name": "Large, M/L curved hipbelt",
+          "weight": {
+            "value": "1068",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "torso_range": "20-22 in",
+            "published_weight": "37.7 oz / 1068 g"
+          }
+        }
       ]
     },
     {
       "source_record_id": "black-diamond:spot-400",
       "brand": "Black Diamond",
-      "brand_aliases": ["Black Diamond Equipment"],
+      "brand_aliases": [
+        "Black Diamond Equipment"
+      ],
       "brand_website": "https://www.blackdiamondequipment.com",
       "name": "Spot 400 Headlamp",
       "category": "lighting",
-      "aliases": ["Spot 400"],
+      "aliases": [
+        "Spot 400"
+      ],
       "official_url": "https://blackdiamondequipment.com/products/spot-400-headlamp",
       "source_url": "https://blackdiamondequipment.com/products/spot-400-headlamp",
       "verified_at": "2026-10-13",
-      "weight": {"value": "86", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "86",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "[AAA] 86 g, [BD1500] 72 g",
         "max_lumens": 400,
@@ -262,13 +475,22 @@
       "brand_website": "https://www.katadyngroup.com",
       "name": "BeFree 1.0L",
       "category": "water-treatment",
-      "aliases": ["BeFree Water Filtration System"],
+      "aliases": [
+        "BeFree Water Filtration System"
+      ],
       "model_number": "8018006",
       "official_url": "https://www.katadyngroup.com/us/en/8018006-katadyn-befree-1.0l-us~p6730",
       "source_url": "https://www.katadyngroup.com/us/en/8018006-katadyn-befree-1.0l-us~p6730",
       "verified_at": "2026-10-13",
-      "weight": {"value": "63", "unit": "g", "basis": "claimed"},
-      "capacity": {"value": "1", "unit": "l"},
+      "weight": {
+        "value": "63",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1",
+        "unit": "l"
+      },
       "specs": {
         "treatment_type": "filter",
         "pore_size_micron": 0.1,
@@ -280,15 +502,23 @@
     {
       "source_record_id": "sawyer:squeeze",
       "brand": "Sawyer",
-      "brand_aliases": ["Sawyer Products"],
+      "brand_aliases": [
+        "Sawyer Products"
+      ],
       "brand_website": "https://www.sawyer.com",
       "name": "Squeeze Water Filter",
       "category": "water-treatment",
-      "aliases": ["Sawyer Squeeze"],
+      "aliases": [
+        "Sawyer Squeeze"
+      ],
       "official_url": "https://www.sawyer.com/product/squeeze-water-filter-system",
       "source_url": "https://help.sawyer.com/retail/products/squeeze-water-filter",
       "verified_at": "2026-10-13",
-      "weight": {"value": "3", "unit": "oz", "basis": "claimed"},
+      "weight": {
+        "value": "3",
+        "unit": "oz",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "approx. 3 ounces",
         "treatment_type": "filter",
@@ -301,7 +531,9 @@
       "brand_website": "https://enlightenedequipment.com",
       "name": "Revelation Quilt",
       "category": "quilts",
-      "aliases": ["Revelation Sleeping Quilt"],
+      "aliases": [
+        "Revelation Sleeping Quilt"
+      ],
       "official_url": "https://enlightenedequipment.com/revelation-sleeping-quilt/",
       "source_url": "https://enlightenedequipment.com/revelation-sleeping-quilt/",
       "verified_at": "2026-10-13",
@@ -319,9 +551,24 @@
       "official_url": "https://seatosummit.com/pages/ether-light-xt-insulated-sleeping-pad",
       "source_url": "https://seatosummit.com/pages/ether-light-xt-insulated-sleeping-pad",
       "verified_at": "2026-10-13",
-      "specs": {"r_value": 3.2, "pad_type": "air", "thickness_cm": 10},
+      "specs": {
+        "r_value": 3.2,
+        "pad_type": "air",
+        "thickness_cm": 10
+      },
       "variants": [
-        {"name": "Regular", "weight": {"value": "490", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "17.3 oz | 490 g", "packed_dimensions": "4.5 x 9.5 in (11 x 24 cm)"}}
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "490",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "17.3 oz | 490 g",
+            "packed_dimensions": "4.5 x 9.5 in (11 x 24 cm)"
+          }
+        }
       ]
     },
     {
@@ -330,12 +577,20 @@
       "brand_website": "https://bearvault.com",
       "name": "BV500 Journey",
       "category": "food-storage",
-      "aliases": ["BV500"],
+      "aliases": [
+        "BV500"
+      ],
       "official_url": "https://bearvault.com/products/bv500",
       "source_url": "https://bearvault.com/products/bv500",
       "verified_at": "2026-10-13",
-      "weight": {"text": "2 lb 9 oz", "basis": "claimed"},
-      "capacity": {"value": "11.5", "unit": "l"},
+      "weight": {
+        "text": "2 lb 9 oz",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "11.5",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "2.5 lb | 2 lbs 9 oz | 1.16 kg",
         "igbc_certified": true,
@@ -350,8 +605,15 @@
       "official_url": "https://zpacks.com/products/arc-haul-ultra-60l-backpack",
       "source_url": "https://zpacks.com/products/arc-haul-ultra-60l-backpack",
       "verified_at": "2026-10-13",
-      "weight": {"value": "619", "unit": "g", "basis": "claimed"},
-      "capacity": {"value": "60", "unit": "l"},
+      "weight": {
+        "value": "619",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "60",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "21.8 oz / 619 g",
         "frame_type": "internal",
@@ -365,11 +627,17 @@
       "brand": "Zpacks",
       "name": "Plex Solo Classic Tent",
       "category": "tents",
-      "aliases": ["Plex Solo"],
+      "aliases": [
+        "Plex Solo"
+      ],
       "official_url": "https://zpacks.com/products/plex-solo-tent",
       "source_url": "https://zpacks.com/products/plex-solo-tent",
       "verified_at": "2026-10-13",
-      "weight": {"value": "348", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "348",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "12.3 oz / 348 g (includes guy lines, sewn-in linelocs and taped seams)",
         "peak_height_cm": 132,
@@ -386,7 +654,11 @@
       "official_url": "https://www.gossamergear.com/products/the-two",
       "source_url": "https://www.gossamergear.com/products/the-two",
       "verified_at": "2026-10-13",
-      "weight": {"value": "864.3", "unit": "g", "basis": "packaged"},
+      "weight": {
+        "value": "864.3",
+        "unit": "g",
+        "basis": "packaged"
+      },
       "specs": {
         "published_weight": "Total 30.5 oz / 864.3 g; Shelter Body 28.15 oz / 798 g",
         "doors": 2,
@@ -403,14 +675,107 @@
       "official_url": "https://durstongear.com/products/kakwa-55",
       "source_url": "https://durstongear.com/products/kakwa-55",
       "verified_at": "2026-10-13",
-      "specs": {"frame_type": "internal", "max_load_kg": 20},
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 20
+      },
       "variants": [
-        {"name": "Small, Ultra 200X", "weight": {"value": "855", "unit": "g", "basis": "claimed"}, "capacity": {"value": "68", "unit": "l"}, "specs": {"torso_range": "15-18 in (38-46 cm)", "published_weight": "30.1 oz / 855 g"}},
-        {"name": "Medium, Ultra 200X", "weight": {"value": "895", "unit": "g", "basis": "claimed"}, "capacity": {"value": "70", "unit": "l"}, "specs": {"torso_range": "17-20 in (43-51 cm)", "published_weight": "31.5 oz / 895 g"}},
-        {"name": "Large, Ultra 200X", "weight": {"value": "920", "unit": "g", "basis": "claimed"}, "capacity": {"value": "72", "unit": "l"}, "specs": {"torso_range": "19-22 in (48-56 cm)", "published_weight": "32.4 oz / 920 g"}},
-        {"name": "Small, UltraGrid", "weight": {"value": "830", "unit": "g", "basis": "claimed"}, "capacity": {"value": "68", "unit": "l"}, "specs": {"torso_range": "15-18 in (38-46 cm)", "published_weight": "29.2 oz / 830 g"}},
-        {"name": "Medium, UltraGrid", "weight": {"value": "870", "unit": "g", "basis": "claimed"}, "capacity": {"value": "70", "unit": "l"}, "specs": {"torso_range": "17-20 in (43-51 cm)", "published_weight": "30.6 oz / 870 g"}},
-        {"name": "Large, UltraGrid", "weight": {"value": "890", "unit": "g", "basis": "claimed"}, "capacity": {"value": "72", "unit": "l"}, "specs": {"torso_range": "19-22 in (48-56 cm)", "published_weight": "31.3 oz / 890 g"}}
+        {
+          "name": "Small, Ultra 200X",
+          "weight": {
+            "value": "855",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "68",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "15-18 in (38-46 cm)",
+            "published_weight": "30.1 oz / 855 g"
+          }
+        },
+        {
+          "name": "Medium, Ultra 200X",
+          "weight": {
+            "value": "895",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "70",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "17-20 in (43-51 cm)",
+            "published_weight": "31.5 oz / 895 g"
+          }
+        },
+        {
+          "name": "Large, Ultra 200X",
+          "weight": {
+            "value": "920",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "72",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "19-22 in (48-56 cm)",
+            "published_weight": "32.4 oz / 920 g"
+          }
+        },
+        {
+          "name": "Small, UltraGrid",
+          "weight": {
+            "value": "830",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "68",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "15-18 in (38-46 cm)",
+            "published_weight": "29.2 oz / 830 g"
+          }
+        },
+        {
+          "name": "Medium, UltraGrid",
+          "weight": {
+            "value": "870",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "70",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "17-20 in (43-51 cm)",
+            "published_weight": "30.6 oz / 870 g"
+          }
+        },
+        {
+          "name": "Large, UltraGrid",
+          "weight": {
+            "value": "890",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "72",
+            "unit": "l"
+          },
+          "specs": {
+            "torso_range": "19-22 in (48-56 cm)",
+            "published_weight": "31.3 oz / 890 g"
+          }
+        }
       ]
     },
     {
@@ -421,8 +786,14 @@
       "official_url": "https://cascadedesigns.com/products/titan-kettle-900ml",
       "source_url": "https://cascadedesigns.com/products/titan-kettle-900ml",
       "verified_at": "2026-10-13",
-      "weight": {"text": "4.4 oz", "basis": "claimed"},
-      "capacity": {"value": "0.9", "unit": "l"},
+      "weight": {
+        "text": "4.4 oz",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "0.9",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "4.4 oz (0.13 kg)",
         "cookware_material": "titanium",
@@ -434,7 +805,9 @@
       "brand": "MSR",
       "name": "Groundhog Tent Stakes (6-pack)",
       "category": "stakes-guylines",
-      "aliases": ["Groundhog"],
+      "aliases": [
+        "Groundhog"
+      ],
       "official_url": "https://cascadedesigns.com/products/groundhog-tent-stakes",
       "source_url": "https://cascadedesigns.com/products/groundhog-tent-stakes",
       "verified_at": "2026-10-13",
@@ -454,12 +827,75 @@
       "official_url": "https://cascadedesigns.com/products/discovery-dry-bag",
       "source_url": "https://cascadedesigns.com/products/discovery-dry-bag",
       "verified_at": "2026-10-13",
-      "specs": {"waterproof": true, "materials": "PVC-free 300D 18 oz polyurethane-coated polyester"},
+      "specs": {
+        "waterproof": true,
+        "materials": "PVC-free 300D 18 oz polyurethane-coated polyester"
+      },
       "variants": [
-        {"name": "5 L", "weight": {"value": "175", "unit": "g", "basis": "claimed"}, "capacity": {"value": "5", "unit": "l"}, "specs": {"published_weight": "6.2 oz (175 g)", "dimensions": "4 x 7 x 10 in (11 x 17 x 25 cm)"}},
-        {"name": "10 L", "weight": {"value": "275", "unit": "g", "basis": "claimed"}, "capacity": {"value": "10", "unit": "l"}, "specs": {"published_weight": "9.7 oz (275 g)", "dimensions": "5 x 8.5 x 14.5 in (13 x 21.5 x 36 cm)"}},
-        {"name": "20 L", "weight": {"value": "390", "unit": "g", "basis": "claimed"}, "capacity": {"value": "20", "unit": "l"}, "specs": {"published_weight": "13.8 oz (390 g)", "dimensions": "6 x 10 x 21 in (15 x 25 x 53 cm)"}},
-        {"name": "30 L", "weight": {"value": "500", "unit": "g", "basis": "claimed"}, "capacity": {"value": "30", "unit": "l"}, "specs": {"published_weight": "1 lb 1 oz (500 g)", "dimensions": "7 x 12 x 22 in (18 x 30 x 55 cm)"}}
+        {
+          "name": "5 L",
+          "weight": {
+            "value": "175",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "5",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "6.2 oz (175 g)",
+            "dimensions": "4 x 7 x 10 in (11 x 17 x 25 cm)"
+          }
+        },
+        {
+          "name": "10 L",
+          "weight": {
+            "value": "275",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "10",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "9.7 oz (275 g)",
+            "dimensions": "5 x 8.5 x 14.5 in (13 x 21.5 x 36 cm)"
+          }
+        },
+        {
+          "name": "20 L",
+          "weight": {
+            "value": "390",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "20",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "13.8 oz (390 g)",
+            "dimensions": "6 x 10 x 21 in (15 x 25 x 53 cm)"
+          }
+        },
+        {
+          "name": "30 L",
+          "weight": {
+            "value": "500",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "30",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "1 lb 1 oz (500 g)",
+            "dimensions": "7 x 12 x 22 in (18 x 30 x 55 cm)"
+          }
+        }
       ]
     },
     {
@@ -467,11 +903,17 @@
       "brand": "Sawyer",
       "name": "Micro Squeeze Water Filter",
       "category": "water-treatment",
-      "aliases": ["Micro Squeeze"],
+      "aliases": [
+        "Micro Squeeze"
+      ],
       "official_url": "https://www.sawyer.com/product/micro-squeeze-water-filtration-system",
       "source_url": "https://help.sawyer.com/retail/products/micro-squeeze-water-filter",
       "verified_at": "2026-10-13",
-      "weight": {"value": "2", "unit": "oz", "basis": "claimed"},
+      "weight": {
+        "value": "2",
+        "unit": "oz",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "approx. 2 ounces",
         "treatment_type": "filter",
@@ -513,7 +955,11 @@
       "official_url": "https://zpacks.com/products/vertice-rain-jacket",
       "source_url": "https://zpacks.com/products/vertice-rain-jacket",
       "verified_at": "2026-10-13",
-      "weight": {"value": "152", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "152",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "5.4 oz / 152 g (size not stated)",
         "gender_fit": "mens",
@@ -523,16 +969,26 @@
     {
       "source_record_id": "adventure-medical-kits:ultralight-watertight-7",
       "brand": "Adventure Medical Kits",
-      "brand_aliases": ["AMK"],
+      "brand_aliases": [
+        "AMK"
+      ],
       "brand_website": "https://adventuremedicalkits.com",
       "name": "Ultralight/Watertight .7 First Aid Kit",
       "category": "first-aid",
-      "aliases": ["Ultralight Watertight .7"],
+      "aliases": [
+        "Ultralight Watertight .7"
+      ],
       "official_url": "https://adventuremedicalkits.com/products/ultralight-watertight-medical-kit-7",
       "source_url": "https://adventuremedicalkits.com/products/ultralight-watertight-medical-kit-7",
       "verified_at": "2026-10-13",
-      "weight": {"text": "5.8 oz", "basis": "claimed"},
-      "specs": {"persons": 2, "days": 4}
+      "weight": {
+        "text": "5.8 oz",
+        "basis": "claimed"
+      },
+      "specs": {
+        "persons": 2,
+        "days": 4
+      }
     },
     {
       "source_record_id": "nitecore:nb10000-gen3",
@@ -544,7 +1000,11 @@
       "official_url": "https://www.nitecore.com/product/nb10000gen3",
       "source_url": "https://www.nitecore.com/product/nb10000gen3",
       "verified_at": "2026-10-13",
-      "weight": {"value": "150", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "150",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "150g±5g / 5.29 oz±0.1 oz (Accessory Not Included)",
         "capacity_mah": 10000,
@@ -559,11 +1019,47 @@
       "official_url": "https://cascadedesigns.com/products/compressible-pillow-cinch",
       "source_url": "https://cascadedesigns.com/products/compressible-pillow-cinch",
       "verified_at": "2026-10-13",
-      "specs": {"pad_type": "compressible", "materials": "Urethane foam fill, polyester insulation, polyester shell"},
+      "specs": {
+        "pad_type": "compressible",
+        "materials": "Urethane foam fill, polyester insulation, polyester shell"
+      },
       "variants": [
-        {"name": "Small", "weight": {"value": "230", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "8 oz (230 g)", "dimensions": "15 x 11 x 5 in (38 x 28 x 13 cm)"}},
-        {"name": "Regular", "weight": {"value": "325", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "11.5 oz (325 g)", "dimensions": "18 x 13 x 6 in (46 x 33 x 15 cm)"}},
-        {"name": "Large", "weight": {"value": "450", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "16 oz (450 g)", "dimensions": "22 x 15 x 7 in (56 x 38 x 18 cm)"}}
+        {
+          "name": "Small",
+          "weight": {
+            "value": "230",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "8 oz (230 g)",
+            "dimensions": "15 x 11 x 5 in (38 x 28 x 13 cm)"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "325",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "11.5 oz (325 g)",
+            "dimensions": "18 x 13 x 6 in (46 x 33 x 15 cm)"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "value": "450",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "16 oz (450 g)",
+            "dimensions": "22 x 15 x 7 in (56 x 38 x 18 cm)"
+          }
+        }
       ]
     },
     {
@@ -571,7 +1067,9 @@
       "brand": "Therm-a-Rest",
       "name": "Parsec 20F/-6C Down Sleeping Bag",
       "category": "sleeping-bags",
-      "aliases": ["Parsec 20"],
+      "aliases": [
+        "Parsec 20"
+      ],
       "official_url": "https://cascadedesigns.com/en-ca/products/parsec-20f-6c-sleeping-bag",
       "source_url": "https://cascadedesigns.com/en-ca/products/parsec-20f-6c-sleeping-bag",
       "verified_at": "2026-10-13",
@@ -584,8 +1082,30 @@
         "materials": "900-fill PFAS-free hydrophobic duck down (RDS)"
       },
       "variants": [
-        {"name": "Regular", "weight": {"value": "820", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lbs 13 oz (820 g)", "fill_weight_g": 490}},
-        {"name": "Long", "weight": {"value": "886", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lbs 15 oz (886 g)", "fill_weight_g": 545}}
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "820",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lbs 13 oz (820 g)",
+            "fill_weight_g": 490
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "886",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lbs 15 oz (886 g)",
+            "fill_weight_g": 545
+          }
+        }
       ]
     },
     {
@@ -593,7 +1113,9 @@
       "brand": "Therm-a-Rest",
       "name": "Vesper 32F/0C Down Quilt",
       "category": "quilts",
-      "aliases": ["Vesper 32"],
+      "aliases": [
+        "Vesper 32"
+      ],
       "official_url": "https://cascadedesigns.com/products/vesper-32f-0c-down-quilt",
       "source_url": "https://cascadedesigns.com/products/vesper-32f-0c-down-quilt",
       "verified_at": "2026-10-13",
@@ -606,8 +1128,30 @@
         "materials": "900-fill PFAS-free hydrophobic goose down (RDS)"
       },
       "variants": [
-        {"name": "Regular", "weight": {"value": "440", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "15 oz (440 g)", "fill_weight_g": 240}},
-        {"name": "Long", "weight": {"value": "490", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lbs 1 oz (490 g)", "fill_weight_g": 270}}
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "440",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "15 oz (440 g)",
+            "fill_weight_g": 240
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "490",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lbs 1 oz (490 g)",
+            "fill_weight_g": 270
+          }
+        }
       ]
     },
     {
@@ -615,12 +1159,21 @@
       "brand": "Platypus",
       "name": "Platy 2.0L Bottle",
       "category": "bottles-reservoirs",
-      "aliases": ["Platy 2L"],
+      "aliases": [
+        "Platy 2L"
+      ],
       "official_url": "https://cascadedesigns.com/products/platy-2l-bottle",
       "source_url": "https://cascadedesigns.com/products/platy-2l-bottle",
       "verified_at": "2026-10-13",
-      "weight": {"value": "36", "unit": "g", "basis": "claimed"},
-      "capacity": {"value": "2", "unit": "l"},
+      "weight": {
+        "value": "36",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "2",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "1.3 oz. (36 g)",
         "dimensions": "13.8 x 7.5 in (35 x 19 cm)",
@@ -632,12 +1185,21 @@
       "brand": "Platypus",
       "name": "SoftBottle 1.0L",
       "category": "bottles-reservoirs",
-      "aliases": ["SoftBottle"],
+      "aliases": [
+        "SoftBottle"
+      ],
       "official_url": "https://cascadedesigns.com/products/softbottle",
       "source_url": "https://cascadedesigns.com/products/softbottle",
       "verified_at": "2026-10-13",
-      "weight": {"value": "29", "unit": "g", "basis": "claimed"},
-      "capacity": {"value": "1", "unit": "l"},
+      "weight": {
+        "value": "29",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1",
+        "unit": "l"
+      },
       "specs": {
         "published_weight": "1.0 oz. (29 g)",
         "dimensions": "6 x 10 in (15 x 28 cm)",
@@ -660,22 +1222,60 @@
         "materials": "12D ripstop nylon shell, 850+ fill power goose down"
       },
       "variants": [
-        {"name": "5 ft 6 in", "weight": {"value": "795", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lb 12 oz / 795 g", "fill_weight_g": 425}},
-        {"name": "6 ft 0 in", "weight": {"value": "820", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lb 13 oz / 820 g", "fill_weight_g": 455}},
-        {"name": "6 ft 6 in", "weight": {"value": "880", "unit": "g", "basis": "claimed"}, "specs": {"published_weight": "1 lb 15 oz / 880 g", "fill_weight_g": 480}}
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "value": "795",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lb 12 oz / 795 g",
+            "fill_weight_g": 425
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "value": "820",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lb 13 oz / 820 g",
+            "fill_weight_g": 455
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "value": "880",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lb 15 oz / 880 g",
+            "fill_weight_g": 480
+          }
+        }
       ]
     },
     {
       "source_record_id": "topo-athletic:ultraventure-5-mens",
       "brand": "Topo Athletic",
-      "brand_aliases": ["Topo"],
+      "brand_aliases": [
+        "Topo"
+      ],
       "brand_website": "https://www.topoathletic.com",
       "name": "Ultraventure 5",
       "category": "trail-runners",
       "official_url": "https://www.topoathletic.com/mens-ultraventure",
       "source_url": "https://www.topoathletic.com/mens-ultraventure",
       "verified_at": "2026-10-13",
-      "weight": {"text": "10.7 oz", "basis": "claimed"},
+      "weight": {
+        "text": "10.7 oz",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "10.7 OZ (M9), per shoe",
         "gender_fit": "mens",
@@ -694,7 +1294,10 @@
       "official_url": "https://silvasweden.com/products/expedition-s",
       "source_url": "https://silvasweden.com/products/expedition-s",
       "verified_at": "2026-10-13",
-      "specs": {"declination_adjustment": true, "dimensions": "10.8 x 6.4 x 2 cm"}
+      "specs": {
+        "declination_adjustment": true,
+        "dimensions": "10.8 x 6.4 x 2 cm"
+      }
     },
     {
       "source_record_id": "silva:ranger-global",
@@ -705,7 +1308,9 @@
       "official_url": "https://silvasweden.com/products/ranger-global",
       "source_url": "https://silvasweden.com/products/ranger-global",
       "verified_at": "2026-10-13",
-      "specs": {"dimensions": "5.5 x 11.1 x 1 cm (2.2 x 4.4 x 0.4 in)"}
+      "specs": {
+        "dimensions": "5.5 x 11.1 x 1 cm (2.2 x 4.4 x 0.4 in)"
+      }
     },
     {
       "source_record_id": "leki:makalu-fx-carbon",
@@ -731,11 +1336,17 @@
       "brand_website": "https://counterassault.com",
       "name": "32-Foot Bear Spray (8.1 oz.)",
       "category": "bear-safety",
-      "aliases": ["8.1 oz Bear Spray"],
+      "aliases": [
+        "8.1 oz Bear Spray"
+      ],
       "official_url": "https://counterassault.com/products/8-1-oz-bear-spray",
       "source_url": "https://counterassault.com/products/8-1-oz-bear-spray",
       "verified_at": "2026-10-13",
-      "weight": {"value": "0.68", "unit": "lb", "basis": "claimed"},
+      "weight": {
+        "value": "0.68",
+        "unit": "lb",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "8.1 oz. Canister Weight: .68 lbs",
         "dimensions": "8.5 x 2 in"
@@ -749,10 +1360,34 @@
       "official_url": "https://seatosummit.com/products/aeros-pillow-ultra-light",
       "source_url": "https://seatosummit.com/products/aeros-pillow-ultra-light",
       "verified_at": "2026-10-13",
-      "specs": {"pad_type": "air"},
+      "specs": {
+        "pad_type": "air"
+      },
       "variants": [
-        {"name": "Regular", "weight": {"value": "55", "unit": "g", "basis": "claimed"}, "specs": {"packaged_weight_g": 57, "dimensions": "34 x 26 x 11 cm (13 x 10 x 4 in)"}},
-        {"name": "Large", "weight": {"value": "80", "unit": "g", "basis": "claimed"}, "specs": {"packaged_weight_g": 85, "dimensions": "45 x 31 x 12 cm (18 x 12 x 5 in)"}}
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "55",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "packaged_weight_g": 57,
+            "dimensions": "34 x 26 x 11 cm (13 x 10 x 4 in)"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "value": "80",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "packaged_weight_g": 85,
+            "dimensions": "45 x 31 x 12 cm (18 x 12 x 5 in)"
+          }
+        }
       ]
     },
     {
@@ -763,12 +1398,480 @@
       "official_url": "https://seatosummit.com/products/xlite-collapsible-mug",
       "source_url": "https://seatosummit.com/products/xlite-collapsible-mug",
       "verified_at": "2026-10-13",
-      "weight": {"value": "60", "unit": "g", "basis": "claimed"},
+      "weight": {
+        "value": "60",
+        "unit": "g",
+        "basis": "claimed"
+      },
       "specs": {
         "published_weight": "60 g / 2.1 oz",
         "dimensions": "10.1 x 10.1 x 9.8 cm",
         "packed_dimensions": "10.1 x 10.1 x 2.1 cm",
         "materials": "Nylon rings and base, silicone body"
+      }
+    },
+    {
+      "source_record_id": "msr:hubba-hubba-lt-2",
+      "brand": "MSR",
+      "name": "Hubba Hubba LT 2",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/hubba-hubba-lt-2-person-tent",
+      "source_url": "https://cascadedesigns.com/products/hubba-hubba-lt-2-person-tent",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "3 lb",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "3 lb (1.36 kg)",
+        "packaged_weight_g": 1540,
+        "capacity_persons": 2,
+        "doors": 2,
+        "floor_area_m2": 2.95,
+        "vestibule_area_m2": 1.48,
+        "peak_height_cm": 102,
+        "packed_dimensions": "20 x 5.5 in (51 x 14 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:hubba-hubba-hd-1",
+      "brand": "MSR",
+      "name": "Hubba Hubba HD 1",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/hubba-hubba-hd-1-person-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/hubba-hubba-hd-1-person-backpacking-tent",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "2 lb 10 oz",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "2 lb 10 oz (1.20 kg)",
+        "packaged_weight_g": 1360,
+        "capacity_persons": 1,
+        "doors": 1,
+        "floor_area_m2": 1.82,
+        "vestibule_area_m2": 0.79,
+        "peak_height_cm": 99,
+        "packed_dimensions": "20 x 5 in (51 x 13 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:freelite-2",
+      "brand": "MSR",
+      "name": "FreeLite 2",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/freelite-2-person-ultralight-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/freelite-2-person-ultralight-backpacking-tent",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "text": "2 lb",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "2 lb",
+        "packaged_weight_g": 1048.9,
+        "capacity_persons": 2,
+        "doors": 2,
+        "floor_area_m2": 2.694,
+        "vestibule_area_m2": 1.394,
+        "peak_height_cm": 99.1,
+        "packed_dimensions": "18 x 4.5 in"
+      }
+    },
+    {
+      "source_record_id": "ula:circuit",
+      "brand": "ULA Equipment",
+      "name": "Circuit",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/circuit/",
+      "source_url": "https://www.ula-equipment.com/product/circuit/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1092",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "68",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "38.5 OZ | 1,092 GM",
+        "frame_type": "internal",
+        "max_load_kg": 16,
+        "torso_range": "S 15-18 in, M 18-21 in, L 21-24 in, XL 24+ in"
+      },
+      "brand_aliases": [
+        "ULA"
+      ],
+      "brand_website": "https://www.ula-equipment.com"
+    },
+    {
+      "source_record_id": "ula:catalyst",
+      "brand": "ULA Equipment",
+      "name": "Catalyst",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/catalyst/",
+      "source_url": "https://www.ula-equipment.com/product/catalyst/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "1259",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "75",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "44.4 OZ | 1259 GM",
+        "frame_type": "internal",
+        "max_load_kg": 18
+      }
+    },
+    {
+      "source_record_id": "ula:ohm",
+      "brand": "ULA Equipment",
+      "name": "Ohm",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/ohm-2024/",
+      "source_url": "https://www.ula-equipment.com/product/ohm-2024/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "958",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "63",
+        "unit": "l"
+      },
+      "specs": {
+        "published_weight": "33.8 OZ | 958 GM",
+        "frame_type": "internal",
+        "max_load_kg": 13.6
+      },
+      "model_year": "2025"
+    },
+    {
+      "source_record_id": "western-mountaineering:alpinlite",
+      "brand": "Western Mountaineering",
+      "name": "AlpinLite",
+      "category": "sleeping-bags",
+      "official_url": "https://www.westernmountaineering.com/product/alpinlite/",
+      "source_url": "https://www.westernmountaineering.com/product/alpinlite/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 850,
+        "temperature_rating_label": "20°F / -7°C"
+      },
+      "variants": [
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "value": "820",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 480
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "value": "880",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 540
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "value": "935",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 595
+          }
+        },
+        {
+          "name": "7 ft 0 in",
+          "weight": {
+            "value": "995",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 650
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "western-mountaineering:megalite",
+      "brand": "Western Mountaineering",
+      "name": "MegaLite",
+      "category": "sleeping-bags",
+      "official_url": "https://www.westernmountaineering.com/product/megalite/",
+      "source_url": "https://www.westernmountaineering.com/product/megalite/",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 850,
+        "temperature_rating_label": "30°F"
+      },
+      "variants": [
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "text": "1 lb 7 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 311.8
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "text": "1 lb 8 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 340.2
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "text": "1 lb 9 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 368.5
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "therm-a-rest:vesper-20f",
+      "brand": "Therm-a-Rest",
+      "name": "Vesper 20F/-6C Down Quilt",
+      "category": "quilts",
+      "official_url": "https://cascadedesigns.com/products/vesper-20f-6c-down-quilt",
+      "source_url": "https://cascadedesigns.com/products/vesper-20f-6c-down-quilt",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 900,
+        "comfort_rating_c": 0,
+        "limit_rating_c": -6,
+        "temperature_rating_label": "EN comfort 32 °F (0 °C), EN limit 20 °F (-6 °C)"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "550",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lb 3 oz (550 g)",
+            "fill_weight_g": 360
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "610",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "1 lbs 5 oz (610 g)",
+            "fill_weight_g": 383
+          }
+        }
+      ],
+      "aliases": [
+        "Vesper 20"
+      ]
+    },
+    {
+      "source_record_id": "therm-a-rest:neoair-xlite-nxt-max",
+      "brand": "Therm-a-Rest",
+      "name": "NeoAir XLite NXT MAX",
+      "category": "sleeping-pads",
+      "official_url": "https://cascadedesigns.com/products/neoair-xlite-nxt-max-sleeping-pad",
+      "source_url": "https://cascadedesigns.com/products/neoair-xlite-nxt-max-sleeping-pad",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "r_value": 4.5,
+        "pad_type": "air",
+        "thickness_cm": 7.6
+      },
+      "variants": [
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "text": "1 lb 3 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 64
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "text": "1 lb 4 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 196,
+            "width_cm": 64
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "therm-a-rest:ridgerest-classic",
+      "brand": "Therm-a-Rest",
+      "name": "RidgeRest Classic",
+      "category": "sleeping-pads",
+      "official_url": "https://cascadedesigns.com/products/ridgerest-classic-sleeping-pad",
+      "source_url": "https://cascadedesigns.com/products/ridgerest-classic-sleeping-pad",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "r_value": 2,
+        "pad_type": "foam",
+        "thickness_cm": 1.5
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "text": "14 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 183,
+            "width_cm": 51
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "text": "1 lb 3 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 196,
+            "width_cm": 64
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "msr:reactor",
+      "brand": "MSR",
+      "name": "Reactor Stove System",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/reactor-stove-systems",
+      "source_url": "https://cascadedesigns.com/products/reactor-stove-systems",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "specs": {
+        "fuel_type": "canister",
+        "integrated_system": true,
+        "burn_time_min": 80
+      },
+      "variants": [
+        {
+          "name": "1.0 L",
+          "weight": {
+            "text": "14.9 oz",
+            "basis": "minimum"
+          },
+          "capacity": {
+            "value": "1.0",
+            "unit": "l"
+          },
+          "specs": {
+            "boil_time_min": 3.5,
+            "packaged_weight_g": 430
+          }
+        },
+        {
+          "name": "1.7 L",
+          "weight": {
+            "text": "1 lb 1 oz",
+            "basis": "minimum"
+          },
+          "capacity": {
+            "value": "1.7",
+            "unit": "l"
+          },
+          "specs": {
+            "boil_time_min": 3,
+            "packaged_weight_g": 500
+          }
+        },
+        {
+          "name": "2.5 L",
+          "weight": {
+            "text": "1 lb 5 oz",
+            "basis": "minimum"
+          },
+          "capacity": {
+            "value": "2.5",
+            "unit": "l"
+          },
+          "specs": {
+            "boil_time_min": 3,
+            "packaged_weight_g": 620
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "msr:whisperlite-universal",
+      "brand": "MSR",
+      "name": "WhisperLite Universal",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/whisperlite-universal-stove",
+      "source_url": "https://cascadedesigns.com/products/whisperlite-universal-stove",
+      "verified_at": "2026-10-13",
+      "status": "active",
+      "weight": {
+        "value": "318",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "specs": {
+        "published_weight": "11.2 oz (318 g)",
+        "packaged_weight_g": 423,
+        "fuel_type": "multi_fuel"
       }
     }
   ]

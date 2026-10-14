@@ -1,0 +1,256 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search {
+  display: block;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.select {
+  flex: 0 1 11rem;
+}
+
+.results {
+  min-height: 12rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+  transition: opacity 150ms ease;
+}
+
+.stale {
+  opacity: 0.55;
+}
+
+.skeletonCard {
+  height: 5.5rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 75%, var(--color-cream));
+  padding: 0.75rem;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.card:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+  box-shadow: 0 10px 20px -16px rgba(40, 54, 24, 0.55);
+}
+
+.cardBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cardBrand {
+  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cardName {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.cardMeta {
+  color: color-mix(in srgb, var(--color-dark-olive) 72%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.cardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.cardLoading {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.6rem;
+  font-size: 0.75rem;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.stateIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+}
+
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.confirmInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.confirmMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 72%, transparent);
+  font-size: 0.9rem;
+}
+
+.confirmWeight {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.confirmWeight span {
+  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.confirmWeightUnknown {
+  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+}
+
+.variants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.variant {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+}
+
+.variant:has(input:checked) {
+  border-color: var(--color-dark-olive);
+  background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+}
+
+.variantMeta {
+  margin-left: auto;
+  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  gap: 0.5rem;
+}
+
+.spec {
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--color-dark-olive) 5%, transparent);
+  padding: 0.5rem 0.65rem;
+}
+
+.spec dt {
+  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  font-size: 0.75rem;
+}
+
+.spec dd {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quantityInput {
+  width: 5rem;
+}
+
+.link {
+  color: var(--color-rust);
+  text-decoration: underline;
+}
+
+.authActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.customForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.unit {
+  width: 5.5rem;
+  flex-shrink: 0;
+}
+
+.customActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  padding-top: 1rem;
+}

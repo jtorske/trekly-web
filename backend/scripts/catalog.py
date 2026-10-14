@@ -2,7 +2,7 @@
 
 Run from backend/:
 
-    python scripts/catalog.py import                     # curated seed (default provider)
+    python scripts/catalog.py import                     # every built-in provider (curated seeds)
     python scripts/catalog.py import --dry-run           # validate + report, write nothing
     python scripts/catalog.py import --file path.json    # another curated JSON file
     python scripts/catalog.py import --csv feed.csv --source-slug acme-feed \\
@@ -52,9 +52,16 @@ def _provider(args):
 
 
 def cmd_import(args) -> int:
-    provider = _provider(args)
+    if args.provider == "all" and not (args.file or args.csv):
+        return max(
+            _import_one(provider, args.dry_run) for provider in default_providers().values()
+        )
+    return _import_one(_provider(args), args.dry_run)
+
+
+def _import_one(provider, dry_run: bool) -> int:
     with SessionLocal() as session:
-        report = run_import(session, provider, dry_run=args.dry_run)
+        report = run_import(session, provider, dry_run=dry_run)
     label = "DRY RUN — nothing written" if report.dry_run else f"run {report.run_id}"
     print(f"Source: {report.source} ({label})")
     print(f"Status: {report.status}")
@@ -135,7 +142,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     imp = sub.add_parser("import", help="Import or update catalogue records")
-    imp.add_argument("--provider", default="curated")
+    imp.add_argument("--provider", default="all", help="'all' (default) or a provider name")
     imp.add_argument("--file")
     imp.add_argument("--csv")
     imp.add_argument("--source-slug")

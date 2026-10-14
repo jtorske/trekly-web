@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 
 // Display/heading font: organic, editorial character that complements the
@@ -35,9 +36,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable}`}>
       <body className="flex min-h-full flex-col overflow-x-hidden">
-        <Navbar />
+        <AuthProvider>
+          <Navbar />
 
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
