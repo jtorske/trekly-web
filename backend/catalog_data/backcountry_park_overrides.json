@@ -1,0 +1,20 @@
+{
+  "_comment": "Park assignments the provider API can't give us. Parks Canada books Banff, Kootenay and Yoho backcountry through one shared location, and only Banff's campgrounds carry a trail code; these are the uncoded ones (keyed by provider resourceId, with the provider name so the sync can warn if it changes). Each park was taken from the site's own description (Verdant Creek's names no park but sends permits to the Kootenay visitor centre in Radium). New uncoded sites are reported by the sync as 'no park' until added here.",
+  "parks_canada": {
+    "sites": {
+      "-2147483103": {"name": "Floe Lake", "park": "Kootenay"},
+      "-2147482997": {"name": "Helmet Falls", "park": "Kootenay"},
+      "-2147483082": {"name": "Helmet/Ochre Junction", "park": "Kootenay"},
+      "-2147483127": {"name": "Numa Creek", "park": "Kootenay"},
+      "-2147483028": {"name": "Tumbling Creek", "park": "Kootenay"},
+      "-2147483038": {"name": "Verdant Creek", "park": "Kootenay"},
+      "-2147482982": {"name": "Laughing Falls", "park": "Yoho"},
+      "-2147482973": {"name": "Little Yoho", "park": "Yoho"},
+      "-2147483050": {"name": "McArthur Creek", "park": "Yoho"},
+      "-2147483002": {"name": "Twin Falls", "park": "Yoho"},
+      "-2147483055": {"name": "Yoho Lake", "park": "Yoho"},
+      "-2147483112": {"name": "Bryant Creek Shelter", "park": "Banff"},
+      "-2147483071": {"name": "Egypt Lake Shelter", "park": "Banff"}
+    }
+  }
+}

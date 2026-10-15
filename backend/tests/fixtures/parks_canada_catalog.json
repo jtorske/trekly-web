@@ -1,0 +1,5426 @@
+{
+ "searchcriteriatabs": [
+  {
+   "bookingCategoryGroupId": 0,
+   "bookingCategoryGroupLocalizedValues": {
+    "en-CA": "Frontcountry Camping",
+    "fr-CA": "Camping en avant-pays"
+   },
+   "childBookingCategoryIds": {
+    "1": 0,
+    "2": 2
+   }
+  },
+  {
+   "bookingCategoryGroupId": 2,
+   "bookingCategoryGroupLocalizedValues": {
+    "en-CA": "Parks Canada Accommodations",
+    "fr-CA": "Hébergements de Parcs Canada"
+   },
+   "childBookingCategoryIds": {
+    "1": 1
+   }
+  },
+  {
+   "bookingCategoryGroupId": 3,
+   "bookingCategoryGroupLocalizedValues": {
+    "en-CA": "Day Use",
+    "fr-CA": "Utilisation diurne"
+   },
+   "childBookingCategoryIds": {
+    "1": 9,
+    "2": 8,
+    "3": 10,
+    "4": 11,
+    "5": 3,
+    "6": 15,
+    "7": 12,
+    "8": 14,
+    "9": 16
+   }
+  },
+  {
+   "bookingCategoryGroupId": 1,
+   "bookingCategoryGroupLocalizedValues": {
+    "en-CA": "Backcountry",
+    "fr-CA": "Camping en arrière-pays"
+   },
+   "childBookingCategoryIds": {
+    "1": 5,
+    "2": 7,
+    "3": 4,
+    "4": 13,
+    "5": 17
+   }
+  }
+ ],
+ "bookingcategories": [
+  {
+   "bookingCategoryId": 11,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483625
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "DayTripper (Georgian Bay Islands)"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 12,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483623
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Fishing (La Mauricie)"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 10,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483626
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Lake O'Hara Day Use Bus (Yoho)"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 9,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483627
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Shuttle to Lake Louise and Moraine Lake (Banff)"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 15,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483620
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Guided Event"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 3,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483638
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Guided Hike"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 14,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483621
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Learn-to Activity"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 16,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483619
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Chilkoot Trail Day Runner"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 4,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483637
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "West Coast Trail"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 17,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483618
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Chilkoot Trail"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 13,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483622
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Long Range Mountains"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 1,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483647,
+    -2147483646,
+    -2147483645,
+    -2147483644,
+    -2147483643,
+    -2147483642,
+    -2147483635,
+    -2147483631,
+    -2147483630
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Parks Canada Accommodation"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 2,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483640
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Group Campsite"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 5,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483636,
+    -2147483634,
+    -2147483633
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Campsite"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 7,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483632,
+    -2147483629
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Zone"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 8,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483628
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Parking"
+    }
+   ]
+  },
+  {
+   "bookingCategoryId": 0,
+   "isDisabled": false,
+   "allowedResourceCategoryIds": [
+    -2147483648,
+    -2147483641,
+    -2147483624
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Campsite"
+    }
+   ]
+  }
+ ],
+ "resourcecategory": [
+  {
+   "resourceCategoryId": -2147483628,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Parking",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483637,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Access Point",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483624,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Campsite/Seasonal",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483638,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Guided Hike",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483623,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Daily Fishing",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483622,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Hiking Trip",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483620,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Guided Event",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483632,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Zone",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483626,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Day Use Bus",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483625,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Ferry",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483618,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backpacking Trip",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483621,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Learn-to Activity",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483641,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Overflow",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483629,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Zone Shelter",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483636,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Site",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483627,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Shuttle",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483630,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Prospector Tent",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483631,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Teepee",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483633,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Yurt",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483634,
+   "resourceType": 3,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Backcountry Cabin",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483635,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Equipped Camping",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483640,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Group",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483642,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "MicrOcube",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483643,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "oTENTik",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483644,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Ôasis",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483645,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Rustic Cabin",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483646,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Cabin",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483647,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Yurt",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483648,
+   "resourceType": 0,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Campsite",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "resourceCategoryId": -2147483619,
+   "resourceType": 2,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Day Runner Hike",
+     "description": ""
+    }
+   ]
+  }
+ ],
+ "attribute/filterable": {
+  "-32701": {
+   "attributeDefinitionId": -32701,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "displayName": "Maximum Group Size"
+    }
+   ]
+  },
+  "-32714": {
+   "attributeDefinitionId": -32714,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "displayName": "Out of Park"
+    }
+   ]
+  },
+  "-32768": {
+   "attributeDefinitionId": -32768,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "displayName": "Service Type"
+    }
+   ]
+  }
+ },
+ "maps": [
+  {
+   "mapId": -2147483385,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kootenay",
+     "description": "Kootenay National Park Overview Map",
+     "mapImageUid": "bf364dd4-ab19-47fa-8635-5ba99d4ba8c3",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483374,
+     "resourceLocationId": -2147483584,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Stanley Glacier"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483373,
+     "resourceLocationId": -2147483585,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "McLeod Meadows"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483372,
+     "resourceLocationId": -2147483583,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Marble Canyon"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483148,
+     "resourceLocationId": -2147483582,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Redstreak"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483307,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Prince Albert",
+     "description": "Prince Albert National Park Overview Map",
+     "mapImageUid": "7b041a33-2691-4b0c-a4b7-56b397bbddd8",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483140,
+     "resourceLocationId": -2147483558,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Beaver Glen"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483139,
+     "resourceLocationId": -2147483559,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Red Deer"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483198,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Waterton Lakes",
+     "description": "Waterton Lakes National Park Overview Map",
+     "mapImageUid": "d8d5a1c1-726c-4e74-ab4a-fe7fb393bcff",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483128,
+     "resourceLocationId": -2147483542,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Townsite Campground"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483115,
+     "resourceLocationId": -2147483528,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483111,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Icefields Parkway",
+     "description": "Icefields Parkway",
+     "mapImageUid": "bcbc6b5c-2765-4bc2-bf97-01f3e803731a",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483648,
+     "resourceLocationId": -2147483639,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Rampart Creek"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483124,
+     "resourceLocationId": -2147483535,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Silverhorn Creek"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483532,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Fundy",
+     "description": "Fundy National Park Overview Map",
+     "mapImageUid": "942f8b76-149f-489f-9b7a-c8dfde0b84c0",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483531,
+     "resourceLocationId": -2147483617,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Chignecto North"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483529,
+     "resourceLocationId": -2147483621,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Headquarters"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483528,
+     "resourceLocationId": -2147483619,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Point Wolfe"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483527,
+     "resourceLocationId": -2147483618,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483514,
+     "resourceLocationId": -2147483616,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lakeview"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483513,
+     "resourceLocationId": -2147483620,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cannontown"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483371,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kouchibouguac",
+     "description": "Kouchibouguac National Park Overview",
+     "mapImageUid": "039eedd0-17d5-493e-b23c-2dbf1b9ba89e",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483147,
+     "resourceLocationId": -2147483580,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Côte-à-Fabien"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483146,
+     "resourceLocationId": -2147483581,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "South Kouchibouguac"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483101,
+     "resourceLocationId": -2147483518,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483584,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Bruce Peninsula",
+     "description": "Bruce Peninsula National Park Overview Map",
+     "mapImageUid": "9bae7dfd-e3a8-4aaf-a4ba-622474ee0400",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483582,
+     "resourceLocationId": -2147483635,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483172,
+     "resourceLocationId": -2147483636,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cyprus Lake"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483171,
+     "resourceLocationId": -2147483637,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Bruce Peninsula - Parking"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483316,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Pacific Rim",
+     "description": "Pacific Rim National Park Reserve Overview Map",
+     "mapImageUid": "a7985026-5bf1-4538-9801-ea83d4158f56",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483315,
+     "resourceLocationId": -2147483565,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Green Point"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483312,
+     "resourceLocationId": -2147483563,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Broken Group Islands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483311,
+     "resourceLocationId": -2147483564,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Keeha Beach"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483189,
+     "resourceLocationId": -2147483562,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "West Coast Trail"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483575,
+   "isOrganizationRoot": true,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "All Locations",
+     "description": "Parks Canada Overview Map",
+     "mapImageUid": "5ffed377-082e-4011-8011-50837f6bd9a0",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483574,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Western"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483573,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Central"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483572,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Eastern"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483365,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "La Mauricie",
+     "description": "La Mauricie Overview Map",
+     "mapImageUid": "daef2e9e-2646-478c-81e6-216d720adfd2",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483364,
+     "resourceLocationId": -2147483577,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483363,
+     "resourceLocationId": -2147483575,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Mistagance"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483362,
+     "resourceLocationId": -2147483573,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Rivière-à-la-Pêche"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483361,
+     "resourceLocationId": -2147483578,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Wapizagonke"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483110,
+     "resourceLocationId": -2147483524,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Saint-Jean-des-Piles"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483107,
+     "resourceLocationId": -2147483523,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "La Clairière"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483095,
+     "resourceLocationId": -2147483520,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fishing"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483239,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Terra Nova",
+     "description": "Terra Nova National Park Overview Map",
+     "mapImageUid": "3dd3b818-048a-47a7-b432-e6158e68964c",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483131,
+     "resourceLocationId": -2147483547,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483130,
+     "resourceLocationId": -2147483546,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Malady Head"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483129,
+     "resourceLocationId": -2147483545,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Newman Sound"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483552,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Forillon",
+     "description": "Forillon National Park Overview Map",
+     "mapImageUid": "6b150e27-802b-412f-82f3-961e4b93bab6",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483551,
+     "resourceLocationId": -2147483627,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cap-Bon-Ami"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483539,
+     "resourceLocationId": -2147483534,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483157,
+     "resourceLocationId": -2147483625,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Des-Rosiers"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483156,
+     "resourceLocationId": -2147483626,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Petit-Gaspé"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483293,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Prince Edward Island",
+     "description": "Prince Edward Island Overview",
+     "mapImageUid": "9bad1785-849a-464f-9063-375d262c76c9",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483136,
+     "resourceLocationId": -2147483556,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Stanhope"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483062,
+     "resourceLocationId": -2147483557,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cavendish"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483630,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Banff",
+     "description": "Banff National Park Overview Map",
+     "mapImageUid": "79c537c7-375c-43b8-933f-5b1daa94b899",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483629,
+     "resourceLocationId": -2147483647,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Johnston Canyon"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483626,
+     "resourceLocationId": -2147483644,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Tunnel Mountain - Trailer Court"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483622,
+     "resourceLocationId": -2147483646,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Tunnel Mountain - Village 1"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483611,
+     "resourceLocationId": -2147483648,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Tunnel Mountain - Village 2"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483606,
+     "resourceLocationId": -2147483643,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Two Jack Lakeside"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483602,
+     "resourceLocationId": -2147483645,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Two Jack Main"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483064,
+     "resourceLocationId": -2147483511,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Castle Mountain"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483259,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Riding Mountain",
+     "description": "Riding Mountain Nation Park Overview Map",
+     "mapImageUid": "3a1c2491-40cb-4ccf-8002-a14e49b5a138",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483245,
+     "resourceLocationId": -2147483551,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483133,
+     "resourceLocationId": -2147483553,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Wasagaming"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483573,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Central",
+     "description": "Central Canada National Parks",
+     "mapImageUid": "8b9393a1-2630-4504-a457-944b6fb65a88",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483584,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Bruce Peninsula"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483554,
+     "resourceLocationId": -2147483628,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fathom Five"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483511,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Georgian Bay Islands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483491,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Grasslands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483309,
+     "resourceLocationId": -2147483561,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Point Pelee"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483307,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Prince Albert"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483279,
+     "resourceLocationId": -2147483555,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Pukaskwa"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483266,
+     "resourceLocationId": -2147483554,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Rideau Canal"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483259,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Riding Mountain"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483216,
+     "resourceLocationId": -2147483544,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Thousand Islands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483204,
+     "resourceLocationId": -2147483543,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Trent-Severn Waterway"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483057,
+     "resourceLocationId": -2147483507,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Bethune Memorial House"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483463,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Jasper",
+     "description": "Jasper Overview",
+     "mapImageUid": "bd225009-d7bb-411a-9e04-e99b016214a8",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483462,
+     "resourceLocationId": -2147483596,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Miette"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483455,
+     "resourceLocationId": -2147483593,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Wapiti"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483454,
+     "resourceLocationId": -2147483597,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Whistlers"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483422,
+     "resourceLocationId": -2147483592,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483403,
+     "resourceLocationId": -2147483591,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Overflow"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483574,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Western",
+     "description": "National Parks of Western Canada",
+     "mapImageUid": "bf68b060-cd89-4779-bb22-ca592bceac40",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483647,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Banff - Lake Louise"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483630,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Banff"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483589,
+     "resourceLocationId": -2147483638,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Banff, Kootenay and Yoho Backcountry"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483559,
+     "resourceLocationId": -2147483629,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Elk Island"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483536,
+     "resourceLocationId": -2147483623,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fort Langley"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483534,
+     "resourceLocationId": -2147483622,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fort Rodd Hill"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483497,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Glacier"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483478,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Gulf Islands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483463,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Jasper"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483387,
+     "resourceLocationId": -2147483586,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Kluane"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483385,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Kootenay"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483323,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Mount Revelstoke"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483316,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Pacific Rim"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483244,
+     "resourceLocationId": -2147483549,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Rocky Mountain House"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483198,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Waterton Lakes"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483188,
+     "resourceLocationId": -2147483541,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Wood Buffalo"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483186,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Yoho"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483113,
+     "resourceLocationId": -2147483526,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Chilkoot Trail"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483486,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Gros Morne",
+     "description": "Gros Morne National Park Overview Map",
+     "mapImageUid": "a8f4c9b4-b8cd-4159-b390-b8c1a418d36a",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483482,
+     "resourceLocationId": -2147483602,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Shallow Bay"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483481,
+     "resourceLocationId": -2147483604,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Trout River"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483480,
+     "resourceLocationId": -2147483603,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Green Point"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483479,
+     "resourceLocationId": -2147483605,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lomond"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483152,
+     "resourceLocationId": -2147483606,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Berry Hill"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483096,
+     "resourceLocationId": -2147483519,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Long Range Mountains"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483083,
+     "resourceLocationId": -2147483517,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Primitive Campsites"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483186,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Yoho",
+     "description": "Yoho National Park Overview Map",
+     "mapImageUid": "7f48874e-048b-4b85-ae7e-60f64d39ad25",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483328,
+     "resourceLocationId": -2147483536,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lake O'Hara Bus"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483185,
+     "resourceLocationId": -2147483537,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Burgess Shale"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483183,
+     "resourceLocationId": -2147483540,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Kicking Horse"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483181,
+     "resourceLocationId": -2147483538,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lake O'Hara Backcountry Camping"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483106,
+     "resourceLocationId": -2147483522,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Takakkaw Falls"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483030,
+     "resourceLocationId": -2147483539,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Monarch"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483647,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Banff - Lake Louise",
+     "description": "Banff National Park - Lake Louise Overview Map",
+     "mapImageUid": "887d2ebe-9d65-44a4-9d87-ca8dc6c9a2e6",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483634,
+     "resourceLocationId": -2147483642,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Shuttle"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483111,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Icefields Parkway"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483065,
+     "resourceLocationId": -2147483512,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Protection Mountain"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483058,
+     "resourceLocationId": -2147483508,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Guided Hike to Consolation Lakes"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483026,
+     "resourceLocationId": -2147483640,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lake Louise Campground"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483399,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kejimkujik",
+     "description": "Kejimkujik National Park and National Historic Site Overview Map",
+     "mapImageUid": "290ebac3-4fe4-4aff-979e-c8bf68079d16",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483398,
+     "resourceLocationId": -2147483588,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483126,
+     "resourceLocationId": -2147483587,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Jeremy's Bay & Jakes Landing"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483478,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Gulf Islands",
+     "description": "Gulf Islands National Park Reserve Overview Map",
+     "mapImageUid": "8a28ab99-4fcb-4af9-b618-2a9569b59e01",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483477,
+     "resourceLocationId": -2147483601,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "SMONEĆTEN"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483476,
+     "resourceLocationId": -2147483599,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Sidney Spit"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483475,
+     "resourceLocationId": -2147483600,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Prior Centennial"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483151,
+     "resourceLocationId": -2147483598,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483323,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Mount Revelstoke",
+     "description": "Mount Revelstoke National Park Overview Map",
+     "mapImageUid": "56c3fbf3-b8da-4a8c-a648-b5d5ac58e2ce",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483141,
+     "resourceLocationId": -2147483567,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Snowforest"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483497,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Glacier",
+     "description": "Glacier Overview Map",
+     "mapImageUid": "80f26003-2624-4ef6-be44-ee418eee1479",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483029,
+     "resourceLocationId": -2147483611,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Illecillewaet"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147482997,
+     "resourceLocationId": -2147483610,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Loop Brook & Hermit Meadows"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483491,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Grasslands",
+     "description": "Grasslands National Park Overview Map",
+     "mapImageUid": "ab499e7d-70b7-45ef-b4c2-624ee6d5df30",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147482999,
+     "resourceLocationId": -2147483607,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Frenchman Valley & West Block"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147482998,
+     "resourceLocationId": -2147483608,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Rock Creek & East Block"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483571,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Cape Breton Highlands",
+     "description": "Cape Breton Highlands National Park Overview Map",
+     "mapImageUid": "4d89f8aa-63e5-4e32-86f7-970838500b97",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483569,
+     "resourceLocationId": -2147483632,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Mkwesaqtuk/Cap-Rouge"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483568,
+     "resourceLocationId": -2147483630,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cheticamp"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483560,
+     "resourceLocationId": -2147483633,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fishing Cove"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483170,
+     "resourceLocationId": -2147483634,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Broad Cove"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483169,
+     "resourceLocationId": -2147483631,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Ingonish Beach"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483004,
+     "resourceLocationId": -2147483503,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cape Breton Highlands - Skyline Trail Parking"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147482996,
+     "resourceLocationId": -2147483506,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Guided Hikes"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483511,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Georgian Bay Islands",
+     "description": "Georgian Bay Islands Overview Map",
+     "mapImageUid": "adc21d9a-b339-4c4b-a608-2534fdfecb28",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483506,
+     "resourceLocationId": -2147483613,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Christian Beach Cabins #1 - 4"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483153,
+     "resourceLocationId": -2147483615,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Backcountry Reservations"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147482995,
+     "resourceLocationId": -2147483614,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cedar Spring & DayTripper"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "mapId": -2147483572,
+   "isOrganizationRoot": false,
+   "resourceLocationId": null,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Eastern",
+     "description": "National Parks of Quebec and Atlantic Canada",
+     "mapImageUid": "3b72aac8-5eea-4c39-b7e6-4c84a13ccc1a",
+     "mapImageFormat": 4
+    }
+   ],
+   "mapLinks": [
+    {
+     "childMapId": -2147483571,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Cape Breton Highlands"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483552,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Forillon"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483532,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Fundy"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483486,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Gros Morne"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483399,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Kejimkujik"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483371,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Kouchibouguac"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483365,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "La Mauricie"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483330,
+     "resourceLocationId": -2147483571,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Lachine Canal"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483327,
+     "resourceLocationId": -2147483570,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Mingan Archipelago"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483293,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Prince Edward Island"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483239,
+     "resourceLocationId": null,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Terra Nova"
+      }
+     ]
+    },
+    {
+     "childMapId": -2147483076,
+     "resourceLocationId": -2147483513,
+     "localizations": [
+      {
+       "cultureName": "en-CA",
+       "title": "Chambly"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "transactionlocation": [
+  {
+   "transactionLocationId": -2147483604,
+   "regionCode": "",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Scheduled Job"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483629,
+   "regionCode": "J8X0B3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Internet"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483648,
+   "regionCode": "T1L1B3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483647,
+   "regionCode": "T0L1E0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff - Lake Louise"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483646,
+   "regionCode": "",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff, Kootenay and Yoho Backcountry"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483598,
+   "regionCode": "P1P1G4",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Bethune Memorial House"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483645,
+   "regionCode": "N0H2R0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Bruce Peninsula"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483600,
+   "regionCode": "J3L4C3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Chambly"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483642,
+   "regionCode": "T8L0V3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Elk Island"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483641,
+   "regionCode": "N0H2R0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Fathom Five"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483640,
+   "regionCode": "G4X6L7",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Forillon"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483639,
+   "regionCode": "E4L2W5",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Fort Beauséjour - Fort Cumberland"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483638,
+   "regionCode": "V1M2R5",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Fort Langley"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483637,
+   "regionCode": "V9C2W8",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Fort Rodd Hill"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483635,
+   "regionCode": "P0E1E0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Georgian Bay Islands"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483634,
+   "regionCode": "V0E2S0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Glacier"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483633,
+   "regionCode": "B0P1M0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Grand-Pré"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483632,
+   "regionCode": "S0N2T0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Grasslands"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483631,
+   "regionCode": "A0K4N0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Gros Morne"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483630,
+   "regionCode": "V8L2P6",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Gulf Islands"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483628,
+   "regionCode": "T0E1E0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Jasper"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483627,
+   "regionCode": "B0T1B0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kejimkujik"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483626,
+   "regionCode": "Y0B1L0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kluane"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483625,
+   "regionCode": "V0A1M0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kootenay"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483623,
+   "regionCode": "G0X2V0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "La Mauricie"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483622,
+   "regionCode": "H2Y2E7",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Lachine Canal"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483621,
+   "regionCode": "G0G1P0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Mingan Archipelago"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483620,
+   "regionCode": "V0E2S0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Mount Revelstoke"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483619,
+   "regionCode": "V0R3A0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Pacific Rim"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483618,
+   "regionCode": "N8H3V4",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Point Pelee"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483617,
+   "regionCode": "S0J2Y0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Prince Albert"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483616,
+   "regionCode": "C1A5V8",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Prince Edward Island"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483615,
+   "regionCode": "P0T1R0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Pukaskwa"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483614,
+   "regionCode": "K7A2A8",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Rideau Canal"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483613,
+   "regionCode": "R0J1N0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Riding Mountain"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483612,
+   "regionCode": "T4T2A4",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Rocky Mountain House"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483611,
+   "regionCode": "J0G1P0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Saint-Ours Canal"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483610,
+   "regionCode": "A0G4K0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Terra Nova"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483609,
+   "regionCode": "K0E1R0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Thousand Islands"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483608,
+   "regionCode": "K9J6Z6",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Trent-Severn Waterway"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483607,
+   "regionCode": "T0K2M0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Waterton Lakes"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483606,
+   "regionCode": "X0E0P0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Wood Buffalo"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483605,
+   "regionCode": "V0A1G0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Yoho"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483602,
+   "regionCode": "Y1A2B5",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Chilkoot Trail"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483603,
+   "regionCode": "J8X0B3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Headquarters"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483644,
+   "regionCode": "J8X0B3",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Call Centre"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483643,
+   "regionCode": "B0C1L0",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Cape Breton Highlands"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483636,
+   "regionCode": "E4H1B4",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Fundy"
+    }
+   ]
+  },
+  {
+   "transactionLocationId": -2147483624,
+   "regionCode": "E4X2P1",
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kouchibouguac"
+    }
+   ]
+  }
+ ],
+ "resourceLocation": [
+  {
+   "resourceLocationId": -2147483646,
+   "rootMapId": -2147483622,
+   "transactionLocationId": -2147483648,
+   "resourceCategoryIds": [
+    -2147483648
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff - Village 1",
+     "fullName": "Banff - Tunnel Mountain Village 1"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483638,
+   "rootMapId": -2147483589,
+   "transactionLocationId": -2147483646,
+   "resourceCategoryIds": [
+    -2147483629,
+    -2147483632
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff, Kootenay and Yoho - Backcountry",
+     "fullName": "Banff, Kootenay and Yoho - Backcountry"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483582,
+   "rootMapId": -2147483148,
+   "transactionLocationId": -2147483625,
+   "resourceCategoryIds": [
+    -2147483643,
+    -2147483648
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kootenay - Redstreak",
+     "fullName": "Kootenay - Redstreak"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483562,
+   "rootMapId": -2147483189,
+   "transactionLocationId": -2147483619,
+   "resourceCategoryIds": [
+    -2147483637
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Pacific Rim - West Coast Trail",
+     "fullName": "Pacific Rim - West Coast Trail"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483540,
+   "rootMapId": -2147483183,
+   "transactionLocationId": -2147483605,
+   "resourceCategoryIds": [
+    -2147483648
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Yoho - Kicking Horse",
+     "fullName": "Yoho - Kicking Horse"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483592,
+   "rootMapId": -2147483422,
+   "transactionLocationId": -2147483628,
+   "resourceCategoryIds": [
+    -2147483632
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Jasper - Backcountry",
+     "fullName": "Jasper - Backcountry"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483531,
+   "rootMapId": null,
+   "transactionLocationId": -2147483629,
+   "resourceCategoryIds": [],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Internet",
+     "fullName": "Internet"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483647,
+   "rootMapId": -2147483629,
+   "transactionLocationId": -2147483648,
+   "resourceCategoryIds": [
+    -2147483641,
+    -2147483648
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Banff - Johnston Canyon",
+     "fullName": "Banff - Johnston Canyon"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483635,
+   "rootMapId": -2147483582,
+   "transactionLocationId": -2147483645,
+   "resourceCategoryIds": [
+    -2147483636
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Bruce Peninsula - Backcountry",
+     "fullName": "Bruce Peninsula - Backcountry"
+    }
+   ]
+  },
+  {
+   "resourceLocationId": -2147483586,
+   "rootMapId": -2147483387,
+   "transactionLocationId": -2147483626,
+   "resourceCategoryIds": [
+    -2147483640,
+    -2147483643,
+    -2147483648,
+    -2147483632
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "shortName": "Kluane",
+     "fullName": "Kluane"
+    }
+   ]
+  }
+ ],
+ "maps?resourceLocationId=-2147483638": [
+  {
+   "mapId": -2147483588,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Banff Random Camping",
+     "description": "Banff Random Camping",
+     "mapImageUid": "91012efe-8007-4baf-9962-8917ac6ef99e",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483587,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Yoho Random Camping",
+     "description": "Yoho Random Camping",
+     "mapImageUid": "cec54df6-fa07-4a92-a606-7e746d1ba7e9",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483586,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kootenay Random Camping",
+     "description": "Kootenay Random Camping",
+     "mapImageUid": "92b5e599-4071-440c-833a-1cb8cb86ec9c",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483585,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Horse Grazing Campsites",
+     "description": "Horse Grazing Campsites",
+     "mapImageUid": "6f6128db-8ac9-47b6-b64a-3a6590dd6168",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483589,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Banff, Kootenay and Yoho Backcountry",
+     "description": "Banff, Kootenay and Yoho National Parks - Backcountry",
+     "mapImageUid": "320b9859-062d-46c4-9145-1dc0f05e3e19",
+     "mapImageFormat": 4
+    }
+   ]
+  }
+ ],
+ "resourcelocation/resources?resourceLocationId=-2147483638": {
+  "-2147482963": {
+   "resourceId": -2147482963,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 3,
+   "mapIds": [],
+   "zoneCapacitySettings": null,
+   "maxCapacity": null,
+   "definedAttributes": [],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Emerald Lake Trailhead",
+     "description": "Emerald Lake Trailhead"
+    }
+   ]
+  },
+  "-2147483046": {
+   "resourceId": -2147483046,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483589
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 5,
+    "reservableCapacity": 5,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147478634,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479088,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479087,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479086,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147479085,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147479084,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479083,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147479082,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479081,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479080,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238692,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Allenby Junction - Br17",
+     "description": "This campground provides a convenient stop along the Great Divide Trail, between the Mount Shark Provincial Park trailhead and Mount Assiniboine Provincial Park. The site offers a wilderness experience, nestled between a field of shrubs and mature trees with cliffs towering high above. Water source may dry up in late summer.<br> <b>Trail restrictions and closures in area Aug 1 - Sept 30. Visit: pc.gc.ca/banffnp-closures.</b><br> <b>Fires not permitted.</b>"
+    }
+   ]
+  },
+  "-2147483103": {
+   "resourceId": -2147483103,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483589
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 18,
+    "reservableCapacity": 18,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479139,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147479466,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479465,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479464,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479463,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479462,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479461,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147479460,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479459,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147479458,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238648,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Floe Lake",
+     "description": "One of Kootenay's most scenic and popular campgrounds, Floe Lake is located at the base of a 1000m metre sheer rock face. The campground is located above the lakeshore. In the fall, the larch trees near the lake turn brilliant gold. No reservations usually accepted before July 10 due to snow level at campground. <br> <b> Fires not permitted. <br>WARNING: </b> The Rockwall area trails are commonly impacted by trail closures or inaccessibility in the spring due to remaining snow levels and avalanche damage to trails and/or bridges. Check the Kootenay National Park Trail Report web page at www.pc.gc.ca/kootenaytrails or a Parks Canada Visitor Centre before making your reservation and starting your trip"
+    }
+   ]
+  },
+  "-2147482982": {
+   "resourceId": -2147482982,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483589
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 8,
+    "reservableCapacity": 8,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147478594,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147478718,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147478717,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147478716,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147478715,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147478714,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147478713,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147478712,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147478711,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147478710,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238657,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Laughing Falls",
+     "description": "Nestled between the turquoise glacially-fed Yoho River and the lovely Laughing Falls, this is a wonderfully scenic campground that is ideal for hikers wanting a backcountry experience without having to invest too much time or effort. <br><b>Fires not permitted. <br> WARNING:</b> The Yoho Valley Road is usually only open from late June to Thanksgiving (mid-October). Check the Yoho National Park Trail Report web page at www.pc.gc.ca/yohotrails or contact a Parks Canada Visitor Centre before making your reservation and before starting your trip."
+    }
+   ]
+  },
+  "-2147483038": {
+   "resourceId": -2147483038,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483589
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 6,
+    "reservableCapacity": 6,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147478629,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479042,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479041,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147479040,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479039,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147479038,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479037,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479036,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147479035,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479034,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238647,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Verdant Creek",
+     "description": "Located below Honeymoon Pass, Verdant Creek is a less frequented campground which offers an alternate route to the Egypt Lake region.<br> <b>WARNING:</b> Unmaintained trail extensively damaged in 2017 wildfires. Route involves dangerous river fords and requires expert routefinding skills. Recommended for highly experienced hikers only. Permits for Verdant Creek can only be obtained in person at the  Parks Canada visitor centre in Radium Hot Springs or by calling the centre at 250-347-9505 after May 15. <br/> <b> Fires not permitted. </b>"
+    }
+   ]
+  },
+  "-2147483071": {
+   "resourceId": -2147483071,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483629,
+   "resourceModel": 2,
+   "mapIds": [],
+   "zoneCapacitySettings": {
+    "capacity": 12,
+    "reservableCapacity": 12,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": null,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479123,
+     "attributeVisibility": 0,
+     "value": 12.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479302,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32765,
+     "attributeId": -2147479301,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      5,
+      6
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479300,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      53
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147479299,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479298,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479297,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479295,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479294,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32571,
+     "attributeId": -2147165455,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147164817,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Egypt Lake Shelter",
+     "description": "Egypt Lake Shelter is closed. Parks Canada is committed to offering a safe and enjoyable backcountry experience. The existing Egypt Lake Shelter will be replaced with a new 12-person shelter which will provide visitors with an authentic, low-impact, low-cost backcountry accommodation in Banff National Park’s backcountry. Once the shelters are completed, they will be available for booking through the Parks Canada reservation service website."
+    }
+   ]
+  },
+  "-2147483027": {
+   "resourceId": -2147483027,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483589
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 1000,
+    "reservableCapacity": 1000,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147478983,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32714,
+     "attributeId": -2147478982,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147478981,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Peter Lougheed Provincial Park (Out of Park)",
+     "description": "Camping areas in Peter Lougheed Provincial Park need to be reserved through albertaparks.ca"
+    }
+   ]
+  },
+  "-2147483072": {
+   "resourceId": -2147483072,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483588
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 1000,
+    "reservableCapacity": 1000,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147479305,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479304,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479303,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238623,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Bryant Random",
+     "description": ""
+    }
+   ]
+  },
+  "-2147483114": {
+   "resourceId": -2147483114,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483586
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 1000,
+    "reservableCapacity": 1000,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479547,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238597,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Rockwall Random",
+     "description": ""
+    }
+   ]
+  },
+  "-2147483084": {
+   "resourceId": -2147483084,
+   "resourceLocationId": -2147483638,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 0,
+   "mapIds": [
+    -2147483585
+   ],
+   "zoneCapacitySettings": null,
+   "maxCapacity": null,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479130,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147479373,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479372,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479371,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479370,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479369,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479368,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147479367,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238587,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Brewster Creek Grazing",
+     "description": "Opening Date July 1st.  UTM 595263 5659164 . <b>This is a shared camp with hikers. Only one  horse group can be booked per night.</b> Camping is at Bw10 campground near the Fatigue junction, with grazing in the meadows upstream of the campground, above the junction of Fatigue Creek. No use of private concessionaires’ horse facilities. Riders should be aware of the seasonal restrictions in the Allenby area and horse restrictions in adjacent Assiniboine Provincial Park."
+    }
+   ]
+  }
+ },
+ "maps?resourceLocationId=-2147483592": [
+  {
+   "mapId": -2147483421,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Athabasca Pass",
+     "description": "Athabasca Pass Trail",
+     "mapImageUid": "af394e5b-9866-4316-a94e-ba19a7bbc63d",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483420,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Athabasca River",
+     "description": "Athabasca River",
+     "mapImageUid": "24fd75b4-a638-4ac9-93bd-76ff1c1ebc27",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483418,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Fiddle River",
+     "description": "Fiddle River Trail",
+     "mapImageUid": "6757c808-8775-4503-a500-1cd1c625864a",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483417,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Chaba Trail",
+     "description": "Chaba Trail",
+     "mapImageUid": "aaf9f783-afad-4168-be5a-84268e7e125e",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483416,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Fryatt Valley",
+     "description": "Fryatt Valley Trail",
+     "mapImageUid": "bb7bc3f2-f31a-46ee-a4b6-3c539c363a84",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483415,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Geraldine Lakes",
+     "description": "Geraldine Lakes Trail",
+     "mapImageUid": "90e2166d-9495-4155-8c50-c65e1820da1f",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483414,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Jacques Lake",
+     "description": "Jacques Lake Trail",
+     "mapImageUid": "79b957a3-f3c8-4c2f-85a6-10531efd24fb",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483413,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Maligne Lake",
+     "description": "Maligne Lake",
+     "mapImageUid": "ebc63be1-63c1-46df-bda5-a48929a0ad01",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483411,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "North Boundary and Celestine Lake",
+     "description": "North Boundary and Celestine Lake Trails",
+     "mapImageUid": "b6824e7c-f764-400c-91e1-8ac609153893",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483410,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Saturday Night Lake Loop",
+     "description": "Saturday Night Lake Loop Trail",
+     "mapImageUid": "4b5afc4e-9d96-4d5e-bab2-cfe5e754ee56",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483412,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Maligne Pass",
+     "description": "Maligne Pass Trail",
+     "mapImageUid": "839db515-75ea-4e52-a940-7f7ddc094fec",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483408,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "South Boundary",
+     "description": "South Boundary Trail",
+     "mapImageUid": "eab7ebd1-c209-45c2-9fb3-e1f64e0710cf",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483404,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Random Camping",
+     "description": "Random Camping",
+     "mapImageUid": "c1ac3769-52ff-48f5-92a8-604d33559d42",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483419,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Brazeau",
+     "description": "Brazeau Trail",
+     "mapImageUid": "7e1251d8-9ce5-4c1a-b533-bfd2721bef97",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483407,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Tonquin Valley",
+     "description": "Tonquin Valley Trail",
+     "mapImageUid": "66c121a7-a59b-4338-9aa7-4bcf029cb893",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483422,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Backcountry Reservations",
+     "description": "Jasper - Backcountry Reservations",
+     "mapImageUid": "5f56e1f5-2209-401f-9e88-0892f316daf8",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483409,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Skyline",
+     "description": "Skyline Trail",
+     "mapImageUid": "2130391c-fe2c-49f2-9557-71d5f5d1564c",
+     "mapImageFormat": 4
+    }
+   ]
+  }
+ ],
+ "resourcelocation/resources?resourceLocationId=-2147483592": {
+  "-2147483174": {
+   "resourceId": -2147483174,
+   "resourceLocationId": -2147483592,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483411
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 4,
+    "reservableCapacity": 4,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479724,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147479863,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479862,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147479861,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147479860,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147479859,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479858,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238519,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "70 - Blue Creek",
+     "description": "Camping area near Blue Creek."
+    }
+   ]
+  },
+  "-2147483194": {
+   "resourceId": -2147483194,
+   "resourceLocationId": -2147483592,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483417
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 1000,
+    "reservableCapacity": 1000,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 6.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479744,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32714,
+     "attributeId": -2147479974,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147479973,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147479972,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238540,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Hamber (Out Of Park)",
+     "description": "Fortress Lake lies within Hamber Provincial Park and provides backcountry camping opportunities on its northern shore. <b>Visit bcparks.ca for more information. Note: The Athabasca River crossing is unbridged. The river crossing may not be passable."
+    }
+   ]
+  },
+  "-2147483143": {
+   "resourceId": -2147483143,
+   "resourceLocationId": -2147483592,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 3,
+   "mapIds": [],
+   "zoneCapacitySettings": null,
+   "maxCapacity": null,
+   "definedAttributes": [],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Nigel Creek Trailhead",
+     "description": "Nigel Creek Trailhead"
+    }
+   ]
+  },
+  "-2147483245": {
+   "resourceId": -2147483245,
+   "resourceLocationId": -2147483592,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483404
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 20,
+    "reservableCapacity": 20,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 6.0
+   },
+   "maxCapacity": 5,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32701,
+     "attributeId": -2147479796,
+     "attributeVisibility": 0,
+     "value": 10.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147480259,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147480258,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      52
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147238473,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "ACC Random",
+     "description": ""
+    }
+   ]
+  }
+ },
+ "maps?resourceLocationId=-2147483635": [
+  {
+   "mapId": -2147483582,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Backcountry Reservations",
+     "description": "Bruce Peninsula - Backcountry Reservations",
+     "mapImageUid": "431c4dcb-2227-4f63-8912-30545ee26a04",
+     "mapImageFormat": 4
+    }
+   ]
+  }
+ ],
+ "resourcelocation/resources?resourceLocationId=-2147483635": {
+  "-2147483648": {
+   "resourceId": -2147483648,
+   "resourceLocationId": -2147483635,
+   "resourceCategoryId": -2147483636,
+   "resourceModel": 0,
+   "mapIds": [
+    -2147483582
+   ],
+   "zoneCapacitySettings": null,
+   "maxCapacity": 4,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147483468,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147483467,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147483466,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147483465,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147483464,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147483463,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147483462,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      49
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147483461,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32765,
+     "attributeId": -2147483460,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "HD1",
+     "description": "End of trail, water view, trees surrounding, steep descent to campsite trail - side trail off of Bruce Trail (blue blazes), use yellow rope over ravine to get into campsite trail. Food Storage - Bear Poles centrally located over 200 m / 656 ft from campsite."
+    }
+   ]
+  },
+  "-2147483631": {
+   "resourceId": -2147483631,
+   "resourceLocationId": -2147483635,
+   "resourceCategoryId": -2147483636,
+   "resourceModel": 0,
+   "mapIds": [
+    -2147483582
+   ],
+   "zoneCapacitySettings": null,
+   "maxCapacity": 4,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147483315,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147483314,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32765,
+     "attributeId": -2147483313,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147483312,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147483311,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147483310,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147483309,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147483308,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147483307,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      49
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "HD2",
+     "description": "Short hike in off trail, water view, trees surrounding tent pad. Steep descent to get to campsite trail - side trail off of Bruce Trail (blue blazes), use yellow rope over ravine to get into campsite trail. Food Storage - Bear Poles centrally located over 200 m / 656 ft from campsite."
+    }
+   ]
+  }
+ },
+ "maps?resourceLocationId=-2147483562": [
+  {
+   "mapId": -2147483189,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "West Coast Trail",
+     "description": "Entry Points",
+     "mapImageUid": "bb140d34-615f-4202-82fa-10de3e03bb51",
+     "mapImageFormat": 4
+    }
+   ]
+  }
+ ],
+ "resourcelocation/resources?resourceLocationId=-2147483562": {
+  "-2147472751": {
+   "resourceId": -2147472751,
+   "resourceLocationId": -2147483562,
+   "resourceCategoryId": -2147483637,
+   "resourceModel": 4,
+   "mapIds": [
+    -2147483189
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 25,
+    "reservableCapacity": 25,
+    "capacityCategoryId": -32765,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": null,
+    "maxEquipmentToPeopleRatio": null
+   },
+   "maxCapacity": null,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147256691,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      48
+     ]
+    },
+    {
+     "attributeDefinitionId": -32720,
+     "attributeId": -2147256690,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0,
+      1,
+      2
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Gordon River (South)",
+     "description": "There are basic tourism services at, or near, this access point. These include accommodations, campgrounds, phones, fuel, some groceries, and food services. There are no banking services in the village of Port Renfrew.<ul><li>Orientation sessions are offered at the Gordon River Information Centre.</li><li>Reservations are not necessary for the orientation process.</li><li>The orientation process takes approximately 1 hour.</li><ul>"
+    }
+   ]
+  },
+  "-2147472750": {
+   "resourceId": -2147472750,
+   "resourceLocationId": -2147483562,
+   "resourceCategoryId": -2147483637,
+   "resourceModel": 4,
+   "mapIds": [
+    -2147483189
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 25,
+    "reservableCapacity": 25,
+    "capacityCategoryId": -32765,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": null,
+    "maxEquipmentToPeopleRatio": null
+   },
+   "maxCapacity": null,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32720,
+     "attributeId": -2147256689,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0,
+      1,
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147256688,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      48
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Pachena Bay (North)",
+     "description": "There are basic tourism services at, or near, this access point. These include accommodations, campgrounds, phones, fuel, some groceries, and food services. There are no banking services in the village of Bamfield.<ul><li>Orientation sessions are offered at the Pachena Bay Information Centre.</li><li>Reservations are not necessary for the orientation process.</li><li>The orientation process takes approximately 1 hour.</li><ul>"
+    }
+   ]
+  }
+ },
+ "maps?resourceLocationId=-2147483586": [
+  {
+   "mapId": -2147483386,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kathleen Lake",
+     "description": "Sites 1-39, oTENTiks O1-O5",
+     "mapImageUid": "a1a8de5b-0871-4744-a625-195131f22cc2",
+     "mapImageFormat": 4
+    }
+   ]
+  },
+  {
+   "mapId": -2147483387,
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "title": "Kluane",
+     "description": "Kluane National Park Overview Map",
+     "mapImageUid": "455a1ac8-b718-46b5-bca3-d5d8d3ee9cb4",
+     "mapImageFormat": 4
+    }
+   ]
+  }
+ ],
+ "resourcelocation/resources?resourceLocationId=-2147483586": {
+  "-2147479766": {
+   "resourceId": -2147479766,
+   "resourceLocationId": -2147483586,
+   "resourceCategoryId": -2147483643,
+   "resourceModel": 0,
+   "mapIds": [
+    -2147483386
+   ],
+   "zoneCapacitySettings": null,
+   "maxCapacity": 6,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32704,
+     "attributeId": -2147410635,
+     "attributeVisibility": 0,
+     "value": 7.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32705,
+     "attributeId": -2147410634,
+     "attributeVisibility": 0,
+     "value": 6.0,
+     "values": []
+    },
+    {
+     "attributeDefinitionId": -32768,
+     "attributeId": -2147411064,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      42
+     ]
+    },
+    {
+     "attributeDefinitionId": -32753,
+     "attributeId": -2147411063,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32721,
+     "attributeId": -2147411062,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32749,
+     "attributeId": -2147411061,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32763,
+     "attributeId": -2147411060,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32752,
+     "attributeId": -2147411059,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32745,
+     "attributeId": -2147411058,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32766,
+     "attributeId": -2147411057,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      9,
+      10,
+      11
+     ]
+    },
+    {
+     "attributeDefinitionId": -32761,
+     "attributeId": -2147411056,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32762,
+     "attributeId": -2147411055,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32746,
+     "attributeId": -2147411054,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      3
+     ]
+    },
+    {
+     "attributeDefinitionId": -32742,
+     "attributeId": -2147411053,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32764,
+     "attributeId": -2147411052,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      3
+     ]
+    },
+    {
+     "attributeDefinitionId": -32760,
+     "attributeId": -2147411051,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32759,
+     "attributeId": -2147411050,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32757,
+     "attributeId": -2147411049,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32754,
+     "attributeId": -2147411048,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147411047,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32748,
+     "attributeId": -2147411046,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147211101,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32572,
+     "attributeId": -2147165796,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "O1",
+     "description": "The oTENTik tent is a spacious blend of a tent and an A-frame cabin equipped with beds and furniture on a raised floor. This oTENTik has a ramp instead of stairs.<br/> <b> Each oTENTik includes: </b> sleeping area for up to 6 people (2 queen mattresses and 1 double mattress), table and seating area for 4 people,  wood stove, solar powered lighting and cell phone charging station, battery powered lantern, fire extinguisher, smoke and carbon monoxide detector, broom and dustpan. <br/> <b> Each oTENTik campsite includes: </b> Two outdoor chairs, fire pit and firewood, outdoor 2-burner propane cook stove (propane not included), a covered picnic table, bear-resistant food storage locker and a wagon for moving your supplies. An outhouse and water dispenser are located nearby. <br/> <b>What To Bring: </b> Sleeping bags, blankets and pillows (extra blankets and sleeping bags are recommended in May and September), food, drinks, a water container (campground water is potable), cooking equipment, dishes, eating utensils, a cooler, flashlights, matches or a lighter, camping chairs, propane for the camp stove and slippers or indoor shoes to help keep a clean oTENTik. <br/> <b> Please Note: </b>  For your safety, no food preparation, food or drink storage, eating, drinking, or cooking is allowed inside the oTENTik. All food, dishes, garbage and related items must be stored in the bear-resistant food storage lockers or your vehicle when not in use.  <br/> <b> Pets are ONLY permitted in oTENTik #1 and #5.  </b>"
+    }
+   ]
+  },
+  "-2147471039": {
+   "resourceId": -2147471039,
+   "resourceLocationId": -2147483586,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483023
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 25,
+    "reservableCapacity": 25,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 3,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147147065,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32765,
+     "attributeId": -2147147064,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147147063,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147147062,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147146841,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147146803,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147146761,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147146718,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0,
+      3
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147146655,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147146611,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32759,
+     "attributeId": -2147146561,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Bighorn Lake",
+     "description": "Explore this region and see Kluane Glacier, Donjek Glacier, Expectation Mountain, and more. Access to Bighorn Lake by aircraft or hiking a lesser-known route. All aircraft landings require a permit, please contact the Visitor Centre in advance. Routes are not trails. Do not only depend on GPS tracks; navigation skills are strongly recommended."
+    }
+   ]
+  },
+  "-2147471037": {
+   "resourceId": -2147471037,
+   "resourceLocationId": -2147483586,
+   "resourceCategoryId": -2147483632,
+   "resourceModel": 2,
+   "mapIds": [
+    -2147483023
+   ],
+   "zoneCapacitySettings": {
+    "capacity": 25,
+    "reservableCapacity": 25,
+    "capacityCategoryId": -32766,
+    "allocatePerBooking": false,
+    "secondaryCapacityCategoryId": -32767,
+    "maxEquipmentToPeopleRatio": 4.0
+   },
+   "maxCapacity": 3,
+   "definedAttributes": [
+    {
+     "attributeDefinitionId": -32756,
+     "attributeId": -2147147057,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    },
+    {
+     "attributeDefinitionId": -32765,
+     "attributeId": -2147147056,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      2
+     ]
+    },
+    {
+     "attributeDefinitionId": -32767,
+     "attributeId": -2147147055,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32758,
+     "attributeId": -2147147054,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32715,
+     "attributeId": -2147146839,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32718,
+     "attributeId": -2147146801,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32717,
+     "attributeId": -2147146759,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32731,
+     "attributeId": -2147146716,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0,
+      3
+     ]
+    },
+    {
+     "attributeDefinitionId": -32716,
+     "attributeId": -2147146653,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32714,
+     "attributeId": -2147146621,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32695,
+     "attributeId": -2147146609,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      0
+     ]
+    },
+    {
+     "attributeDefinitionId": -32759,
+     "attributeId": -2147146559,
+     "attributeVisibility": 0,
+     "value": null,
+     "values": [
+      1
+     ]
+    }
+   ],
+   "localizedValues": [
+    {
+     "cultureName": "en-CA",
+     "name": "Out of Park - North",
+     "description": "The Donjek Route travels across the park boundary. For more information, please contact the Visitor Centre at 867-634-5134. Routes are not trails. Do not only depend on GPS tracks; navigation skills are strongly recommended."
+    }
+   ]
+  }
+ }
+}

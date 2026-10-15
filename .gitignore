@@ -96,3 +96,5 @@ next-env.d.ts
 # Logs
 # =========================
 *.log
+# Raw provider responses cached by scripts/sync_backcountry.py
+backend/.cache/

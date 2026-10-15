@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.catalog import (
     CatalogBrand,
     CatalogBrandAlias,
@@ -17,6 +18,8 @@ from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.models.user_gear import UserGearItem
 
 __all__ = [
+    "BackcountryPark",
+    "BackcountrySite",
     "CatalogBrand",
     "CatalogBrandAlias",
     "CatalogCategory",
