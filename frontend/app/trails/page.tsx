@@ -140,9 +140,6 @@ function TrailView({
           onToggle={onToggleSave}
           returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
         />
-        <Link href="/campalert" className={styles.primaryAction}>
-          Find campsites
-        </Link>
       </div>
 
       <section className={styles.section}>

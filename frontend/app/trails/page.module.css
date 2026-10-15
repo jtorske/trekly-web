@@ -177,7 +177,6 @@
   margin-top: 1.5rem;
 }
 
-.primaryAction,
 .secondaryAction {
   border-radius: 9999px;
   padding: 0.65rem 1.4rem;
@@ -185,18 +184,6 @@
   transition:
     background-color 150ms ease,
     color 150ms ease;
-}
-
-.primaryAction {
-  background: var(--color-rust);
-  color: var(--color-cream);
-}
-
-.primaryAction:hover {
-  background: color-mix(in srgb, var(--color-rust) 88%, black);
-}
-
-.secondaryAction {
   border: 1px solid var(--ink);
   color: var(--ink);
 }
