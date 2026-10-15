@@ -11,6 +11,7 @@ import { listCategories, type GearItem } from "@/lib/gearApi";
 import type { GearSetup } from "@/lib/setupsApi";
 import { formatWeight } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
+import FlatLay from "./FlatLay";
 import GearList from "./GearList";
 import { GearIcon } from "./icons";
 import ItemDetails from "./ItemDetails";
@@ -34,11 +35,6 @@ function takePending(): PendingAdd | null {
   }
 }
 
-function itemSubtitle(item: GearItem): string {
-  if (item.kind === "custom") return [item.custom_brand, item.custom_model].filter(Boolean).join(" ") || "Custom item";
-  return item.variant ? `${item.brand_name} · ${item.variant.name}` : (item.brand_name ?? "");
-}
-
 function GearContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,6 +49,7 @@ function GearContent() {
   const [details, setDetails] = useState<GearItem | null>(null);
   const [setupDialog, setSetupDialog] = useState<{ setup: GearSetup | null } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [snapId, setSnapId] = useState<string | null>(null);
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
   const resumed = useRef(false);
 
@@ -88,7 +85,10 @@ function GearContent() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 4000);
+    const timer = window.setTimeout(() => {
+      setToast(null);
+      setSnapId(null);
+    }, 4000);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -129,63 +129,17 @@ function GearContent() {
     setupsData.reload();
     setPicker(null);
     setDetails(null);
+    if (action === "added") setSnapId(item.id);
     setToast(action === "added" ? `Added ${item.display_name} to your gear.` : `Replaced with ${item.display_name}.`);
   };
-
-  const showcaseCard = (item: GearItem, slot: Slot) => (
-    <li key={item.id} className={styles.showcaseItem}>
-      <button
-        type="button"
-        className={styles.showcaseCard}
-        onClick={() => canEdit && setDetails(item)}
-        aria-label={`${item.display_name}, your ${slot.noun}. View details`}
-      >
-        {item.quantity > 1 && <span className={styles.qty}>×{item.quantity}</span>}
-        <span className={styles.showcaseImage}>
-          <GearThumb icon={slot.icon} productImage={item.product?.image} photoPath={item.image_path} alt="" size="xl" />
-        </span>
-        <span className={styles.showcaseSlot}>{slot.label}</span>
-        <span className={styles.showcaseName}>{item.product?.name ?? item.display_name}</span>
-        <span className={styles.showcaseBrand}>{itemSubtitle(item)}</span>
-        <span className={styles.showcaseWeight}>
-          {item.weight.effective_g != null ? formatWeight(item.weight.effective_g * item.quantity, units) : "Weight unknown"}
-        </span>
-      </button>
-    </li>
-  );
 
   return (
     <main className={styles.page}>
       <div className={styles.texture} aria-hidden="true" />
 
-      <header className={styles.intro}>
-        <h1 className={styles.title}>{activeSetup ? activeSetup.name : "Your gear"}</h1>
-        <p className={styles.subtitle}>
-          {activeSetup
-            ? activeSetup.description || "One of your saved setups."
-            : "Your backpacking setup at a glance. Start with the big pieces — pack, shelter, sleep and stove — and add the rest when it’s useful."}
-        </p>
-      </header>
-
-      {authStatus === "signedOut" && (
-        <div className={`${ui.notice} ${styles.banner}`}>
-          <p>
-            <strong>Sign in to save your setup.</strong> Browse the catalogue now; your gear is saved to your
-            account so it&apos;s there on every device.
-          </p>
-          <div className={styles.bannerActions}>
-            <Link href={`/signup${nextQuery("/gear")}`} className={ui.primary}>
-              Create account
-            </Link>
-            <Link href={`/login${nextQuery("/gear")}`} className={ui.secondary}>
-              Sign in
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {isSignedIn && (
-        <div className={styles.setupBar}>
+      <div className={styles.headBar}>
+        <h1 className={styles.title}>Your gear</h1>
+        {isSignedIn && (
           <div className={ui.chips} role="group" aria-label="Show">
             <button type="button" className={ui.chip} aria-pressed={!activeSetup} onClick={() => selectSetup(null)}>
               All my gear
@@ -210,42 +164,61 @@ function GearContent() {
               + New setup
             </button>
           </div>
-          <p className={styles.setupSummary}>
-            {activeSetup ? (
-              <>
-                {activeSetup.item_count} {activeSetup.item_count === 1 ? "item" : "items"} ·{" "}
-                {formatWeight(knownGrams, units)}
-                {missing > 0 && ` known (${missing} without a weight)`} ·{" "}
-                <button type="button" className={ui.ghost} onClick={() => setSetupDialog({ setup: activeSetup })}>
-                  Edit setup
-                </button>
-              </>
-            ) : (
-              <>
-                {coreFilled} of {CORE_SLOTS.length} main pieces · {allItems.length}{" "}
-                {allItems.length === 1 ? "item" : "items"} in total · {formatWeight(knownGrams, units)} known weight
-                {missing > 0 && ` (${missing} without a weight)`}
-              </>
-            )}
+        )}
+      </div>
+
+      {authStatus === "signedOut" && (
+        <div className={`${ui.notice} ${styles.banner}`}>
+          <p>
+            <strong>Sign in to save your setup.</strong> Browse the catalogue now; your gear is saved to your
+            account so it&apos;s there on every device.
           </p>
+          <div className={styles.bannerActions}>
+            <Link href={`/signup${nextQuery("/gear")}`} className={ui.primary}>
+              Create account
+            </Link>
+            <Link href={`/login${nextQuery("/gear")}`} className={ui.secondary}>
+              Sign in
+            </Link>
+          </div>
         </div>
       )}
 
       <div className={styles.toolbar}>
-        {isSignedIn && allItems.length > 0 ? (
-          <label>
-            <span className={ui.srOnly}>Search your gear</span>
-            <input
-              className={`${ui.input} ${styles.searchInput}`}
-              type="search"
-              placeholder="Search your gear…"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          </label>
-        ) : (
-          <span />
-        )}
+        <div className={styles.toolbarLeft}>
+          {isSignedIn && allItems.length > 0 && (
+            <label>
+              <span className={ui.srOnly}>Search your gear</span>
+              <input
+                className={`${ui.input} ${styles.searchInput}`}
+                type="search"
+                placeholder="Search your gear…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </label>
+          )}
+          {isSignedIn && (
+            <p className={styles.setupSummary}>
+              {activeSetup ? (
+                <>
+                  {activeSetup.item_count} {activeSetup.item_count === 1 ? "item" : "items"} ·{" "}
+                  {formatWeight(knownGrams, units)}
+                  {missing > 0 && ` known (${missing} without a weight)`} ·{" "}
+                  <button type="button" className={ui.ghost} onClick={() => setSetupDialog({ setup: activeSetup })}>
+                    Edit setup
+                  </button>
+                </>
+              ) : (
+                <>
+                  {coreFilled} of {CORE_SLOTS.length} main pieces · {allItems.length}{" "}
+                  {allItems.length === 1 ? "item" : "items"} · {formatWeight(knownGrams, units)} known weight
+                  {missing > 0 && ` (${missing} without a weight)`}
+                </>
+              )}
+            </p>
+          )}
+        </div>
         <div className={styles.toolbarRight}>
           <div className={styles.toggle} role="group" aria-label="Units">
             <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
@@ -288,56 +261,26 @@ function GearContent() {
               <h2 id="main-setup" className={styles.sectionTitle}>
                 Main setup
               </h2>
-              <ul className={styles.showcaseGrid}>
-                {CORE_SLOTS.map((slot) => {
-                  const items = bySlot.get(slot.key) ?? [];
-                  if (items.length > 0) return items.map((item) => showcaseCard(item, slot));
-                  if (!showEmptySlots) return null;
-                  return (
-                    <li key={slot.key} className={styles.showcaseItem}>
-                      <button
-                        type="button"
-                        className={`${styles.showcaseCard} ${styles.showcaseEmpty}`}
-                        onClick={() => openAdd(slot)}
-                        disabled={gear.status === "error"}
-                        aria-label={`Add your ${slot.noun}`}
-                      >
-                        <span className={styles.showcaseImage}>
-                          <GearIcon icon={slot.icon} className={styles.silhouette} />
-                        </span>
-                        <span className={styles.showcaseSlot}>{slot.label}</span>
-                        <span className={styles.emptyCta}>
-                          <span className={styles.plus} aria-hidden="true">
-                            +
-                          </span>
-                          Add your {slot.noun}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              {showEmptySlots && CORE_SLOTS.some((slot) => (bySlot.get(slot.key) ?? []).length > 0) && (
-                <div className={styles.anotherRow}>
-                  <span className={ui.hint}>Own more than one?</span>
-                  {CORE_SLOTS.filter((slot) => (bySlot.get(slot.key) ?? []).length > 0).map((slot) => (
-                    <button
-                      key={slot.key}
-                      type="button"
-                      className={styles.anotherButton}
-                      onClick={() => openAdd(slot)}
-                      aria-label={`Add another ${slot.noun}`}
-                    >
-                      + Another {slot.label.toLowerCase()}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {!showEmptySlots && coreItems.length === 0 && (
-                <p className={styles.noMatch}>
-                  {activeSetup ? "No main pieces in this setup yet — edit it to add some." : "No main pieces match."}
-                </p>
-              )}
+              <FlatLay
+                slots={CORE_SLOTS}
+                bySlot={bySlot}
+                showEmptySlots={showEmptySlots}
+                units={units}
+                canEdit={canEdit}
+                addDisabled={gear.status === "error"}
+                snapId={snapId}
+                emptyMessage={
+                  showEmptySlots || coreItems.length > 0
+                    ? null
+                    : activeSetup && !needle
+                      ? "No main pieces in this setup yet — edit it to add some."
+                      : visibleItems.length === 0
+                        ? "No gear matches"
+                        : "No main pieces match — see More gear below."
+                }
+                onAdd={openAdd}
+                onOpen={setDetails}
+              />
             </section>
 
             <details className={styles.more} open={moreItems.length > 0 && (Boolean(activeSetup) || Boolean(needle))}>

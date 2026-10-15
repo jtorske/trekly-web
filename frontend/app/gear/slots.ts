@@ -25,6 +25,8 @@ export interface Slot {
   categories: string[];
   /** Core slots form the showcase setup; the rest live under "More gear". */
   core?: boolean;
+  /** Only one item makes sense in this slot, so no "add another" is offered. */
+  single?: boolean;
 }
 
 export interface Zone {
