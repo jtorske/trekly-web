@@ -113,8 +113,8 @@ function TrailSearch() {
             highlightedTrail ? `landing-trail-${highlightedTrail.id}` : undefined
           }
           autoComplete="off"
-          placeholder="Where do you want to backpack?"
-          aria-label="Search for a trail or region"
+          placeholder="Search trails or parks"
+          aria-label="Search trails or parks"
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -277,8 +277,8 @@ export default function LandingPage() {
           <h1 className={styles.headline}>Your next trail is waiting</h1>
 
           <p className={styles.subtext}>
-            Find backpacking routes by duration and location. Log your gear and
-            build setups for every kind of trip.
+            Find Canada&apos;s best hikes, from day trips to multi-night routes.
+            Check backcountry campsites, plan your trip and pack the right&nbsp;gear.
           </p>
 
           <TrailSearch />
