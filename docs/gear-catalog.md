@@ -14,7 +14,7 @@
   2-Night Kit"). They reference inventory rows; deleting a setup never deletes
   gear, and deleting gear removes it from setups.
 
-Gear is the equipment someone owns. It is **not** PackPlan's trip packing list.
+Gear is the equipment someone owns, not a per-trip packing list.
 
 ## The Gear page
 

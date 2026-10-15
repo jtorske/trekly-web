@@ -1,7 +1,7 @@
 # Trekly
 
 A hub for backpackers: find trails, show off and organize the gear you own,
-build a packing list for a trip, and get alerts for campsite availability.
+and get alerts for campsite availability.
 
 | Part | Stack | Folder |
 | --- | --- | --- |
@@ -11,8 +11,7 @@ build a packing list for a trip, and get alerts for campsite availability.
 | CampAlert worker | Node | `campalert-service/` |
 
 Features: Explore trails and trail pages with saved trails · Gear showcase
-with a verified product catalogue and named setups · PackPlan packing lists ·
-CampAlert · accounts with private profiles.
+with a verified product catalogue and named setups · CampAlert · accounts with private profiles.
 
 ## Setup
 

@@ -8,7 +8,7 @@ import { summarize } from "@/app/gear/useMyGear";
 import { slotForItem, zoneCoverage } from "@/app/gear/slots";
 import GearThumb from "@/components/GearThumb";
 import type { GearSetup } from "@/lib/setupsApi";
-import { TERRAIN_LABELS } from "@/app/packplanner/packingList";
+import { TERRAIN_LABELS } from "@/lib/terrain";
 import type { SavedTrail } from "@/lib/accountApi";
 import type { GearItem } from "@/lib/gearApi";
 import { formatWeight, metersToFeet, type UnitSystem } from "@/lib/units";
@@ -152,10 +152,9 @@ export function GearSection({ gear, units, limit }: { gear: GearData; units: Uni
 
 export function TripsSection() {
   return (
-    <EmptyState title="Trips aren't saved to your account yet" action={{ href: "/packplanner", label: "Plan a trip with PackPlan" }}>
-      PackPlan builds a packing list for a trail and trip length, but it doesn&apos;t store trips — each plan
-      lives only in that browser tab. When saved trips arrive, they&apos;ll appear here. Your Gear inventory is
-      separate: it&apos;s everything you own, not what you pack for one trip.
+    <EmptyState title="Trips aren't saved to your account yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+      When saved trips arrive, they&apos;ll appear here. Your Gear inventory is separate: it&apos;s everything
+      you own, not what you pack for one trip.
     </EmptyState>
   );
 }

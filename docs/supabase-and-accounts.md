@@ -31,7 +31,7 @@ and what has to be configured in the Supabase dashboard.
 | Profile | Empty `app/profile/` | Profile with Overview / My gear / Saved trails / Trips / Settings; edit name, username, bio, region, avatar; email & password change; sign out; account deletion |
 | Saved trails | None | Bookmark on Explore cards and trail pages; guests are sent to sign in and the save completes afterwards |
 | Gear | Unapplied `user_gear` table | Shared catalogue + per-user inventory + named setups (see `docs/gear-catalog.md`) |
-| Trips / completed hikes | PackPlan doesn't persist trips; no hike records | Not invented — the Trips tab says trips aren't saved yet and links to PackPlan; no completed-hike section |
+| Trips / completed hikes | No trip or hike records | Not invented — the Trips tab says trips aren't saved yet; no completed-hike section |
 
 ## Migrations (Alembic, `backend/alembic/versions/`)
 
@@ -44,7 +44,7 @@ and what has to be configured in the Supabase dashboard.
 All three are applied to the hosted project. Apply to another database with
 `cd backend && python -m alembic upgrade head`.
 
-> The `trails`, `campsites` and PackPlan `gear_*` tables predate Alembic and
+> The `trails` and `campsites` tables predate Alembic and
 > aren't created by any migration. A fresh database needs them first (see
 > "Local stack" below for how they were copied).
 
@@ -119,7 +119,7 @@ Mailpit inbox) with Docker. Ports are moved to 443xx because Windows reserves
 
 ```bash
 npx supabase start                    # API 127.0.0.1:44321, DB :44322, mail :44324
-# base tables (trails, PackPlan gear_*) were copied from hosted with pg_dump, then:
+# base tables (trails, campsites) were copied from hosted with pg_dump, then:
 cd backend
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:44322/postgres python -m alembic stamp a1b2c3d4e5f6
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:44322/postgres python -m alembic upgrade head

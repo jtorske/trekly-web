@@ -8,7 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
-import { TERRAIN_LABELS } from "@/app/packplanner/packingList";
+import { TERRAIN_LABELS } from "@/lib/terrain";
 import { searchTrails, type TrailSummary } from "@/lib/trailsApi";
 import styles from "./page.module.css";
 
@@ -277,8 +277,8 @@ export default function LandingPage() {
           <h1 className={styles.headline}>Your next trail is waiting</h1>
 
           <p className={styles.subtext}>
-            Find backpacking routes by duration and location. Log your gear, and
-            get a calculated packing plan for your trip.
+            Find backpacking routes by duration and location. Log your gear and
+            build setups for every kind of trip.
           </p>
 
           <TrailSearch />

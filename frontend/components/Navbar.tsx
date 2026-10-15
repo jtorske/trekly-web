@@ -13,7 +13,6 @@ import styles from "./Navbar.module.css";
 const LINKS = [
   { href: "/trail-list", label: "Explore" },
   { href: "/gear", label: "Gear" },
-  { href: "/packplanner", label: "PackPlan" },
   { href: "/campalert", label: "CampAlert" },
 ];
 

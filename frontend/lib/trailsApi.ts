@@ -1,4 +1,4 @@
-import type { Terrain } from "@/app/packplanner/packingList";
+import type { Terrain } from "@/lib/terrain";
 
 export interface TrailSummary {
   id: string;

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import { useSavedTrails } from "@/lib/useSavedTrails";
-import { TERRAIN_LABELS, type Terrain } from "@/app/packplanner/packingList";
+import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { metersToFeet } from "@/lib/units";
 import styles from "./page.module.css";

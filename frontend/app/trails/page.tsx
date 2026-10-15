@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import { useSavedTrails } from "@/lib/useSavedTrails";
-import { TERRAIN_LABELS } from "@/app/packplanner/packingList";
+import { TERRAIN_LABELS } from "@/lib/terrain";
 import { getTrail, type SeasonalCondition, type TrailDetail } from "@/lib/trailsApi";
 import { celsiusToFahrenheit, metersToFeet } from "@/lib/units";
 import styles from "./page.module.css";
@@ -71,9 +71,6 @@ function TrailView({
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
 }) {
   const nights = trail.typical_duration_nights;
-  const packPlanHref = `/packplanner?trailId=${encodeURIComponent(trail.id)}${
-    nights ? `&nights=${nights}` : ""
-  }`;
   const hasLocation = trail.latitude != null && trail.longitude != null;
 
   const stats: { label: string; value: string }[] = [
@@ -126,10 +123,7 @@ function TrailView({
           onToggle={onToggleSave}
           returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
         />
-        <Link href={packPlanHref} className={styles.primaryAction}>
-          Plan your pack
-        </Link>
-        <Link href="/campalert" className={styles.secondaryAction}>
+        <Link href="/campalert" className={styles.primaryAction}>
           Find campsites
         </Link>
       </div>
