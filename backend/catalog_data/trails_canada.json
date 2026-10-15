@@ -1,0 +1,3004 @@
+{
+  "meta": {
+    "description": "Trekly's editorial top 100 Canadian trails. List order is the editorial popularity rank.",
+    "popularity_source": "editorial",
+    "popularity_score": "derived from rank: (total - rank + 1) / total",
+    "drafted": "2026-10-15",
+    "status": "approved 2026-10-15",
+    "attribution": "Coordinates, provinces and elevations verified against OpenStreetMap data, (c) OpenStreetMap contributors, available under the Open Database License (ODbL) 1.0: https://www.openstreetmap.org/copyright",
+    "fields": {
+      "latitude_longitude": "Point of the OSM feature named in verification.coordinates (trailhead/start feature where OSM has one, otherwise the destination).",
+      "max_elevation_m": "OSM ele tag of the high point / destination; else the pre-existing row value (verification source legacy) or a reviewer override (manual); null otherwise.",
+      "elevation_gain_m": "Net gain between OSM ele of start and high point; else the pre-existing row value (verification source legacy); null otherwise."
+    }
+  },
+  "trails": [
+    {
+      "rank": 1,
+      "name": "Lake Agnes Tea House",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.415942,
+      "longitude": -116.211169,
+      "max_elevation_m": 2135,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Switchbacks above Lake Louise to a historic tea house on the shore of Lake Agnes.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4341530174",
+          "feature": "Lake Louise",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "way/263569994",
+          "feature": "Lake Agnes Tea House"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 2,
+      "name": "Johnston Canyon to the Ink Pots",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.253612,
+      "longitude": -115.837955,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Catwalks past the Lower and Upper Falls, continuing to the mineral springs of the Ink Pots.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1137488348",
+          "feature": "Johnston Canyon",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 3,
+      "name": "Grouse Grind",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "North Vancouver, BC",
+      "latitude": 49.378756,
+      "longitude": -123.083502,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Relentless 2.9 km stair-climb up the face of Grouse Mountain, Vancouver's outdoor gym.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1554833699",
+          "feature": "Grouse Grind",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 4,
+      "name": "Plain of Six Glaciers",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.415942,
+      "longitude": -116.211169,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Lakeshore and moraine walk from Lake Louise toward the Victoria Glacier and a second historic tea house.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4341530174",
+          "feature": "Lake Louise",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 5,
+      "name": "Joffre Lakes",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Joffre Lakes Provincial Park, BC",
+      "latitude": 50.366384,
+      "longitude": -122.497092,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Three turquoise glacier-fed lakes stacked beneath the Matier Glacier near Pemberton.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/30492335",
+          "feature": "Lower Joffre Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 6,
+      "name": "West Coast Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Pacific Rim National Park Reserve, BC",
+      "latitude": 48.78521,
+      "longitude": -125.131568,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 6,
+      "climate_zone": "coastal_temperate",
+      "description": "Rugged 75 km coastal route of ladders, cable cars and beach walking between Bamfield and Port Renfrew.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/8369166",
+          "feature": "Pachena Bay",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 7,
+      "name": "Sentinel Pass via Larch Valley",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.321566,
+      "longitude": -116.185985,
+      "max_elevation_m": 2611,
+      "elevation_gain_m": 727,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Larch Valley's golden autumn larches give way to a steep climb to one of the highest trail passes in the Rockies.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/356877446",
+          "feature": "Moraine Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/2706106443",
+          "feature": "Sentinel Pass"
+        },
+        "elevation_gain_m": {
+          "start": "way/356877446",
+          "high": "node/2706106443"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 8,
+      "name": "Garibaldi Lake",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Garibaldi Provincial Park, BC",
+      "latitude": 49.897892,
+      "longitude": -122.994858,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Forested switchbacks to a vivid glacial lake beneath Mount Price and the Black Tusk.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/72199250",
+          "feature": "Rubble Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 9,
+      "name": "Berg Lake Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Mount Robson Provincial Park, BC",
+      "latitude": 53.081484,
+      "longitude": -119.188043,
+      "max_elevation_m": 1650,
+      "elevation_gain_m": 800,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "Leads to the base of Mount Robson, the highest peak in the Canadian Rockies.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/14912519",
+          "feature": "Kinney Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 10,
+      "name": "Tunnel Mountain",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.177539,
+      "longitude": -115.55376,
+      "max_elevation_m": 1692,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short summit hike right from the town of Banff with views over the Bow Valley.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/263425880",
+          "feature": "Tunnel Mountain",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/263425880",
+          "feature": "Tunnel Mountain"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 11,
+      "name": "Skyline Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.661302,
+      "longitude": -117.528206,
+      "max_elevation_m": 2510,
+      "elevation_gain_m": 1400,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "A classic alpine ridge walk above treeline for most of its length.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/5760911",
+          "feature": "Maligne Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 12,
+      "name": "Stawamus Chief",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Stawamus Chief Provincial Park, BC",
+      "latitude": 49.689491,
+      "longitude": -123.133808,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Steep stairs, ladders and chains to three granite summits above Squamish and Howe Sound.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/8634840",
+          "feature": "Stawamus Chief Provincial Park",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of boundary=national_park 'Stawamus Chief Provincial Park', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 13,
+      "name": "Cyprus Lake to the Grotto",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Bruce Peninsula National Park, ON",
+      "latitude": 45.232176,
+      "longitude": -81.530035,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Short walk to the turquoise waters and sea cave of the Georgian Bay shoreline.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/112326624",
+          "feature": "Cyprus Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 14,
+      "name": "Elizabeth Parker Hut / Lake O'Hara",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Yoho National Park, BC",
+      "latitude": 51.355793,
+      "longitude": -116.330754,
+      "max_elevation_m": 2040,
+      "elevation_gain_m": 400,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A short but stunning alpine lake basin, day-hike or overnight friendly.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/356689552",
+          "feature": "Lake O'Hara",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "way/304740250",
+          "feature": "Elizabeth Parker Hut"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 15,
+      "name": "Iceline Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Yoho National Park, BC",
+      "latitude": 51.500223,
+      "longitude": -116.473461,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Contours across glacial moraine beneath the Emerald Glacier with views of Takakkaw Falls.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4293962861",
+          "feature": "Takakkaw Falls",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 16,
+      "name": "Ha Ling Peak",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Canmore, AB",
+      "latitude": 51.062314,
+      "longitude": -115.441795,
+      "max_elevation_m": 2407,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Steep, short summit hike overlooking Canmore and the Bow Valley.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/119208698",
+          "feature": "Goat Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "manual",
+          "note": "reviewer override 2026-10-15; OSM node/269825868 has 2474"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 17,
+      "name": "Skyline Trail",
+      "country_code": "CA",
+      "province_code": "NS",
+      "region": "Cape Breton Highlands National Park, NS",
+      "latitude": 46.758988,
+      "longitude": -60.899603,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Boardwalk to a headland above the Gulf of St. Lawrence, often with moose and whales.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/8288959",
+          "feature": "Skyline Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 18,
+      "name": "Panorama Ridge",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Garibaldi Provincial Park, BC",
+      "latitude": 49.897892,
+      "longitude": -122.994858,
+      "max_elevation_m": 2133,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Long day or overnight from Garibaldi Lake to a ridge with the classic view of the lake and Black Tusk.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/72199250",
+          "feature": "Rubble Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/887601559",
+          "feature": "Panorama Ridge"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 19,
+      "name": "Maligne Canyon",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.919782,
+      "longitude": -118.010161,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Bridge-hopping walk along a narrow limestone canyon, also popular as a winter ice walk.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1677700364",
+          "feature": "Maligne Canyon",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of place=locality 'Maligne Canyon', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 20,
+      "name": "Gros Morne Mountain",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "latitude": 49.594008,
+      "longitude": -57.783879,
+      "max_elevation_m": 806,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Steep gully scramble to the barren tableland summit of Newfoundland's second-highest peak.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4207809160",
+          "feature": "Gros Morne",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/4207809160",
+          "feature": "Gros Morne"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 21,
+      "name": "Crypt Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "latitude": 49.001219,
+      "longitude": -113.840729,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Boat-accessed hike past waterfalls, through a tunnel and along a cable ledge to a cirque lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/82676125",
+          "feature": "Crypt Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 22,
+      "name": "Grassi Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Canmore, AB",
+      "latitude": 51.081324,
+      "longitude": -115.39505,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short family hike to two clear lakes beneath limestone climbing walls above Canmore.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/11253808518",
+          "feature": "Grassi Lakes",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 23,
+      "name": "Quarry Rock",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Deep Cove, North Vancouver, BC",
+      "latitude": 49.327508,
+      "longitude": -122.950388,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Short forest walk from Deep Cove to a rocky viewpoint over Indian Arm.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/9519106",
+          "feature": "Beach & Quarry Rock",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
+          "coordinates: trailhead parking; the viewpoint itself is not a named OSM feature"
+        ]
+      }
+    },
+    {
+      "rank": 24,
+      "name": "Emerald Lake Loop",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Yoho National Park, BC",
+      "latitude": 51.443749,
+      "longitude": -116.531658,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Flat loop around one of the Rockies' most photographed lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/429418878",
+          "feature": "Emerald Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 25,
+      "name": "Mount Assiniboine via Sunshine Meadows",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Mount Assiniboine Provincial Park, BC",
+      "latitude": 51.089525,
+      "longitude": -115.762202,
+      "max_elevation_m": 2400,
+      "elevation_gain_m": 1000,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "Iconic multi-day trek to the \"Matterhorn of the Rockies.\"",
+      "verification": {
+        "coordinates": {
+          "osm": "way/739168515",
+          "feature": "Banff Sunshine Village",
+          "role": "start"
+        },
+        "province": false,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": [
+          "province: OSM places the start point in AB, listed as BC",
+          "province: starts in AB (Sunshine Village), destination in BC; kept BC"
+        ]
+      }
+    },
+    {
+      "rank": 26,
+      "name": "Valley of the Five Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.808055,
+      "longitude": -118.022201,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Gentle loop past five lakes in shades of jade and blue south of Jasper.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/21190218",
+          "feature": "Valley of the five lakes",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 27,
+      "name": "Rawson Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.620158,
+      "longitude": -115.158127,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Forested climb from Upper Kananaskis Lake to a lake beneath Mount Sarrail's headwall.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/4011900",
+          "feature": "Upper Kananaskis Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 28,
+      "name": "Path of the Glacier and Cavell Meadows",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.677849,
+      "longitude": -118.048163,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Walk to the Angel Glacier's iceberg-filled pond, then up through subalpine wildflower meadows.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/20584892",
+          "feature": "Cavell Pond",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 29,
+      "name": "East Coast Trail",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Avalon Peninsula, NL",
+      "latitude": 47.563344,
+      "longitude": -52.680373,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 10,
+      "climate_zone": "coastal_temperate",
+      "description": "Over 300 km of cliff-top coastal path linking communities, lighthouses and sea stacks south and north of St. John's.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1301132683",
+          "feature": "Fort Amherst Lighthouse",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 30,
+      "name": "Parker Ridge",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 52.181281,
+      "longitude": -117.092297,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short climb to a ridge overlooking the Saskatchewan Glacier off the Icefields Parkway.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/2698466351",
+          "feature": "Parker Ridge",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 31,
+      "name": "Wilcox Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.21814,
+      "longitude": -117.183597,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb above the Icefields Parkway to a meadowed pass facing the Athabasca Glacier.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/31176317",
+          "feature": "Wilcox Creek Campground",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 32,
+      "name": "Juan de Fuca Marine Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Juan de Fuca Provincial Park, BC",
+      "latitude": 48.43371,
+      "longitude": -124.093442,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "coastal_temperate",
+      "description": "47 km wilderness coastal trail between China Beach and Botanical Beach.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/5064789629",
+          "feature": "China Beach",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 33,
+      "name": "Lion's Head",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Bruce Peninsula, ON",
+      "latitude": 44.988222,
+      "longitude": -81.219138,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Bruce Trail loop to Niagara Escarpment cliffs and the Lion's Head rock formation over Georgian Bay.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/60862376",
+          "feature": "Lion's Head Provincial Nature Reserve",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of boundary=national_park 'Lion's Head Provincial Nature Reserve', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 34,
+      "name": "L'Acropole des Draveurs",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Parc national des Hautes-Gorges-de-la-Rivière-Malbaie, QC",
+      "latitude": 47.883966,
+      "longitude": -70.466371,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Steep climb above the deep river valley of the Hautes-Gorges, one of Quebec's signature hikes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1413814828",
+          "feature": "L'Acropole des draveurs",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 35,
+      "name": "Rockwall Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Kootenay National Park, BC",
+      "latitude": 51.054441,
+      "longitude": -116.136126,
+      "max_elevation_m": 2360,
+      "elevation_gain_m": 2200,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 4,
+      "climate_zone": "alpine",
+      "description": "Traverses beneath a dramatic limestone escarpment.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1907814134",
+          "feature": "Floe Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 36,
+      "name": "Stanley Glacier",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Kootenay National Park, BC",
+      "latitude": 51.205464,
+      "longitude": -116.080654,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb through a 1968 burn into a hanging valley beneath Stanley Glacier.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/2460486116",
+          "feature": "Stanley Glacier Trailhead",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
+          "max_elevation_m: only nearby OSM ele is Stanley Peak (3155 m), which the trail does not summit"
+        ]
+      }
+    },
+    {
+      "rank": 37,
+      "name": "Bow Glacier Falls",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.664549,
+      "longitude": -116.449421,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Lakeshore and canyon walk from Bow Lake to the waterfall draining the Wapta Icefield.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/6403766",
+          "feature": "Bow Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 38,
+      "name": "Chester Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.811719,
+      "longitude": -115.274012,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Popular Spray Lakes hike to a subalpine lake, with the Three Fools Elephant Rocks nearby.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/303566752",
+          "feature": "Chester Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 39,
+      "name": "Ptarmigan Cirque",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.596229,
+      "longitude": -114.984504,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short loop from Highwood Pass, Canada's highest paved road pass, into an alpine cirque.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1339315277",
+          "feature": "Highwood Pass",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 40,
+      "name": "Mont Albert",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Parc national de la Gaspésie, QC",
+      "latitude": 48.944422,
+      "longitude": -66.122143,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb to a broad tundra plateau with woodland caribou habitat in the Chic-Choc Mountains.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/604337862",
+          "feature": "Gîte du Mont-Albert",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 41,
+      "name": "Top of the Giant",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Sleeping Giant Provincial Park, ON",
+      "latitude": 48.332188,
+      "longitude": -88.906409,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Long approach to cliff-top views over Lake Superior from the Sleeping Giant.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/170765743",
+          "feature": "Top of the Giant Trail",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 42,
+      "name": "Bertha Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "latitude": 49.0246,
+      "longitude": -113.940142,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb from Waterton townsite past Lower Bertha Falls to a hanging lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/24836283",
+          "feature": "Bertha Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 43,
+      "name": "Elfin Lakes",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Garibaldi Provincial Park, BC",
+      "latitude": 49.825575,
+      "longitude": -123.007277,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Ridge walk from the Diamond Head trailhead to a hut and small lakes facing the Garibaldi massif.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/512536307",
+          "feature": "Diamond Head",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 44,
+      "name": "Marble Canyon",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Kootenay National Park, BC",
+      "latitude": 51.190656,
+      "longitude": -116.127566,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short interpretive trail over bridges spanning a narrow, deep limestone canyon.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4112129106",
+          "feature": "Marble Canyon",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of place=locality 'Marble Canyon', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 45,
+      "name": "Sunshine Meadows",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.089525,
+      "longitude": -115.762202,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Wildflower meadows and lakes straddling the Continental Divide above Sunshine Village.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/739168515",
+          "feature": "Banff Sunshine Village",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "province: destination 'Rock isle lake' is in BC (cross-border)",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 46,
+      "name": "Fundy Footpath",
+      "country_code": "CA",
+      "province_code": "NB",
+      "region": "Fundy Trail Parkway, NB",
+      "latitude": 45.506008,
+      "longitude": -65.359724,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 4,
+      "climate_zone": "coastal_temperate",
+      "description": "Rugged 41 km coastal trek of steep river valleys and tidal crossings along the Bay of Fundy.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/20137445",
+          "feature": "Big Salmon River",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 47,
+      "name": "Cape Split",
+      "country_code": "CA",
+      "province_code": "NS",
+      "region": "Cape Split Provincial Park, NS",
+      "latitude": 44.361595,
+      "longitude": -65.223896,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Forest walk to grassy cliffs at the tip of Cape Split above the Minas Basin tides.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3512744916",
+          "feature": "Cape Split",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 48,
+      "name": "Wild Pacific Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Ucluelet, BC",
+      "latitude": 48.921187,
+      "longitude": -125.541173,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Coastal path along the headlands of Ucluelet with storm-watching viewpoints.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/374651008",
+          "feature": "Amphitrite Point Lighthouse",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 49,
+      "name": "Tonquin Valley",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.69431,
+      "longitude": -118.09839,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "Backpacking route to Amethyst Lakes beneath the Ramparts.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/20204306",
+          "feature": "Astoria River",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 50,
+      "name": "Mount Yamnuska",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Bow Valley Wildland Provincial Park, AB",
+      "latitude": 51.123586,
+      "longitude": -115.118091,
+      "max_elevation_m": 2232,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Scramble-style loop with a chained traverse around the cliffs of Yamnuska.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/270003070",
+          "feature": "Mount Yamnuska",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/270003070",
+          "feature": "Mount Yamnuska"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 51,
+      "name": "Prairie Mountain",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.86756,
+      "longitude": -114.78357,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short, steep year-round summit near Calgary with views to the prairie.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/270030306",
+          "feature": "Elbow Falls",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 52,
+      "name": "Mont Jacques-Cartier",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Parc national de la Gaspésie, QC",
+      "latitude": 48.988723,
+      "longitude": -65.948243,
+      "max_elevation_m": 1268,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb to the highest summit in southern Quebec, an alpine tundra plateau.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1303925134",
+          "feature": "Mont Jacques-Cartier",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/1303925134",
+          "feature": "Mont Jacques-Cartier"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 53,
+      "name": "Helen Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.662954,
+      "longitude": -116.438683,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Wildflower meadows to an alpine lake beneath Cirque Peak off the Icefields Parkway.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1907720762",
+          "feature": "Crowfoot Glacier Viewpoint",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 54,
+      "name": "Consolation Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.327627,
+      "longitude": -116.179991,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short walk from Moraine Lake through a rockslide to two lakes beneath Mount Bident.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/348002839",
+          "feature": "Moraine lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 55,
+      "name": "Sulphur Skyline",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 53.130191,
+      "longitude": -117.769537,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Steep climb from Miette Hot Springs to a bare ridge summit with 360-degree views.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3705593955",
+          "feature": "Miette Hot Springs",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 56,
+      "name": "Centennial Ridges",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Algonquin Provincial Park, ON",
+      "latitude": 45.556407,
+      "longitude": -78.420202,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Algonquin's most demanding day loop, along two ridges with views over the park's lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/298155743",
+          "feature": "Centennial Ridges Trail Parking Lot",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 57,
+      "name": "La Cloche Silhouette Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Killarney Provincial Park, ON",
+      "latitude": 46.026777,
+      "longitude": -81.405143,
+      "max_elevation_m": 539,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 6,
+      "climate_zone": "temperate",
+      "description": "Rugged 78 km loop over the white quartzite La Cloche ridges.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/3242008",
+          "feature": "George Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/2467168928",
+          "feature": "Silver Peak"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 58,
+      "name": "The Crack",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Killarney Provincial Park, ON",
+      "latitude": 46.057144,
+      "longitude": -81.343747,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Boulder-strewn climb through a cleft in the La Cloche ridge to views of Killarney's lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/238912287",
+          "feature": "The \"Crack\" Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 59,
+      "name": "Long Range Traverse",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "latitude": 49.751048,
+      "longitude": -57.791539,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 4,
+      "climate_zone": "alpine",
+      "description": "Unmarked, navigation-only route across the Long Range Mountains, starting with a boat ride up Western Brook Pond.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/1919183",
+          "feature": "Western Brook Pond",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 60,
+      "name": "Green Gardens",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "latitude": 49.503661,
+      "longitude": -58.089026,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Descent from the Tablelands' serpentine barrens to grassy sea-cliff meadows and sea stacks.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/137401716",
+          "feature": "Green Gardens Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 61,
+      "name": "Carthew-Alderson Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "latitude": 49.009206,
+      "longitude": -114.049198,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Point-to-point traverse from Cameron Lake over Carthew Summit down to Waterton townsite.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/8299848",
+          "feature": "Cameron Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 62,
+      "name": "Skoki Valley Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.450102,
+      "longitude": -116.113713,
+      "max_elevation_m": 2350,
+      "elevation_gain_m": 700,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "A high alpine valley beloved for wildflowers and historic Skoki Lodge.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3667899893",
+          "feature": "Temple Lodge",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 63,
+      "name": "Egypt Lake / Healy Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.089525,
+      "longitude": -115.762202,
+      "max_elevation_m": 2370,
+      "elevation_gain_m": 650,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Larch-lined pass leading to a scenic backcountry lake basin.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/739168515",
+          "feature": "Banff Sunshine Village",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/2843722958",
+          "feature": "Healy Pass (Trail Junction)"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 64,
+      "name": "Burstall Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.794115,
+      "longitude": -115.309337,
+      "max_elevation_m": 2400,
+      "elevation_gain_m": 500,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Popular pass hike with sweeping views of the Spray Valley.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/4042939",
+          "feature": "Mud Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 65,
+      "name": "Boom Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.228579,
+      "longitude": -116.049636,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Gentle forest trail to a long lake beneath the cliffs of Boom Mountain.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/797080461",
+          "feature": "Vermilion Pass",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 66,
+      "name": "Tent Ridge Horseshoe",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.8281,
+      "longitude": -115.4097,
+      "max_elevation_m": 2545,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Ridge loop with exposed scrambling above the Spray Valley.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/2687421261",
+          "feature": "Mount Shark",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/2687421271",
+          "feature": "Tent Ridge"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 67,
+      "name": "Galatea Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.865006,
+      "longitude": -115.199791,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Creek crossings on suspension bridges up to Lillian and Galatea Lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/303715716",
+          "feature": "Galatea Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 68,
+      "name": "Eiffel Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.321566,
+      "longitude": -116.185985,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Traverse high above the Valley of the Ten Peaks from Moraine Lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/356877446",
+          "feature": "Moraine Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 69,
+      "name": "C-Level Cirque",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.256217,
+      "longitude": -115.460925,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb past old Bankhead coal-mine ruins to a cirque beneath Cascade Mountain.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/2048785",
+          "feature": "Lake Minnewanka",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 70,
+      "name": "Bald Hills",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "latitude": 52.661302,
+      "longitude": -117.528206,
+      "max_elevation_m": 2400,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Old fire road to open summits overlooking Maligne Lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/5760911",
+          "feature": "Maligne Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/10616252697",
+          "feature": "Bald Hills"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 71,
+      "name": "Lake Superior Coastal Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Lake Superior Provincial Park, ON",
+      "latitude": 47.337448,
+      "longitude": -84.639663,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 6,
+      "climate_zone": "temperate",
+      "description": "Rugged 65 km route over cobble beaches and granite headlands along Lake Superior.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1388680996",
+          "feature": "Agawa Bay",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 72,
+      "name": "Mont du Lac des Cygnes",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Parc national des Grands-Jardins, QC",
+      "latitude": 47.668002,
+      "longitude": -70.618789,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Climb through taiga to a bare summit with views over the Charlevoix impact crater.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/168301496",
+          "feature": "Mont du Lac des Cygnes",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 73,
+      "name": "Pain de Sucre",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Mont Saint-Hilaire, QC",
+      "latitude": 45.562503,
+      "longitude": -73.182803,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Popular summit loop in the Gault Nature Reserve, an hour from Montreal.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/36777241",
+          "feature": "Rue du Pain de Sucre",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 74,
+      "name": "Les Graves",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Forillon National Park, QC",
+      "latitude": 48.751105,
+      "longitude": -64.162633,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Coastal trail to Land's End at Cap Gaspé, the tip of the Gaspé Peninsula.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/878547660",
+          "feature": "Cap Gaspé",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 75,
+      "name": "Traversée de Charlevoix",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Charlevoix, QC",
+      "latitude": 47.557715,
+      "longitude": -70.539755,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 6,
+      "climate_zone": "temperate",
+      "description": "Hut-to-hut route of about 100 km across the Charlevoix highlands.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/7717120",
+          "feature": "Saint-Urbain",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of boundary=administrative 'Saint-Urbain', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 76,
+      "name": "North Head Trail",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Signal Hill National Historic Site, NL",
+      "latitude": 47.572131,
+      "longitude": -52.680367,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Cliffside trail from Cabot Tower above the Narrows of St. John's harbour.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1430617647",
+          "feature": "Signal Hill",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 77,
+      "name": "Franey Trail",
+      "country_code": "CA",
+      "province_code": "NS",
+      "region": "Cape Breton Highlands National Park, NS",
+      "latitude": 46.679479,
+      "longitude": -60.491995,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Steep climb to a fire-tower viewpoint over the Clyburn Valley and the Atlantic.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1317651928",
+          "feature": "Franey Mountain",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 78,
+      "name": "Cape Scott Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Cape Scott Provincial Park, BC",
+      "latitude": 50.791759,
+      "longitude": -128.361365,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "coastal_temperate",
+      "description": "Muddy rainforest route to the wide white-sand beaches at the northern tip of Vancouver Island.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/8368589",
+          "feature": "Nels Bight",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 79,
+      "name": "Sunshine Coast Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Powell River, BC",
+      "latitude": 50.062439,
+      "longitude": -124.843639,
+      "max_elevation_m": 1181,
+      "elevation_gain_m": 3600,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 10,
+      "climate_zone": "coastal_temperate",
+      "description": "A long-distance coastal traverse through old-growth forest.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1623458635",
+          "feature": "Sarah Point",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/9653001169",
+          "feature": "Tin Hat Mountain"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 80,
+      "name": "Wedgemount Lake",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Garibaldi Provincial Park, BC",
+      "latitude": 50.16653,
+      "longitude": -122.828937,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Steep, unrelenting climb to a glacier-fed lake and hut above Whistler.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/342799129",
+          "feature": "Wedgemount Lake Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 81,
+      "name": "Mount Cheam",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Fraser Valley, BC",
+      "latitude": 49.174134,
+      "longitude": -121.680072,
+      "max_elevation_m": 2112,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short hike from a rough logging road to a summit high above the Fraser Valley.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/26534114",
+          "feature": "Spoon Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/2992563556",
+          "feature": "Cheam Peak"
+        },
+        "elevation_gain_m": null,
+        "flags": [
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 82,
+      "name": "Lookout Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Algonquin Provincial Park, ON",
+      "latitude": 45.081358,
+      "longitude": -78.706829,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Short loop to a famous cliff viewpoint over Algonquin's hills, busiest in fall colours.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/368681040",
+          "feature": "James Cooper Lookout Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 83,
+      "name": "Pukaskwa Coastal Hiking Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Pukaskwa National Park, ON",
+      "latitude": 48.590869,
+      "longitude": -86.280847,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 7,
+      "climate_zone": "temperate",
+      "description": "Remote 60 km Lake Superior coastal route including the White River Suspension Bridge.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4411583776",
+          "feature": "Hattie Cove",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 84,
+      "name": "Highland Backpacking Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Algonquin Provincial Park, ON",
+      "latitude": 45.53728,
+      "longitude": -78.529171,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "temperate",
+      "description": "Backpacking loops through Algonquin's hardwood hills to interior lake campsites.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1171031285",
+          "feature": "Highland Backpacking Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 85,
+      "name": "Grizzly Lake",
+      "country_code": "CA",
+      "province_code": "YT",
+      "region": "Tombstone Territorial Park, YT",
+      "latitude": 64.426267,
+      "longitude": -138.469859,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Ridge-top route to an alpine lake beneath Mount Monolith in the Tombstone Range.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/257867726",
+          "feature": "Grizzly Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 86,
+      "name": "King's Throne",
+      "country_code": "CA",
+      "province_code": "YT",
+      "region": "Kluane National Park and Reserve, YT",
+      "latitude": 60.576117,
+      "longitude": -137.22238,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Steep climb to a cirque and ridge above Kathleen Lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/2182400559",
+          "feature": "Kathleen Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 87,
+      "name": "Miles Canyon",
+      "country_code": "CA",
+      "province_code": "YT",
+      "region": "Whitehorse, YT",
+      "latitude": 60.661791,
+      "longitude": -135.028657,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Short trails along basalt cliffs and a suspension bridge over the Yukon River near Whitehorse.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1710926088",
+          "feature": "Miles Canyon",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of place=locality 'Miles Canyon', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 88,
+      "name": "Goldensides",
+      "country_code": "CA",
+      "province_code": "YT",
+      "region": "Tombstone Territorial Park, YT",
+      "latitude": 64.525307,
+      "longitude": -138.20317,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Short, steep tundra climb off the Dempster Highway with views into the Tombstone Range.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/301188195",
+          "feature": "Goldensides",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 89,
+      "name": "Shadow Lake - Twin Lakes - Redearth Creek Loop",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.217922,
+      "longitude": -115.830305,
+      "max_elevation_m": 2000,
+      "elevation_gain_m": 500,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "A gentle multi-day loop with lodge access and lake scenery.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/409132785",
+          "feature": "Redearth Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 90,
+      "name": "Glacier Lake Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.973675,
+      "longitude": -116.759385,
+      "max_elevation_m": 1650,
+      "elevation_gain_m": 200,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "An accessible overnight trip to a large glacial lake beneath the Icefields Parkway.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/17961681",
+          "feature": "Glacier Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 91,
+      "name": "Ball Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.106919,
+      "longitude": -116.025948,
+      "max_elevation_m": 2210,
+      "elevation_gain_m": 900,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Steep alpine pass connecting Banff to Kootenay National Park.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/19775392",
+          "feature": "Hawk Creek",
+          "role": "start"
+        },
+        "province": false,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": [
+          "province: OSM places the start point in BC, listed as AB",
+          "province: destination 'Ball Pass' is in BC (cross-border)",
+          "province: the pass is on the AB/BC boundary; kept AB to match the existing row"
+        ]
+      }
+    },
+    {
+      "rank": 92,
+      "name": "Mystic Pass Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "latitude": 51.253612,
+      "longitude": -115.837955,
+      "max_elevation_m": 2300,
+      "elevation_gain_m": 800,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Remote valley traverse connecting Johnston Canyon to the Panther River area.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1137488348",
+          "feature": "Johnston Canyon",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 93,
+      "name": "Northover Ridge / Three Isle Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.620158,
+      "longitude": -115.158127,
+      "max_elevation_m": 2809,
+      "elevation_gain_m": 900,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "A high, exposed ridge walk considered one of the best backpacking routes in the Canadian Rockies.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/4011900",
+          "feature": "Upper Kananaskis Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "osm": "node/12333484208",
+          "feature": "Northover Ridge"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 94,
+      "name": "Elbow Lake to Rae Glacier",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Kananaskis Country, AB",
+      "latitude": 50.637075,
+      "longitude": -115.010108,
+      "max_elevation_m": 2200,
+      "elevation_gain_m": 400,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A short approach to an alpine lake beneath Rae Glacier.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3058542579",
+          "feature": "Elbow Pass",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "elevation_gain_m": {
+          "source": "legacy",
+          "note": "pre-existing trails row, unsourced"
+        },
+        "flags": []
+      }
+    },
+    {
+      "rank": 95,
+      "name": "Sentier des Crêtes",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Parc national du Mont-Orford, QC",
+      "latitude": 45.315095,
+      "longitude": -72.231549,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Ridge trail linking Mont Orford and Mont Chauve in the Eastern Townships.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/15656310",
+          "feature": "Mont Orford",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 96,
+      "name": "Greenwich Dunes Trail",
+      "country_code": "CA",
+      "province_code": "PE",
+      "region": "Prince Edward Island National Park, PE",
+      "latitude": 46.436638,
+      "longitude": -62.642798,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Boardwalk over a floating pond to rare parabolic sand dunes on PEI's north shore.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/11991757",
+          "feature": "Greenwich",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "coordinates: centroid of boundary=administrative 'Greenwich', not a trailhead",
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 97,
+      "name": "Grey Owl Trail",
+      "country_code": "CA",
+      "province_code": "SK",
+      "region": "Prince Albert National Park, SK",
+      "latitude": 54.086125,
+      "longitude": -106.445852,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "temperate",
+      "description": "Lakeshore route to the cabin of conservationist Grey Owl on Ajawaan Lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/23225906",
+          "feature": "Kingsmere Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 98,
+      "name": "Kokanee Glacier via Gibson Lake",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Kokanee Glacier Provincial Park, BC",
+      "latitude": 49.724128,
+      "longitude": -117.15645,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Climb from Gibson Lake past Kokanee Lake to the Kokanee Glacier Cabin in the Selkirks.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/327544772",
+          "feature": "Gibson Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 99,
+      "name": "Mantario Trail",
+      "country_code": "CA",
+      "province_code": "MB",
+      "region": "Whiteshell Provincial Park, MB",
+      "latitude": 50.083151,
+      "longitude": -95.345839,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "temperate",
+      "description": "63 km Canadian Shield route of granite ridges and lakes, the longest wilderness trail in Manitoba.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/6640611",
+          "feature": "Big Whiteshell Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    },
+    {
+      "rank": 100,
+      "name": "Cameron Falls",
+      "country_code": "CA",
+      "province_code": "NT",
+      "region": "Hidden Lake Territorial Park, NT",
+      "latitude": 62.520074,
+      "longitude": -113.687757,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "Short walk to a waterfall on the Cameron River off the Ingraham Trail near Yellowknife.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/1759047356",
+          "feature": "Cameron Falls",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "flags": [
+          "max_elevation_m: no OSM ele tag on the high point",
+          "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
+        ]
+      }
+    }
+  ]
+}

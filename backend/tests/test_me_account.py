@@ -9,8 +9,8 @@ from app.models.trail import Trail
 def trails(session_factory, client):
     session = session_factory()
     rows = [
-        Trail(name="Berg Lake Trail", region="BC", terrain_difficulty="moderate", typical_duration_nights=3, elevation_gain_m=800),
-        Trail(name="Lost Coast Trail", region="California", terrain_difficulty="moderate"),
+        Trail(name="Berg Lake Trail", region="BC", country_code="CA", province_code="BC", terrain_difficulty="moderate", typical_duration_nights=3, elevation_gain_m=800),
+        Trail(name="Lost Coast Trail", region="California", country_code="US", province_code="CA", terrain_difficulty="moderate"),
     ]
     session.add_all(rows)
     session.commit()

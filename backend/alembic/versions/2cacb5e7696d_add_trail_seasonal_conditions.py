@@ -1,7 +1,7 @@
 """add trail_seasonal_conditions
 
 Revision ID: 2cacb5e7696d
-Revises: 
+Revises: 0a9b8c7d6e5f
 Create Date: 2026-09-04 14:44:10.811231
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '2cacb5e7696d'
-down_revision: Union[str, Sequence[str], None] = None
+down_revision: Union[str, Sequence[str], None] = '0a9b8c7d6e5f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

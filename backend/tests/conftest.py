@@ -33,7 +33,8 @@ SUPABASE_URL = "https://test-project.supabase.co"
 ISSUER = f"{SUPABASE_URL}/auth/v1"
 GEAR_TABLES = [
     table for name, table in Base.metadata.tables.items()
-    if name.startswith(("catalog_", "gear_setup")) or name in ("user_gear_items", "profiles", "saved_trails", "trails")
+    if name.startswith(("catalog_", "gear_setup"))
+    or name in ("user_gear_items", "profiles", "saved_trails", "trails", "trail_seasonal_conditions")
 ]
 
 

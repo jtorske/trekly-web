@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -19,8 +20,14 @@ class TrailOut(BaseModel):
 
 
 class TrailListItemOut(TrailOut):
+    country_code: str
+    province_code: str | None = None
     typical_duration_nights: int | None = None
     elevation_gain_m: int | None = None
+    popularity_rank: int | None = None
+    # Set when the trail has left the catalogue; it still resolves for
+    # bookmarks but no longer appears in search.
+    retired_at: datetime | None = None
 
 
 class SeasonalConditionOut(BaseModel):

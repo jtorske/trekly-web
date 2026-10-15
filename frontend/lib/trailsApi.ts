@@ -8,8 +8,13 @@ export interface TrailSummary {
 }
 
 export interface TrailListItem extends TrailSummary {
+  country_code: string;
+  province_code: string | null;
   typical_duration_nights: number | null;
   elevation_gain_m: number | null;
+  popularity_rank: number | null;
+  /** Set once a trail leaves the catalogue; bookmarks to it still resolve. */
+  retired_at: string | null;
 }
 
 export type Season = "spring" | "summer" | "fall" | "winter";
