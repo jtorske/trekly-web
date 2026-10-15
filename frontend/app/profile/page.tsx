@@ -87,7 +87,7 @@ function ProfileContent() {
       <div className={styles.texture} aria-hidden="true" />
       <div className={styles.wrap}>
         <header className={styles.header}>
-          <Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={96} />
+          <Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={96} alt={`${name}'s profile photo`} />
           <div className={styles.headerText}>
             <h1 className={styles.name}>{name}</h1>
             {profile.username && <p className={styles.username}>@{profile.username}</p>}

@@ -25,7 +25,8 @@ from app.schemas.trail import TrailListItemOut
 
 router = APIRouter(prefix="/api/me", tags=["account"])
 
-AVATAR_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:jpg|jpeg|png|webp)$")
+# Matches what the client uploads after cropping/re-encoding (see migration 9a769eeb0dae).
+AVATAR_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:webp|jpg)$")
 DELETE_CONFIRMATION = "delete my account"
 
 

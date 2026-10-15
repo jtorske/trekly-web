@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { signedImageUrl } from "@/lib/storage";
+import { useState } from "react";
+import { publicAvatarUrl } from "@/lib/storage";
 import styles from "./Avatar.module.css";
 
 export function initialsFor(name: string | null | undefined, email: string | null | undefined): string {
@@ -12,13 +12,18 @@ export function initialsFor(name: string | null | undefined, email: string | nul
   return letters.toUpperCase();
 }
 
-/** The user's uploaded avatar (private bucket, signed URL) or their initials. */
+/**
+ * The user's uploaded avatar (public bucket) or their initials. Every photo
+ * change saves to a new path, so the URL changes and no cache can serve the
+ * old photo. Decorative unless `alt` is given.
+ */
 export default function Avatar({
   path,
   name,
   email,
   size = 36,
   preview,
+  alt,
 }: {
   path: string | null | undefined;
   name: string | null | undefined;
@@ -26,28 +31,25 @@ export default function Avatar({
   size?: number;
   /** Local object URL to show before an upload is saved. */
   preview?: string | null;
+  /** e.g. "Jordan's profile photo"; omit where the avatar is decorative. */
+  alt?: string;
 }) {
-  const [resolved, setResolved] = useState<{ path: string; url: string | null } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!path || preview) return;
-    let cancelled = false;
-    signedImageUrl("avatars", path).then((url) => !cancelled && setResolved({ path, url }));
-    return () => {
-      cancelled = true;
-    };
-  }, [path, preview]);
-
-  const url = preview ?? (path && resolved?.path === path ? resolved.url : null);
+  const url = preview ?? (path ? publicAvatarUrl(path) : null);
   const showImage = Boolean(url) && url !== failed;
+  const label = alt && !showImage ? { role: "img", "aria-label": alt } : {};
 
   return (
-    <span className={styles.avatar} style={{ width: size, height: size, fontSize: size * 0.38 }} aria-hidden="true">
+    <span
+      className={styles.avatar}
+      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      aria-hidden={alt ? undefined : true}
+      {...label}
+    >
       {showImage ? (
-        // Signed, short-lived Storage URLs can't go through next/image.
+        // Storage URLs (and local previews) don't go through next/image.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url!} alt="" className={styles.image} onError={() => setFailed(url)} />
+        <img src={url!} alt={alt ?? ""} className={styles.image} onError={() => setFailed(url)} />
       ) : (
         initialsFor(name, email)
       )}

@@ -7,18 +7,25 @@ import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { updateProfile, type Profile } from "@/lib/accountApi";
-import { removeImages, uploadImage, validateImage } from "@/lib/storage";
+import { validateAvatarFile } from "@/lib/avatarImage";
+import type { ProcessedAvatar } from "@/lib/processAvatar";
+import { removeImages, uploadAvatar } from "@/lib/storage";
 import { announceProfile } from "@/lib/useProfile";
-import { BIO_LIMIT, closeAction, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
+import AvatarCropper from "./AvatarCropper";
+import { BIO_LIMIT, closeAction, initialValues, isDirty, profileUpdate, staleAvatar, validateProfile } from "./editProfileForm";
 import styles from "./page.module.css";
 
 export default function EditProfileDialog({ profile, onClose }: { profile: Profile; onClose: () => void }) {
   const { user } = useAuth();
   const [initial] = useState(() => initialValues(profile));
   const [values, setValues] = useState(initial);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // Picked but not yet cropped; then the processed 512px image awaiting Save.
+  const [cropping, setCropping] = useState<File | null>(null);
+  const [newAvatar, setNewAvatar] = useState<ProcessedAvatar | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
+  const changePhotoRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [failure, setFailure] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -26,17 +33,53 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
   const keepEditingRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!avatarFile) return;
-    const url = URL.createObjectURL(avatarFile);
+    if (!newAvatar) return;
+    const url = URL.createObjectURL(newAvatar.blob);
     queueMicrotask(() => setAvatarPreview(url));
     return () => URL.revokeObjectURL(url);
-  }, [avatarFile]);
+  }, [newAvatar]);
 
   useEffect(() => {
     if (confirmingDiscard) keepEditingRef.current?.focus();
   }, [confirmingDiscard]);
 
-  const dirty = isDirty(values, initial, { file: avatarFile, remove: removeAvatar });
+  // The photo controls only exist again once the crop step has unmounted.
+  const wasCropping = useRef(false);
+  useEffect(() => {
+    if (wasCropping.current && !cropping) changePhotoRef.current?.focus();
+    wasCropping.current = Boolean(cropping);
+  }, [cropping]);
+
+  const dirty = isDirty(values, initial, { file: newAvatar ?? cropping, remove: removeAvatar });
+  const hasPhoto = Boolean(newAvatar) || (Boolean(profile.avatar_path) && !removeAvatar);
+  const photoAlt = `${values.display_name.trim() || profile.display_name || "Your"}'s profile photo`;
+
+  const pickPhoto = (file: File | undefined) => {
+    if (!file) return;
+    const problem = validateAvatarFile(file);
+    setErrors((current) => {
+      const next = { ...current };
+      if (problem) next.avatar = problem;
+      else delete next.avatar;
+      return next;
+    });
+    if (!problem) setCropping(file);
+  };
+
+  const finishCrop = (image: ProcessedAvatar) => {
+    setCropping(null);
+    setNewAvatar(image);
+    setRemoveAvatar(false);
+    setFailure(null);
+  };
+
+  const removePhoto = () => {
+    setNewAvatar(null);
+    setAvatarPreview(null);
+    setRemoveAvatar(Boolean(profile.avatar_path));
+    setFailure(null);
+    changePhotoRef.current?.focus();
+  };
 
   const requestClose = () => {
     const action = closeAction({ dirty, confirming: confirmingDiscard });
@@ -52,10 +95,6 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
   const save = async (event: FormEvent) => {
     event.preventDefault();
     const nextErrors = validateProfile(values);
-    if (avatarFile) {
-      const problem = validateImage(avatarFile, "avatars");
-      if (problem) nextErrors.avatar = problem;
-    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length || !user) return;
 
@@ -64,16 +103,16 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
     let uploaded: string | null = null;
     try {
       const update = profileUpdate(values);
-      if (avatarFile) {
-        uploaded = await uploadImage("avatars", user.id, avatarFile);
+      if (newAvatar) {
+        setProgress(0);
+        uploaded = await uploadAvatar(user.id, newAvatar, setProgress);
         update.avatar_path = uploaded;
       } else if (removeAvatar) {
         update.avatar_path = null;
       }
       const saved = await updateProfile(update);
-      if (profile.avatar_path && profile.avatar_path !== saved.avatar_path) {
-        removeImages("avatars", [profile.avatar_path]).catch(() => undefined);
-      }
+      const stale = staleAvatar(profile.avatar_path, saved.avatar_path);
+      if (stale) removeImages("avatars", [stale]).catch(() => undefined);
       announceProfile(saved);
       onClose();
     } catch (caught) {
@@ -84,6 +123,7 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
         setFailure(caught instanceof Error ? caught.message : "That didn't save.");
       }
       setSaving(false);
+      setProgress(null);
     }
   };
 
@@ -110,7 +150,7 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
             <button type="button" className={ui.ghost} onClick={requestClose} disabled={saving}>
               Cancel
             </button>
-            <button type="submit" form="edit-profile-form" className={ui.primary} disabled={!dirty || saving}>
+            <button type="submit" form="edit-profile-form" className={ui.primary} disabled={!dirty || saving || Boolean(cropping)}>
               {saving ? "Saving…" : "Save"}
             </button>
           </>
@@ -118,37 +158,68 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
       }
     >
       <form id="edit-profile-form" className={styles.form} onSubmit={save} noValidate>
-        <div className={styles.avatarRow}>
-          <Avatar
-            path={removeAvatar ? null : profile.avatar_path}
-            preview={avatarPreview}
-            name={values.display_name || profile.display_name}
-            email={profile.email}
-            size={72}
-          />
-          <div className={ui.field}>
-            <label className={ui.label} htmlFor="avatar-input">
-              Profile photo
-            </label>
-            <input
-              id="avatar-input"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => {
-                setAvatarFile(event.target.files?.[0] ?? null);
-                setRemoveAvatar(false);
-              }}
+        {cropping ? (
+          <AvatarCropper file={cropping} onCancel={() => setCropping(null)} onDone={finishCrop} />
+        ) : (
+          <div className={styles.avatarRow}>
+            <Avatar
+              path={removeAvatar ? null : profile.avatar_path}
+              preview={avatarPreview}
+              name={values.display_name || profile.display_name}
+              email={profile.email}
+              size={88}
+              alt={photoAlt}
             />
-            <span className={ui.hint}>JPEG, PNG or WebP up to 2 MB.</span>
-            {profile.avatar_path && !avatarFile && (
-              <label className={styles.checkbox}>
-                <input type="checkbox" checked={removeAvatar} onChange={(event) => setRemoveAvatar(event.target.checked)} />
-                Remove photo and use initials
-              </label>
-            )}
-            {errors.avatar && <span className={ui.fieldError}>{errors.avatar}</span>}
+            <div className={styles.photoControls}>
+              <span className={ui.label} id="photo-label">
+                Profile photo
+              </span>
+              <div className={styles.photoButtons}>
+                <input
+                  ref={changePhotoRef}
+                  id="avatar-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className={`${ui.srOnly} ${styles.fileInput}`}
+                  aria-describedby="photo-hint"
+                  disabled={saving}
+                  onChange={(event) => {
+                    pickPhoto(event.target.files?.[0]);
+                    event.target.value = "";
+                  }}
+                />
+                <label htmlFor="avatar-input" className={ui.secondary}>
+                  {hasPhoto ? "Change photo" : "Add photo"}
+                </label>
+                {hasPhoto && (
+                  <button type="button" className={ui.ghost} onClick={removePhoto} disabled={saving}>
+                    Remove photo
+                  </button>
+                )}
+              </div>
+              <span id="photo-hint" className={ui.hint}>
+                {newAvatar
+                  ? "New photo — it replaces your current one when you save."
+                  : removeAvatar
+                    ? "Your photo will be removed when you save."
+                    : "JPEG, PNG or WebP up to 5 MB."}
+              </span>
+              {errors.avatar && (
+                <span className={ui.fieldError} role="alert">
+                  {errors.avatar}
+                </span>
+              )}
+              {progress !== null && (
+                <div className={styles.progress}>
+                  <progress max={1} value={progress} aria-label="Uploading photo" />
+                  <span className={ui.hint} aria-hidden="true">
+                    {Math.round(progress * 100)}%
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className={ui.row}>
           <label className={ui.field}>

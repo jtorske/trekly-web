@@ -47,6 +47,11 @@ export function profileUpdate(values: ProfileFormValues): ProfileUpdate {
   };
 }
 
+/** The stored avatar to delete after a save: the old one, if it was replaced or removed. */
+export function staleAvatar(previous: string | null, saved: string | null): string | null {
+  return previous && previous !== saved ? previous : null;
+}
+
 /** What a close request (Cancel, ×, Escape, backdrop) should do. */
 export function closeAction(state: { dirty: boolean; confirming: boolean }): "close" | "confirm" | "keep-editing" {
   if (state.confirming) return "keep-editing";

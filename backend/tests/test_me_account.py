@@ -102,6 +102,38 @@ def test_own_avatar_path_accepted(client, headers, alice):
     assert response.status_code == 200 and response.json()["avatar_path"] == path
 
 
+def test_avatar_upload_replace_and_remove(client, headers, alice):
+    first = f"{alice}/{uuid.uuid4()}.webp"
+    assert client.patch("/api/me/profile", json={"avatar_path": first}, headers=headers(alice)).json()["avatar_path"] == first
+
+    # Replacing points the profile at the new file (the client then deletes the old one).
+    second = f"{alice}/{uuid.uuid4()}.jpg"
+    replaced = client.patch("/api/me/profile", json={"avatar_path": second, "bio": "New photo"}, headers=headers(alice)).json()
+    assert replaced["avatar_path"] == second and replaced["bio"] == "New photo"
+    assert client.get("/api/me/profile", headers=headers(alice)).json()["avatar_path"] == second
+
+    # Editing other fields leaves the photo alone.
+    assert client.patch("/api/me/profile", json={"bio": "Still here"}, headers=headers(alice)).json()["avatar_path"] == second
+
+    removed = client.patch("/api/me/profile", json={"avatar_path": None}, headers=headers(alice)).json()
+    assert removed["avatar_path"] is None
+    assert client.get("/api/me/profile", headers=headers(alice)).json()["avatar_path"] is None
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["{uuid}.png", "{uuid}.jpeg", "avatar.webp", "{uuid}.webp/../x.webp", "nested/{uuid}.webp"],
+)
+def test_avatar_path_must_be_a_processed_upload(client, headers, alice, name):
+    path = f"{alice}/{name.format(uuid=uuid.uuid4())}"
+    assert client.patch("/api/me/profile", json={"avatar_path": path}, headers=headers(alice)).status_code == 422
+
+
+def test_cannot_point_profile_at_another_users_avatar(client, headers, alice, bob):
+    path = f"{bob}/{uuid.uuid4()}.webp"
+    assert client.patch("/api/me/profile", json={"avatar_path": path}, headers=headers(alice)).status_code == 422
+
+
 def test_save_and_unsave_trails(client, headers, alice, trails):
     first = client.put(f"/api/me/saved-trails/{trails[0]}", headers=headers(alice))
     assert first.status_code == 201

@@ -37,7 +37,10 @@ export default function Dialog({
     busyRef.current = busy;
   }, [busy]);
 
+  const unmounting = useRef(false);
+
   useEffect(() => {
+    unmounting.current = false;
     const dialog = ref.current;
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const root = document.documentElement;
@@ -50,6 +53,7 @@ export default function Dialog({
       dialog.querySelector<HTMLElement>("[data-autofocus]")?.focus();
     }
     return () => {
+      unmounting.current = true;
       dialog?.close();
       root.style.overflow = previousOverflow;
       if (opener?.isConnected) opener.focus();
@@ -82,8 +86,24 @@ export default function Dialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
+      // Escape is handled on keydown: cancelling it there means the browser
+      // never raises a close request. Refusing those via `cancel` instead
+      // makes Chrome force-close the dialog on a second Escape.
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        if (!busyRef.current) onClose();
+      }}
       onCancel={(event) => {
         event.preventDefault();
+        if (!busyRef.current) onClose();
+      }}
+      // A close we didn't ask for (e.g. repeated Android back gestures):
+      // reopen and route it through onClose so unsaved-changes checks run.
+      onClose={() => {
+        const dialog = ref.current;
+        if (unmounting.current || !dialog || dialog.open) return;
+        dialog.showModal();
         if (!busyRef.current) onClose();
       }}
       onClick={(event) => {

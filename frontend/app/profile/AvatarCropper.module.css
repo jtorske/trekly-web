@@ -1,0 +1,67 @@
+.cropper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 60%, var(--color-cream));
+  padding: 1rem;
+  text-align: center;
+}
+
+.frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--color-dark-olive);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.frame:active {
+  cursor: grabbing;
+}
+
+.frame:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 3px;
+}
+
+.image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* The avatar shows as a circle; dim what falls outside it. */
+.guide {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 999px rgba(20, 28, 12, 0.45);
+  pointer-events: none;
+}
+
+.zoom {
+  display: flex;
+  width: 100%;
+  max-width: 15rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.zoom input {
+  flex: 1;
+  accent-color: var(--color-rust);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}

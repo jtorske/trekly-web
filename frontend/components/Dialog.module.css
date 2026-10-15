@@ -9,6 +9,8 @@
   border-radius: 1.25rem;
   background: var(--color-cream);
   padding: 0;
+  /* The body scrolls; without this the borders add a second, outer scrollbar. */
+  overflow: hidden;
   color: var(--ink);
   box-shadow: 0 30px 60px -30px rgba(20, 28, 12, 0.55);
 }
