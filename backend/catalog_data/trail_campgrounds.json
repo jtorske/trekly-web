@@ -1,0 +1,308 @@
+{
+  "_comment": "Hand-curated links between overnight trails in the top-100 catalogue (catalog_data/trails_canada.json) and backcountry campgrounds/permits (backcountry_sites). Backcountry sites have no coordinates, so links can't be derived automatically. Trails are keyed by (name, province_code), the same natural key the trail seed uses; sites by Parks Canada resourceId, with the provider name and code alongside so the seed can warn if they drift (like backcountry_park_overrides.json). `order` is the position along the route in the direction given in `direction`; stops sharing an order are individually booked pads at the same place (`stop`). Every overnight trail in the top 100 appears here; trails with no Parks Canada sites list only `booking`.",
+  "status": "DRAFT 2026-10-15, pending review. Not seeded.",
+  "confidence": {
+    "exact": "Parks Canada's own data ties the site to this route: its map area (Jasper 'Skyline'), its trail-code prefix (Banff 'Sk' = Skoki), or a description that names the route.",
+    "likely": "Inferred from route knowledge and site names; Parks Canada's data doesn't say so. Check before approving."
+  },
+  "booking_systems": {
+    "parks_canada": {"name": "Parks Canada", "url": "https://reservation.pc.gc.ca"},
+    "bc_parks": {"name": "BC Parks", "url": "https://camping.bcparks.ca"},
+    "alberta_parks": {"name": "Alberta Parks", "url": "https://reserve.albertaparks.ca"},
+    "ontario_parks": {"name": "Ontario Parks", "url": "https://reservations.ontarioparks.ca"},
+    "yukon_parks": {"name": "Yukon Parks", "url": null},
+    "manitoba_parks": {"name": "Manitoba Parks", "url": null},
+    "fundy_trail_parkway": {"name": "Fundy Trail Parkway", "url": null},
+    "alpine_club_of_canada": {"name": "Alpine Club of Canada", "url": "https://www.alpineclubofcanada.ca"},
+    "traversee_de_charlevoix": {"name": "Traversée de Charlevoix", "url": null},
+    "none": {"name": "No reservations (first come, first served)", "url": null}
+  },
+  "trails": [
+    {
+      "name": "West Coast Trail", "province_code": "BC",
+      "direction": "north to south (Pachena Bay to Gordon River); the mid-point entry is Nitinaht",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "A trail permit, booked by entry point. Campsites on the trail aren't reserved."}],
+      "campgrounds": [
+        {"resource_id": "-2147472750", "name": "Pachena Bay (North)", "kind": "trail_permit", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147472749", "name": "Balaats’adt (Nitinaht Village) - Mid-Point", "kind": "trail_permit", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147472751", "name": "Gordon River (South)", "kind": "trail_permit", "order": 3, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Garibaldi Lake", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Garibaldi Lake and Taylor Meadows backcountry campgrounds."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Berg Lake Trail", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Berg Lake corridor campgrounds."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Skyline Trail", "province_code": "AB",
+      "direction": "Maligne Lake to Maligne Canyon (the usual direction)",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483250", "name": "Evelyn Creek", "code": "27", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483167", "name": "Little Shovel", "code": "28", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483222", "name": "Snowbowl", "code": "29", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483191", "name": "Curator", "code": "30", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483225", "name": "Tekarra", "code": "31", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483193", "name": "Signal", "code": "32", "order": 6, "confidence": "exact"}
+      ],
+      "excluded": ["Watchtower (33) is in Parks Canada's Skyline area but on the separate Watchtower trail."]
+    },
+    {
+      "name": "Elizabeth Parker Hut / Lake O'Hara", "province_code": "BC",
+      "booking": [
+        {"system": "parks_canada", "covers": "partial", "note": "Lake O'Hara campground (bus access is booked separately through Parks Canada)."},
+        {"system": "alpine_club_of_canada", "covers": "partial", "note": "Elizabeth Parker Hut."}
+      ],
+      "campgrounds": [
+        {"resource_id": "-2147471963", "name": "Lake O'Hara Backcountry Sites", "order": 1, "confidence": "exact"}
+      ],
+      "excluded": ["'Lake O'Hara Campground - Off Season' (winter random camping) and the unlisted last-minute/staff/alpine zones."]
+    },
+    {
+      "name": "Panorama Ridge", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Overnight from Garibaldi Lake or Taylor Meadows campgrounds."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Mount Assiniboine via Sunshine Meadows", "province_code": "BC",
+      "direction": "Sunshine Village to Lake Magog",
+      "booking": [
+        {"system": "parks_canada", "covers": "partial", "note": "The Banff section (Howard Douglas Lake)."},
+        {"system": "bc_parks", "covers": "partial", "note": "Porcupine and Lake Magog campgrounds in Mount Assiniboine Provincial Park. Naiset Huts and the lodge are booked separately."}
+      ],
+      "campgrounds": [
+        {"resource_id": "-2147483065", "name": "Howard Douglas Lake", "code": "Su8", "order": 1, "confidence": "exact", "notes": "Parks Canada's description places it on the Sunshine Meadows to Citadel Pass corridor."}
+      ],
+      "excluded": ["Bryant Creek exit (Big Springs Br9, McBride's Camp Br14, Allenby Junction Br17): a different route in and out, not added."]
+    },
+    {
+      "name": "East Coast Trail", "province_code": "NL",
+      "booking": [{"system": "none", "covers": "all", "note": "Campsites along the trail are first come, first served."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Juan de Fuca Marine Trail", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Backcountry camping permit, bought online; campsites aren't reserved."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Rockwall Trail", "province_code": "BC",
+      "direction": "south to north (Floe Lake trailhead to Paint Pots)",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483103", "name": "Floe Lake", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483127", "name": "Numa Creek", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483028", "name": "Tumbling Creek", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147482997", "name": "Helmet Falls", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483082", "name": "Helmet/Ochre Junction", "order": 5, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Elfin Lakes", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Elfin Lakes shelter and campground."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Fundy Footpath", "province_code": "NB",
+      "direction": "east to west (Fundy National Park to Big Salmon River)",
+      "booking": [
+        {"system": "fundy_trail_parkway", "covers": "partial", "note": "Campsites on the Footpath itself."},
+        {"system": "parks_canada", "covers": "partial", "note": "Goose River, where the Footpath meets Fundy National Park, and Point Wolfe the night before or after."}
+      ],
+      "campgrounds": [
+        {"resource_id": "-2147471566", "name": "PW162", "code": "PW162", "stop": "Point Wolfe", "order": 1, "confidence": "likely", "notes": "A frontcountry pad Parks Canada lists as 'a great place to camp before or after doing the Fundy Footpath'."},
+        {"resource_id": "-2147471565", "name": "PW164", "code": "PW164", "stop": "Point Wolfe", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483618", "name": "GR4", "code": "GR4", "stop": "Goose River", "order": 2, "confidence": "likely", "notes": "At the park's southwest boundary, where the Footpath starts."},
+        {"resource_id": "-2147483619", "name": "GR5", "code": "GR5", "stop": "Goose River", "order": 2, "confidence": "likely"},
+        {"resource_id": "-2147483620", "name": "GR6", "code": "GR6", "stop": "Goose River", "order": 2, "confidence": "likely"}
+      ]
+    },
+    {
+      "name": "Tonquin Valley", "province_code": "AB",
+      "direction": "in by Astoria River, out by Portal Creek",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483219", "name": "Astoria", "code": "42", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483289", "name": "Switchback", "code": "43", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483197", "name": "Clitheroe", "code": "44", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483257", "name": "Surprise Point", "code": "45", "order": 4, "confidence": "exact", "notes": "On a short spur off the main route."},
+        {"resource_id": "-2147483186", "name": "Amethyst", "code": "46", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483278", "name": "Maccarib", "code": "47", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483233", "name": "Portal", "code": "48", "order": 7, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "La Cloche Silhouette Trail", "province_code": "ON",
+      "booking": [{"system": "ontario_parks", "covers": "all", "note": "Killarney backcountry campsites."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Long Range Traverse", "province_code": "NL",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "A route permit; the boat across Western Brook Pond is booked separately."}],
+      "campgrounds": [
+        {"resource_id": "-2147471571", "name": "Long Range Traverse", "kind": "trail_permit", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147471567", "name": "Combined Northern and Long Range Traverse", "kind": "trail_permit", "order": 2, "confidence": "likely", "notes": "A longer variant permit, shown as an alternative rather than a stop."}
+      ]
+    },
+    {
+      "name": "Skoki Valley Trail", "province_code": "AB",
+      "direction": "from the Fish Creek trailhead (Banff codes are trail + km)",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "Skoki Lodge is booked separately."}],
+      "campgrounds": [
+        {"resource_id": "-2147483081", "name": "Hidden Lake", "code": "Sk5", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483008", "name": "Baker Lake", "code": "Sk11", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483021", "name": "Merlin Meadows", "code": "Sk18", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147482999", "name": "Red Deer Lakes", "code": "Sk19", "order": 4, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Egypt Lake / Healy Pass", "province_code": "AB",
+      "direction": "Sunshine Village over Healy Pass",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483001", "name": "Healy Creek", "code": "E5", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483054", "name": "Egypt Lake", "code": "E13", "order": 2, "confidence": "exact"}
+      ],
+      "excluded": ["Egypt Lake Shelter: is_publicly_listed = false today (no published map), so the API would hide it.", "Pharaoh Creek (Re16): on the Redearth Creek approach, a different route."]
+    },
+    {
+      "name": "Lake Superior Coastal Trail", "province_code": "ON",
+      "booking": [{"system": "ontario_parks", "covers": "all"}],
+      "campgrounds": []
+    },
+    {
+      "name": "Traversée de Charlevoix", "province_code": "QC",
+      "booking": [{"system": "traversee_de_charlevoix", "covers": "all", "note": "Huts and cabins booked with the trail operator."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Cape Scott Trail", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all", "note": "Backcountry camping permit, bought online; campsites aren't reserved."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Sunshine Coast Trail", "province_code": "BC",
+      "booking": [{"system": "none", "covers": "all", "note": "Huts and campsites are free and first come, first served."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Wedgemount Lake", "province_code": "BC",
+      "booking": [{"system": "bc_parks", "covers": "all"}],
+      "campgrounds": []
+    },
+    {
+      "name": "Pukaskwa Coastal Hiking Trail", "province_code": "ON",
+      "direction": "north to south (Hattie Cove to North Swallow River)",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "Each campsite is booked individually."}],
+      "campgrounds": [
+        {"resource_id": "-2147477554", "name": "HF1", "code": "HF1", "stop": "Hook Falls", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147477538", "name": "HF2", "code": "HF2", "stop": "Hook Falls", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147477551", "name": "HF3", "code": "HF3", "stop": "Hook Falls", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147477579", "name": "WR1", "code": "WR1", "stop": "Willow River", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147477516", "name": "WR2", "code": "WR2", "stop": "Willow River", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147477548", "name": "WR3", "code": "WR3", "stop": "Willow River", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147477577", "name": "WR6", "code": "WR6", "stop": "Willow River", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147477530", "name": "MH1", "code": "MH1", "stop": "Morrison Harbour", "order": 3, "confidence": "likely", "notes": "Order of Morrison Harbour vs Fish Harbour unverified."},
+        {"resource_id": "-2147477532", "name": "MH2", "code": "MH2", "stop": "Morrison Harbour", "order": 3, "confidence": "likely"},
+        {"resource_id": "-2147477546", "name": "FH1", "code": "FH1", "stop": "Fish Harbour", "order": 4, "confidence": "likely", "notes": "Order of Morrison Harbour vs Fish Harbour unverified."},
+        {"resource_id": "-2147477567", "name": "FH2", "code": "FH2", "stop": "Fish Harbour", "order": 4, "confidence": "likely"},
+        {"resource_id": "-2147477571", "name": "FH3", "code": "FH3", "stop": "Fish Harbour", "order": 4, "confidence": "likely"},
+        {"resource_id": "-2147477581", "name": "OB1", "code": "OB1", "stop": "Oiseau Bay", "order": 5, "confidence": "likely"},
+        {"resource_id": "-2147477547", "name": "OB2", "code": "OB2", "stop": "Oiseau Bay", "order": 5, "confidence": "likely"},
+        {"resource_id": "-2147477513", "name": "FC1", "code": "FC1", "stop": "Fisherman's Cove", "order": 6, "confidence": "likely", "notes": "Order within Hiking Mid-South (Oiseau Bay, Fisherman's Cove, White Gravel River) unverified."},
+        {"resource_id": "-2147477528", "name": "FC2", "code": "FC2", "stop": "Fisherman's Cove", "order": 6, "confidence": "likely"},
+        {"resource_id": "-2147477559", "name": "WGR1", "code": "WGR1", "stop": "White Gravel River", "order": 7, "confidence": "likely"},
+        {"resource_id": "-2147477582", "name": "WGR2", "code": "WGR2", "stop": "White Gravel River", "order": 7, "confidence": "likely"},
+        {"resource_id": "-2147477562", "name": "WGR3", "code": "WGR3", "stop": "White Gravel River", "order": 7, "confidence": "likely"},
+        {"resource_id": "-2147477560", "name": "HL1", "code": "HL1", "stop": "Hideaway Lake", "order": 8, "confidence": "likely"},
+        {"resource_id": "-2147477561", "name": "WSH1", "code": "WSH1", "stop": "White Spruce Harbour", "order": 9, "confidence": "likely"},
+        {"resource_id": "-2147477575", "name": "NS1", "code": "NS1", "stop": "North Swallow River", "order": 10, "confidence": "exact", "notes": "Southern end of the trail."}
+      ],
+      "excluded": ["Playter Harbour (PH1-3), Picture Rock Harbour (PRH1, PRH3-5) and White River Portage (WRP2): their descriptions put them on the Mdaabii Miikna loop, not the Coastal Trail.", "Chigamiwinigum Falls (CHF1-2): on the White River canoe portage."]
+    },
+    {
+      "name": "Highland Backpacking Trail", "province_code": "ON",
+      "booking": [{"system": "ontario_parks", "covers": "all", "note": "Algonquin backcountry campsites."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Grizzly Lake", "province_code": "YT",
+      "booking": [{"system": "yukon_parks", "covers": "all", "note": "Tombstone Territorial Park backcountry campgrounds."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Shadow Lake - Twin Lakes - Redearth Creek Loop", "province_code": "AB",
+      "direction": "up Redearth Creek, over Gibbon Pass to Twin Lakes",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "Shadow Lake Lodge is booked separately."}],
+      "campgrounds": [
+        {"resource_id": "-2147483142", "name": "Lost Horse Creek", "code": "Re6", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483110", "name": "Shadow Lake", "code": "Re14", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147482979", "name": "Twin Lakes", "code": "Tw7", "order": 3, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Glacier Lake Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483041", "name": "Glacier Lake", "code": "Gl9", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Ball Pass", "province_code": "AB",
+      "direction": "up Redearth Creek to Ball Pass, out by Hawk Creek (Kootenay)",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483142", "name": "Lost Horse Creek", "code": "Re6", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483110", "name": "Shadow Lake", "code": "Re14", "order": 2, "confidence": "likely"},
+        {"resource_id": "-2147483014", "name": "Ball Pass Junction", "code": "Re21", "order": 3, "confidence": "exact"}
+      ],
+      "excluded": ["Hawk Random (Kootenay random camping zone): not a campground."]
+    },
+    {
+      "name": "Mystic Pass Trail", "province_code": "AB",
+      "direction": "Johnston Canyon over Mystic Pass, out by Forty Mile Creek to Mt Norquay",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483105", "name": "Larry's Camp", "code": "Jo9", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483076", "name": "Mystic Valley", "code": "Mi22", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147482998", "name": "Mystic Junction", "code": "Fm19", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483024", "name": "Mount Cockscomb", "code": "Fm10", "order": 4, "confidence": "likely"}
+      ],
+      "review": "The trail's catalogue description says it connects Johnston Canyon to 'the Panther River area', but the usual traverse exits by Forty Mile Creek to Mt Norquay. These links assume the Norquay exit."
+    },
+    {
+      "name": "Northover Ridge / Three Isle Lake", "province_code": "AB",
+      "booking": [{"system": "alberta_parks", "covers": "all", "note": "Kananaskis backcountry campgrounds (Three Isle Lake, Aster Lake)."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Elbow Lake to Rae Glacier", "province_code": "AB",
+      "booking": [{"system": "alberta_parks", "covers": "all", "note": "Elbow Lake backcountry campground."}],
+      "campgrounds": []
+    },
+    {
+      "name": "Grey Owl Trail", "province_code": "SK",
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "Prince Albert National Park backcountry, which Parks Canada doesn't offer online: the catalogue sync found no Prince Albert backcountry location."}],
+      "campgrounds": [],
+      "review": "Booked through Parks Canada but not online. Confirm how (phone or visitor centre) before we show a note."
+    },
+    {
+      "name": "Kokanee Glacier via Gibson Lake", "province_code": "BC",
+      "booking": [
+        {"system": "bc_parks", "covers": "partial", "note": "Kokanee Glacier backcountry campground."},
+        {"system": "alpine_club_of_canada", "covers": "partial", "note": "Kokanee Glacier Cabin."}
+      ],
+      "campgrounds": []
+    },
+    {
+      "name": "Mantario Trail", "province_code": "MB",
+      "booking": [{"system": "manitoba_parks", "covers": "all", "note": "Backcountry campsites in Whiteshell Provincial Park."}],
+      "campgrounds": []
+    }
+  ]
+}
