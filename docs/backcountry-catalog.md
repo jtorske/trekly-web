@@ -118,3 +118,67 @@ opens the Backcountry tab with that park and booking type selected. It needs
 a `mapId` (without one it falls back to "All Locations"), and it never
 selects a campground, because Parks Canada builds backcountry trips as an
 itinerary in that form. So there are no per-campground booking links.
+
+## Availability and alerts
+
+Availability is fetched only on demand, never bulk-polled:
+
+- `GET /api/trails/{id}/availability?start=&nights=&party=` (no sign-in)
+  checks the trail's listed, unretired campgrounds for one stay.
+- `scripts/poll_alerts.py` checks campgrounds with active alerts
+  (`/api/me/alerts`, signed-in users only) and emails once when every night
+  of an alert's stay is available.
+
+Both go through `app/backcountry/availability.py`:
+
+- One `availability/map` request covers every site on a provider map for a
+  date range, so a trail costs one or two requests. The poller merges
+  alerts on the same map and party size into windows of up to 31 nights.
+- Responses are cached in `availability_cache` for 5 minutes
+  (`AVAILABILITY_CACHE_MINUTES`) and shared by the API and the poller.
+- Every live request takes from a global per-minute budget in
+  `provider_request_budget` (`AVAILABILITY_REQUESTS_PER_MINUTE`, default 20).
+  When it's used up, the API answers 429 with Retry-After, and the poller
+  leaves the remaining alerts for its next run.
+- Same polite client as the catalogue sync: browser-like headers, a Referer
+  matching the results page, 1-2 s spacing and exponential backoff.
+
+### Poller
+
+```bash
+cd backend
+python scripts/poll_alerts.py     # from any cron or worker, e.g. every 5-10 minutes
+```
+
+- A lease in `job_locks` stops runs from overlapping; a crashed run's lease
+  expires after 15 minutes.
+- A run that starts less than `ALERT_POLL_MIN_INTERVAL_MINUTES` (default 10)
+  after the previous one exits immediately. This is the global cap on polling
+  frequency, whatever the schedule says.
+- Each run makes at most `ALERT_POLL_MAX_REQUESTS` (default 20) live
+  requests. Least recently checked alerts go first.
+- Alerts whose first night has passed expire. A notified alert stays quiet
+  until the user turns it back on.
+- `EMAIL_BACKEND`: `sendgrid` in production, `mailpit` locally (the Supabase
+  stack's mail catcher at http://127.0.0.1:44324, over its HTTP send API, so
+  no SMTP port needs exposing), or `console`.
+
+### `availability/map`, as verified live on 2026-10-15
+
+- `startDate`..`endDate` is inclusive (one entry per night), but `endDate`
+  must be after `startDate`: start == end returns HTTP 400. One-night checks
+  ask for two nights and read the first.
+- `peopleCapacityCategoryCounts` carries the party size; `numEquipment` is
+  tent pads (Parks Canada allows at most 4 people per pad).
+- Status values: **0 available** (confirmed on Parks Canada's own map: Skyline
+  zones on 2026-10-20 were bookable once a party size was entered), 1
+  unavailable/full (GoingToCamp enum, not yet seen live), 2 not operating
+  (West Coast Trail and Pukaskwa out of season), 3 not bookable online yet
+  (July 2027, before release). Anything else is treated as unknown and never
+  triggers an alert.
+- campalert-service's `parksCanadaClient.js` documents the opposite (0 =
+  unavailable, 1 = available), so its poller's 0 → 1 "opened up" check would
+  fire when a site fills. It's left untouched pending its retirement.
+
+Fixtures: `backend/tests/fixtures/parks_canada_availability.json` (4 real
+responses plus one clearly labelled synthetic "partly full" variant).

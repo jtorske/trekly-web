@@ -22,6 +22,8 @@ pip install -r requirements-dev.txt
 cp .env.example .env            # fill in DATABASE_URL and SUPABASE_URL
 python -m alembic upgrade head  # gear, profiles, saved trails, setups
 python scripts/catalog.py import
+python scripts/seed_trails.py && python scripts/sync_backcountry.py && python scripts/seed_trail_campgrounds.py
+python scripts/poll_alerts.py   # campground alerts; run from cron/a worker every 5-10 min
 uvicorn app.main:app --reload   # http://localhost:8000
 
 # Web app

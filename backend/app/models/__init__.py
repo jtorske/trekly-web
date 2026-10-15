@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
 from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.catalog import (
     CatalogBrand,
@@ -19,6 +20,8 @@ from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.models.user_gear import UserGearItem
 
 __all__ = [
+    "AvailabilityAlert",
+    "AvailabilityCache",
     "BackcountryPark",
     "BackcountrySite",
     "CatalogBrand",
@@ -33,7 +36,9 @@ __all__ = [
     "CatalogSource",
     "GearSetup",
     "GearSetupItem",
+    "JobLock",
     "Profile",
+    "ProviderRequestBudget",
     "SavedTrail",
     "Trail",
     "TrailBookingSystem",

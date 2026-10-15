@@ -128,7 +128,13 @@ class ParksCanadaClient:
             cached.write_text(json.dumps({"path": path, "body": body}), encoding="utf-8")
         return body
 
-    def _fetch(self, path: str) -> Any:
+    def get_live(self, path: str, headers: dict[str, str] | None = None) -> Any:
+        """Always a live request (never the disk cache), with extra headers.
+        Used for availability, which changes minute to minute and is cached
+        in the database for a few minutes instead."""
+        return self._fetch(path, headers)
+
+    def _fetch(self, path: str, extra_headers: dict[str, str] | None = None) -> Any:
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             wait = self.delay_s - (time.monotonic() - self._last_request_at)
@@ -136,7 +142,7 @@ class ParksCanadaClient:
                 time.sleep(wait)
             self._last_request_at = time.monotonic()
             self.live_requests += 1
-            request = urllib.request.Request(BASE_URL + path, headers=HEADERS)
+            request = urllib.request.Request(BASE_URL + path, headers={**HEADERS, **(extra_headers or {})})
             try:
                 with urllib.request.urlopen(request, timeout=self.timeout_s) as response:
                     return json.load(response)

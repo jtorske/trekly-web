@@ -112,5 +112,39 @@ check("Signed-in users can't modify the shared catalogue", status in (401, 403) 
 status, objects = call("POST", f"/storage/v1/object/list/gear-photos", bob, {"prefix": alice_id})
 check("Bob can't list Alice's photo folder", objects == [] or status >= 400)
 
+# Trail campgrounds: public, read-only.
+status, links = call("GET", "/rest/v1/trail_campgrounds?select=trail_id,site_id&limit=1")
+check("Trail campground links are publicly readable", status == 200)
+if links:
+    status, written = call("PATCH", f"/rest/v1/trail_campgrounds?site_id=eq.{links[0]['site_id']}", alice,
+                           {"notes": "Hacked"}, extra={"Prefer": "return=representation"})
+    check("Signed-in users can't modify trail campground links", status in (401, 403) or written == [])
+
+# Availability alerts: owners read their own; nobody writes through the REST API.
+_, site = call("GET", "/rest/v1/backcountry_sites?select=id&limit=1")
+status, made = call("POST", "/rest/v1/availability_alerts", SERVICE, apikey=SERVICE, extra={"Prefer": "return=representation"},
+                    body={"user_id": alice_id, "email": "alice@example.com", "site_id": site[0]["id"],
+                          "start_date": "2027-07-15", "nights": 2, "party_size": 2})
+alert_id = made[0]["id"] if status == 201 else None
+check("(setup) service role created an alert for Alice", alert_id is not None)
+_, mine = call("GET", "/rest/v1/availability_alerts?select=id", alice)
+check("Alice can read her own alert", [r["id"] for r in mine or []] == [alert_id])
+_, theirs = call("GET", "/rest/v1/availability_alerts?select=id", bob)
+check("Bob sees none of Alice's alerts", theirs == [])
+_, anon_alerts = call("GET", "/rest/v1/availability_alerts?select=id")
+check("Anonymous sees no alerts", anon_alerts == [] or isinstance(anon_alerts, dict))
+status, changed = call("PATCH", f"/rest/v1/availability_alerts?id=eq.{alert_id}", alice, {"status": "notified"},
+                       extra={"Prefer": "return=representation"})
+check("Alice can't change her alert's status directly", status in (401, 403) or changed == [])
+status, _ = call("POST", "/rest/v1/availability_alerts", bob,
+                 {"user_id": bob_id, "email": "b@example.com", "site_id": site[0]["id"], "start_date": "2027-07-15",
+                  "nights": 1, "party_size": 1})
+check("Users can't insert alerts directly", status in (401, 403))
+for table in ("availability_cache", "provider_request_budget", "job_locks"):
+    status, rows = call("GET", f"/rest/v1/{table}?select=*", alice)
+    check(f"{table} is backend-only", status in (401, 403) or rows == [])
+if alert_id:
+    call("DELETE", f"/rest/v1/availability_alerts?id=eq.{alert_id}", SERVICE, apikey=SERVICE)
+
 print(f"\n{len(failures)} failure(s)")
 sys.exit(1 if failures else 0)

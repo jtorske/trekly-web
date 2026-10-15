@@ -218,3 +218,143 @@
     height: 1.6rem;
   }
 }
+
+/* Availability check */
+
+.checkCard {
+  margin-bottom: 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 80%, var(--color-cream));
+  padding: 0.9rem 1rem;
+}
+
+.stayForm {
+  display: grid;
+  grid-template-columns: minmax(9.5rem, 1.4fr) minmax(4.5rem, 0.6fr) minmax(4.5rem, 0.6fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.checkButton {
+  min-height: 2.6rem;
+}
+
+.checkStatus {
+  margin-top: 0.6rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.checkError {
+  color: #7a2d12;
+  font-weight: 600;
+}
+
+.availability {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-top: 0.55rem;
+}
+
+.padLabel {
+  min-width: 3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.night {
+  min-width: 3.1rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  padding: 0.12rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.night_available {
+  background: color-mix(in srgb, var(--color-olive) 22%, transparent);
+  color: var(--color-dark-olive);
+}
+
+.night_full {
+  background: color-mix(in srgb, var(--color-rust) 18%, transparent);
+  color: #7a3f0d;
+  text-decoration: line-through;
+}
+
+.night_closed,
+.night_unknown {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 20%, transparent);
+  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+}
+
+.night_unknown {
+  border-style: dashed;
+}
+
+.night_not_released {
+  background: color-mix(in srgb, var(--color-tan) 22%, transparent);
+  color: #6b4613;
+}
+
+.summary {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.summary_available {
+  color: var(--color-olive);
+}
+
+.summary_partial,
+.summary_not_released {
+  color: #6b4613;
+}
+
+.summary_full {
+  color: #7a3f0d;
+}
+
+.summary_closed,
+.summary_unknown {
+  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+}
+
+.alertButton {
+  margin-left: auto;
+  border: 1px solid var(--color-rust);
+  border-radius: 9999px;
+  padding: 0.25rem 0.8rem;
+  color: var(--color-rust);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.alertButton:hover {
+  background: var(--color-rust);
+  color: var(--color-cream);
+}
+
+@media (max-width: 640px) {
+  .stayForm {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .startField,
+  .checkButton {
+    grid-column: 1 / -1;
+  }
+}
