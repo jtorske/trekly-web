@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
+import { tripLengthLabel } from "@/lib/tripLength";
 import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { metersToFeet } from "@/lib/units";
 import styles from "./page.module.css";
@@ -48,8 +49,7 @@ function TrailCard({
           </span>
           {trail.typical_duration_nights != null && (
             <span className={styles.metaItem}>
-              {trail.typical_duration_nights}{" "}
-              {trail.typical_duration_nights === 1 ? "night" : "nights"}
+              {tripLengthLabel(trail.typical_duration_nights)}
             </span>
           )}
           {trail.elevation_gain_m != null && (

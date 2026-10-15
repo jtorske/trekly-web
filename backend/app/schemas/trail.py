@@ -48,3 +48,60 @@ class TrailDetailOut(TrailListItemOut):
     climate_zone: str | None = None
     description: str | None = None
     seasonal_conditions: list[SeasonalConditionOut] = []
+
+
+class CampgroundParkOut(BaseModel):
+    name: str
+    province_code: str | None = None
+
+
+class TrailCampgroundOut(BaseModel):
+    site_id: UUID
+    route_order: int
+    # Groups individually booked pads at one place ("Fish Harbour").
+    stop_name: str | None = None
+    notes: str | None = None
+    confidence: Literal["exact", "likely"]
+    # The provider no longer lists the site; the link is kept so the route
+    # still reads correctly.
+    retired: bool
+    name: str
+    site_code: str | None = None
+    kind: str
+    area: str | None = None
+    park: CampgroundParkOut | None = None
+    reservable_capacity: int | None = None
+    max_capacity: int | None = None
+    max_group_size: int | None = None
+    provider: str
+
+
+class TrailBookingOut(BaseModel):
+    system: str
+    # Null until the system is confirmed: the UI then says "Booked outside Trekly".
+    name: str | None = None
+    url: str | None = None
+    covers: Literal["all", "partial"]
+    confirmed: bool
+    note: str | None = None
+
+
+class TrailBookingLinkOut(BaseModel):
+    """A provider booking form preset to a park and booking type. Parks Canada
+    builds backcountry trips as an itinerary inside that form, so there is no
+    link to an individual campground."""
+
+    label: str
+    url: str
+
+
+class TrailCampgroundsOut(BaseModel):
+    trail_id: UUID
+    trip_type: Literal["overnight", "day"]
+    # A day hike that has campgrounds on it ("Also doable as an overnight").
+    overnight_option: bool
+    # Some stops' order or placement is curated rather than confirmed.
+    route_order_approximate: bool
+    booking: list[TrailBookingOut]
+    booking_links: list[TrailBookingLinkOut]
+    campgrounds: list[TrailCampgroundOut]

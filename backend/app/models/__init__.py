@@ -14,6 +14,7 @@ from app.models.catalog import (
 )
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.trail import Trail
+from app.models.trail_campground import TrailBookingSystem, TrailCampground
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.models.user_gear import UserGearItem
 
@@ -35,6 +36,8 @@ __all__ = [
     "Profile",
     "SavedTrail",
     "Trail",
+    "TrailBookingSystem",
+    "TrailCampground",
     "TrailSeasonalCondition",
     "UserGearItem",
 ]

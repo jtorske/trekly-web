@@ -7,8 +7,16 @@ import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
-import { getTrail, type SeasonalCondition, type TrailDetail } from "@/lib/trailsApi";
+import { tripLengthLabel } from "@/lib/tripLength";
+import {
+  getTrail,
+  getTrailCampgrounds,
+  type SeasonalCondition,
+  type TrailCampgrounds,
+  type TrailDetail,
+} from "@/lib/trailsApi";
 import { celsiusToFahrenheit, metersToFeet } from "@/lib/units";
+import CampgroundsSection from "./CampgroundsSection";
 import styles from "./page.module.css";
 
 const SEASON_LABELS: Record<SeasonalCondition["season"], string> = {
@@ -61,11 +69,15 @@ function SeasonCard({ condition }: { condition: SeasonalCondition }) {
 
 function TrailView({
   trail,
+  campgrounds,
+  campgroundsFailed,
   saved,
   pending,
   onToggleSave,
 }: {
   trail: TrailDetail;
+  campgrounds: TrailCampgrounds | null;
+  campgroundsFailed: boolean;
   saved: boolean;
   pending: boolean;
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
@@ -79,7 +91,7 @@ function TrailView({
   if (nights != null) {
     stats.push({
       label: "Typical trip",
-      value: `${nights} ${nights === 1 ? "night" : "nights"}`,
+      value: tripLengthLabel(nights),
     });
   }
   if (trail.elevation_gain_m != null) {
@@ -103,9 +115,14 @@ function TrailView({
       <header className={styles.header}>
         <p className={styles.region}>{trail.region}</p>
         <h1 className={styles.title}>{trail.name}</h1>
-        <span className={`${styles.terrainTag} ${styles[trail.terrain]}`}>
-          {TERRAIN_LABELS[trail.terrain]}
-        </span>
+        <div className={styles.tags}>
+          <span className={`${styles.terrainTag} ${styles[trail.terrain]}`}>
+            {TERRAIN_LABELS[trail.terrain]}
+          </span>
+          {campgrounds?.overnight_option && (
+            <span className={styles.overnightTag}>Also doable as an overnight</span>
+          )}
+        </div>
       </header>
 
       <dl className={styles.stats}>
@@ -136,6 +153,12 @@ function TrailView({
           <p className={styles.muted}>We don&apos;t have a description for this trail yet.</p>
         )}
       </section>
+
+      <CampgroundsSection
+        data={campgrounds}
+        failed={campgroundsFailed && ((trail.typical_duration_nights ?? 0) >= 1)}
+        className={styles.section}
+      />
 
       {trail.seasonal_conditions.length > 0 && (
         <section className={styles.section}>
@@ -180,6 +203,11 @@ function TrailContent() {
     trail: TrailDetail | null;
     failed: boolean;
   } | null>(null);
+  const [campgrounds, setCampgrounds] = useState<{
+    id: string;
+    data: TrailCampgrounds | null;
+    failed: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -191,8 +219,18 @@ function TrailContent() {
           setResult({ id, trail: null, failed: true });
         }
       });
+    // Fetched in parallel; the page renders without it and the section
+    // appears once it arrives.
+    getTrailCampgrounds(id, controller.signal)
+      .then((data) => setCampgrounds({ id, data, failed: false }))
+      .catch((error: unknown) => {
+        if ((error as { name?: string }).name !== "AbortError") {
+          setCampgrounds({ id, data: null, failed: true });
+        }
+      });
     return () => controller.abort();
   }, [id]);
+  const trailCampgrounds = campgrounds?.id === id ? campgrounds : null;
 
   const isLoading = id !== null && result?.id !== id;
 
@@ -230,6 +268,8 @@ function TrailContent() {
     body = (
       <TrailView
         trail={result.trail}
+        campgrounds={trailCampgrounds?.data ?? null}
+        campgroundsFailed={trailCampgrounds?.failed ?? false}
         saved={savedTrails.savedIds.has(result.trail.id)}
         pending={savedTrails.pending.has(result.trail.id) || (saveParam === result.trail.id && authStatus === "signedIn")}
         onToggleSave={savedTrails.toggle}

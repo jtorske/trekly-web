@@ -82,3 +82,39 @@ file.
 Gwaii Haanas isn't in the system. Glacier and Mount Revelstoke only expose
 Hermit Meadows, Eva Lake and Jade Lakes. Cape Breton Highlands only exposes
 Fishing Cove.
+
+## Trail ↔ campground links
+
+`trail_campgrounds` links trails to backcountry sites in route order, and
+`trail_booking_systems` records which reservation system(s) book each trail
+(for "Booked through BC Parks" notes). Sites have no coordinates, so links
+are curated by hand in `catalog_data/trail_campgrounds.json` and seeded:
+
+```bash
+cd backend
+python scripts/seed_trail_campgrounds.py --dry-run
+python scripts/seed_trail_campgrounds.py   # after seed_trails.py and sync_backcountry.py
+```
+
+- Trails are keyed by `(name, province_code)`; sites by provider resource id,
+  with the provider name alongside so the seed warns if it drifts.
+- `confidence: likely` links are curated, not confirmed by Parks Canada; the
+  trail page shows "Route order is approximate for some stops".
+- `notes` are shown to hikers; `review` holds evidence and open questions
+  and is never seeded.
+- Booking systems with `confirmed: false` show as "Booked outside Trekly".
+  Non-Parks Canada URLs stay `null` until verified.
+- Links to retired sites are kept and shown as "No longer listed by Parks
+  Canada"; links taken out of the file are removed. Sites with
+  `is_publicly_listed = false` are hidden by the API and by RLS.
+- A few day hikes (`overnight_option: true`) keep their trip type but show
+  their campgrounds as "Also doable as an overnight".
+
+`GET /api/trails/{id}/campgrounds` returns the links in route order with
+park, kind and capacity, the trail's booking systems, and `booking_links`:
+one Parks Canada booking form per (booking location, booking category).
+Verified 2026-10-15: `create-booking/results?resourceLocationId=&mapId=&bookingCategoryId=`
+opens the Backcountry tab with that park and booking type selected. It needs
+a `mapId` (without one it falls back to "All Locations"), and it never
+selects a campground, because Parks Canada builds backcountry trips as an
+itinerary in that form. So there are no per-campground booking links.

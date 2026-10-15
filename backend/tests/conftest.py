@@ -34,7 +34,8 @@ ISSUER = f"{SUPABASE_URL}/auth/v1"
 GEAR_TABLES = [
     table for name, table in Base.metadata.tables.items()
     if name.startswith(("catalog_", "gear_setup"))
-    or name in ("user_gear_items", "profiles", "saved_trails", "trails", "trail_seasonal_conditions")
+    or name in ("user_gear_items", "profiles", "saved_trails", "trails", "trail_seasonal_conditions",
+                "backcountry_parks", "backcountry_sites", "trail_campgrounds", "trail_booking_systems")
 ]
 
 

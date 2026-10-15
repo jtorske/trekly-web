@@ -97,6 +97,22 @@
   line-height: 1.08;
 }
 
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.overnightTag {
+  display: inline-block;
+  border: 1px solid color-mix(in srgb, var(--color-olive) 45%, transparent);
+  border-radius: 9999px;
+  padding: 0.2rem 0.75rem;
+  color: var(--color-dark-olive);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 .terrainTag {
   display: inline-block;
   border-radius: 9999px;

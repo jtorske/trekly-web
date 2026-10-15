@@ -1,0 +1,220 @@
+.title {
+  margin-bottom: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.intro,
+.muted {
+  margin-bottom: 0.9rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 75%, transparent);
+  line-height: 1.6;
+}
+
+/* Numbered route rail */
+
+.route {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.route::before {
+  content: "";
+  position: absolute;
+  top: 1.2rem;
+  bottom: 1.2rem;
+  left: 0.95rem;
+  border-left: 2px dashed color-mix(in srgb, var(--color-olive) 45%, transparent);
+}
+
+.stop {
+  position: relative;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.marker {
+  z-index: 1;
+  display: grid;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-top: 0.7rem;
+  place-items: center;
+  border: 2px solid var(--color-cream);
+  border-radius: 9999px;
+  background: var(--color-olive);
+  color: var(--color-cream);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 70%, var(--color-cream));
+  padding: 0.8rem 1rem;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.name {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.code {
+  margin-left: 0.5rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.kind {
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-tan) 26%, transparent);
+  padding: 0.12rem 0.6rem;
+  color: #6b4613;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.meta {
+  margin-top: 0.2rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  font-size: 0.85rem;
+}
+
+.pads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.pads li {
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 18%, transparent);
+  border-radius: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pads .padRetired {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.note {
+  margin-top: 0.4rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 70%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.bookLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.book {
+  color: var(--color-rust);
+  font-weight: 600;
+}
+
+.bookHint {
+  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  font-size: 0.82rem;
+}
+
+.book:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.retired .body {
+  border-style: dashed;
+  background: transparent;
+}
+
+.retired .name,
+.retired .meta {
+  opacity: 0.6;
+}
+
+.retired .marker {
+  background: color-mix(in srgb, var(--color-dark-olive) 35%, var(--color-cream));
+}
+
+.retiredNote {
+  margin-top: 0.4rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 70%, transparent);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.approximate {
+  margin-top: 0.6rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Booked through another system */
+
+.elsewhere {
+  margin-top: 0.9rem;
+  border-left: 3px solid var(--color-tan);
+  border-radius: 0 0.6rem 0.6rem 0;
+  background: color-mix(in srgb, var(--color-tan) 12%, transparent);
+  padding: 0.75rem 1rem;
+}
+
+.elsewhereTitle {
+  font-weight: 600;
+}
+
+.elsewhereTitle a {
+  color: var(--color-rust);
+}
+
+.elsewhereNote {
+  margin-top: 0.2rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 75%, transparent);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .body {
+    padding: 0.7rem 0.8rem;
+  }
+
+  .route::before {
+    left: 0.8rem;
+  }
+
+  .marker {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+}

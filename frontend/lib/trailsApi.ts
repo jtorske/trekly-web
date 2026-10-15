@@ -65,3 +65,78 @@ export async function getTrail(
   if (!res.ok) throw new Error("Failed to load trail");
   return res.json();
 }
+
+export type CampgroundKind =
+  | "zone"
+  | "site"
+  | "shelter"
+  | "cabin"
+  | "yurt"
+  | "random_zone"
+  | "horse_camp"
+  | "backpacking_campground"
+  | "trail_permit"
+  | "other";
+
+export interface TrailCampground {
+  site_id: string;
+  route_order: number;
+  /** Groups individually booked pads at one place ("Fish Harbour"). */
+  stop_name: string | null;
+  notes: string | null;
+  /** "likely" links are curated, not confirmed by the provider. */
+  confidence: "exact" | "likely";
+  /** The provider no longer lists this site. */
+  retired: boolean;
+  name: string;
+  site_code: string | null;
+  kind: CampgroundKind;
+  area: string | null;
+  park: { name: string; province_code: string | null } | null;
+  reservable_capacity: number | null;
+  max_capacity: number | null;
+  max_group_size: number | null;
+  provider: string;
+}
+
+/**
+ * A Parks Canada booking form preset to a park and booking type. It never
+ * opens a specific campground: trips are built as an itinerary there.
+ */
+export interface TrailBookingLink {
+  label: string;
+  url: string;
+}
+
+export interface TrailBooking {
+  system: string;
+  /** Null until the system is confirmed: show "Booked outside Trekly". */
+  name: string | null;
+  url: string | null;
+  covers: "all" | "partial";
+  confirmed: boolean;
+  note: string | null;
+}
+
+export interface TrailCampgrounds {
+  trail_id: string;
+  trip_type: "overnight" | "day";
+  /** A day hike with campgrounds on it ("Also doable as an overnight"). */
+  overnight_option: boolean;
+  route_order_approximate: boolean;
+  booking: TrailBooking[];
+  booking_links: TrailBookingLink[];
+  campgrounds: TrailCampground[];
+}
+
+export async function getTrailCampgrounds(
+  id: string,
+  signal?: AbortSignal,
+): Promise<TrailCampgrounds> {
+  const res = await fetch(
+    `${API_BASE}/api/trails/${encodeURIComponent(id)}/campgrounds`,
+    { signal },
+  );
+  if (!res.ok) throw new Error("Failed to load campgrounds");
+  return res.json();
+}
