@@ -9,6 +9,7 @@ import { slotForItem, zoneCoverage } from "@/app/gear/slots";
 import GearThumb from "@/components/GearThumb";
 import type { GearSetup } from "@/lib/setupsApi";
 import { TERRAIN_LABELS } from "@/lib/terrain";
+import { tripLengthLabel } from "@/lib/tripLength";
 import type { SavedTrail } from "@/lib/accountApi";
 import type { GearItem } from "@/lib/gearApi";
 import { formatWeight, metersToFeet, type UnitSystem } from "@/lib/units";
@@ -95,9 +96,7 @@ export function SavedTrailList({ data, limit }: { data: SavedData; limit?: numbe
               {[
                 trail.region,
                 TERRAIN_LABELS[trail.terrain],
-                trail.typical_duration_nights != null
-                  ? `${trail.typical_duration_nights} ${trail.typical_duration_nights === 1 ? "night" : "nights"}`
-                  : null,
+                trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
                 trail.elevation_gain_m != null ? `${metersToFeet(trail.elevation_gain_m).toLocaleString()} ft gain` : null,
               ]
                 .filter(Boolean)
