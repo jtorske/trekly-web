@@ -169,3 +169,22 @@ def test_shipped_catalogue_is_valid():
         assert t["terrain_difficulty"] in TERRAIN_DIFFICULTIES, t["name"]
         assert 41.6 <= t["latitude"] <= 83.2 and -141.1 <= t["longitude"] <= -52.6, t["name"]
     assert any(t["name"] == "West Coast Trail" for t in trails)
+
+
+def test_list_filters_by_trip_type(client, synced, session_factory):
+    session = session_factory()
+    for trail in session.query(Trail).filter(Trail.name.in_(["Trail 002", "Trail 005"])):
+        trail.typical_duration_nights = 2
+    session.query(Trail).filter(Trail.name == "Trail 007").one().typical_duration_nights = None
+    session.commit()
+    session.close()
+
+    def names(**params):
+        return [t["name"] for t in client.get("/api/trails", params={"limit": 100, **params}).json()]
+
+    assert names(trip="overnight") == ["Trail 002", "Trail 005"]
+    day = names(trip="day")
+    assert "Trail 002" not in day and "Trail 007" not in day and len(day) == 97
+    assert names(trip="overnight", q="Trail 005") == ["Trail 005"]
+    assert names(trip="overnight", terrain="extreme") == []
+    assert client.get("/api/trails", params={"trip": "weekend"}).status_code == 422

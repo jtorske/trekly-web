@@ -17,6 +17,9 @@ export interface TrailListItem extends TrailSummary {
   retired_at: string | null;
 }
 
+/** "overnight" = backpacking trips (1+ typical nights), "day" = day hikes. */
+export type TripType = "overnight" | "day";
+
 export type Season = "spring" | "summer" | "fall" | "winter";
 
 export interface SeasonalCondition {
@@ -42,10 +45,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export async function searchTrails(
   query: string,
   signal?: AbortSignal,
-  options: { terrain?: Terrain; limit?: number } = {},
+  options: { terrain?: Terrain; trip?: TripType; limit?: number } = {},
 ): Promise<TrailListItem[]> {
   const params = new URLSearchParams({ q: query });
   if (options.terrain) params.set("terrain", options.terrain);
+  if (options.trip) params.set("trip", options.trip);
   if (options.limit) params.set("limit", String(options.limit));
 
   const res = await fetch(`${API_BASE}/api/trails?${params}`, { signal });

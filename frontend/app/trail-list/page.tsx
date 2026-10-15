@@ -1,22 +1,74 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Suspense, useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import ui from "@/components/ui.module.css";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
-import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
+import { searchTrails, type TrailListItem, type TripType } from "@/lib/trailsApi";
 import { metersToFeet } from "@/lib/units";
 import styles from "./page.module.css";
 
 const TERRAINS = Object.keys(TERRAIN_LABELS) as Terrain[];
 const RESULT_LIMIT = 100;
 
+const TRIP_LABELS: Record<TripType, string> = {
+  overnight: "Backpacking",
+  day: "Day hikes",
+};
+const TRIPS = Object.keys(TRIP_LABELS) as TripType[];
+
 function isTerrain(value: string | null): value is Terrain {
   return value !== null && (TERRAINS as string[]).includes(value);
+}
+
+function isTrip(value: string | null): value is TripType {
+  return value !== null && (TRIPS as string[]).includes(value);
+}
+
+interface Filters {
+  terrain?: Terrain;
+  trip?: TripType;
+}
+
+function FilterGroup<T extends string>({
+  label,
+  options,
+  labels,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: T[];
+  labels: Record<T, string>;
+  value: T | undefined;
+  onChange: (value: T | undefined) => void;
+}) {
+  return (
+    <fieldset className={styles.filterGroup}>
+      <legend className={styles.filterLegend}>{label}</legend>
+      <div className={styles.filterChips}>
+        <button type="button" className={styles.chip} aria-pressed={!value} onClick={() => onChange(undefined)}>
+          All
+        </button>
+        {options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            className={styles.chip}
+            aria-pressed={value === option}
+            onClick={() => onChange(option)}
+          >
+            {labels[option]}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
 }
 
 function TrailCard({
@@ -80,6 +132,12 @@ function ExploreContent() {
   const q = searchParams.get("q")?.trim() ?? "";
   const terrainParam = searchParams.get("terrain");
   const terrain = isTerrain(terrainParam) ? terrainParam : undefined;
+  const tripParam = searchParams.get("trip");
+  const trip = isTrip(tripParam) ? tripParam : undefined;
+  const filters: Filters = { terrain, trip };
+  const activeFilters = (terrain ? 1 : 0) + (trip ? 1 : 0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersId = useId();
 
   const [input, setInput] = useState(q);
   const savedTrails = useSavedTrails();
@@ -92,13 +150,14 @@ function ExploreContent() {
     trails: TrailListItem[] | null;
   } | null>(null);
 
-  const requestKey = `${q}|${terrain ?? ""}`;
+  const requestKey = `${q}|${terrain ?? ""}|${trip ?? ""}`;
 
   const updateUrl = useCallback(
-    (nextQuery: string, nextTerrain: Terrain | undefined) => {
+    (nextQuery: string, next: Filters) => {
       const params = new URLSearchParams();
       if (nextQuery) params.set("q", nextQuery);
-      if (nextTerrain) params.set("terrain", nextTerrain);
+      if (next.trip) params.set("trip", next.trip);
+      if (next.terrain) params.set("terrain", next.terrain);
       const search = params.toString();
       router.replace(search ? `/trail-list?${search}` : "/trail-list", {
         scroll: false,
@@ -112,13 +171,13 @@ function ExploreContent() {
   useEffect(() => {
     const trimmed = input.trim();
     if (trimmed === q) return;
-    const timer = window.setTimeout(() => updateUrl(trimmed, terrain), 300);
+    const timer = window.setTimeout(() => updateUrl(trimmed, { terrain, trip }), 300);
     return () => window.clearTimeout(timer);
-  }, [input, q, terrain, updateUrl]);
+  }, [input, q, terrain, trip, updateUrl]);
 
   useEffect(() => {
     const controller = new AbortController();
-    searchTrails(q, controller.signal, { terrain, limit: RESULT_LIMIT })
+    searchTrails(q, controller.signal, { terrain, trip, limit: RESULT_LIMIT })
       .then((trails) => setResult({ key: requestKey, trails }))
       .catch((error: unknown) => {
         if ((error as { name?: string }).name !== "AbortError") {
@@ -126,16 +185,16 @@ function ExploreContent() {
         }
       });
     return () => controller.abort();
-  }, [q, terrain, requestKey]);
+  }, [q, terrain, trip, requestKey]);
 
   // Back from sign-in after a guest clicked Save on a card: finish that save.
   useEffect(() => {
     if (!saveParam || authStatus !== "signedIn" || savedTrails.loading || resumedSave.current) return;
     resumedSave.current = true;
-    const done = () => updateUrl(q, terrain);
+    const done = () => updateUrl(q, { terrain, trip });
     if (savedTrails.savedIds.has(saveParam)) done();
     else savedTrails.toggle(saveParam, true).catch(() => undefined).finally(done);
-  }, [saveParam, authStatus, savedTrails, updateUrl, q, terrain]);
+  }, [saveParam, authStatus, savedTrails, updateUrl, q, terrain, trip]);
 
   const isLoading = result?.key !== requestKey;
   const trails = result?.trails;
@@ -143,20 +202,16 @@ function ExploreContent() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    updateUrl(input.trim(), terrain);
+    updateUrl(input.trim(), filters);
   };
+
+  const setFilter = (next: Filters) => updateUrl(input.trim(), next);
 
   return (
     <main className={styles.page}>
       <div className={styles.texture} aria-hidden="true" />
 
-      <div className={styles.intro}>
-        <h1 className={styles.title}>Explore</h1>
-        <p className={styles.subtitle}>
-          Search backpacking trails by name or region, then open one to see
-          conditions and plan your pack.
-        </p>
-      </div>
+      <h1 className={ui.srOnly}>Explore trails</h1>
 
       <div className={styles.controls}>
         <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
@@ -169,32 +224,92 @@ function ExploreContent() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
           />
+          <button
+            type="button"
+            className={styles.filterButton}
+            aria-expanded={filtersOpen}
+            aria-controls={filtersId}
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.filterIcon}>
+              <path d="M3 5h14M6 10h8M9 15h2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+            <span className={styles.filterLabel}>Filters</span>
+            {activeFilters > 0 && (
+              <span className={styles.filterCount}>
+                {activeFilters}
+                <span className={ui.srOnly}> active</span>
+              </span>
+            )}
+          </button>
           <button className={styles.searchButton} type="submit">
             Search
           </button>
         </form>
 
-        <div className={styles.filters} role="group" aria-label="Filter by difficulty">
-          <button
-            type="button"
-            className={styles.chip}
-            aria-pressed={!terrain}
-            onClick={() => updateUrl(input.trim(), undefined)}
+        {filtersOpen && (
+          <div
+            id={filtersId}
+            className={styles.filterPanel}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setFiltersOpen(false);
+            }}
           >
-            All
-          </button>
-          {TERRAINS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={styles.chip}
-              aria-pressed={terrain === option}
-              onClick={() => updateUrl(input.trim(), option)}
-            >
-              {TERRAIN_LABELS[option]}
-            </button>
-          ))}
-        </div>
+            <FilterGroup
+              label="Trip type"
+              options={TRIPS}
+              labels={TRIP_LABELS}
+              value={trip}
+              onChange={(value) => setFilter({ ...filters, trip: value })}
+            />
+            <FilterGroup
+              label="Difficulty"
+              options={TERRAINS}
+              labels={TERRAIN_LABELS}
+              value={terrain}
+              onChange={(value) => setFilter({ ...filters, terrain: value })}
+            />
+            <div className={styles.filterFooter}>
+              {activeFilters > 0 && (
+                <button type="button" className={ui.ghost} onClick={() => setFilter({})}>
+                  Clear filters
+                </button>
+              )}
+              <button type="button" className={ui.secondary} onClick={() => setFiltersOpen(false)}>
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!filtersOpen && activeFilters > 0 && (
+          <ul className={styles.activeFilters} aria-label="Active filters">
+            {trip && (
+              <li>
+                <button
+                  type="button"
+                  className={styles.activeChip}
+                  onClick={() => setFilter({ ...filters, trip: undefined })}
+                  aria-label={`Remove filter: ${TRIP_LABELS[trip]}`}
+                >
+                  {TRIP_LABELS[trip]} <span aria-hidden="true">×</span>
+                </button>
+              </li>
+            )}
+            {terrain && (
+              <li>
+                <button
+                  type="button"
+                  className={styles.activeChip}
+                  onClick={() => setFilter({ ...filters, terrain: undefined })}
+                  aria-label={`Remove filter: ${TERRAIN_LABELS[terrain]}`}
+                >
+                  {TERRAIN_LABELS[terrain]} <span aria-hidden="true">×</span>
+                </button>
+              </li>
+            )}
+          </ul>
+        )}
       </div>
 
       <section className={styles.results} aria-live="polite" aria-busy={isLoading}>
@@ -209,13 +324,15 @@ function ExploreContent() {
           <p className={styles.status}>
             No trails match
             {q ? <> &ldquo;{q}&rdquo;</> : null}
+            {trip ? <> among {TRIP_LABELS[trip].toLowerCase()} trips</> : null}
             {terrain ? <> at {TERRAIN_LABELS[terrain].toLowerCase()} difficulty</> : null}
-            . Try a broader search.
+            . Try a broader search or clear a filter.
           </p>
         ) : (
           <>
             <p className={styles.count}>
               {trails.length === RESULT_LIMIT ? `${RESULT_LIMIT}+` : trails.length}{" "}
+              {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
               {trails.length === 1 ? "trail" : "trails"}
               {q ? <> matching &ldquo;{q}&rdquo;</> : null}
             </p>

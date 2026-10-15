@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 from urllib.parse import urlencode
 from uuid import UUID
 
@@ -35,10 +36,15 @@ SEASON_ORDER = {"spring": 0, "summer": 1, "fall": 2, "winter": 3}
 def search_trails(
     q: str = "",
     terrain: Terrain | None = None,
+    trip: Literal["overnight", "day"] | None = None,
     limit: int = Query(10, ge=1, le=TRAIL_CATALOG_LIMIT),
     db: Session = Depends(get_db),
 ):
-    """Live catalogue only (configured countries, not retired), most popular first."""
+    """Live catalogue only (configured countries, not retired), most popular first.
+
+    `trip=overnight` keeps backpacking trips (one or more typical nights);
+    `trip=day` keeps day hikes. Trails with an unknown length match neither.
+    """
     query = db.query(Trail).filter(
         Trail.retired_at.is_(None),
         Trail.country_code.in_(TRAIL_CATALOG_COUNTRIES),
@@ -50,6 +56,10 @@ def search_trails(
         query = query.filter(or_(Trail.name.ilike(like), Trail.region.ilike(like)))
     if terrain:
         query = query.filter(Trail.terrain_difficulty == terrain)
+    if trip == "overnight":
+        query = query.filter(Trail.typical_duration_nights >= 1)
+    elif trip == "day":
+        query = query.filter(Trail.typical_duration_nights == 0)
     return query.order_by(Trail.popularity_rank, Trail.name).limit(limit).all()
 
 

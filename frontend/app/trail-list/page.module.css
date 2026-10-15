@@ -42,36 +42,12 @@
 
 /* Intro */
 
-.intro {
-  max-width: 40rem;
-  margin: 0 auto 2rem;
-  padding: 7rem 1.5rem 0;
-  text-align: center;
-}
-
-.title {
-  font-family: var(--display);
-  font-size: clamp(2.25rem, 1.7rem + 2vw, 3.1rem);
-  font-weight: 600;
-  font-style: italic;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
-}
-
-.subtitle {
-  max-width: 30rem;
-  margin: 0.85rem auto 0;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
-
 /* Search + filters */
 
 .controls {
   max-width: 48rem;
   margin: 0 auto 2rem;
-  padding: 0 1.5rem;
+  padding: 7rem 1.5rem 0;
 }
 
 .searchBar {
@@ -111,12 +87,100 @@
   background: color-mix(in srgb, var(--color-rust) 88%, black);
 }
 
-.filters {
+.filterButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--hair);
+  border-radius: 9999px;
+  padding: 0.55rem 0.95rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 120ms ease;
+}
+
+.filterButton:hover,
+.filterButton[aria-expanded="true"] {
+  background: var(--hair-soft);
+}
+
+.filterIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.filterCount {
+  display: inline-grid;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--ink);
+  padding: 0 0.3rem;
+  color: var(--paper);
+  font-size: 0.72rem;
+}
+
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  border: 1px solid var(--hair);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, white 88%, var(--paper));
+  padding: 1rem 1.25rem;
+}
+
+.filterGroup {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.filterLegend {
+  margin-bottom: 0.5rem;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filterChips {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 0.5rem;
-  margin-top: 1rem;
+}
+
+.filterFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid var(--hair-soft);
+  padding-top: 0.75rem;
+}
+
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.activeChip {
+  border-radius: 9999px;
+  background: var(--ink);
+  padding: 0.3rem 0.85rem;
+  color: var(--paper);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.activeChip:hover {
+  background: color-mix(in srgb, var(--ink) 85%, black);
 }
 
 .chip {
@@ -266,13 +330,30 @@
 }
 
 @media (max-width: 640px) {
-  .intro {
-    padding-top: 6rem;
+  .controls {
+    padding: 6rem 1rem 0;
   }
 
-  .controls,
   .results {
     padding: 0 1rem;
+  }
+
+  .searchBar {
+    padding-left: 1rem;
+  }
+
+  /* Icon + count only; the label stays for screen readers. */
+  .filterLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .filterButton {
+    padding: 0.55rem 0.7rem;
   }
 
   .card {
