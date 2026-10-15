@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import styles from "./Dialog.module.css";
 
 /**
  * Modal built on the native <dialog>: focus is trapped, Escape closes it and
- * the page behind is inert. Mount it to open; `onClose` fires on Escape,
- * the close button or a backdrop click.
+ * the page behind is inert and doesn't scroll. Mount it to open; `onClose`
+ * fires on Escape, the close button or a backdrop click. Focus starts on the
+ * element marked `data-autofocus` (if any) and returns to the opener on unmount.
  */
 export default function Dialog({
   title,
@@ -16,6 +17,7 @@ export default function Dialog({
   footer,
   size = "md",
   busy = false,
+  sheet = false,
 }: {
   title: string;
   subtitle?: ReactNode;
@@ -25,8 +27,11 @@ export default function Dialog({
   size?: "sm" | "md" | "lg";
   /** While busy (e.g. saving), Escape and backdrop clicks don't close it. */
   busy?: boolean;
+  /** On phones, fill the screen and keep the footer above the keyboard. */
+  sheet?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const busyRef = useRef(busy);
   useEffect(() => {
     busyRef.current = busy;
@@ -34,15 +39,49 @@ export default function Dialog({
 
   useEffect(() => {
     const dialog = ref.current;
-    if (dialog && !dialog.open) dialog.showModal();
-    return () => dialog?.close();
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = "hidden";
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+      // showModal() focuses the first focusable element (the close button);
+      // React's autoFocus never reaches the DOM, so honour a marker instead.
+      dialog.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    }
+    return () => {
+      dialog?.close();
+      root.style.overflow = previousOverflow;
+      if (opener?.isConnected) opener.focus();
+    };
   }, []);
+
+  // Mobile keyboards shrink the visual viewport without resizing the layout
+  // viewport, so size the sheet to what's actually visible.
+  useEffect(() => {
+    const dialog = ref.current;
+    const viewport = window.visualViewport;
+    if (!sheet || !dialog || !viewport) return;
+    const fit = () => {
+      dialog.style.setProperty("--sheet-height", `${viewport.height}px`);
+      dialog.style.setProperty("--sheet-top", `${viewport.offsetTop}px`);
+    };
+    fit();
+    viewport.addEventListener("resize", fit);
+    viewport.addEventListener("scroll", fit);
+    return () => {
+      viewport.removeEventListener("resize", fit);
+      viewport.removeEventListener("scroll", fit);
+    };
+  }, [sheet]);
 
   return (
     <dialog
       ref={ref}
-      className={`${styles.dialog} ${styles[size]}`}
-      aria-labelledby="dialog-title"
+      className={`${styles.dialog} ${styles[size]} ${sheet ? styles.sheet : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
         if (!busyRef.current) onClose();
@@ -54,7 +93,7 @@ export default function Dialog({
       <div className={styles.inner}>
         <header className={styles.header}>
           <div>
-            <h2 id="dialog-title" className={styles.title}>
+            <h2 id={titleId} className={styles.title}>
               {title}
             </h2>
             {subtitle && <p className={styles.subtitle}>{subtitle}</p>}

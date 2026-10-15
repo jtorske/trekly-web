@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -12,6 +12,7 @@ import { useSetups } from "@/app/gear/useSetups";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { useUnits } from "@/lib/useUnits";
+import EditProfileDialog from "./EditProfileDialog";
 import ProfileSettings from "./ProfileSettings";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import styles from "./page.module.css";
@@ -52,6 +53,7 @@ function ProfileContent() {
   const savedTrails = useSavedTrails();
   const setups = useSetups();
   const [units] = useUnits();
+  const [editing, setEditing] = useState(false);
 
   const requested = searchParams.get("tab");
   const tab: TabKey = TABS.some((t) => t.key === requested) ? (requested as TabKey) : "overview";
@@ -101,7 +103,7 @@ function ProfileContent() {
                 .join(" · ")}
             </p>
           </div>
-          <button type="button" className={`${ui.secondary} ${styles.editButton}`} onClick={() => setTab("settings")}>
+          <button type="button" className={`${ui.secondary} ${styles.editButton}`} onClick={() => setEditing(true)}>
             Edit profile
           </button>
         </header>
@@ -155,9 +157,9 @@ function ProfileContent() {
             <div className={styles.overview}>
               {isNew && (
                 <div className={ui.notice}>
-                  <strong>Welcome to Trekly.</strong> Add a name and photo in{" "}
-                  <button type="button" className={ui.ghost} onClick={() => setTab("settings")}>
-                    Settings
+                  <strong>Welcome to Trekly.</strong>{" "}
+                  <button type="button" className={ui.ghost} onClick={() => setEditing(true)}>
+                    Add a name and photo
                   </button>
                   , lay out the gear you own, and bookmark trails you want to hike.
                 </div>
@@ -233,6 +235,7 @@ function ProfileContent() {
           {tab === "settings" && <ProfileSettings profile={profile} />}
         </section>
       </div>
+      {editing && <EditProfileDialog profile={profile} onClose={() => setEditing(false)} />}
     </main>
   );
 }

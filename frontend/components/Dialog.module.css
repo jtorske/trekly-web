@@ -102,4 +102,23 @@
     padding-right: 1rem;
     padding-left: 1rem;
   }
+
+  .sheet {
+    top: var(--sheet-top, 0);
+    width: 100vw;
+    max-width: none;
+    height: var(--sheet-height, 100dvh);
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .sheet .inner {
+    height: 100%;
+  }
+
+  .sheet .footer {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }

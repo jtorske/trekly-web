@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
-import Avatar from "@/components/Avatar";
 import ui from "@/components/ui.module.css";
-import { ApiError } from "@/lib/api";
-import { DELETE_CONFIRMATION, deleteAccount, updateProfile, type Profile } from "@/lib/accountApi";
+import { DELETE_CONFIRMATION, deleteAccount, type Profile } from "@/lib/accountApi";
 import { emailLooksValid, friendlyAuthError, nextQuery, passwordChecks, passwordIsValid } from "@/lib/authLogic";
-import { listOwnImages, removeImages, uploadImage, validateImage } from "@/lib/storage";
+import { listOwnImages, removeImages } from "@/lib/storage";
 import { getSupabaseClient } from "@/lib/supabaseClient";
-import { announceProfile } from "@/lib/useProfile";
 import styles from "./page.module.css";
-
-const BIO_LIMIT = 280;
 
 function Card({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
   return (
@@ -24,189 +19,6 @@ function Card({ id, title, description, children }: { id: string; title: string;
       {description && <p className={styles.cardDescription}>{description}</p>}
       {children}
     </section>
-  );
-}
-
-function EditProfile({ profile }: { profile: Profile }) {
-  const { user } = useAuth();
-  const initial = {
-    display_name: profile.display_name ?? "",
-    username: profile.username ?? "",
-    bio: profile.bio ?? "",
-    home_region: profile.home_region ?? "",
-  };
-  const [values, setValues] = useState(initial);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [removeAvatar, setRemoveAvatar] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!avatarFile) return;
-    const url = URL.createObjectURL(avatarFile);
-    queueMicrotask(() => setAvatarPreview(url));
-    return () => URL.revokeObjectURL(url);
-  }, [avatarFile]);
-
-  const dirty =
-    JSON.stringify(values) !== JSON.stringify(initial) || avatarFile !== null || removeAvatar;
-
-  const set = (key: keyof typeof values) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setValues((current) => ({ ...current, [key]: event.target.value }));
-    setStatus(null);
-  };
-
-  const reset = () => {
-    setValues(initial);
-    setAvatarFile(null);
-    setAvatarPreview(null);
-    setRemoveAvatar(false);
-    setErrors({});
-    setStatus(null);
-  };
-
-  const save = async (event: FormEvent) => {
-    event.preventDefault();
-    const nextErrors: Record<string, string> = {};
-    const username = values.username.trim().toLowerCase();
-    if (username && !/^[a-z0-9_]{3,30}$/.test(username)) {
-      nextErrors.username = "Use 3–30 lowercase letters, numbers or underscores.";
-    }
-    if (values.bio.length > BIO_LIMIT) nextErrors.bio = `Keep your bio to ${BIO_LIMIT} characters.`;
-    if (avatarFile) {
-      const problem = validateImage(avatarFile, "avatars");
-      if (problem) nextErrors.avatar = problem;
-    }
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length || !user) return;
-
-    setSaving(true);
-    setStatus(null);
-    let uploaded: string | null = null;
-    try {
-      const update: Record<string, string | null> = {
-        display_name: values.display_name.trim() || null,
-        username: username || null,
-        bio: values.bio.trim() || null,
-        home_region: values.home_region.trim() || null,
-      };
-      if (avatarFile) {
-        uploaded = await uploadImage("avatars", user.id, avatarFile);
-        update.avatar_path = uploaded;
-      } else if (removeAvatar) {
-        update.avatar_path = null;
-      }
-      const saved = await updateProfile(update);
-      if (profile.avatar_path && profile.avatar_path !== saved.avatar_path) {
-        removeImages("avatars", [profile.avatar_path]).catch(() => undefined);
-      }
-      announceProfile(saved);
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      setRemoveAvatar(false);
-      setStatus({ ok: true, message: "Profile saved." });
-    } catch (caught) {
-      if (uploaded) removeImages("avatars", [uploaded]).catch(() => undefined);
-      if (caught instanceof ApiError && caught.status === 409) {
-        setErrors({ username: caught.message });
-      } else {
-        setStatus({ ok: false, message: caught instanceof Error ? caught.message : "That didn't save." });
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <form className={styles.form} onSubmit={save} noValidate>
-      <div className={styles.avatarRow}>
-        <Avatar
-          path={removeAvatar ? null : profile.avatar_path}
-          preview={avatarPreview}
-          name={values.display_name || profile.display_name}
-          email={profile.email}
-          size={72}
-        />
-        <div className={ui.field}>
-          <label className={ui.label} htmlFor="avatar-input">
-            Profile photo
-          </label>
-          <input
-            id="avatar-input"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => {
-              setAvatarFile(event.target.files?.[0] ?? null);
-              setRemoveAvatar(false);
-            }}
-          />
-          <span className={ui.hint}>JPEG, PNG or WebP up to 2 MB.</span>
-          {profile.avatar_path && !avatarFile && (
-            <label className={styles.checkbox}>
-              <input type="checkbox" checked={removeAvatar} onChange={(event) => setRemoveAvatar(event.target.checked)} />
-              Remove photo and use initials
-            </label>
-          )}
-          {errors.avatar && <span className={ui.fieldError}>{errors.avatar}</span>}
-        </div>
-      </div>
-
-      <div className={ui.row}>
-        <label className={ui.field}>
-          <span className={ui.label}>Display name</span>
-          <input className={ui.input} value={values.display_name} onChange={set("display_name")} maxLength={60} autoComplete="name" />
-        </label>
-        <label className={ui.field}>
-          <span className={ui.label}>Username</span>
-          <input
-            className={ui.input}
-            value={values.username}
-            onChange={set("username")}
-            maxLength={30}
-            autoCapitalize="none"
-            spellCheck={false}
-            aria-invalid={Boolean(errors.username)}
-            aria-describedby="username-hint"
-          />
-          <span id="username-hint" className={ui.hint}>
-            Unique · lowercase letters, numbers and underscores
-          </span>
-          {errors.username && <span className={ui.fieldError}>{errors.username}</span>}
-        </label>
-      </div>
-
-      <label className={ui.field}>
-        <span className={styles.labelRow}>
-          <span className={ui.label}>Bio</span>
-          <span className={values.bio.length > BIO_LIMIT ? ui.fieldError : ui.hint} aria-live="polite">
-            {values.bio.length}/{BIO_LIMIT}
-          </span>
-        </span>
-        <textarea className={ui.input} rows={3} value={values.bio} onChange={set("bio")} aria-invalid={Boolean(errors.bio)} />
-        {errors.bio && <span className={ui.fieldError}>{errors.bio}</span>}
-      </label>
-
-      <label className={ui.field}>
-        <span className={ui.label}>Home region (optional)</span>
-        <input className={ui.input} value={values.home_region} onChange={set("home_region")} maxLength={80} placeholder="e.g. Pacific Northwest" />
-      </label>
-
-      {status && (
-        <p className={status.ok ? ui.success : ui.error} role={status.ok ? "status" : "alert"}>
-          {status.message}
-        </p>
-      )}
-      <div className={styles.formActions}>
-        <button type="button" className={ui.ghost} onClick={reset} disabled={!dirty || saving}>
-          Cancel
-        </button>
-        <button type="submit" className={ui.primary} disabled={!dirty || saving}>
-          {saving ? "Saving…" : "Save profile"}
-        </button>
-      </div>
-    </form>
   );
 }
 
@@ -444,9 +256,6 @@ function DeleteAccount() {
 export default function ProfileSettings({ profile }: { profile: Profile }) {
   return (
     <div className={styles.settings}>
-      <Card id="edit-profile" title="Profile" description="How you appear in Trekly.">
-        <EditProfile profile={profile} />
-      </Card>
       <Card id="privacy" title="Privacy">
         <p>
           Your profile is <strong>private</strong>. Trekly doesn&apos;t have public profiles, so your name, bio,
