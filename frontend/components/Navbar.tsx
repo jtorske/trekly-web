@@ -9,11 +9,16 @@ import { nextQuery } from "@/lib/authLogic";
 import { useProfile } from "@/lib/useProfile";
 import styles from "./Navbar.module.css";
 
+// `match`: the path prefixes that mark the link as the current page. A trail
+// page is opened from Explore, so it highlights Explore too.
 const LINKS = [
-  { href: "/trail-list", label: "Explore" },
-  { href: "/gear", label: "Gear" },
-  { href: "/campalert", label: "CampAlert" },
+  { href: "/trail-list", label: "Explore", match: ["/trail-list", "/trails"] },
+  { href: "/gear", label: "Gear", match: ["/gear"] },
+  { href: "/campalert", label: "CampAlert", match: ["/campalert"] },
 ];
+
+const isCurrent = (pathname: string, prefixes: string[]) =>
+  prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -85,7 +90,7 @@ export default function Navbar() {
             key={link.href}
             href={link.href}
             className={styles.link}
-            aria-current={pathname.startsWith(link.href) ? "page" : undefined}
+            aria-current={isCurrent(pathname, link.match) ? "page" : undefined}
           >
             {link.label}
           </Link>
