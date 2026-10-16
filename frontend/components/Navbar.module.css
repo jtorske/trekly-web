@@ -1,4 +1,23 @@
+/*
+ * Two looks:
+ * - Default (every content page): ink on the page's own paper. At the top it is
+ *   see-through, so the topo background runs behind it; once the page scrolls
+ *   it turns into translucent, blurred paper with a hairline under it.
+ * - .hero (the landing photo only): cream on a dark see-through gradient.
+ *
+ * Contrast (WCAG AA, 4.5:1), checked against the worst case behind the text:
+ * - Unscrolled paper over the darkest topo pixel (~14% ink): ink 9.5:1,
+ *   active rust 5.1:1, hovered ink 8.3:1.
+ * - Scrolled paper at 88% over solid black content: ink 9.3:1, active rust
+ *   5.1:1, hovered ink 8.3:1. The blur only lightens that worst case. Without
+ *   backdrop-filter the paper is 96% opaque instead.
+ */
 .navbar {
+  --nav-text: var(--color-dark-olive);
+  --nav-active: var(--color-rust-text);
+  --nav-hover-bg: color-mix(in srgb, var(--color-dark-olive) 7%, transparent);
+  --nav-hair: color-mix(in srgb, var(--color-dark-olive) 16%, transparent);
+
   position: fixed;
   top: 0;
   left: 0;
@@ -8,9 +27,13 @@
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid transparent;
   background: transparent;
   padding: 0.08rem 1.5rem 0.08rem 1.75rem;
-  transition: background 200ms ease;
+  color: var(--nav-text);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
 }
 
 .navbar::after {
@@ -29,88 +52,119 @@
     transparent 100%
   );
   content: "";
+  opacity: 0;
   pointer-events: none;
   transition: opacity 200ms ease;
 }
 
+.hero {
+  --nav-text: var(--color-cream);
+  --nav-active: var(--color-tan);
+  --nav-hover-bg: color-mix(in srgb, var(--color-cream) 14%, transparent);
+  --nav-hair: color-mix(in srgb, var(--color-cream) 70%, transparent);
+}
+
+.hero::after {
+  opacity: 1;
+}
+
 .scrolled {
-  background: var(--color-dark-olive);
+  border-bottom-color: var(--nav-hair);
+  background-color: color-mix(in srgb, var(--color-cream) 96%, transparent);
 }
 
-.scrolled::after {
-  opacity: 0;
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .scrolled {
+    background-color: color-mix(in srgb, var(--color-cream) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    backdrop-filter: blur(12px) saturate(1.2);
+  }
 }
 
+.logoLink {
+  display: block;
+  border-radius: 0.5rem;
+}
+
+/* The logo SVG as a mask over the text colour. */
 .logo {
   display: block;
   width: 100px;
-  height: auto;
+  aspect-ratio: 40 / 29;
   margin-top: 0.45rem;
+  background-color: currentColor;
+  -webkit-mask: url("/TreklyLogoW.svg") center / contain no-repeat;
+  mask: url("/TreklyLogoW.svg") center / contain no-repeat;
 }
 
 .links {
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.25rem;
 }
 
 .link {
-  color: var(--color-cream);
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  color: var(--nav-text);
   font-weight: 600;
-  transition: color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
-/* Tan, not rust: rust on dark olive is only ~3.3:1. */
 .link:hover {
-  color: var(--color-tan);
+  background-color: var(--nav-hover-bg);
+  color: var(--nav-text);
 }
 
-.login {
-  margin-left: -0.5rem;
-  border: 1px solid var(--color-cream);
-  border-radius: 9999px;
-  background: transparent;
-  padding: 0.35rem 0.75rem;
-  color: var(--color-cream);
-}
-
-.login:hover {
-  color: var(--color-cream);
-}
-
-.signup {
-  margin-left: 1.5rem;
-  border-radius: 9999px;
-  /* Darker than the brand rust so cream text clears 4.5:1 (~5.5:1). */
-  background: color-mix(in srgb, var(--color-rust) 78%, black);
-  padding: 0.35rem 0.75rem;
-  color: var(--color-cream);
-}
-
-.signup:hover {
-  color: var(--color-cream);
-}
-
-.links {
-  align-items: center;
-}
-
-.link[aria-current="page"] {
-  color: var(--color-tan);
+.link[aria-current="page"],
+.link[aria-current="page"]:hover {
+  /* No hover tint on the active link: rust keeps its margin over the paper. */
+  background-color: transparent;
+  color: var(--nav-active);
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 6px;
 }
 
+.login {
+  margin-left: -0.75rem;
+  border: 1px solid var(--nav-text);
+  background: transparent;
+}
+
+.signup {
+  margin-left: 0.75rem;
+  /* Darker than the brand rust so cream text clears 4.5:1 (~5.7:1). Same pill
+     on paper and over the hero photo. */
+  background: color-mix(in srgb, var(--color-rust) 78%, black);
+  color: var(--color-cream);
+}
+
+.signup:hover {
+  background: color-mix(in srgb, var(--color-rust) 68%, black);
+  color: var(--color-cream);
+}
+
 .avatarLink {
   display: inline-flex;
   border-radius: 9999px;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-cream) 70%, transparent);
+  box-shadow:
+    0 0 0 2px var(--color-cream),
+    0 0 0 3px var(--nav-hair);
   transition: box-shadow 150ms ease;
+}
+
+.hero .avatarLink {
+  box-shadow: 0 0 0 2px var(--nav-hair);
 }
 
 .avatarLink:hover,
 .avatarLink:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-rust);
+  box-shadow:
+    0 0 0 2px var(--color-cream),
+    0 0 0 4px var(--color-rust);
   outline: none;
 }
 
@@ -119,7 +173,7 @@
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--color-cream) 18%, transparent);
+  background: var(--nav-hover-bg);
 }
 
 .menuToggle,
@@ -136,21 +190,6 @@
   .logo {
     width: 80px;
     margin-top: 0;
-  }
-
-  .links {
-    gap: 0.5rem;
-  }
-
-  .link {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    font-size: 0.75rem;
-  }
-
-  .login {
-    display: none;
   }
 
   .links {
@@ -173,10 +212,15 @@
     justify-content: center;
     gap: 4px;
     margin-left: 0.25rem;
-    border: 1px solid color-mix(in srgb, var(--color-cream) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--nav-text) 75%, transparent);
     border-radius: 9999px;
     background: transparent;
-    color: var(--color-cream);
+    color: var(--nav-text);
+    transition: background-color 150ms ease;
+  }
+
+  .menuToggle:hover {
+    background-color: var(--nav-hover-bg);
   }
 
   .menuToggle span {
@@ -187,6 +231,7 @@
     background: currentColor;
   }
 
+  /* A paper card in both looks, so it reads the same over photo or page. */
   .mobileMenu {
     position: absolute;
     top: calc(100% + 0.5rem);
@@ -196,9 +241,10 @@
     flex-direction: column;
     gap: 0.25rem;
     padding: 0.5rem;
-    border: 1px solid color-mix(in srgb, var(--color-cream) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-dark-olive) 16%, transparent);
     border-radius: 0.75rem;
-    background: var(--color-dark-olive);
+    background: var(--color-cream);
+    box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
   }
 
   .mobileMenuLink {
@@ -207,12 +253,17 @@
     align-items: center;
     padding: 0 0.75rem;
     border-radius: 0.5rem;
-    color: var(--color-cream);
+    color: var(--color-dark-olive);
     font-weight: 600;
   }
 
   .mobileMenuLink:hover {
-    background: color-mix(in srgb, var(--color-cream) 10%, transparent);
+    background: color-mix(in srgb, var(--color-dark-olive) 7%, transparent);
+    color: var(--color-dark-olive);
+  }
+
+  .mobileMenuSignup,
+  .mobileMenuSignup:hover {
     color: var(--color-cream);
   }
 
@@ -222,5 +273,15 @@
 
   .mobileMenuSignup:hover {
     background: color-mix(in srgb, var(--color-rust) 68%, black);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar::after,
+  .link,
+  .avatarLink,
+  .menuToggle {
+    transition: none;
   }
 }

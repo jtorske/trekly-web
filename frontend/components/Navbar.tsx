@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
@@ -18,20 +17,23 @@ const LINKS = [
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { status, user } = useAuth();
   const { profile } = useProfile();
   const pathname = usePathname();
   const isAuthPage = /^\/(login|signup|forgot-password|reset-password|auth)/.test(pathname);
-  // Only the landing hero (a dark photo) keeps the see-through bar; on paper
-  // pages a gradient over pale ground can't keep the links readable.
-  const overHero = pathname === "/landing" || pathname === "/";
+  // Only the landing hero (a dark photo) keeps the see-through cream bar;
+  // everywhere else the header is paper, blending into the topo background.
+  const hasHero = pathname === "/landing" || pathname === "/";
+  const overHero = hasHero && !isPastHero;
   const returnTo = isAuthPage ? "" : nextQuery(pathname);
 
   useEffect(() => {
     const updateNavbar = () => {
       const hero = document.querySelector("main");
-      setIsScrolled(
+      setIsScrolled(window.scrollY > 0);
+      setIsPastHero(
         hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY > window.innerHeight,
       );
     };
@@ -40,7 +42,7 @@ export default function Navbar() {
     window.addEventListener("scroll", updateNavbar, { passive: true });
 
     return () => window.removeEventListener("scroll", updateNavbar);
-  }, []);
+  }, [pathname]);
 
   const displayName = profile?.display_name ?? null;
   const email = user?.email ?? null;
@@ -66,9 +68,15 @@ export default function Navbar() {
     );
 
   return (
-    <nav className={`${styles.navbar} ${isScrolled || !overHero ? styles.scrolled : ""}`}>
-      <Link href="/landing" aria-label="Trekly home">
-        <Image src="/TreklyLogoW.svg" alt="Trekly" width={82} height={81} className={styles.logo} />
+    <nav
+      className={`${styles.navbar} ${
+        overHero ? styles.hero : isScrolled ? styles.scrolled : ""
+      }`}
+    >
+      <Link href="/landing" aria-label="Trekly home" className={styles.logoLink}>
+        {/* The logo SVG as a mask, filled with the current text colour: ink on
+            paper, cream over the hero photo. */}
+        <span className={styles.logo} />
       </Link>
 
       <div className={styles.links}>
