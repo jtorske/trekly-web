@@ -195,7 +195,7 @@ function ProfileContent() {
                       </button>
                     )}
                   </div>
-                  <SavedTrailList data={savedTrails} limit={4} />
+                  <SavedTrailList data={savedTrails} units={units} limit={4} />
                 </div>
               </div>
             </div>
@@ -225,7 +225,7 @@ function ProfileContent() {
                   Full collection →
                 </Link>
               </div>
-              <SavedTrailList data={savedTrails} />
+              <SavedTrailList data={savedTrails} units={units} />
             </>
           )}
 

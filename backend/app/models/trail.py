@@ -18,6 +18,11 @@ class Trail(Base):
         ),
         CheckConstraint("length(country_code) = 2", name="trails_country_code_check"),
         CheckConstraint("popularity_rank >= 1", name="trails_popularity_rank_check"),
+        CheckConstraint(
+            "(distance_km is null and route_type is null) or "
+            "(distance_km > 0 and route_type in ('out_and_back','loop','point_to_point'))",
+            name="trails_distance_check",
+        ),
         UniqueConstraint("name", "province_code", name="trails_name_province_key"),
         Index("trails_country_rank_idx", "country_code", "popularity_rank"),
     )
@@ -33,6 +38,10 @@ class Trail(Base):
     longitude = Column(Numeric(9, 6))
     elevation_gain_m = Column(Integer)
     max_elevation_m = Column(Integer)
+    # out_and_back, loop or point_to_point. distance_km is what a hiker
+    # covers: the round trip, the loop, or the full one-way length.
+    route_type = Column(Text)
+    distance_km = Column(Numeric(5, 1))
     terrain_difficulty = Column(Text, nullable=False)
     typical_duration_nights = Column(Integer)
     climate_zone = Column(Text)

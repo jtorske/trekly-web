@@ -115,6 +115,18 @@ export function decodeItinerary(code: string | null, nights: number, validSiteId
 }
 
 /** A plan is past once its last night is before the user's own today. */
+/**
+ * Nights in a row at the same campground starting at `index`, so its Book
+ * link opens Parks Canada on that whole stretch.
+ */
+export function nightsInARow(itinerary: Pick<PlanNight, "site">[], index: number): number {
+  const siteId = itinerary[index]?.site?.id;
+  if (!siteId) return 1;
+  let run = 1;
+  while (itinerary[index + run]?.site?.id === siteId) run += 1;
+  return run;
+}
+
 export function isPastPlan(plan: Pick<TripPlanSummary, "last_night">, today: string): boolean {
   return plan.last_night < today;
 }

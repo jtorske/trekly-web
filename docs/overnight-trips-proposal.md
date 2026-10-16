@@ -382,3 +382,31 @@ dialog, `/alerts`). Still open, none of it code on master:
   12-column layout and doesn't fit a side column.
 - **"Past"** is decided in the browser from the user's own date, so a plan
   turns past at their midnight, not the server's.
+
+### Phase 5 (trail page + walk-through)
+- **Metric by default** (m, km, °C) for everyone; the gear page's toggle is
+  now a shared `ui.segmented` control and the trail page has its own
+  (`km/m` / `mi/ft`). One per-browser preference covers both pages.
+- **Distance:** `trails.route_type` (`out_and_back` / `loop` /
+  `point_to_point`) plus `distance_km` (migration `d2e3f4a5b6c7`, local only).
+  `distance_km` is what a hiker covers: the round trip for an out-and-back,
+  the loop, or the full one-way length; shown as "8.7 km round trip",
+  "5.2 km loop", "75.9 km one way". Measured from OSM route relations or named
+  trail ways and accepted only where the mapped feature is one clean line or
+  loop that fits the hike; 11 of 100 trails have it, the rest are null (the UI
+  hides distance). The Overpass servers were overloaded during collection, so
+  most trails were never measured, not rejected. Route type is a judgement
+  for three: Grassi Lakes (loop), Green Gardens (out-and-back to the coast),
+  Egypt Lake / Healy Pass (out-and-back via Healy Pass); each has a
+  `route_type:` flag in the catalogue.
+- **"Book on Parks Canada"** opens on the stay's dates: `startDate`/`endDate`
+  on `create-booking/results` fill in the arrival date and nights (verified
+  live 2026-10-15). No parameter sets party size; the hint says to set it
+  there. Plan nights open on their own date for the nights in a row at that
+  campground; alert emails open on the alert's dates.
+- **Date fields** (`components/DateInput`) only report complete dates on or
+  after `min`; the browser reports in-between values while someone types a
+  year, and one of them crashed the plan dialog.
+- **Plan page gear panel** now sits on the gear page's cloth mat.
+- Not done: a plan's nights don't pick up a check made on the trail page just
+  before ("Not checked" until checked from the plan page).

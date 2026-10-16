@@ -123,25 +123,6 @@
   padding-bottom: 0.35rem;
 }
 
-.toggle {
-  display: flex;
-  border: 1px solid var(--hair);
-  border-radius: 9999px;
-  padding: 0.2rem;
-}
-
-.toggle button {
-  border-radius: 9999px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.83rem;
-  font-weight: 600;
-}
-
-.toggle button[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--paper);
-}
-
 .board {
   padding: 0 1.5rem;
 }

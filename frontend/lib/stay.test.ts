@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addDays, canAlert, sentence, defaultStay, formatStay, localToday, stayFromParams, stayParams } from "./stay.ts";
+import { addDays, canAlert, sentence, defaultStay, formatStay, isPlainDate, localToday, stayFromParams, stayParams, withStayDates } from "./stay.ts";
 
 test("adding days crosses months and years in UTC", () => {
   assert.equal(addDays("2026-10-30", 3), "2026-11-02");
@@ -45,4 +45,23 @@ test("alerts are offered only when a stay could open up", () => {
   assert.equal(canAlert("available"), false);
   assert.equal(canAlert("closed"), false);
   assert.equal(canAlert("unknown"), false);
+});
+
+test("Parks Canada booking links open on the stay's dates", () => {
+  const base = "https://reservation.pc.gc.ca/create-booking/results?resourceLocationId=-2147483638&mapId=-2147483589&bookingCategoryId=7";
+  assert.equal(
+    withStayDates(base, "2027-07-30", 3),
+    `${base}&startDate=2027-07-30&endDate=2027-08-02`,
+  );
+  assert.equal(withStayDates(`${base}&startDate=2027-01-01&endDate=2027-01-02`, "2027-07-30", 1), `${base}&startDate=2027-07-30&endDate=2027-07-31`);
+  assert.equal(withStayDates("https://bcparks.ca/reservations/", "2027-07-30", 3), "https://bcparks.ca/reservations/");
+  assert.equal(withStayDates("not a url", "2027-07-30", 3), "not a url");
+});
+
+test("only complete dates count while someone types in a date input", () => {
+  assert.equal(isPlainDate("2026-11-06"), true);
+  assert.equal(isPlainDate("110620-11-06"), false);
+  assert.equal(isPlainDate("20261-11-06"), false);
+  assert.equal(isPlainDate("2026-02-30"), false);
+  assert.equal(isPlainDate(""), false);
 });

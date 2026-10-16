@@ -186,7 +186,9 @@ def alert_email(alert: AvailabilityAlert, booking_url: str | None) -> Email:
 
 
 def booking_url_for(alert: AvailabilityAlert) -> str | None:
-    """Parks Canada's booking form for the campground's park and booking type."""
+    """Parks Canada's booking form for the campground's park and booking type,
+    opened on the alert's dates (startDate/endDate fill in the arrival and
+    nights; no parameter sets party size)."""
     group = group_of(alert.site)
     if group is None:
         return None
@@ -194,6 +196,8 @@ def booking_url_for(alert: AvailabilityAlert) -> str | None:
         "resourceLocationId": group.location_id,
         "mapId": group.map_id,
         "bookingCategoryId": group.booking_category_id,
+        "startDate": alert.start_date.isoformat(),
+        "endDate": (alert.start_date + timedelta(days=alert.nights)).isoformat(),
     })
 
 

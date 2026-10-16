@@ -11,6 +11,7 @@ import {
   groupSizeWarning,
   isPastPlan,
   listPhrase,
+  nightsInARow,
   resizeItinerary,
   sleepableSites,
   splitPlans,
@@ -126,4 +127,14 @@ test("a plan turns past the day after its last night, by the user's own date", (
   );
   assert.deepEqual(upcoming.map((x) => x.id), ["now", "soon"]);
   assert.deepEqual(past.map((x) => x.id), ["old", "older"]);
+});
+
+test("a Book link covers the nights in a row at that campground", () => {
+  const at = (id: string | null) => ({ site: id ? ({ id } as PlanNight["site"]) : null });
+  const itinerary = [at("a"), at("a"), at("b"), at(null), at("a")];
+  assert.equal(nightsInARow(itinerary, 0), 2);
+  assert.equal(nightsInARow(itinerary, 1), 1);
+  assert.equal(nightsInARow(itinerary, 2), 1);
+  assert.equal(nightsInARow(itinerary, 3), 1);
+  assert.equal(nightsInARow(itinerary, 4), 1);
 });

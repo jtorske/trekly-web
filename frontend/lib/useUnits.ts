@@ -7,7 +7,7 @@ const KEY = "trekly:units";
 const listeners = new Set<() => void>();
 // Used when localStorage is unavailable (private mode), so the choice still
 // applies for the rest of this visit.
-let memory: UnitSystem = "imperial";
+let memory: UnitSystem = "metric";
 
 function read(): UnitSystem {
   try {
@@ -18,7 +18,10 @@ function read(): UnitSystem {
   }
 }
 
-/** Per-browser display preference; canonical data is always metric. */
+/**
+ * Per-browser display preference, metric unless the visitor picks imperial.
+ * Canonical data is always metric.
+ */
 export function useUnits(): [UnitSystem, (next: UnitSystem) => void] {
   const units = useSyncExternalStore(
     (listener) => {
@@ -26,7 +29,7 @@ export function useUnits(): [UnitSystem, (next: UnitSystem) => void] {
       return () => listeners.delete(listener);
     },
     read,
-    () => "imperial" as UnitSystem,
+    () => "metric" as UnitSystem,
   );
   const set = useCallback((next: UnitSystem) => {
     memory = next;

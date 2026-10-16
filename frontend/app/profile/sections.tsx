@@ -15,7 +15,7 @@ import type { GearItem } from "@/lib/gearApi";
 import { splitPlans } from "@/lib/planDraft";
 import type { TripPlanSummary } from "@/lib/plansApi";
 import { formatStay, localToday } from "@/lib/stay";
-import { formatWeight, metersToFeet, type UnitSystem } from "@/lib/units";
+import { formatElevation, formatWeight, type UnitSystem } from "@/lib/units";
 import styles from "./page.module.css";
 
 export function EmptyState({
@@ -77,7 +77,7 @@ export interface SavedData {
   reload: () => void;
 }
 
-export function SavedTrailList({ data, limit }: { data: SavedData; limit?: number }) {
+export function SavedTrailList({ data, units, limit }: { data: SavedData; units: UnitSystem; limit?: number }) {
   if (data.loading) return <ListSkeleton />;
   if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
   if (data.saved.length === 0) {
@@ -100,7 +100,7 @@ export function SavedTrailList({ data, limit }: { data: SavedData; limit?: numbe
                 trail.region,
                 TERRAIN_LABELS[trail.terrain],
                 trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
-                trail.elevation_gain_m != null ? `${metersToFeet(trail.elevation_gain_m).toLocaleString()} ft gain` : null,
+                trail.elevation_gain_m != null ? `${formatElevation(trail.elevation_gain_m, units)} gain` : null,
               ]
                 .filter(Boolean)
                 .join(" · ")}

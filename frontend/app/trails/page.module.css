@@ -1,8 +1,6 @@
 .page {
   --ink: var(--color-dark-olive);
   --paper: var(--color-cream);
-  --slate: #3d5866;
-  --slate-deep: #253947;
   --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
   --hair-soft: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
 
@@ -95,59 +93,39 @@
   font-weight: 600;
 }
 
-.terrainTag {
-  display: inline-block;
-  border-radius: 9999px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.easy {
-  background: color-mix(in srgb, var(--color-olive) 18%, transparent);
-  color: var(--color-dark-olive);
-}
-
-.moderate {
-  background: color-mix(in srgb, var(--color-tan) 28%, transparent);
-  color: #6b4613;
-}
-
-.difficult {
-  background: color-mix(in srgb, var(--color-rust) 20%, transparent);
-  color: #7a3f0d;
-}
-
-.extreme {
-  background: color-mix(in srgb, var(--slate-deep) 85%, transparent);
-  color: var(--color-cream);
-}
-
-/* Stats */
+/* Stats: one compact row, wrapping on narrow screens. */
 
 .stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 0.75rem;
-}
-
-.stat {
+  display: flex;
+  flex-wrap: wrap;
   border: 1px solid var(--hair);
   border-radius: 0.9rem;
   background: color-mix(in srgb, white 70%, var(--paper));
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0;
+}
+
+.stat {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-left: 1px solid var(--hair-soft);
+  padding: 0.1rem 1.1rem;
+}
+
+.stat:first-child {
+  border-left: 0;
 }
 
 .statLabel {
-  color: var(--color-muted-text);
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
   font-size: 0.75rem;
   font-weight: 500;
 }
 
 .statValue {
-  margin-top: 0.2rem;
-  font-size: 1.1rem;
+  margin-top: 0.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Actions */
@@ -155,24 +133,10 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.secondaryAction {
-  border-radius: 9999px;
-  padding: 0.65rem 1.4rem;
-  font-weight: 600;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease;
-  border: 1px solid var(--ink);
-  color: var(--ink);
-}
-
-.secondaryAction:hover {
-  background: var(--ink);
-  color: var(--paper);
+  margin-top: 1.25rem;
 }
 
 /* Sections */
@@ -202,6 +166,11 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.climate {
+  margin-bottom: 0.75rem;
+  color: color-mix(in srgb, var(--ink) 85%, transparent);
 }
 
 .seasons {
@@ -253,5 +222,25 @@
 @media (max-width: 640px) {
   .wrap {
     padding: 6rem 1rem 0;
+  }
+
+  /* Two per row; the dividers become a grid of hairlines. */
+  .stats {
+    padding: 0;
+  }
+
+  .stat {
+    flex: 1 1 50%;
+    border-top: 1px solid var(--hair-soft);
+    border-left: 1px solid var(--hair-soft);
+    padding: 0.65rem 0.9rem;
+  }
+
+  .stat:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .stat:nth-child(-n + 2) {
+    border-top: 0;
   }
 }

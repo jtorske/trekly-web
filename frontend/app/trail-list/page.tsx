@@ -10,7 +10,8 @@ import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
 import { searchTrails, type TrailListItem, type TripType } from "@/lib/trailsApi";
-import { metersToFeet } from "@/lib/units";
+import { formatElevation, formatRouteDistance, type UnitSystem } from "@/lib/units";
+import { useUnits } from "@/lib/useUnits";
 import styles from "./page.module.css";
 
 const TERRAINS = Object.keys(TERRAIN_LABELS) as Terrain[];
@@ -77,12 +78,14 @@ function TrailCard({
   pending,
   onToggleSave,
   returnTo,
+  units,
 }: {
   trail: TrailListItem;
   saved: boolean;
   pending: boolean;
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
   returnTo: string;
+  units: UnitSystem;
 }) {
   return (
     <li className={styles.cardItem}>
@@ -104,10 +107,11 @@ function TrailCard({
               {tripLengthLabel(trail.typical_duration_nights)}
             </span>
           )}
+          {trail.distance_km != null && trail.route_type && (
+            <span className={styles.metaItem}>{formatRouteDistance(trail.distance_km, trail.route_type, units)}</span>
+          )}
           {trail.elevation_gain_m != null && (
-            <span className={styles.metaItem}>
-              {metersToFeet(trail.elevation_gain_m).toLocaleString()} ft gain
-            </span>
+            <span className={styles.metaItem}>{formatElevation(trail.elevation_gain_m, units)} gain</span>
           )}
         </div>
       </Link>
@@ -141,6 +145,7 @@ function ExploreContent() {
 
   const [input, setInput] = useState(q);
   const savedTrails = useSavedTrails();
+  const [units] = useUnits();
   const { status: authStatus } = useAuth();
   const resumedSave = useRef(false);
   const saveParam = searchParams.get("save");
@@ -344,6 +349,7 @@ function ExploreContent() {
                   pending={savedTrails.pending.has(trail.id)}
                   onToggleSave={savedTrails.toggle}
                   returnTo={returnTo}
+                  units={units}
                 />
               ))}
             </ul>

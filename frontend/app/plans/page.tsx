@@ -12,11 +12,12 @@ import {
   groupSizeWarning,
   isCheckedStatus,
   isPastPlan,
+  nightsInARow,
   siteLabel,
   type DraftNight,
 } from "@/lib/planDraft";
 import { plansApi, type PlanNight, type TripPlan } from "@/lib/plansApi";
-import { formatDay, formatStay, localToday } from "@/lib/stay";
+import { formatDay, formatStay, localToday, withStayDates } from "@/lib/stay";
 import { getTrailCampgrounds, type TrailCampground } from "@/lib/trailsApi";
 import { formatWeight } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
@@ -129,7 +130,12 @@ function NightCard({
             )
           )}
           {site?.book_url && !site.retired && (
-            <a href={site.book_url} className={styles.action} target="_blank" rel="noopener noreferrer">
+            <a
+              href={upcoming ? withStayDates(site.book_url, night.date, nightsInARow(plan.itinerary, night.night_index)) : site.book_url}
+              className={styles.action}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Book <span aria-hidden="true">↗</span>
             </a>
           )}
@@ -181,18 +187,20 @@ function GearPanel({ plan, onEdit }: { plan: TripPlan; onEdit: () => void }) {
           ))}
         </ul>
       )}
-      <FlatLay
-        slots={CORE_SLOTS}
-        bySlot={groupItemsBySlot(setup.items)}
-        showEmptySlots={false}
-        units={units}
-        canEdit={false}
-        addDisabled
-        snapId={null}
-        emptyMessage={setup.items.length === 0 ? "This setup is empty." : null}
-        onAdd={() => undefined}
-        onOpen={() => undefined}
-      />
+      <div className={styles.mat}>
+        <FlatLay
+          slots={CORE_SLOTS}
+          bySlot={groupItemsBySlot(setup.items)}
+          showEmptySlots={false}
+          units={units}
+          canEdit={false}
+          addDisabled
+          snapId={null}
+          emptyMessage={setup.items.length === 0 ? "This setup is empty." : null}
+          onAdd={() => undefined}
+          onOpen={() => undefined}
+        />
+      </div>
       {others.length > 0 && (
         <>
           <h3 className={styles.subTitle}>More gear</h3>
@@ -366,7 +374,7 @@ function PlanView({ id }: { id: string }) {
               <span key={permit.name}>
                 {i > 0 && ", "}
                 {permit.book_url ? (
-                  <a href={permit.book_url} target="_blank" rel="noopener noreferrer">
+                  <a href={past ? permit.book_url : withStayDates(permit.book_url, plan.start_date, plan.nights)} target="_blank" rel="noopener noreferrer">
                     {permit.name} <span aria-hidden="true">↗</span>
                   </a>
                 ) : (

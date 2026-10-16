@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import DateInput from "@/components/DateInput";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { useAuth } from "@/components/AuthProvider";
@@ -208,13 +209,12 @@ export default function PlanDialog({
         <div className={styles.stay}>
           <label className={ui.field}>
             <span className={ui.label}>First night</span>
-            <input
-              type="date"
+            <DateInput
               className={ui.input}
               value={draft.stay.start}
               min={plan ? undefined : today}
               required
-              onChange={(event) => event.target.value && setStay({ start: event.target.value })}
+              onChange={(start) => setStay({ start })}
             />
           </label>
           <label className={ui.field}>

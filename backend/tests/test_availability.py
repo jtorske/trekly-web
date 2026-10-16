@@ -568,7 +568,10 @@ def test_alert_email_content(session_factory, world):
     assert email.to == "hiker@example.com"
     assert email.subject == "Evelyn Creek has opened up for Tue Oct 20"
     assert "Tue Oct 20 to Thu Oct 22 (2 nights), party of 3" in email.text
-    assert "resourceLocationId=-2147483592&mapId=-2147483409&bookingCategoryId=7" in email.text
+    assert (
+        "resourceLocationId=-2147483592&mapId=-2147483409&bookingCategoryId=7"
+        "&startDate=2026-10-20&endDate=2026-10-22"
+    ) in email.text
     assert f"/trails?id={world['trail']}&start=2026-10-20&nights=2&party=3" in email.text
     assert "/alerts" in email.text
     db.close()

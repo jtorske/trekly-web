@@ -453,6 +453,18 @@
   color: var(--soft-ink);
 }
 
+/* The gear page's cloth mat, so the flat-lay art reads the same here. */
+.mat {
+  border: 1px solid color-mix(in srgb, var(--color-tan) 45%, transparent);
+  border-radius: 1.5rem;
+  background-color: color-mix(in srgb, var(--color-tan) 22%, var(--color-cream));
+  background-image:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-dark-olive) 3%, transparent) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--color-dark-olive) 3%, transparent) 0 1px, transparent 1px 6px);
+  padding: 1.5rem;
+  box-shadow: inset 0 0 0 6px color-mix(in srgb, white 25%, transparent);
+}
+
 .emptyGear {
   display: flex;
   flex-direction: column;
@@ -501,5 +513,9 @@
   .nightHead {
     flex-direction: row;
     gap: 0.5rem;
+  }
+
+  .mat {
+    padding: 1rem;
   }
 }

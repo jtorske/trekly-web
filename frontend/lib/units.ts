@@ -4,6 +4,8 @@
  * the stored value.
  */
 
+import type { RouteType } from "./trailsApi";
+
 export type UnitSystem = "imperial" | "metric";
 
 const GRAMS_PER_OUNCE = 28.349523125;
@@ -17,10 +19,46 @@ export function celsiusToFahrenheit(celsius: number): number {
   return Math.round((celsius * 9) / 5 + 32);
 }
 
+const KM_PER_MILE = 1.609344;
+
 function trim(value: number, decimals: number): string {
   return Number(value.toFixed(decimals)).toLocaleString("en-US", {
     maximumFractionDigits: decimals,
   });
+}
+
+/** "1,250 m" / "4,101 ft": elevations and elevation gain. */
+export function formatElevation(meters: number, system: UnitSystem = "metric"): string {
+  return system === "metric"
+    ? `${Math.round(meters).toLocaleString("en-US")} m`
+    : `${metersToFeet(meters).toLocaleString("en-US")} ft`;
+}
+
+/** "12.4 km" / "7.7 mi"; whole numbers past 100 so long trails stay short. */
+export function formatDistance(km: number, system: UnitSystem = "metric"): string {
+  const value = system === "metric" ? km : km / KM_PER_MILE;
+  return `${trim(value, value >= 100 ? 0 : 1)} ${system === "metric" ? "km" : "mi"}`;
+}
+
+const ROUTE_DISTANCE_SUFFIX: Record<RouteType, string> = {
+  out_and_back: "round trip",
+  loop: "loop",
+  point_to_point: "one way",
+};
+
+/** "8.6 km round trip", "12.4 km loop", "75.9 km one way". */
+export function formatRouteDistance(km: number, routeType: RouteType, system: UnitSystem = "metric"): string {
+  return `${formatDistance(km, system)} ${ROUTE_DISTANCE_SUFFIX[routeType]}`;
+}
+
+/** Bare degrees, for the low end of a range: "-4° / 12°C". */
+export function formatDegrees(celsius: number, system: UnitSystem = "metric"): string {
+  return `${system === "metric" ? Math.round(celsius) : celsiusToFahrenheit(celsius)}°`;
+}
+
+/** "12°C" / "54°F". */
+export function formatTemperature(celsius: number, system: UnitSystem = "metric"): string {
+  return `${formatDegrees(celsius, system)}${system === "metric" ? "C" : "F"}`;
 }
 
 export function formatWeight(grams: number, system: UnitSystem = "imperial"): string {

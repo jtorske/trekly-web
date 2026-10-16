@@ -23,6 +23,9 @@ class TrailListItemOut(TrailOut):
     country_code: str
     province_code: str | None = None
     typical_duration_nights: int | None = None
+    route_type: Literal["out_and_back", "loop", "point_to_point"] | None = None
+    # Round trip for out-and-backs, the loop, or the full one-way length.
+    distance_km: float | None = None
     elevation_gain_m: int | None = None
     popularity_rank: int | None = None
     # Set when the trail has left the catalogue; it still resolves for

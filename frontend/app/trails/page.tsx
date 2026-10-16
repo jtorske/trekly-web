@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import ui from "@/components/ui.module.css";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
@@ -15,7 +16,8 @@ import {
   type TrailCampgrounds,
   type TrailDetail,
 } from "@/lib/trailsApi";
-import { celsiusToFahrenheit, metersToFeet } from "@/lib/units";
+import { formatDegrees, formatElevation, formatRouteDistance, formatTemperature, type UnitSystem } from "@/lib/units";
+import { useUnits } from "@/lib/useUnits";
 import CampgroundsSection from "./CampgroundsSection";
 import styles from "./page.module.css";
 
@@ -37,7 +39,12 @@ function formatClimateZone(zone: string): string {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+interface StatItem {
+  label: string;
+  value: string;
+}
+
+function Stat({ label, value }: StatItem) {
   return (
     <div className={styles.stat}>
       <dt className={styles.statLabel}>{label}</dt>
@@ -46,14 +53,13 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SeasonCard({ condition }: { condition: SeasonalCondition }) {
+function SeasonCard({ condition, units }: { condition: SeasonalCondition; units: UnitSystem }) {
   return (
     <li className={styles.season}>
       <div className={styles.seasonHeader}>
         <h3 className={styles.seasonName}>{SEASON_LABELS[condition.season]}</h3>
         <span className={styles.seasonTemps}>
-          {celsiusToFahrenheit(condition.avg_low_c)}° /{" "}
-          {celsiusToFahrenheit(condition.avg_high_c)}°F
+          {formatDegrees(condition.avg_low_c, units)} / {formatTemperature(condition.avg_high_c, units)}
         </span>
       </div>
       <ul className={styles.seasonFacts}>
@@ -82,52 +88,40 @@ function TrailView({
   pending: boolean;
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
 }) {
+  const [units, setUnits] = useUnits();
   const nights = trail.typical_duration_nights;
   const hasLocation = trail.latitude != null && trail.longitude != null;
 
-  const stats: { label: string; value: string }[] = [
-    { label: "Difficulty", value: TERRAIN_LABELS[trail.terrain] },
-  ];
-  if (nights != null) {
-    stats.push({
-      label: "Typical trip",
-      value: tripLengthLabel(nights),
-    });
+  const stats: StatItem[] = [];
+  if (trail.distance_km != null && trail.route_type) {
+    stats.push({ label: "Distance", value: formatRouteDistance(trail.distance_km, trail.route_type, units) });
   }
   if (trail.elevation_gain_m != null) {
-    stats.push({
-      label: "Elevation gain",
-      value: `${metersToFeet(trail.elevation_gain_m).toLocaleString()} ft`,
-    });
+    stats.push({ label: "Elevation gain", value: formatElevation(trail.elevation_gain_m, units) });
   }
   if (trail.max_elevation_m != null) {
-    stats.push({
-      label: "High point",
-      value: `${metersToFeet(trail.max_elevation_m).toLocaleString()} ft`,
-    });
+    stats.push({ label: "High point", value: formatElevation(trail.max_elevation_m, units) });
   }
-  if (trail.climate_zone) {
-    stats.push({ label: "Climate", value: formatClimateZone(trail.climate_zone) });
+  if (nights != null) {
+    stats.push({ label: "Typical trip", value: tripLengthLabel(nights) });
   }
+  stats.push({ label: "Difficulty", value: TERRAIN_LABELS[trail.terrain] });
 
   return (
     <article className={styles.article}>
       <header className={styles.header}>
         <p className={styles.region}>{trail.region}</p>
         <h1 className={styles.title}>{trail.name}</h1>
-        <div className={styles.tags}>
-          <span className={`${styles.terrainTag} ${styles[trail.terrain]}`}>
-            {TERRAIN_LABELS[trail.terrain]}
-          </span>
-          {campgrounds?.overnight_option && (
+        {campgrounds?.overnight_option && (
+          <div className={styles.tags}>
             <span className={styles.overnightTag}>Also doable as an overnight</span>
-          )}
-        </div>
+          </div>
+        )}
       </header>
 
       <dl className={styles.stats}>
         {stats.map((stat) => (
-          <Stat key={stat.label} label={stat.label} value={stat.value} />
+          <Stat key={stat.label} {...stat} />
         ))}
       </dl>
 
@@ -140,6 +134,14 @@ function TrailView({
           onToggle={onToggleSave}
           returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
         />
+        <div className={ui.segmented} role="group" aria-label="Units">
+          <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
+            mi/ft
+          </button>
+          <button type="button" aria-pressed={units === "metric"} onClick={() => setUnits("metric")}>
+            km/m
+          </button>
+        </div>
       </div>
 
       <section className={styles.section}>
@@ -160,14 +162,21 @@ function TrailView({
         className={styles.section}
       />
 
-      {trail.seasonal_conditions.length > 0 && (
+      {(trail.seasonal_conditions.length > 0 || trail.climate_zone) && (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Seasonal conditions</h2>
-          <ul className={styles.seasons}>
-            {trail.seasonal_conditions.map((condition) => (
-              <SeasonCard key={condition.season} condition={condition} />
-            ))}
-          </ul>
+          {trail.climate_zone && (
+            <p className={styles.climate}>
+              Climate: <strong>{formatClimateZone(trail.climate_zone)}</strong>
+            </p>
+          )}
+          {trail.seasonal_conditions.length > 0 && (
+            <ul className={styles.seasons}>
+              {trail.seasonal_conditions.map((condition) => (
+                <SeasonCard key={condition.season} condition={condition} units={units} />
+              ))}
+            </ul>
+          )}
         </section>
       )}
 

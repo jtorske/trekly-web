@@ -10,6 +10,16 @@ const MAX_NIGHTS = 14;
 const MAX_PARTY = 12;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/**
+ * A complete YYYY-MM-DD date. Date inputs report partial values while someone
+ * types (a 5- or 6-digit year, say), which must not reach the stay.
+ */
+export function isPlainDate(value: string): boolean {
+  if (!ISO_DATE.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export function toISODate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -40,11 +50,29 @@ function clampInt(value: string | null, min: number, max: number): number | null
 /** The stay in ?start=&nights=&party=, or null if absent or invalid. */
 export function stayFromParams(params: URLSearchParams, today: string): Stay | null {
   const start = params.get("start");
-  if (!start || !ISO_DATE.test(start) || Number.isNaN(Date.parse(start)) || start < today) return null;
+  if (!start || !isPlainDate(start) || start < today) return null;
   const nights = clampInt(params.get("nights"), 1, MAX_NIGHTS);
   if (nights === null) return null;
   const party = clampInt(params.get("party"), 1, MAX_PARTY) ?? 2;
   return { start, nights, party };
+}
+
+/**
+ * A Parks Canada booking form opened on these dates. Verified 2026-10-15:
+ * startDate/endDate fill in the arrival date and the nights of the first
+ * itinerary row. No parameter sets party size. Other URLs pass through.
+ */
+export function withStayDates(url: string, start: string, nights: number): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+  if (parsed.hostname !== "reservation.pc.gc.ca") return url;
+  parsed.searchParams.set("startDate", start);
+  parsed.searchParams.set("endDate", addDays(start, nights));
+  return parsed.toString();
 }
 
 export function stayParams(stay: Stay): Record<string, string> {

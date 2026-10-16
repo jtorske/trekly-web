@@ -219,7 +219,7 @@ function GearContent() {
           )}
         </div>
         <div className={styles.toolbarRight}>
-          <div className={styles.toggle} role="group" aria-label="Units">
+          <div className={ui.segmented} role="group" aria-label="Units">
             <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
               lb/oz
             </button>
@@ -227,7 +227,7 @@ function GearContent() {
               kg/g
             </button>
           </div>
-          <div className={styles.toggle} role="group" aria-label="View">
+          <div className={ui.segmented} role="group" aria-label="View">
             <button type="button" aria-pressed={view === "flatlay"} onClick={() => setView("flatlay")}>
               Showcase
             </button>

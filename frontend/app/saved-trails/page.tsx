@@ -6,10 +6,12 @@ import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { SavedTrailList } from "@/app/profile/sections";
 import { useSavedTrails } from "@/lib/useSavedTrails";
+import { useUnits } from "@/lib/useUnits";
 import styles from "@/app/profile/page.module.css";
 
 function SavedTrailsContent() {
   const savedTrails = useSavedTrails();
+  const [units] = useUnits();
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
@@ -21,7 +23,7 @@ function SavedTrailsContent() {
           Trails you&apos;ve bookmarked. Saving a trail doesn&apos;t plan a trip or mark it as hiked.
         </p>
         <div className={styles.panel}>
-          <SavedTrailList data={savedTrails} />
+          <SavedTrailList data={savedTrails} units={units} />
         </div>
       </div>
     </main>

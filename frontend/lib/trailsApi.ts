@@ -7,10 +7,15 @@ export interface TrailSummary {
   terrain: Terrain;
 }
 
+export type RouteType = "out_and_back" | "loop" | "point_to_point";
+
 export interface TrailListItem extends TrailSummary {
   country_code: string;
   province_code: string | null;
   typical_duration_nights: number | null;
+  route_type: RouteType | null;
+  /** Round trip for an out-and-back, the loop, or the full one-way length. */
+  distance_km: number | null;
   elevation_gain_m: number | null;
   popularity_rank: number | null;
   /** Set once a trail leaves the catalogue; bookmarks to it still resolve. */

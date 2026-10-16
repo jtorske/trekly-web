@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatCapacity, formatSpecValue, formatWeight } from "./units.ts";
+import {
+  formatCapacity,
+  formatDegrees,
+  formatDistance,
+  formatElevation,
+  formatRouteDistance,
+  formatSpecValue,
+  formatTemperature,
+  formatWeight,
+} from "./units.ts";
 
 test("weights format without changing the canonical value", () => {
   assert.equal(formatWeight(83), "2.9 oz");
@@ -28,4 +37,20 @@ test("spec rows", () => {
   assert.equal(formatSpecValue(2, "persons"), "2 people");
   assert.equal(formatSpecValue(4.5, null), "4.5");
   assert.equal(formatSpecValue("canister", null), "canister");
+});
+
+test("trail measurements default to metric", () => {
+  assert.equal(formatElevation(2135), "2,135 m");
+  assert.equal(formatElevation(2135, "imperial"), "7,005 ft");
+  assert.equal(formatDistance(12.43), "12.4 km");
+  assert.equal(formatDistance(12.43, "imperial"), "7.7 mi");
+  assert.equal(formatDistance(75), "75 km");
+  assert.equal(formatDistance(336.4), "336 km");
+  assert.equal(formatRouteDistance(8.66, "out_and_back"), "8.7 km round trip");
+  assert.equal(formatRouteDistance(75.9, "point_to_point"), "75.9 km one way");
+  assert.equal(formatRouteDistance(5.2, "loop", "imperial"), "3.2 mi loop");
+  assert.equal(formatDegrees(-3.6), "-4°");
+  assert.equal(formatDegrees(-3.6, "imperial"), "26°");
+  assert.equal(formatTemperature(12.4), "12°C");
+  assert.equal(formatTemperature(12.4, "imperial"), "54°F");
 });

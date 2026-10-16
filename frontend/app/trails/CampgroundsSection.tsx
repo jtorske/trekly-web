@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import DateInput from "@/components/DateInput";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import {
@@ -23,6 +24,7 @@ import {
   sentence,
   stayFromParams,
   stayParams,
+  withStayDates,
 } from "@/lib/stay";
 import { decodeItinerary, defaultItinerary, encodeItinerary, sleepableSites } from "@/lib/planDraft";
 import type { TrailBooking, TrailCampground, TrailCampgrounds } from "@/lib/trailsApi";
@@ -175,13 +177,12 @@ function StayForm({
     <form className={styles.stayForm} onSubmit={submit} aria-label="Check availability">
       <label className={`${ui.field} ${styles.startField}`}>
         <span className={ui.label}>First night</span>
-        <input
-          type="date"
+        <DateInput
           className={ui.input}
           value={stay.start}
           min={today}
           required
-          onChange={(event) => event.target.value && onChange({ ...stay, start: event.target.value })}
+          onChange={(start) => onChange({ ...stay, start })}
         />
       </label>
       <label className={ui.field}>
@@ -438,11 +439,21 @@ export default function CampgroundsSection({
           {data.booking_links.length > 0 && (
             <div className={styles.bookLinks}>
               {data.booking_links.map((link) => (
-                <a key={link.url} className={styles.book} href={link.url} target="_blank" rel="noopener noreferrer">
+                <a
+                  key={link.url}
+                  className={styles.book}
+                  href={checkable ? withStayDates(link.url, stay.start, stay.nights) : link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {link.label}{" "}<span aria-hidden="true">↗</span>
                 </a>
               ))}
-              <p className={styles.bookHint}>Pick your campgrounds and dates there.</p>
+              <p className={styles.bookHint}>
+                {checkable
+                  ? `Opens on ${formatDay(stay.start)} for ${stay.nights} ${stay.nights === 1 ? "night" : "nights"}. Pick your campgrounds and party size there.`
+                  : "Pick your campgrounds and dates there."}
+              </p>
             </div>
           )}
         </>

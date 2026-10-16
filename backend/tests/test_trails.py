@@ -168,6 +168,17 @@ def test_shipped_catalogue_is_valid():
         assert t["province_code"] in CA_PROVINCES, t["name"]
         assert t["terrain_difficulty"] in TERRAIN_DIFFICULTIES, t["name"]
         assert 41.6 <= t["latitude"] <= 83.2 and -141.1 <= t["longitude"] <= -52.6, t["name"]
+        # Route type and distance are set together, and only with a source.
+        if t["distance_km"] is None:
+            assert t["route_type"] is None and t["verification"]["distance_km"] is None, t["name"]
+        else:
+            assert 0 < t["distance_km"] < 1000, t["name"]
+            assert t["route_type"] in ("out_and_back", "loop", "point_to_point"), t["name"]
+            source = t["verification"]["distance_km"]
+            assert source.get("osm") or source.get("osm_named_ways"), t["name"]
+            # An out-and-back shows the round trip: twice the mapped length.
+            factor = 2 if t["route_type"] == "out_and_back" else 1
+            assert abs(t["distance_km"] - source["mapped_km"] * factor) < 0.06, t["name"]
     assert any(t["name"] == "West Coast Trail" for t in trails)
 
 
