@@ -153,6 +153,7 @@ function TrailView({
 
       <CampgroundsSection
         trailId={trail.id}
+        trailName={trail.name}
         typicalNights={trail.typical_duration_nights}
         data={campgrounds}
         failed={campgroundsFailed && ((trail.typical_duration_nights ?? 0) >= 1)}

@@ -24,7 +24,9 @@ import {
   stayFromParams,
   stayParams,
 } from "@/lib/stay";
+import { decodeItinerary, defaultItinerary, encodeItinerary, sleepableSites } from "@/lib/planDraft";
 import type { TrailBooking, TrailCampground, TrailCampgrounds } from "@/lib/trailsApi";
+import PlanDialog, { type PlanDraft } from "../plans/PlanDialog";
 import AlertDialog from "./AlertDialog";
 import { bookingLabel, campgroundView, capacityFacts, kindLabel, type Stop } from "./campgrounds";
 import styles from "./CampgroundsSection.module.css";
@@ -156,12 +158,14 @@ function StayForm({
   busy,
   onChange,
   onSubmit,
+  onPlan,
 }: {
   stay: Stay;
   today: string;
   busy: boolean;
   onChange: (stay: Stay) => void;
   onSubmit: () => void;
+  onPlan: () => void;
 }) {
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -208,8 +212,11 @@ function StayForm({
           ))}
         </select>
       </label>
-      <button type="submit" className={`${ui.primary} ${styles.checkButton}`} disabled={busy}>
+      <button type="submit" className={`${ui.secondary} ${styles.checkButton}`} disabled={busy}>
         {busy ? "Checking…" : "Check availability"}
+      </button>
+      <button type="button" className={`${ui.primary} ${styles.checkButton}`} onClick={onPlan}>
+        Plan this trip
       </button>
     </form>
   );
@@ -228,14 +235,18 @@ function checkedStatus(checkedAt: string | null): string {
  * open, and a note for any part of the trip booked through another system.
  * Renders nothing for day hikes without campgrounds.
  */
+const DRAFT_KEY = "trekly:plan-draft";
+
 export default function CampgroundsSection({
   trailId,
+  trailName,
   typicalNights,
   data,
   failed,
   className,
 }: {
   trailId: string;
+  trailName: string;
   typicalNights: number | null;
   data: TrailCampgrounds | null;
   failed: boolean;
@@ -248,12 +259,14 @@ export default function CampgroundsSection({
   const [stay, setStay] = useState<Stay>(
     () => stayFromParams(searchParams, today) ?? defaultStay(today, typicalNights),
   );
-  const [result, setResult] = useState<{ key: string; data: TrailAvailability } | null>(null);
+  const [result, setResult] = useState<{ key: string; stay: Stay; data: TrailAvailability } | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alertSite, setAlertSite] = useState<{ site: TrailCampground; stay: Stay } | null>(null);
+  const [planDraft, setPlanDraft] = useState<PlanDraft | null>(null);
   const controller = useRef<AbortController | null>(null);
   const autoChecked = useRef(false);
+  const planReopened = useRef(false);
 
   const view = campgroundView(data);
   const checkable = view.stops.some((stop) => stop.sites.some((site) => !site.retired && site.provider === "parks_canada"));
@@ -273,7 +286,7 @@ export default function CampgroundsSection({
       setError(null);
       try {
         const found = await checkTrailAvailability(trailId, s, current.signal);
-        setResult({ key: JSON.stringify(s), data: found });
+        setResult({ key: JSON.stringify(s), stay: s, data: found });
       } catch (caught) {
         if ((caught as { name?: string }).name === "AbortError") return;
         setError(caught instanceof ApiError ? caught.message : "We couldn't check availability right now.");
@@ -309,6 +322,33 @@ export default function CampgroundsSection({
     });
   }, [data, checkable, searchParams, today, check, router, urlFor]);
 
+  // Back from sign-in after "Sign in to save plan": reopen the dialog with
+  // the draft (dates and nights from the URL, title and notes kept in this tab).
+  useEffect(() => {
+    if (planReopened.current || !data) return;
+    const code = searchParams.get("plan");
+    const fromUrl = stayFromParams(searchParams, today);
+    if (code === null || !fromUrl) return;
+    planReopened.current = true;
+    const valid = new Set(sleepableSites(data.campgrounds).filter((c) => !c.retired).map((c) => c.site_id));
+    let saved: { title?: string; notes?: string } = {};
+    try {
+      saved = JSON.parse(window.sessionStorage.getItem(`${DRAFT_KEY}:${trailId}`) ?? "{}");
+    } catch {
+      // Not available (private mode): the title and notes start empty.
+    }
+    Promise.resolve().then(() => {
+      setPlanDraft({
+        title: typeof saved.title === "string" ? saved.title : "",
+        notes: typeof saved.notes === "string" ? saved.notes : "",
+        stay: fromUrl,
+        itinerary: decodeItinerary(code, fromUrl.nights, valid) ?? [],
+        setupId: null,
+      });
+      router.replace(urlFor(fromUrl), { scroll: false });
+    });
+  }, [data, searchParams, today, trailId, router, urlFor]);
+
   useEffect(() => () => controller.current?.abort(), []);
 
   if (failed) {
@@ -325,6 +365,27 @@ export default function CampgroundsSection({
 
   const checkedResult = result?.key === JSON.stringify(stay) ? result.data : null;
   const availability = new Map((checkedResult?.campgrounds ?? []).map((found) => [found.site_id, found]));
+
+  // After a check, the plan starts from that stay and what was free; otherwise
+  // from the trail's typical length and the first campgrounds in order.
+  const openPlan = () => {
+    const base = result?.stay ?? defaultStay(today, typicalNights);
+    const found = result ? new Map(result.data.campgrounds.map((c) => [c.site_id, c])) : null;
+    setPlanDraft({
+      title: "",
+      notes: "",
+      setupId: null,
+      stay: base,
+      itinerary: defaultItinerary(view.stops, base.nights, found),
+    });
+  };
+  const keepDraftText = (draft: PlanDraft) => {
+    try {
+      window.sessionStorage.setItem(`${DRAFT_KEY}:${trailId}`, JSON.stringify({ title: draft.title, notes: draft.notes }));
+    } catch {
+      // Not persisted; the itinerary still comes back through the URL.
+    }
+  };
 
   return (
     <section className={className} aria-labelledby="campgrounds-title">
@@ -347,7 +408,7 @@ export default function CampgroundsSection({
 
           {checkable && (
             <div className={styles.checkCard}>
-              <StayForm stay={stay} today={today} busy={checking} onChange={setStay} onSubmit={submit} />
+              <StayForm stay={stay} today={today} busy={checking} onChange={setStay} onSubmit={submit} onPlan={openPlan} />
               <p className={styles.checkStatus} role="status" aria-live="polite">
                 {error ? (
                   <span className={styles.checkError}>{error}</span>
@@ -390,6 +451,28 @@ export default function CampgroundsSection({
       {view.elsewhere.map((booking) => (
         <BookingNote key={booking.system} booking={booking} />
       ))}
+
+      {!checkable && (
+        <div className={styles.planRow}>
+          <button type="button" className={ui.primary} onClick={openPlan}>
+            Plan this trip
+          </button>
+          <p className={styles.bookHint}>Lay out each night, your gear and what you&apos;ve booked in one place.</p>
+        </div>
+      )}
+
+      {planDraft && (
+        <PlanDialog
+          trailId={trailId}
+          trailName={trailName}
+          campgrounds={data.campgrounds}
+          initial={planDraft}
+          today={today}
+          guestReturnTo={(draft) => urlFor(draft.stay, { plan: encodeItinerary(draft.itinerary) })}
+          onBeforeSignIn={keepDraftText}
+          onClose={() => setPlanDraft(null)}
+        />
+      )}
 
       {alertSite && (
         <AlertDialog

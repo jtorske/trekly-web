@@ -231,13 +231,21 @@
 
 .stayForm {
   display: grid;
-  grid-template-columns: minmax(9.5rem, 1.4fr) minmax(4.5rem, 0.6fr) minmax(4.5rem, 0.6fr) auto;
+  grid-template-columns: minmax(9.5rem, 1.4fr) minmax(4.5rem, 0.6fr) minmax(4.5rem, 0.6fr) auto auto;
   gap: 0.75rem;
   align-items: end;
 }
 
 .checkButton {
   min-height: 2.6rem;
+}
+
+.planRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin-top: 1rem;
 }
 
 .checkStatus {
@@ -353,8 +361,7 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .startField,
-  .checkButton {
+  .startField {
     grid-column: 1 / -1;
   }
 }

@@ -9,6 +9,7 @@ import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { useMyGear } from "@/app/gear/useMyGear";
 import { useSetups } from "@/app/gear/useSetups";
+import { usePlans } from "@/lib/usePlans";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { useUnits } from "@/lib/useUnits";
@@ -52,6 +53,7 @@ function ProfileContent() {
   const gear = useMyGear();
   const savedTrails = useSavedTrails();
   const setups = useSetups();
+  const plans = usePlans();
   const [units] = useUnits();
   const [editing, setEditing] = useState(false);
 
@@ -118,10 +120,8 @@ function ProfileContent() {
             <span className={styles.statLabel}>{savedCount === 1 ? "Saved trail" : "Saved trails"}</span>
           </button>
           <button type="button" className={styles.stat} onClick={() => setTab("trips")}>
-            <span className={styles.statValue} aria-hidden="true">—</span>
-            <span className={styles.statLabel}>
-              Planned trips<span className={ui.srOnly}>: not saved to accounts yet</span>
-            </span>
+            <span className={styles.statValue}>{plans.loading ? "–" : plans.plans.length}</span>
+            <span className={styles.statLabel}>{plans.plans.length === 1 ? "Planned trip" : "Planned trips"}</span>
           </button>
         </div>
 
@@ -230,7 +230,7 @@ function ProfileContent() {
             </>
           )}
 
-          {tab === "trips" && <TripsSection />}
+          {tab === "trips" && <TripsSection data={plans} />}
 
           {tab === "settings" && <ProfileSettings profile={profile} />}
         </section>

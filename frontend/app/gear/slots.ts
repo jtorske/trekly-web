@@ -137,3 +137,26 @@ export function zoneCoverage(items: GearItem[]): { filled: number; total: number
   const zones = new Set(items.map((item) => slotForItem(item).zone));
   return { filled: zones.size, total: ZONES.length };
 }
+
+export interface GearWarning {
+  key: string;
+  /** warning: hard to camp without it. note: worth a second look. */
+  level: "warning" | "note";
+  message: string;
+}
+
+const TRIP_CHECKS: { slot: string; level: GearWarning["level"]; message: string }[] = [
+  { slot: "tent", level: "warning", message: "No shelter (tent, tarp or bivy)" },
+  { slot: "sleeping-bag", level: "warning", message: "No sleeping bag or quilt" },
+  { slot: "sleeping-pad", level: "note", message: "No sleeping pad" },
+];
+
+/** "Missing core gear" for a trip plan's setup: shelter and sleep system. */
+export function missingTripGear(items: GearItem[]): GearWarning[] {
+  const present = new Set(items.map((item) => slotForItem(item).key));
+  return TRIP_CHECKS.filter((check) => !present.has(check.slot)).map(({ slot, level, message }) => ({
+    key: slot,
+    level,
+    message,
+  }));
+}

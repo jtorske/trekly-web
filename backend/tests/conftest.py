@@ -36,7 +36,8 @@ GEAR_TABLES = [
     if name.startswith(("catalog_", "gear_setup"))
     or name in ("user_gear_items", "profiles", "saved_trails", "trails", "trail_seasonal_conditions",
                 "backcountry_parks", "backcountry_sites", "trail_campgrounds", "trail_booking_systems",
-                "availability_alerts", "availability_cache", "provider_request_budget", "job_locks")
+                "availability_alerts", "availability_cache", "provider_request_budget", "job_locks",
+                "trip_plans", "trip_plan_nights")
 ]
 
 

@@ -350,3 +350,35 @@ night count and booked count) next to the new "Alerts" section.
    River area"), how Grey Owl is booked, and the non-Parks Canada booking
    systems. I'm fairly sure of those systems, but I didn't verify each
    one, and most of their URLs are left `null` on purpose.
+
+## 7. Build notes
+
+### Phase 3 (alerts): what's left
+Alerts are complete and tested on master (API, poller, email, "Alert me"
+dialog, `/alerts`). Still open, none of it code on master:
+- Where the poller runs in production (undecided; it's a CLI script either way).
+- Production email settings (SendGrid key and sender).
+- `verify_rls_local.py` stops before its alert checks because the local Bob
+  test user can't sign in, so alert RLS hasn't been checked against a live
+  database yet.
+- Migrations `f1afb297138e`, `bcc7f8e1333b` and `6cf9b95bf4d2` are local only.
+
+### Phase 4 (trip plans): differences from section 3
+- **Nights: 1–14**, not 1–21, the same limit as availability checks and
+  alerts. The longest trail in the catalogue is 10 nights.
+- **`trip_plan_nights.choice`** (`campground` / `undecided` / `outside`)
+  tells "Not decided" apart from "Outside Parks Canada"; `site_id` is set
+  only for `campground`.
+- **The last check is stored per night** (`last_status`, `last_checked_at`)
+  so the plan page can say how stale it is; `availability_cache` is pruned,
+  so it can't serve that. It's cleared when the night's site, date or the
+  party size changes. The status itself is still derived on read.
+- **RLS is read-only for owners** (like alerts, not like setups): writes go
+  through the API, which checks campgrounds against the trail.
+- **Booked nights are protected:** any edit that would clear "Booked by me"
+  (dropping the night, moving the dates, changing its campground) is
+  refused with 409 unless confirmed, and the dialog names the nights first.
+- **Gear panel sits below the itinerary**, full width: the flat-lay mat is a
+  12-column layout and doesn't fit a side column.
+- **"Past"** is decided in the browser from the user's own date, so a plan
+  turns past at their midnight, not the server's.

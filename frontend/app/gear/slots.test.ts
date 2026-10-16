@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ALL_SLOTS, CORE_SLOTS, MORE_ZONES, ZONES, groupItemsBySlot, slotForCategory, zoneCoverage } from "./slots.ts";
+import { ALL_SLOTS, CORE_SLOTS, MORE_ZONES, ZONES, groupItemsBySlot, missingTripGear, slotForCategory, zoneCoverage } from "./slots.ts";
 import type { GearItem } from "../../lib/gearApi.ts";
 
 // Mirrors backend/app/catalog/taxonomy.py — every subcategory must have a slot.
@@ -72,4 +72,14 @@ test("seven core showcase slots; everything else is under More gear", () => {
   // The stove picker only offers stoves, not fuel or accessories.
   assert.deepEqual(slotForCategory("stoves").categories, ["stoves"]);
   assert.equal(slotForCategory("fuel-accessories").key, "cookware");
+});
+
+test("trip gear warns about shelter and sleeping bag, and notes a missing pad", () => {
+  assert.deepEqual(missingTripGear([]).map((w) => [w.key, w.level]), [
+    ["tent", "warning"], ["sleeping-bag", "warning"], ["sleeping-pad", "note"],
+  ]);
+  // A tarp is shelter and a quilt is a sleeping bag, via the slot mapping.
+  const kit = [item("t", "tarps", "shelter"), item("q", "quilts", "sleep"), item("p", "sleeping-pads", "sleep")];
+  assert.deepEqual(missingTripGear(kit), []);
+  assert.deepEqual(missingTripGear(kit.slice(0, 2)).map((w) => w.key), ["sleeping-pad"]);
 });

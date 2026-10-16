@@ -12,6 +12,9 @@ import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
 import type { SavedTrail } from "@/lib/accountApi";
 import type { GearItem } from "@/lib/gearApi";
+import { splitPlans } from "@/lib/planDraft";
+import type { TripPlanSummary } from "@/lib/plansApi";
+import { formatStay, localToday } from "@/lib/stay";
 import { formatWeight, metersToFeet, type UnitSystem } from "@/lib/units";
 import styles from "./page.module.css";
 
@@ -149,12 +152,60 @@ export function GearSection({ gear, units, limit }: { gear: GearData; units: Uni
   );
 }
 
-export function TripsSection() {
+function TripCard({ plan }: { plan: TripPlanSummary }) {
   return (
-    <EmptyState title="Trips aren't saved to your account yet" action={{ href: "/trail-list", label: "Explore trails" }}>
-      When saved trips arrive, they&apos;ll appear here. Your Gear inventory is separate: it&apos;s everything
-      you own, not what you pack for one trip.
-    </EmptyState>
+    <li>
+      <Link href={`/plans?id=${encodeURIComponent(plan.id)}`} className={styles.tripCard}>
+        <span className={styles.tripTrail}>{plan.title ?? plan.trail.name}</span>
+        {plan.title && <span className={styles.tripMeta}>{plan.trail.name}</span>}
+        <span className={styles.tripMeta}>{formatStay(plan.start_date, plan.nights)}</span>
+        <span className={styles.tripBooked}>
+          {plan.booked_nights} of {plan.nights} {plan.nights === 1 ? "night" : "nights"} booked
+        </span>
+      </Link>
+    </li>
+  );
+}
+
+/** Upcoming plans soonest first; a plan moves to Past the day after its last night. */
+export function TripsSection({
+  data,
+}: {
+  data: { loading: boolean; error: string | null; plans: TripPlanSummary[]; reload: () => void };
+}) {
+  if (data.loading) return <ListSkeleton rows={2} />;
+  if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
+  if (data.plans.length === 0) {
+    return (
+      <EmptyState title="No trip plans yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+        Open an overnight trail and choose &ldquo;Plan this trip&rdquo; to lay out each night, your gear and what
+        you&apos;ve booked.
+      </EmptyState>
+    );
+  }
+  const { upcoming, past } = splitPlans(data.plans, localToday());
+  return (
+    <>
+      {upcoming.length > 0 ? (
+        <ul className={styles.trips}>
+          {upcoming.map((plan) => (
+            <TripCard key={plan.id} plan={plan} />
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.tripsNone}>No upcoming trips.</p>
+      )}
+      {past.length > 0 && (
+        <>
+          <h3 className={styles.tripsPastTitle}>Past</h3>
+          <ul className={`${styles.trips} ${styles.tripsPast}`}>
+            {past.map((plan) => (
+              <TripCard key={plan.id} plan={plan} />
+            ))}
+          </ul>
+        </>
+      )}
+    </>
   );
 }
 

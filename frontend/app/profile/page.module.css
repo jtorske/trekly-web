@@ -423,3 +423,61 @@
     align-items: flex-start;
   }
 }
+
+/* Trip plans */
+
+.trips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tripCard {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 72%, var(--paper));
+  padding: 0.85rem 1rem;
+  transition: border-color 120ms ease;
+}
+
+.tripCard:hover {
+  border-color: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.tripTrail {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tripMeta {
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  font-size: 0.88rem;
+}
+
+.tripBooked {
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.tripsNone {
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+}
+
+.tripsPastTitle {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.tripsPast .tripCard {
+  opacity: 0.75;
+}
