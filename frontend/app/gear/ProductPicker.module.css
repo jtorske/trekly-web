@@ -69,7 +69,7 @@
 }
 
 .cardBrand {
-  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -150,13 +150,13 @@
 }
 
 .confirmWeight span {
-  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .confirmWeightUnknown {
-  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  color: var(--color-muted-text);
 }
 
 .variants {
@@ -185,7 +185,7 @@
 
 .variantMeta {
   margin-left: auto;
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.85rem;
   white-space: nowrap;
 }
@@ -203,7 +203,7 @@
 }
 
 .spec dt {
-  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.75rem;
 }
 

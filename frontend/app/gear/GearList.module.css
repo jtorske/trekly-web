@@ -41,7 +41,7 @@ button.row:hover {
 }
 
 .meta {
-  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.82rem;
 }
 

@@ -39,7 +39,7 @@
 
 .meta,
 .detail {
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.85rem;
 }
 
@@ -74,7 +74,7 @@
 .status_cancelled,
 .status_expired {
   background: color-mix(in srgb, var(--color-dark-olive) 8%, transparent);
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
 }
 
 .actions {

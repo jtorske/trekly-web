@@ -100,7 +100,7 @@
 }
 
 .statLabel {
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.82rem;
 }
 
@@ -214,7 +214,7 @@
 
 .trailMeta,
 .trailSaved {
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.82rem;
 }
 
@@ -242,7 +242,7 @@
 
 .cardDescription {
   margin-top: -0.4rem;
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.9rem;
 }
 

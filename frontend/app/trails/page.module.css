@@ -139,7 +139,7 @@
 }
 
 .statLabel {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.75rem;
   font-weight: 500;
 }
@@ -194,7 +194,7 @@
 }
 
 .muted {
-  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  color: var(--color-muted-text);
 }
 
 .inlineLink {

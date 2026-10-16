@@ -21,12 +21,12 @@
 }
 
 .primary {
-  background: var(--color-rust);
+  background: var(--color-rust-fill);
   color: var(--color-cream);
 }
 
 .primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-rust) 86%, black);
+  background: var(--color-rust-fill-hover);
 }
 
 .secondary {
@@ -80,7 +80,7 @@
 }
 
 .hint {
-  color: color-mix(in srgb, var(--color-dark-olive) 62%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.8rem;
   line-height: 1.4;
 }

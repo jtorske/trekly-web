@@ -118,7 +118,7 @@
 .searchButton {
   border: 0;
   border-radius: 9999px;
-  background: var(--color-rust);
+  background: var(--color-rust-fill);
   padding: 0.75rem 1.75rem;
   color: var(--color-cream);
   font-weight: 600;
@@ -126,7 +126,7 @@
 }
 
 .searchButton:hover {
-  background: color-mix(in srgb, var(--color-rust) 90%, transparent);
+  background: var(--color-rust-fill-hover);
 }
 
 .trailResults {
@@ -175,13 +175,13 @@
 
 .trailOptionTerrain {
   flex-shrink: 0;
-  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.8rem;
 }
 
 .trailStatus {
   padding: 0.65rem 0.75rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.9rem;
 }
 

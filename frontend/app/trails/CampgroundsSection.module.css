@@ -78,7 +78,7 @@
 
 .code {
   margin-left: 0.5rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -96,7 +96,7 @@
 
 .meta {
   margin-top: 0.2rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.85rem;
 }
 
@@ -250,7 +250,7 @@
 
 .checkStatus {
   margin-top: 0.6rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.82rem;
   line-height: 1.45;
 }
@@ -306,7 +306,7 @@
 .night_closed,
 .night_unknown {
   border-color: color-mix(in srgb, var(--color-dark-olive) 20%, transparent);
-  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  color: var(--color-muted-text);
 }
 
 .night_unknown {
@@ -338,7 +338,7 @@
 
 .summary_closed,
 .summary_unknown {
-  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  color: var(--color-muted-text);
 }
 
 .alertButton {
@@ -352,7 +352,7 @@
 }
 
 .alertButton:hover {
-  background: var(--color-rust);
+  background: var(--color-rust-fill);
   color: var(--color-cream);
 }
 

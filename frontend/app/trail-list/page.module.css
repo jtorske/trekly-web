@@ -58,7 +58,7 @@
 
 .searchButton {
   border-radius: 9999px;
-  background: var(--color-rust);
+  background: var(--color-rust-fill);
   padding: 0.6rem 1.4rem;
   color: var(--color-cream);
   font-weight: 600;
@@ -66,7 +66,7 @@
 }
 
 .searchButton:hover {
-  background: color-mix(in srgb, var(--color-rust) 88%, black);
+  background: var(--color-rust-fill-hover);
 }
 
 .filterButton {
@@ -264,7 +264,7 @@
 
 .cardRegion {
   margin-top: 0.15rem;
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.9rem;
 }
 

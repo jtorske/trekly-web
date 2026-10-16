@@ -9,6 +9,11 @@
   /* Rust for text on paper or cards: the brand rust is only ~3.8:1 on
      cream; this stays >= 4.5:1 even over the topo background. */
   --color-rust-text: color-mix(in srgb, var(--color-rust) 70%, black);
+  /* Filled rust buttons with cream text: ~4.9:1 at rest, ~6.1:1 on hover. */
+  --color-rust-fill: color-mix(in srgb, var(--color-rust) 86%, black);
+  --color-rust-fill-hover: color-mix(in srgb, var(--color-rust) 74%, black);
+  /* Small secondary text on white and cream cards: >= 5.2:1 on either. */
+  --color-muted-text: color-mix(in srgb, var(--color-dark-olive) 72%, transparent);
   --background: var(--color-cream);
   --foreground: var(--color-dark-olive);
 
