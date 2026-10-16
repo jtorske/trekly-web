@@ -54,6 +54,12 @@
   color: var(--ink);
 }
 
+/* Empty-slot captions stay lighter than filled ones but readable (AA);
+   the faded tone is left to the outline art. */
+.piece[data-state="empty"]:not(:hover):not(:focus-visible) .label {
+  color: var(--color-muted-text);
+}
+
 .piece:hover:not(:disabled),
 .piece:focus-visible {
   transform: translateY(-3px);
