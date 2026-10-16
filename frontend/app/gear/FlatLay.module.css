@@ -175,7 +175,7 @@
 .brand {
   overflow: hidden;
   max-width: 100%;
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  color: var(--color-muted-text);
   font-size: 0.78rem;
   text-overflow: ellipsis;
   white-space: nowrap;
