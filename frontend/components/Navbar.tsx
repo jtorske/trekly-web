@@ -23,6 +23,9 @@ export default function Navbar() {
   const { profile } = useProfile();
   const pathname = usePathname();
   const isAuthPage = /^\/(login|signup|forgot-password|reset-password|auth)/.test(pathname);
+  // Only the landing hero (a dark photo) keeps the see-through bar; on paper
+  // pages a gradient over pale ground can't keep the links readable.
+  const overHero = pathname === "/landing" || pathname === "/";
   const returnTo = isAuthPage ? "" : nextQuery(pathname);
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function Navbar() {
     );
 
   return (
-    <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
+    <nav className={`${styles.navbar} ${isScrolled || !overHero ? styles.scrolled : ""}`}>
       <Link href="/landing" aria-label="Trekly home">
         <Image src="/TreklyLogoW.svg" alt="Trekly" width={82} height={81} className={styles.logo} />
       </Link>

@@ -3,6 +3,8 @@ import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
+import SiteFooter from "@/components/SiteFooter";
+import TopoBackground from "@/components/TopoBackground";
 
 // Display/heading font: organic, editorial character that complements the
 // hand-drawn Trekly logo. UI/body font: clean and highly readable so the
@@ -39,7 +41,11 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
 
-          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+          <TopoBackground />
+          {/* At least one (small) viewport tall, so the footer credit always
+              starts below the first screen and full-height heroes stay full. */}
+          <div className="flex min-h-svh flex-1 flex-col">{children}</div>
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>

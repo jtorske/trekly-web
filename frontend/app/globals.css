@@ -6,6 +6,9 @@
   --color-cream: #fefae0;
   --color-tan: #dda15e;
   --color-rust: #bc6c25;
+  /* Rust for text on paper or cards: the brand rust is only ~3.8:1 on
+     cream; this stays >= 4.5:1 even over the topo background. */
+  --color-rust-text: color-mix(in srgb, var(--color-rust) 70%, black);
   --background: var(--color-cream);
   --foreground: var(--color-dark-olive);
 

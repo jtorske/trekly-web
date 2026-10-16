@@ -1,0 +1,38 @@
+/*
+ * Fixed and out of flow: it never moves layout, and as its own composited
+ * layer it isn't repainted while the page scrolls.
+ */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--color-cream);
+  /* Paper grain: a tiny tiling noise texture, a few percent ink. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .21 0 0 0 0 .09 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  transform: translateZ(0);
+}
+
+.contours {
+  position: absolute;
+  inset: 0;
+  /* The ink token at low opacity: lines read as texture, never as content.
+     Worst case (a line over the darkest grain) is ~14% ink, which muted page
+     text is checked against for 4.5:1. */
+  background-color: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
+  -webkit-mask-image: var(--topo-map);
+  mask-image: var(--topo-map);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+@media print {
+  .layer {
+    display: none;
+  }
+}

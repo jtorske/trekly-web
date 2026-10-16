@@ -86,7 +86,6 @@ function ProfileContent() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
       <div className={styles.wrap}>
         <header className={styles.header}>
           <Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={96} alt={`${name}'s profile photo`} />

@@ -57,7 +57,7 @@
 
 .inlineLink,
 .linkButton {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -108,7 +108,7 @@
 }
 
 .switch a {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-weight: 600;
 }
 

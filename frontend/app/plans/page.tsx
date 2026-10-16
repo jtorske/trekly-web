@@ -489,7 +489,6 @@ function PlanContent() {
   const id = useSearchParams().get("id");
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
       <div className={styles.wrap}>
         <RequireAuth fallback={<PlanSkeleton />}>
           {id ? (

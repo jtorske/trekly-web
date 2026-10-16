@@ -8,7 +8,7 @@
 .intro,
 .muted {
   margin-bottom: 0.9rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 75%, transparent);
+  color: color-mix(in srgb, var(--color-dark-olive) 85%, transparent);
   line-height: 1.6;
 }
 
@@ -137,12 +137,12 @@
 }
 
 .book {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-weight: 600;
 }
 
 .bookHint {
-  color: color-mix(in srgb, var(--color-dark-olive) 60%, transparent);
+  color: color-mix(in srgb, var(--color-dark-olive) 82%, transparent);
   font-size: 0.82rem;
 }
 
@@ -174,7 +174,7 @@
 
 .approximate {
   margin-top: 0.6rem;
-  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  color: color-mix(in srgb, var(--color-dark-olive) 82%, transparent);
   font-size: 0.8rem;
   font-style: italic;
 }
@@ -194,7 +194,7 @@
 }
 
 .elsewhereTitle a {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
 }
 
 .elsewhereNote {
@@ -346,7 +346,7 @@
   border: 1px solid var(--color-rust);
   border-radius: 9999px;
   padding: 0.25rem 0.8rem;
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-size: 0.8rem;
   font-weight: 600;
 }

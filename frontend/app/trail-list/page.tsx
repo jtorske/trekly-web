@@ -209,7 +209,6 @@ function ExploreContent() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
 
       <h1 className={ui.srOnly}>Explore trails</h1>
 

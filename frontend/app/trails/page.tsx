@@ -279,7 +279,6 @@ function TrailContent() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
       <div className={styles.wrap}>
         <Link href="/trail-list" className={styles.backLink}>
           ← Explore trails

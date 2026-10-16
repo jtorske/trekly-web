@@ -22,24 +22,6 @@
   border-radius: 4px;
 }
 
-.texture {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    repeating-radial-gradient(
-      circle at 8% 0%,
-      transparent 0 38px,
-      color-mix(in srgb, var(--color-olive) 6%, transparent) 38px 40px
-    ),
-    repeating-radial-gradient(
-      circle at 100% 55%,
-      transparent 0 46px,
-      color-mix(in srgb, var(--slate) 6%, transparent) 46px 48px
-    );
-  background-color: var(--paper);
-}
-
 .wrap {
   max-width: 48rem;
   margin: 0 auto;
@@ -49,13 +31,13 @@
 .backLink {
   display: inline-block;
   margin-bottom: 1.5rem;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: color-mix(in srgb, var(--ink) 85%, transparent);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .backLink:hover {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
 }
 
 .status {
@@ -80,7 +62,7 @@
 }
 
 .region {
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -216,7 +198,7 @@
 }
 
 .inlineLink {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;

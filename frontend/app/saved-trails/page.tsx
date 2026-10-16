@@ -12,7 +12,6 @@ function SavedTrailsContent() {
   const savedTrails = useSavedTrails();
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
       <div className={styles.wrap}>
         <Link href="/profile?tab=trails" className={ui.ghost}>
           ← Back to profile

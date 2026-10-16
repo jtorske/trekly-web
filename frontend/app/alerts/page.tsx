@@ -180,7 +180,6 @@ function AlertsContent() {
 
   return (
     <main className={profile.page}>
-      <div className={profile.texture} aria-hidden="true" />
       <div className={profile.wrap}>
         <h1 className={profile.name}>Campground alerts</h1>
         <p className={profile.bio}>

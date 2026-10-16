@@ -17,18 +17,6 @@
   outline-offset: 2px;
 }
 
-.texture {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: repeating-radial-gradient(
-    circle at 92% 0%,
-    transparent 0 40px,
-    color-mix(in srgb, var(--color-olive) 6%, transparent) 40px 42px
-  );
-  background-color: var(--paper);
-}
-
 .wrap {
   display: flex;
   max-width: 60rem;
@@ -62,7 +50,7 @@
 }
 
 .username {
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
   font-weight: 500;
 }
 
@@ -73,7 +61,7 @@
 }
 
 .meta {
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
   font-size: 0.88rem;
 }
 
@@ -129,7 +117,7 @@
   margin-bottom: -1px;
   border-bottom: 2px solid transparent;
   padding: 0.65rem 0.9rem;
-  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
   font-weight: 600;
 }
 

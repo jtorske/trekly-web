@@ -135,7 +135,6 @@ function GearContent() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
 
       <div className={styles.headBar}>
         <h1 className={styles.title}>Your gear</h1>

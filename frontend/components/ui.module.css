@@ -40,7 +40,7 @@
 }
 
 .ghost {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   padding-right: 0.5rem;
   padding-left: 0.5rem;
 }

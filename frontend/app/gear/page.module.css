@@ -19,16 +19,6 @@
   outline-offset: 2px;
 }
 
-.texture {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    repeating-radial-gradient(circle at 8% 0%, transparent 0 38px, color-mix(in srgb, var(--color-olive) 6%, transparent) 38px 40px),
-    repeating-radial-gradient(circle at 100% 55%, transparent 0 46px, color-mix(in srgb, var(--slate) 6%, transparent) 46px 48px);
-  background-color: var(--paper);
-}
-
 /* Compact page head: the h1 reads as a section label beside the setup tabs. */
 .headBar {
   display: flex;
@@ -377,7 +367,7 @@
 }
 
 .setupSummary {
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
   font-size: 0.88rem;
 }
 

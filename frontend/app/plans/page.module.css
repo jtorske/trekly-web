@@ -4,7 +4,8 @@
   --slate: #3d5866;
   --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
   --hair-soft: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
-  --soft-ink: color-mix(in srgb, var(--color-dark-olive) 68%, transparent);
+  /* >= 4.5:1 even where a contour line crosses the paper grain. */
+  --soft-ink: color-mix(in srgb, var(--color-dark-olive) 82%, transparent);
 
   position: relative;
   isolation: isolate;
@@ -20,18 +21,6 @@
   outline: 2px solid var(--color-rust);
   outline-offset: 2px;
   border-radius: 4px;
-}
-
-.texture {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: repeating-radial-gradient(
-    circle at 8% 0%,
-    transparent 0 38px,
-    color-mix(in srgb, var(--color-olive) 6%, transparent) 38px 40px
-  );
-  background-color: var(--paper);
 }
 
 .wrap {
@@ -50,7 +39,7 @@
 
 .backLink:hover,
 .inlineLink:hover {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
 }
 
 .inlineLink {
@@ -211,7 +200,7 @@
 }
 
 .permit a {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-weight: 600;
 }
 
@@ -403,7 +392,7 @@
 }
 
 .action {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -429,7 +418,7 @@
 }
 
 .setupName:hover {
-  color: var(--color-rust);
+  color: var(--color-rust-text);
 }
 
 .gearTotals {
