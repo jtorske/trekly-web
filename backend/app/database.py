@@ -13,7 +13,9 @@ DATABASE_URL=os.getenv(
 
 
 engine=create_engine(
-    DATABASE_URL
+    DATABASE_URL,
+    # The hosted pooler drops idle connections; check before reuse.
+    pool_pre_ping=True,
 )
 
 

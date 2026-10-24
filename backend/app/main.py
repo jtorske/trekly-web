@@ -5,20 +5,27 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import availability, gear, me_account, me_alerts, me_gear, me_plans, me_setups, trails
 
+
+def cors_options(env=os.environ) -> dict:
+    return {
+        # Comma-separated list, e.g. "https://trekly.app,http://localhost:3000".
+        "allow_origins": [
+            origin.strip()
+            for origin in env.get("CORS_ORIGINS", "http://localhost:3000").split(",")
+            if origin.strip()
+        ],
+        # Full-match regex for origins that can't be listed, such as Vercel
+        # preview URLs: "https://trekly-web-[a-z0-9-]+-myteam\.vercel\.app".
+        "allow_origin_regex": env.get("CORS_ORIGIN_REGEX") or None,
+        "allow_credentials": True,
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+    }
+
+
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    # Comma-separated list, e.g. "https://trekly.app,http://localhost:3000".
-    allow_origins=[
-        origin.strip()
-        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
-        if origin.strip()
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, **cors_options())
 
 app.include_router(trails.router)
 app.include_router(availability.router)

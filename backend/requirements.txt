@@ -1,7 +1,9 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-alembic
-python-dotenv
-psycopg2-binary
-pyjwt[crypto]>=2.10
+# Pinned to the versions the test suite runs against. Unpinned installs pick
+# up SQLAlchemy 2.1, which maps postgresql:// to psycopg 3 instead of psycopg2.
+fastapi==0.135.3
+uvicorn[standard]==0.42.0
+sqlalchemy==2.0.51
+alembic==1.18.5
+python-dotenv==1.2.2
+psycopg2-binary==2.9.12
+pyjwt[crypto]==2.10.1
