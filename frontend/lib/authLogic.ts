@@ -85,6 +85,13 @@ export function friendlyAuthError(error: unknown): string {
   if (code === "otp_expired" || message.includes("expired") || message.includes("invalid") && message.includes("link")) {
     return "This link is invalid or has expired. Request a new one.";
   }
+  if (code === "access_denied" && !message.includes("link")) {
+    // The person backed out of the Google consent screen.
+    return "Google sign-in was cancelled. Try again, or use your email and password.";
+  }
+  if (code === "provider_disabled" || message.includes("provider is not enabled")) {
+    return "Google sign-in isn't available right now. Use your email and password instead.";
+  }
   if (message.includes("failed to fetch") || message.includes("network")) {
     return "We couldn't reach the sign-in service. Check your connection and try again.";
   }

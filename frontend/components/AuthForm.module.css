@@ -86,6 +86,51 @@
   min-height: 2.9rem;
 }
 
+.google {
+  display: inline-flex;
+  width: 100%;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 9999px;
+  background: white;
+  padding: 0.55rem 1.15rem;
+  color: #1f1f1f;
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.google:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: #f7f7f5;
+}
+
+.google:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-muted-text);
+  font-size: 0.82rem;
+}
+
+.divider::before,
+.divider::after {
+  flex: 1;
+  height: 1px;
+  background: var(--hair);
+  content: "";
+}
+
 .steps {
   display: flex;
   flex-direction: column;

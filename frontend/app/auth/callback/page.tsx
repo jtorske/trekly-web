@@ -10,7 +10,7 @@ import { getSupabaseClient } from "@/lib/supabaseClient";
 
 /**
  * Landing page for Supabase email links (signup confirmation, password
- * recovery, email change). The Supabase client exchanges the PKCE `code` in
+ * recovery, email change) and for Google sign-in. The Supabase client exchanges the PKCE `code` in
  * the URL for a session during initialisation; we wait for that, then send
  * the user on to `next`.
  */
@@ -56,7 +56,7 @@ function CallbackContent() {
 
   if (!problem) {
     return (
-      <AuthShell title="Signing you in…" subtitle="One moment while we confirm your link.">
+      <AuthShell title="Signing you in…" subtitle="One moment while we check your sign-in.">
         <p className={ui.hint} role="status">
           If nothing happens, <Link href="/login">sign in here</Link>.
         </p>

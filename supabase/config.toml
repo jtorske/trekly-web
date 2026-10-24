@@ -335,6 +335,20 @@ skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
 
+# Google sign-in. To use it locally, put SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID and
+# SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET in supabase/.env, set enabled = true, and add
+# http://127.0.0.1:44321/auth/v1/callback as an authorised redirect URI in Google Cloud.
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+url = ""
+# Only needed for ID-token sign-in; Trekly uses the redirect (PKCE) flow.
+skip_nonce_check = false
+email_optional = false
+
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
 [auth.web3.solana]

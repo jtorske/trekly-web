@@ -70,3 +70,11 @@ test("auth redirect errors are read from query or hash", () => {
   assert.match(authRedirectError("?error_description=Email%20link%20is%20invalid%20or%20has%20expired", "") ?? "", /expired/);
   assert.equal(authRedirectError("?code=abc", ""), null);
 });
+
+test("authRedirectError explains a cancelled Google sign-in", () => {
+  assert.match(
+    authRedirectError("?error=access_denied&error_description=The+user+denied+the+request", "") ?? "",
+    /cancelled/,
+  );
+  assert.match(friendlyAuthError(Object.assign(new Error("Unsupported provider: provider is not enabled"), { code: "validation_failed" })), /isn't available/);
+});
