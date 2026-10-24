@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
-import Avatar from "./Avatar";
+import AccountMenu, { AccountRows } from "./AccountMenu";
+import accountStyles from "./AccountMenu.module.css";
+import { currentAccountHref } from "@/lib/accountMenu";
 import { nextQuery } from "@/lib/authLogic";
 import { useProfile } from "@/lib/useProfile";
 import styles from "./Navbar.module.css";
@@ -23,6 +25,8 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Query string when the mobile menu opened, for highlighting profile tabs.
+  const [menuSearch, setMenuSearch] = useState("");
   const { status, user } = useAuth();
   const { profile } = useProfile();
   const pathname = usePathname();
@@ -50,13 +54,12 @@ export default function Navbar() {
 
   const displayName = profile?.display_name ?? null;
   const email = user?.email ?? null;
-  const accountLabel = `Your profile${displayName ? ` (${displayName})` : ""}`;
+  const identity = { displayName, email, avatarPath: profile?.avatar_path };
+  const currentAccount = isMenuOpen ? currentAccountHref(pathname, menuSearch) : null;
 
   const account =
     status === "signedIn" ? (
-      <Link href="/profile" className={styles.avatarLink} aria-label={accountLabel} title="Your profile">
-        <Avatar path={profile?.avatar_path} name={displayName} email={email} size={34} />
-      </Link>
+      <AccountMenu identity={identity} triggerClassName={styles.avatarLink} onOpen={() => setIsMenuOpen(false)} />
     ) : status === "loading" ? (
       // Reserve the space while the session restores so buttons don't flash.
       <span className={styles.avatarPlaceholder} aria-hidden="true" />
@@ -105,7 +108,10 @@ export default function Navbar() {
           aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-navigation"
-          onClick={() => setIsMenuOpen((open) => !open)}
+          onClick={() => {
+            setMenuSearch(window.location.search);
+            setIsMenuOpen((open) => !open);
+          }}
         >
           <span />
           <span />
@@ -114,16 +120,17 @@ export default function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div id="mobile-navigation" className={styles.mobileMenu}>
+        <div id="mobile-navigation" className={`${accountStyles.card} ${styles.mobileMenu}`}>
           {LINKS.map((link) => (
             <Link key={link.href} href={link.href} className={styles.mobileMenuLink} onClick={() => setIsMenuOpen(false)}>
               {link.label}
             </Link>
           ))}
           {status === "signedIn" ? (
-            <Link href="/profile" className={styles.mobileMenuLink} onClick={() => setIsMenuOpen(false)}>
-              Your profile
-            </Link>
+            <>
+              <div className={styles.mobileMenuDivider} />
+              <AccountRows identity={identity} current={currentAccount} asMenuItems={false} onChoose={() => setIsMenuOpen(false)} />
+            </>
           ) : (
             <>
               <Link

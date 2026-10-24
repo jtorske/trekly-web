@@ -256,13 +256,6 @@ function DeleteAccount() {
 export default function ProfileSettings({ profile }: { profile: Profile }) {
   return (
     <div className={styles.settings}>
-      <Card id="privacy" title="Privacy">
-        <p>
-          Your profile photo is visible to anyone with its link; everything else is <strong>private</strong>.
-          Trekly doesn&apos;t have public profiles, so your name, bio, gear and saved trails are only visible to
-          you when you&apos;re signed in. Your email is never shown to anyone else.
-        </p>
-      </Card>
       <Card id="email" title="Email">
         <ChangeEmail email={profile.email} />
       </Card>

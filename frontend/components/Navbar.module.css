@@ -237,14 +237,14 @@
     top: calc(100% + 0.5rem);
     right: 0.75rem;
     display: flex;
-    min-width: 11rem;
+    width: 14.5rem;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100dvh - 5rem);
+    overflow-y: auto;
     flex-direction: column;
     gap: 0.25rem;
     padding: 0.5rem;
-    border: 1px solid color-mix(in srgb, var(--color-dark-olive) 16%, transparent);
-    border-radius: 0.75rem;
-    background: var(--color-cream);
-    box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+    /* Card colours, light and dark, come from AccountMenu.module.css (.card). */
   }
 
   .mobileMenuLink {
@@ -252,14 +252,22 @@
     min-height: 44px;
     align-items: center;
     padding: 0 0.75rem;
-    border-radius: 0.5rem;
-    color: var(--color-dark-olive);
-    font-weight: 600;
+    border-radius: 9999px;
+    color: var(--menu-text);
+    font-weight: 500;
   }
 
-  .mobileMenuLink:hover {
-    background: color-mix(in srgb, var(--color-dark-olive) 7%, transparent);
-    color: var(--color-dark-olive);
+  .mobileMenuLink:hover,
+  .mobileMenuLink:focus-visible {
+    background: var(--menu-pill);
+    color: var(--menu-text);
+  }
+
+  /* Between the site links and the account rows. */
+  .mobileMenuDivider {
+    height: 1px;
+    margin: 0.25rem;
+    background: var(--menu-edge);
   }
 
   .mobileMenuSignup,

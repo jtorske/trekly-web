@@ -65,6 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // "local" clears this browser's session even if the network call fails.
       await supabase.auth.signOut({ scope: "local" });
     } finally {
+      // Per-tab drafts (trip plans, pending gear picks) belong to this user.
+      // Preferences such as units live in localStorage and are kept.
+      try {
+        window.sessionStorage.clear();
+      } catch {
+        // Storage can be unavailable (private mode); nothing to clear then.
+      }
       if (redirectTo) {
         // A full navigation drops every bit of in-memory signed-in state and
         // can't race with route guards reacting to the sign-out.
