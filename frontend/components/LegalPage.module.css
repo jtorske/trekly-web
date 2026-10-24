@@ -1,0 +1,119 @@
+.page {
+  flex: 1 1 auto;
+  padding: 6.5rem 1.5rem 4rem;
+  color: var(--color-dark-olive);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+/* A solid sheet keeps long-form text readable over the topo background. */
+.sheet {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 2.75rem 3rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  border-radius: 1rem;
+  background: var(--color-cream);
+  line-height: 1.6;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(1.9rem, 1.5rem + 1.5vw, 2.6rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.updated {
+  margin-top: 0.5rem;
+  color: var(--color-muted-text);
+  font-size: 0.88rem;
+}
+
+.summary {
+  margin-top: 1.25rem;
+  font-size: 1.05rem;
+}
+
+.sheet h2 {
+  margin-top: 2.25rem;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.sheet h3 {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sheet p,
+.sheet ul,
+.sheet table {
+  margin-top: 0.75rem;
+}
+
+.sheet ul {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.sheet li + li {
+  margin-top: 0.35rem;
+}
+
+.sheet a {
+  color: var(--color-rust-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.sheet a:hover {
+  color: var(--color-dark-olive);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.sheet th,
+.sheet td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sheet th {
+  font-weight: 600;
+}
+
+.related {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 5.5rem 1rem 3rem;
+  }
+
+  .sheet {
+    padding: 1.75rem 1.25rem 2rem;
+  }
+}
