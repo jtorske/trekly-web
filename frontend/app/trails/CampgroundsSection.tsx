@@ -299,6 +299,9 @@ export default function CampgroundsSection({
   );
 
   const submit = () => {
+    // The URL is about to carry ?start=; without this the shared-link effect
+    // below would treat it as an incoming link and check a second time.
+    autoChecked.current = true;
     router.replace(urlFor(stay), { scroll: false });
     check(stay);
   };
