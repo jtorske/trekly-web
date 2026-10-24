@@ -41,9 +41,8 @@ category 5.
 
 `resourceModel` is the booking model, not a validity flag: 0 = individual
 site/pad, 2 = quota zone, 3 = trailhead / non-bookable access point (always
-excluded), 4 = permit entry (West Coast Trail, Long Range). This is why
-campalert-service's `resourceModel === 2` filter drops every Eastern site
-(campalert-service/KNOWN_ISSUES.md).
+excluded), 4 = permit entry (West Coast Trail, Long Range). Keeping only
+`resourceModel === 2` would drop every Eastern site.
 
 ### Rules
 
@@ -176,9 +175,6 @@ python scripts/poll_alerts.py     # from any cron or worker, e.g. every 5-10 min
   (West Coast Trail and Pukaskwa out of season), 3 not bookable online yet
   (July 2027, before release). Anything else is treated as unknown and never
   triggers an alert.
-- campalert-service's `parksCanadaClient.js` documents the opposite (0 =
-  unavailable, 1 = available), so its poller's 0 → 1 "opened up" check would
-  fire when a site fills. It's left untouched pending its retirement.
 
 Fixtures: `backend/tests/fixtures/parks_canada_availability.json` (4 real
 responses plus one clearly labelled synthetic "partly full" variant).

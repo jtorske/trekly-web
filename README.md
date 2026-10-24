@@ -244,6 +244,10 @@ frontend/
   lib/               API clients, auth and domain logic, with node:test tests
 supabase/            Local Supabase stack config
 docs/                Design notes: accounts and RLS, gear catalogue, backcountry data
-campalert-service/   Earlier Node prototype of the alert worker; not used
 render.yaml          Render Blueprint for the API
 ```
+
+## Copyright
+
+© 2026 Jordan Torske. All rights reserved. The source is public for reference
+only; no license is granted to copy, modify or distribute it.
