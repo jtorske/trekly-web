@@ -14,7 +14,6 @@ import styles from "./Navbar.module.css";
 const LINKS = [
   { href: "/trail-list", label: "Explore", match: ["/trail-list", "/trails"] },
   { href: "/gear", label: "Gear", match: ["/gear"] },
-  { href: "/campalert", label: "CampAlert", match: ["/campalert"] },
 ];
 
 const isCurrent = (pathname: string, prefixes: string[]) =>

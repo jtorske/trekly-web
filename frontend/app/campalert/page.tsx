@@ -169,7 +169,6 @@ export default function CampAlertPage() {
   if (submitted && selectedTrail) {
     return (
       <main className={styles.page}>
-        <div className={styles.texture} aria-hidden="true" />
         <SuccessPanel trail={selectedTrail} onReset={handleReset} />
       </main>
     );
@@ -177,8 +176,6 @@ export default function CampAlertPage() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
-
       <div className={styles.intro}>
         <h1 className={styles.title}>CampAlert</h1>
         <p className={styles.subtitle}>
