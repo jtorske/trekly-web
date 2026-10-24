@@ -20,6 +20,7 @@ from sqlalchemy import (
     Integer,
     Text,
     Uuid,
+    text,
 )
 from sqlalchemy.orm import relationship
 
@@ -82,6 +83,15 @@ class AvailabilityAlert(Base):
         ),
         Index("availability_alerts_user_idx", "user_id", "status"),
         Index("availability_alerts_active_idx", "status", "start_date"),
+        # One active alert per user, campground and stay, even when two
+        # requests race past the API's duplicate check.
+        Index(
+            "availability_alerts_active_unique",
+            "user_id", "site_id", "start_date", "nights",
+            unique=True,
+            postgresql_where=text("status = 'active'"),
+            sqlite_where=text("status = 'active'"),
+        ),
     )
 
     id = Column(Uuid, primary_key=True, default=uuid.uuid4)

@@ -11,7 +11,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth import CurrentUser, get_current_user, get_current_user_id
@@ -95,6 +96,32 @@ def _query(user_id: UUID):
     )
 
 
+DUPLICATE_ALERT = "You already have an alert for this campground and these dates."
+
+
+def _lock_user_alerts(db: Session, user_id: UUID) -> None:
+    """Serialize alert writes per user until the transaction ends.
+
+    Without it, simultaneous requests all pass the duplicate check and the
+    active-alert cap before any of them commits. The partial unique index
+    still backs up the duplicate rule; this is what keeps the cap honest.
+    SQLite (tests) runs one request at a time, so it needs no lock.
+    """
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(
+            text("select pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+            {"key": f"availability_alerts:{user_id}"},
+        )
+
+
+def _commit_or_conflict(db: Session) -> None:
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=DUPLICATE_ALERT) from error
+
+
 def _get(db: Session, user_id: UUID, alert_id: UUID) -> AvailabilityAlert:
     # Someone else's alert is indistinguishable from a missing one.
     alert = db.scalar(_query(user_id).where(AvailabilityAlert.id == alert_id))
@@ -132,6 +159,7 @@ def create_alert(
     if payload.trail_id is not None and db.get(TrailCampground, (payload.trail_id, payload.site_id)) is None:
         raise HTTPException(status_code=422, detail="That campground isn't on this trail.")
 
+    _lock_user_alerts(db, user.id)
     active = AvailabilityAlert.status == "active"
     duplicate = db.scalar(
         select(AvailabilityAlert.id).where(
@@ -142,7 +170,7 @@ def create_alert(
         )
     )
     if duplicate is not None:
-        raise HTTPException(status_code=409, detail="You already have an alert for this campground and these dates.")
+        raise HTTPException(status_code=409, detail=DUPLICATE_ALERT)
     count = db.scalar(
         select(func.count()).select_from(AvailabilityAlert).where(AvailabilityAlert.user_id == user.id, active)
     )
@@ -163,7 +191,7 @@ def create_alert(
         status="active",
     )
     db.add(alert)
-    db.commit()
+    _commit_or_conflict(db)
     return _out(_get(db, user.id, alert.id))
 
 
@@ -189,6 +217,7 @@ def rearm_alert(
     if alert.status != "notified":
         raise HTTPException(status_code=409, detail="Only alerts that have already notified you can be turned back on.")
     validate_stay(alert.start_date, alert.nights, today)
+    _lock_user_alerts(db, user_id)
     count = db.scalar(
         select(func.count()).select_from(AvailabilityAlert)
         .where(AvailabilityAlert.user_id == user_id, AvailabilityAlert.status == "active")
@@ -197,7 +226,8 @@ def rearm_alert(
         raise HTTPException(status_code=422, detail=f"You can have up to {MAX_ACTIVE_ALERTS_PER_USER} active alerts.")
     alert.status = "active"
     alert.notified_at = None
-    db.commit()
+    # An identical alert may have been set again after this one notified.
+    _commit_or_conflict(db)
     return _out(_get(db, user_id, alert_id))
 
 

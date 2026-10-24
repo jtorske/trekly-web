@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.alert_poller import JOB_NAME, alert_email, booking_url_for, build_windows, run_alert_poll
 from app.backcountry import availability as av
@@ -30,6 +31,7 @@ from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.trail import Trail
 from app.models.trail_campground import TrailCampground
 from app.notify import Email
+from app.routers import me_alerts
 from app.routers.availability import get_availability_fetch, get_today
 
 FIXTURES = json.loads((Path(__file__).parent / "fixtures" / "parks_canada_availability.json").read_text(encoding="utf-8"))
@@ -403,6 +405,50 @@ def test_duplicate_and_limit(client, world, fetch, user, monkeypatch):
         client.post("/api/me/alerts", json=alert_body(world, nights=nights), headers=headers)
     over = client.post("/api/me/alerts", json=alert_body(world, nights=12), headers=headers)
     assert over.status_code == 422 and "up to 10" in over.json()["detail"]
+
+
+def test_database_allows_one_active_alert_per_stay(session_factory, world):
+    user_id = uuid.uuid4()
+
+    def alert(status="active"):
+        return AvailabilityAlert(user_id=user_id, email="hiker@example.com", site_id=world["evelyn"],
+                                 start_date=START, nights=2, party_size=2, status=status)
+
+    db = session_factory()
+    db.add_all([alert(), alert("cancelled"), alert("notified")])
+    db.commit()
+    db.add(alert())
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+    db.close()
+
+
+def test_rearm_conflicts_with_an_identical_active_alert(client, session_factory, world, fetch, user):
+    _, headers = user
+    first = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    db = session_factory()
+    db.get(AvailabilityAlert, uuid.UUID(first["id"])).status = "notified"
+    db.commit()
+    db.close()
+    assert client.post("/api/me/alerts", json=alert_body(world), headers=headers).status_code == 201
+
+    rearmed = client.post(f"/api/me/alerts/{first['id']}/rearm", headers=headers)
+    assert rearmed.status_code == 409
+    assert "already have an alert" in rearmed.json()["detail"]
+
+
+def test_alert_writes_lock_per_user(client, session_factory, world, fetch, user, monkeypatch):
+    user_id, headers = user
+    locked = []
+    monkeypatch.setattr(me_alerts, "_lock_user_alerts", lambda db, uid: locked.append(uid))
+    alert = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    db = session_factory()
+    db.get(AvailabilityAlert, uuid.UUID(alert["id"])).status = "notified"
+    db.commit()
+    db.close()
+    client.post(f"/api/me/alerts/{alert['id']}/rearm", headers=headers)
+    assert locked == [user_id, user_id]
 
 
 def test_alerts_need_an_email(client, world, fetch, make_token):
