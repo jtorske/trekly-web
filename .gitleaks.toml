@@ -1,0 +1,15 @@
+# Gitleaks config: the default rules, minus known-safe local-only values.
+# Path- and value-based (not commit fingerprints), so it survives history rewrites.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local Supabase CLI stack values, never valid against a hosted project"
+# The Supabase CLI's built-in demo JWTs (iss "supabase-demo"), identical in every local install.
+regexes = [
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1v[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+''',
+]
+# Test accounts that exist only in the local Docker database.
+paths = [
+  '''(^|/)supabase/e2e-test-users\.env$''',
+]
