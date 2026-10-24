@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { FooterNotice } from "@/components/SiteFooter";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { searchTrails, type TrailSummary } from "@/lib/trailsApi";
 import styles from "./page.module.css";
@@ -284,6 +285,8 @@ export default function LandingPage() {
           <TrailSearch />
         </div>
       </section>
+
+      <FooterNotice className={styles.footer} />
     </main>
   );
 }

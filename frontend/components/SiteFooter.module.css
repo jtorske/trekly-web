@@ -3,7 +3,7 @@
   /* >= 4.5:1 even where a contour line crosses the grain. */
   color: color-mix(in srgb, var(--color-dark-olive) 82%, var(--color-cream));
   font-size: 0.75rem;
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: center;
 }
 
