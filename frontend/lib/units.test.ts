@@ -8,8 +8,28 @@ import {
   formatRouteDistance,
   formatSpecValue,
   formatTemperature,
+  formatTrailDistance,
+  formatTrailElevation,
   formatWeight,
 } from "./units.ts";
+
+test("trail distance hides unknown lengths and falls back without a route type", () => {
+  assert.equal(formatTrailDistance(8.66, "out_and_back"), "8.7 km round trip");
+  assert.equal(formatTrailDistance(5.2, null, "imperial"), "3.2 mi");
+  assert.equal(formatTrailDistance(null, "loop"), null);
+  assert.equal(formatTrailDistance(undefined, null), null);
+  assert.equal(formatTrailDistance(0, "loop"), null);
+  assert.equal(formatTrailDistance(-3, "loop"), null);
+  assert.equal(formatTrailDistance(Number.NaN, "loop"), null);
+});
+
+test("trail elevation hides unknown, zero and invalid values", () => {
+  assert.equal(formatTrailElevation(650), "650 m");
+  assert.equal(formatTrailElevation(650, "imperial"), "2,133 ft");
+  assert.equal(formatTrailElevation(null), null);
+  assert.equal(formatTrailElevation(0), null);
+  assert.equal(formatTrailElevation(Number.POSITIVE_INFINITY), null);
+});
 
 test("weights format without changing the canonical value", () => {
   assert.equal(formatWeight(83), "2.9 oz");

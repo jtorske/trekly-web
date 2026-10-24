@@ -16,7 +16,7 @@ import {
   type TrailCampgrounds,
   type TrailDetail,
 } from "@/lib/trailsApi";
-import { formatDegrees, formatElevation, formatRouteDistance, formatTemperature, type UnitSystem } from "@/lib/units";
+import { formatDegrees, formatTemperature, formatTrailDistance, formatTrailElevation, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
 import CampgroundsSection from "./CampgroundsSection";
 import styles from "./page.module.css";
@@ -93,15 +93,12 @@ function TrailView({
   const hasLocation = trail.latitude != null && trail.longitude != null;
 
   const stats: StatItem[] = [];
-  if (trail.distance_km != null && trail.route_type) {
-    stats.push({ label: "Distance", value: formatRouteDistance(trail.distance_km, trail.route_type, units) });
-  }
-  if (trail.elevation_gain_m != null) {
-    stats.push({ label: "Elevation gain", value: formatElevation(trail.elevation_gain_m, units) });
-  }
-  if (trail.max_elevation_m != null) {
-    stats.push({ label: "High point", value: formatElevation(trail.max_elevation_m, units) });
-  }
+  const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
+  if (distance) stats.push({ label: "Distance", value: distance });
+  const gain = formatTrailElevation(trail.elevation_gain_m, units);
+  if (gain) stats.push({ label: "Elevation gain", value: gain });
+  const highPoint = formatTrailElevation(trail.max_elevation_m, units);
+  if (highPoint) stats.push({ label: "High point", value: highPoint });
   if (nights != null) {
     stats.push({ label: "Typical trip", value: tripLengthLabel(nights) });
   }

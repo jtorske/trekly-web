@@ -15,7 +15,7 @@ import type { GearItem } from "@/lib/gearApi";
 import { splitPlans } from "@/lib/planDraft";
 import type { TripPlanSummary } from "@/lib/plansApi";
 import { formatStay, localToday } from "@/lib/stay";
-import { formatElevation, formatWeight, type UnitSystem } from "@/lib/units";
+import { formatTrailElevation, formatWeight, type UnitSystem } from "@/lib/units";
 import styles from "./page.module.css";
 
 export function EmptyState({
@@ -77,6 +77,11 @@ export interface SavedData {
   reload: () => void;
 }
 
+function gainLabel(meters: number | null, units: UnitSystem): string | null {
+  const gain = formatTrailElevation(meters, units);
+  return gain ? `${gain} gain` : null;
+}
+
 export function SavedTrailList({ data, units, limit }: { data: SavedData; units: UnitSystem; limit?: number }) {
   if (data.loading) return <ListSkeleton />;
   if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
@@ -100,7 +105,7 @@ export function SavedTrailList({ data, units, limit }: { data: SavedData; units:
                 trail.region,
                 TERRAIN_LABELS[trail.terrain],
                 trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
-                trail.elevation_gain_m != null ? `${formatElevation(trail.elevation_gain_m, units)} gain` : null,
+                gainLabel(trail.elevation_gain_m, units),
               ]
                 .filter(Boolean)
                 .join(" · ")}

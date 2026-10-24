@@ -10,7 +10,7 @@ import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
 import { searchTrails, type TrailListItem, type TripType } from "@/lib/trailsApi";
-import { formatElevation, formatRouteDistance, type UnitSystem } from "@/lib/units";
+import { formatTrailDistance, formatTrailElevation, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
 import styles from "./page.module.css";
 
@@ -87,6 +87,8 @@ function TrailCard({
   returnTo: string;
   units: UnitSystem;
 }) {
+  const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
+  const gain = formatTrailElevation(trail.elevation_gain_m, units);
   return (
     <li className={styles.cardItem}>
       <Link
@@ -107,12 +109,8 @@ function TrailCard({
               {tripLengthLabel(trail.typical_duration_nights)}
             </span>
           )}
-          {trail.distance_km != null && trail.route_type && (
-            <span className={styles.metaItem}>{formatRouteDistance(trail.distance_km, trail.route_type, units)}</span>
-          )}
-          {trail.elevation_gain_m != null && (
-            <span className={styles.metaItem}>{formatElevation(trail.elevation_gain_m, units)} gain</span>
-          )}
+          {distance && <span className={styles.metaItem}>{distance}</span>}
+          {gain && <span className={styles.metaItem}>{gain} gain</span>}
         </div>
       </Link>
       <div className={styles.cardSave}>

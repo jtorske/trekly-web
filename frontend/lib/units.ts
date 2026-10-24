@@ -51,6 +51,27 @@ export function formatRouteDistance(km: number, routeType: RouteType, system: Un
   return `${formatDistance(km, system)} ${ROUTE_DISTANCE_SUFFIX[routeType]}`;
 }
 
+/** Most catalogue trails still lack length and elevation data; null, zero or
+ * nonsense values mean "unknown", so callers hide the field. */
+function isKnownMeasure(value: number | null | undefined): value is number {
+  return value != null && Number.isFinite(value) && value > 0;
+}
+
+/** Route distance when known, bare distance when the route type isn't, else null. */
+export function formatTrailDistance(
+  km: number | null | undefined,
+  routeType: RouteType | null | undefined,
+  system: UnitSystem = "metric",
+): string | null {
+  if (!isKnownMeasure(km)) return null;
+  return routeType ? formatRouteDistance(km, routeType, system) : formatDistance(km, system);
+}
+
+/** Elevation or elevation gain when known, else null. */
+export function formatTrailElevation(meters: number | null | undefined, system: UnitSystem = "metric"): string | null {
+  return isKnownMeasure(meters) ? formatElevation(meters, system) : null;
+}
+
 /** Bare degrees, for the low end of a range: "-4° / 12°C". */
 export function formatDegrees(celsius: number, system: UnitSystem = "metric"): string {
   return `${system === "metric" ? Math.round(celsius) : celsiusToFahrenheit(celsius)}°`;
