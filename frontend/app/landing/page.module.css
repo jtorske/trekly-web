@@ -1,6 +1,8 @@
 .hero {
   position: relative;
+  display: flex;
   flex: 1 1 0%;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -48,16 +50,41 @@
   position: relative;
   z-index: 10;
   display: flex;
+  flex: 1;
   min-height: 100%;
   align-items: center;
   justify-content: center;
-  padding: 5rem 2rem;
+  padding: 5rem 2rem 10rem;
   color: var(--color-cream);
   text-align: center;
 }
 
 .content {
   max-width: 56rem;
+}
+
+/* Sits on the photo itself, no panel. Below .section so the search
+   dropdown paints over it if the two ever meet. */
+.footer {
+  position: relative;
+  z-index: 5;
+  padding: 0 1.5rem 1.5rem;
+  color: color-mix(in srgb, var(--color-cream) 85%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-cream) 45%, transparent);
+  text-underline-offset: 2px;
+}
+
+.footer a:hover {
+  color: var(--color-cream);
 }
 
 .logo {
@@ -68,7 +95,7 @@
 }
 
 .headline {
-  margin-top: 10.75rem;
+  margin-top: 0;
   font-family: var(--display);
   font-size: 3rem;
   font-weight: 600;
@@ -210,7 +237,11 @@
   }
 
   .section {
-    padding: 5.5rem 1.5rem 4rem;
+    padding: 5.5rem 1.5rem 6rem;
+  }
+
+  .footer {
+    padding: 0 1rem 1.25rem;
   }
 
   .content {
@@ -218,7 +249,7 @@
   }
 
   .headline {
-    margin-top: 3rem;
+    margin-top: 0;
     font-size: 2.25rem;
     line-height: 1.08;
   }

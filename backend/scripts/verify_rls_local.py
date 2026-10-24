@@ -127,8 +127,11 @@ status, made = call("POST", "/rest/v1/availability_alerts", SERVICE, apikey=SERV
                           "start_date": "2027-07-15", "nights": 2, "party_size": 2})
 alert_id = made[0]["id"] if status == 201 else None
 check("(setup) service role created an alert for Alice", alert_id is not None)
-_, mine = call("GET", "/rest/v1/availability_alerts?select=id", alice)
-check("Alice can read her own alert", [r["id"] for r in mine or []] == [alert_id])
+# Alice may have alerts from earlier manual testing, so look for this one
+# rather than expecting it to be her only alert.
+_, mine = call("GET", "/rest/v1/availability_alerts?select=id,user_id", alice)
+check("Alice can read her own alert",
+      alert_id in [r["id"] for r in mine or []] and all(r["user_id"] == alice_id for r in mine))
 _, theirs = call("GET", "/rest/v1/availability_alerts?select=id", bob)
 check("Bob sees none of Alice's alerts", theirs == [])
 _, anon_alerts = call("GET", "/rest/v1/availability_alerts?select=id")

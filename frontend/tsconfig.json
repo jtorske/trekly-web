@@ -36,7 +36,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next-e2e/types/**/*.ts",
-    ".next-e2e/dev/types/**/*.ts"
+    ".next-e2e/dev/types/**/*.ts",
+    ".next-readme-build/types/**/*.ts",
+    ".next-readme-build/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
