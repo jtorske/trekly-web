@@ -85,7 +85,7 @@ export default function ItemDetails({
     if (weight.trim() && !(Number(weight) >= 0)) nextErrors.weight = "Enter a positive number.";
     if (isCustom && !name.trim()) nextErrors.name = "Give your item a name.";
     if (photo) {
-      const problem = validateImage(photo, "gear-photos");
+      const problem = await validateImage(photo, "gear-photos");
       if (problem) nextErrors.photo = problem;
     }
     setErrors(nextErrors);

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import ui from "@/components/ui.module.css";
 import { MAX_ZOOM, clampOffset, clampZoom, displayScale, type Offset, type Size } from "@/lib/avatarImage";
+import { NOT_AN_IMAGE } from "@/lib/imageType";
 import { processAvatar, type ProcessedAvatar } from "@/lib/processAvatar";
 import styles from "./AvatarCropper.module.css";
 
@@ -14,10 +15,13 @@ export default function AvatarCropper({
   file,
   onCancel,
   onDone,
+  onUnreadable,
 }: {
   file: File;
   onCancel: () => void;
   onDone: (image: ProcessedAvatar) => void;
+  /** The image wouldn't load, so there's nothing to crop. */
+  onUnreadable: () => void;
 }) {
   const [src, setSrc] = useState<string | null>(null);
   const [natural, setNatural] = useState<Size | null>(null);
@@ -81,7 +85,14 @@ export default function AvatarCropper({
     try {
       onDone(await processAvatar(file, { frame: FRAME, zoom, offset }));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "We couldn't process that photo. Try another one.");
+      // createImageBitmap rejects with a DOMException whose text means nothing to people.
+      setError(
+        caught instanceof DOMException
+          ? NOT_AN_IMAGE
+          : caught instanceof Error
+            ? caught.message
+            : "We couldn't process that photo. Try another one.",
+      );
       setBusy(false);
     }
   };
@@ -117,6 +128,7 @@ export default function AvatarCropper({
             draggable={false}
             className={styles.image}
             onLoad={(event) => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+            onError={onUnreadable}
             style={
               natural
                 ? {

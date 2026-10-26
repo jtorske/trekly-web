@@ -8,6 +8,7 @@ import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { updateProfile, type Profile } from "@/lib/accountApi";
 import { validateAvatarFile } from "@/lib/avatarImage";
+import { NOT_AN_IMAGE, readImageType } from "@/lib/imageType";
 import type { ProcessedAvatar } from "@/lib/processAvatar";
 import { removeImages, uploadAvatar } from "@/lib/storage";
 import { announceProfile } from "@/lib/useProfile";
@@ -21,6 +22,8 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
   const [values, setValues] = useState(initial);
   // Picked but not yet cropped; then the processed 512px image awaiting Save.
   const [cropping, setCropping] = useState<File | null>(null);
+  // A fresh cropper (zoom, position, load state) for every pick.
+  const [cropKey, setCropKey] = useState(0);
   const [newAvatar, setNewAvatar] = useState<ProcessedAvatar | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
@@ -54,16 +57,27 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
   const hasPhoto = Boolean(newAvatar) || (Boolean(profile.avatar_path) && !removeAvatar);
   const photoAlt = `${values.display_name.trim() || profile.display_name || "Your"}'s profile photo`;
 
-  const pickPhoto = (file: File | undefined) => {
-    if (!file) return;
-    const problem = validateAvatarFile(file);
+  const setAvatarError = (problem: string | null) =>
     setErrors((current) => {
       const next = { ...current };
       if (problem) next.avatar = problem;
       else delete next.avatar;
       return next;
     });
-    if (!problem) setCropping(file);
+
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    const problem = validateAvatarFile(file) ?? ((await readImageType(file)) ? null : NOT_AN_IMAGE);
+    setAvatarError(problem);
+    if (problem) return;
+    setCropKey((key) => key + 1);
+    setCropping(file);
+  };
+
+  // The browser couldn't decode it after all (e.g. a truncated file).
+  const unreadablePhoto = () => {
+    setCropping(null);
+    setAvatarError(NOT_AN_IMAGE);
   };
 
   const finishCrop = (image: ProcessedAvatar) => {
@@ -159,7 +173,13 @@ export default function EditProfileDialog({ profile, onClose }: { profile: Profi
     >
       <form id="edit-profile-form" className={styles.form} onSubmit={save} noValidate>
         {cropping ? (
-          <AvatarCropper file={cropping} onCancel={() => setCropping(null)} onDone={finishCrop} />
+          <AvatarCropper
+            key={cropKey}
+            file={cropping}
+            onCancel={() => setCropping(null)}
+            onDone={finishCrop}
+            onUnreadable={unreadablePhoto}
+          />
         ) : (
           <div className={styles.avatarRow}>
             <Avatar

@@ -1,3 +1,4 @@
+import { NOT_AN_IMAGE, readImageType } from "./imageType";
 import { getSupabaseClient } from "./supabaseClient";
 
 /**
@@ -19,21 +20,25 @@ const EXTENSIONS: Record<string, string> = {
   "image/webp": "webp",
 };
 
-export function validateImage(file: File, bucket: Bucket): string | null {
+/** Checks the name-based type and size, then the file's actual contents. */
+export async function validateImage(file: File, bucket: Bucket): Promise<string | null> {
   if (!EXTENSIONS[file.type]) return "Use a JPEG, PNG or WebP image.";
   if (file.size > LIMITS[bucket]) {
     return `Images must be ${LIMITS[bucket] / 1024 / 1024} MB or smaller.`;
   }
+  if (!(await readImageType(file))) return NOT_AN_IMAGE;
   return null;
 }
 
 export async function uploadImage(bucket: Bucket, userId: string, file: File): Promise<string> {
-  const problem = validateImage(file, bucket);
+  const problem = await validateImage(file, bucket);
   if (problem) throw new Error(problem);
-  const path = `${userId}/${crypto.randomUUID()}.${EXTENSIONS[file.type]}`;
+  // Store it as what it really is (a PNG renamed .jpg is still a PNG).
+  const type = (await readImageType(file)) ?? file.type;
+  const path = `${userId}/${crypto.randomUUID()}.${EXTENSIONS[type]}`;
   const { error } = await getSupabaseClient()
     .storage.from(bucket)
-    .upload(path, file, { contentType: file.type, upsert: false });
+    .upload(path, file, { contentType: type, upsert: false });
   if (error) throw new Error(`Upload failed: ${error.message}`);
   return path;
 }
