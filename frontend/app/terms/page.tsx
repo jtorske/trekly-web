@@ -14,7 +14,7 @@ export default function TermsPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Terms of Use</h1>
-        <p className={styles.updated}>Last updated: October 23, 2026</p>
+        <p className={styles.updated}>Last updated: October 26, 2026</p>
         <p className={styles.summary}>
           By using Trekly, you agree to these terms. Trekly helps you plan hikes and backpacking
           trips, but you are responsible for your own safety in the backcountry.
@@ -94,17 +94,17 @@ export default function TermsPage() {
         <h2>Your content</h2>
         <p>
           You own what you create in Trekly, such as trip plans, gear lists, and photos. You give us
-          permission to store, display, and process it so we can run Trekly for you, and to show
-          your public profile, profile picture, and gear loadouts to other users. Only upload photos
-          you took or have the right to share. We may remove content that breaks these terms.
+          permission to store, display, and process it only so we can run Trekly for you. Only
+          upload photos you took or have the right to share. We may remove content that breaks these terms.
         </p>
 
         <h2>Our content</h2>
         <p>
           The Trekly name, logo, app design, and code belong to Jordan Torske. Don&apos;t copy or
-          reuse them without permission. Trail and reservation information comes from Parks
-          Canada&apos;s publicly available data, which remains subject to Parks Canada&apos;s own
-          terms.
+          reuse them without permission. Trail information comes from public sources, including
+          Parks Canada, provincial park agencies, and OpenStreetMap contributors. Campsite
+          reservation information comes from Parks Canada. These sources keep their own rights and
+          terms, and trail photos are credited to their photographers under their own licenses.
         </p>
 
         <h2>Changes and ending your use</h2>

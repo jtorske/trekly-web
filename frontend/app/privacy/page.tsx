@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: October 23, 2026</p>
+        <p className={styles.updated}>Last updated: October 26, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -99,9 +99,10 @@ export default function PrivacyPage() {
 
         <h2>What other users can see</h2>
         <p>
-          Your display name, profile, profile picture, and gear loadouts are visible to other people
-          using Trekly. Your trip plans, permit alerts, and email address are private. Don&apos;t
-          add anything to your public profile that you don&apos;t want others to see.
+          Trekly doesn&apos;t have public profiles. Your profile, profile picture, photos, gear,
+          saved trails, trip plans, permit alerts, and email address are only visible to you. If we
+          add sharing features later, they&apos;ll be optional and we&apos;ll update this policy
+          before they launch.
         </p>
 
         <h2>Service providers</h2>
@@ -130,8 +131,13 @@ export default function PrivacyPage() {
               </tr>
               <tr>
                 <td>Render</td>
-                <td>Hosts the Trekly API and sends permit alerts</td>
-                <td>Technical data, app data, alert details</td>
+                <td>Hosts the Trekly API</td>
+                <td>Technical data, app data</td>
+              </tr>
+              <tr>
+                <td>GitHub</td>
+                <td>Runs the scheduled permit alert checks</td>
+                <td>Alert details, email address for alerts</td>
               </tr>
               <tr>
                 <td>Google</td>
