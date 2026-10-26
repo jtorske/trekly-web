@@ -11,6 +11,7 @@ import {
   formatTrailDistance,
   formatTrailElevation,
   formatWeight,
+  preferUnitSystem,
 } from "./units.ts";
 
 test("trail distance hides unknown lengths and falls back without a route type", () => {
@@ -73,4 +74,22 @@ test("trail measurements default to metric", () => {
   assert.equal(formatDegrees(-3.6, "imperial"), "26°");
   assert.equal(formatTemperature(12.4), "12°C");
   assert.equal(formatTemperature(12.4, "imperial"), "54°F");
+});
+
+test("dual-unit spec text puts the reader's system first", () => {
+  assert.equal(preferUnitSystem("9 x 4.1 in (23 x 10 cm)", "metric"), "23 x 10 cm (9 x 4.1 in)");
+  assert.equal(preferUnitSystem("9 x 4.1 in (23 x 10 cm)", "imperial"), "9 x 4.1 in (23 x 10 cm)");
+  assert.equal(preferUnitSystem("34 x 26 x 11 cm (13 x 10 x 4 in)", "imperial"), "13 x 10 x 4 in (34 x 26 x 11 cm)");
+  assert.equal(preferUnitSystem("3 lb 9 oz (1.61 kg)", "metric"), "1.61 kg (3 lb 9 oz)");
+  assert.equal(
+    preferUnitSystem("8.7 in diameter x 12.7 in tall (22.1 x 32.3 cm)", "metric"),
+    "22.1 x 32.3 cm (8.7 in diameter x 12.7 in tall)",
+  );
+  assert.equal(formatSpecValue("9 x 4.1 in (23 x 10 cm)", null, "metric"), "23 x 10 cm (9 x 4.1 in)");
+});
+
+test("other spec text is left alone", () => {
+  for (const text of ["32-Foot Bear Spray (8.1 oz.)", "Canister (sold separately)", "19-22 in", "Mummy"]) {
+    assert.equal(preferUnitSystem(text, "metric"), text);
+  }
 });

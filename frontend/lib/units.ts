@@ -102,6 +102,34 @@ export function formatCapacity(ml: number, system: UnitSystem = "imperial"): str
   return `${trim(ml / ML_PER_FL_OZ, 1)} fl oz`;
 }
 
+const METRIC_UNITS = new Set(["mm", "cm", "m", "km", "g", "kg", "ml", "l"]);
+const IMPERIAL_UNITS = new Set(["in", "inch", "inches", "ft", "oz", "lb", "lbs"]);
+
+/** The unit system of a measurement like "9 x 4.1 in", from its last unit. */
+function textUnitSystem(text: string): UnitSystem | null {
+  if (!/\d/.test(text)) return null;
+  const units = text.toLowerCase().match(/[a-z]+/g) ?? [];
+  for (let i = units.length - 1; i >= 0; i--) {
+    if (METRIC_UNITS.has(units[i])) return "metric";
+    if (IMPERIAL_UNITS.has(units[i])) return "imperial";
+  }
+  return null;
+}
+
+/**
+ * Free-text specs often carry both systems: "9 x 4.1 in (23 x 10 cm)". Put
+ * the reader's system first, e.g. "23 x 10 cm (9 x 4.1 in)" in metric.
+ */
+export function preferUnitSystem(text: string, system: UnitSystem): string {
+  const match = /^(.+?)\s*\(([^()]+)\)$/.exec(text.trim());
+  if (!match) return text;
+  const [, outer, inner] = match;
+  const outerSystem = textUnitSystem(outer);
+  const innerSystem = textUnitSystem(inner);
+  if (!outerSystem || !innerSystem || outerSystem === innerSystem || outerSystem === system) return text;
+  return `${inner.trim()} (${outer.trim()})`;
+}
+
 /** Format one API spec row (canonical units) for display. */
 export function formatSpecValue(
   value: number | string | boolean,
@@ -109,7 +137,7 @@ export function formatSpecValue(
   system: UnitSystem = "imperial",
 ): string {
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "string") return value;
+  if (typeof value === "string") return preferUnitSystem(value, system);
   switch (unit) {
     case "g":
       return formatWeight(value, system);

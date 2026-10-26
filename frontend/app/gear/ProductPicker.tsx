@@ -25,13 +25,22 @@ import { GearIcon } from "./icons";
 import type { Slot } from "./slots";
 import styles from "./ProductPicker.module.css";
 
-const WEIGHT_FILTERS = [
-  { label: "Any weight", grams: null },
-  { label: "Under 8 oz", grams: 227 },
-  { label: "Under 1 lb", grams: 454 },
-  { label: "Under 2 lb", grams: 907 },
-  { label: "Under 3 lb", grams: 1361 },
-] as const;
+const WEIGHT_FILTERS: Record<UnitSystem, { label: string; grams: number | null }[]> = {
+  imperial: [
+    { label: "Any weight", grams: null },
+    { label: "Under 8 oz", grams: 227 },
+    { label: "Under 1 lb", grams: 454 },
+    { label: "Under 2 lb", grams: 907 },
+    { label: "Under 3 lb", grams: 1361 },
+  ],
+  metric: [
+    { label: "Any weight", grams: null },
+    { label: "Under 250 g", grams: 250 },
+    { label: "Under 500 g", grams: 500 },
+    { label: "Under 1 kg", grams: 1000 },
+    { label: "Under 1.5 kg", grams: 1500 },
+  ],
+};
 
 const CAPACITY_SLOTS: Record<string, { label: string; min?: number; max?: number }[]> = {
   backpack: [
@@ -262,7 +271,7 @@ export default function ProductPicker({
   const authPrompt = needsAuth && (
     <div className={ui.notice} role="status">
       <p>
-        <strong>Sign in to save your gear.</strong> We&apos;ll keep your selection and bring you
+        <strong>Sign in to save your gear.</strong>{" "}We&apos;ll keep your selection and bring you
         back to finish adding it.
       </p>
       <div className={styles.authActions}>
@@ -509,7 +518,7 @@ export default function ProductPicker({
               value={maxWeight ?? ""}
               onChange={(event) => setMaxWeight(event.target.value ? Number(event.target.value) : null)}
             >
-              {WEIGHT_FILTERS.map((option) => (
+              {WEIGHT_FILTERS[units].map((option) => (
                 <option key={option.label} value={option.grams ?? ""}>
                   {option.label}
                 </option>
@@ -681,7 +690,7 @@ function CustomItemForm({
     if (!draft.name.trim()) nextErrors.name = "Give your item a name.";
     if (draft.weight.trim() && !(Number(draft.weight) >= 0)) nextErrors.weight = "Enter a positive number.";
     if (photo) {
-      const problem = validateImage(photo, "gear-photos");
+      const problem = await validateImage(photo, "gear-photos");
       if (problem) nextErrors.photo = problem;
     }
     setErrors(nextErrors);
@@ -821,7 +830,7 @@ function CustomItemForm({
       {needsAuth && (
         <div className={ui.notice} role="status">
           <p>
-            <strong>Sign in to save your gear.</strong> We&apos;ll keep what you&apos;ve entered.
+            <strong>Sign in to save your gear.</strong>{" "}We&apos;ll keep what you&apos;ve entered.
           </p>
           <div className={styles.authActions}>
             <Link href={`/signup${nextQuery("/gear?resume=1")}`} className={ui.primary}>
