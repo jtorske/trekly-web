@@ -4,9 +4,9 @@ import { useState, type InputHTMLAttributes } from "react";
 import { isPlainDate } from "@/lib/stay";
 
 /**
- * A date field that only reports complete YYYY-MM-DD dates on or after `min`.
- * While someone types, the browser reports in-between values (year 0002, a
- * 6-digit year) and doesn't enforce `min`; those stay in the field without
+ * A date field that only reports complete YYYY-MM-DD dates within `min` and
+ * `max`. While someone types, the browser reports in-between values (year
+ * 0002, a 6-digit year) and doesn't enforce the bounds; those stay in the field without
  * reaching `onChange`, and leaving the field puts back the last good date so
  * what's shown is what's used.
  */
@@ -26,7 +26,9 @@ export default function DateInput({
       value={typing ?? value}
       onChange={(event) => {
         const next = event.target.value;
-        if (isPlainDate(next) && !(typeof props.min === "string" && next < props.min)) {
+        const tooEarly = typeof props.min === "string" && next < props.min;
+        const tooLate = typeof props.max === "string" && next > props.max;
+        if (isPlainDate(next) && !tooEarly && !tooLate) {
           setTyping(null);
           onChange(next);
         } else {

@@ -139,6 +139,13 @@
   margin-top: 1.25rem;
 }
 
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
 /* Sections */
 
 .section {

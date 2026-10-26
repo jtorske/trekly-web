@@ -4,8 +4,10 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import HikeLogButton from "@/components/HikeLogButton";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import ui from "@/components/ui.module.css";
+import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
@@ -80,6 +82,7 @@ function TrailView({
   saved,
   pending,
   onToggleSave,
+  hikeLogs,
 }: {
   trail: TrailDetail;
   campgrounds: TrailCampgrounds | null;
@@ -87,6 +90,7 @@ function TrailView({
   saved: boolean;
   pending: boolean;
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
+  hikeLogs: ReturnType<typeof useHikeLogs>;
 }) {
   const [units, setUnits] = useUnits();
   const nights = trail.typical_duration_nights;
@@ -123,14 +127,26 @@ function TrailView({
       </dl>
 
       <div className={styles.actions}>
-        <SaveTrailButton
-          trailId={trail.id}
-          trailName={trail.name}
-          saved={saved}
-          pending={pending}
-          onToggle={onToggleSave}
-          returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
-        />
+        <div className={styles.actionButtons}>
+          <SaveTrailButton
+            trailId={trail.id}
+            trailName={trail.name}
+            saved={saved}
+            pending={pending}
+            onToggle={onToggleSave}
+            returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
+          />
+          <HikeLogButton
+            trailId={trail.id}
+            trailName={trail.name}
+            retired={trail.retired_at !== null}
+            entry={hikeLogs.byTrail.get(trail.id) ?? null}
+            loading={hikeLogs.loading}
+            onSave={hikeLogs.save}
+            onRemove={hikeLogs.remove}
+            returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
+          />
+        </div>
         <div className={ui.segmented} role="group" aria-label="Units">
           <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
             mi/ft
@@ -203,6 +219,7 @@ function TrailContent() {
   const id = searchParams.get("id");
   const { status: authStatus } = useAuth();
   const savedTrails = useSavedTrails();
+  const hikeLogs = useHikeLogs();
   const pendingSave = useRef(false);
   const [result, setResult] = useState<{
     id: string;
@@ -279,6 +296,7 @@ function TrailContent() {
         saved={savedTrails.savedIds.has(result.trail.id)}
         pending={savedTrails.pending.has(result.trail.id) || (saveParam === result.trail.id && authStatus === "signedIn")}
         onToggleSave={savedTrails.toggle}
+        hikeLogs={hikeLogs}
       />
     );
   }

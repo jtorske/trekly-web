@@ -1,0 +1,98 @@
+.badge {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.name {
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* Hiked: a full-colour patch. */
+
+.fill {
+  fill: var(--badge);
+  filter: drop-shadow(0 1.5px 1.5px rgb(0 0 0 / 0.25));
+}
+
+.innerRing {
+  fill: none;
+  stroke: var(--color-cream);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+  stroke-dasharray: 2.5 2;
+}
+
+.centre {
+  fill: color-mix(in srgb, var(--badge) 70%, black);
+}
+
+.mountain {
+  fill: var(--color-cream);
+}
+
+.snow {
+  fill: var(--badge);
+  opacity: 0.55;
+}
+
+.star {
+  fill: var(--color-tan);
+}
+
+.hiked .name {
+  fill: var(--color-cream);
+}
+
+/* Not hiked yet: an empty dashed slot. */
+
+.slot {
+  fill: color-mix(in srgb, var(--journal-ink, var(--color-dark-olive)) 4%, transparent);
+  stroke: color-mix(in srgb, var(--journal-ink, var(--color-dark-olive)) 45%, transparent);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+}
+
+.locked .name {
+  fill: color-mix(in srgb, var(--journal-ink, var(--color-dark-olive)) 72%, transparent);
+}
+
+/* The first time a hiked badge is shown: pressed in like an ink stamp. */
+
+.stamp {
+  transform-origin: center;
+  animation: stamp 620ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-14deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.92) rotate(3deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: fadeIn 300ms ease both;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}

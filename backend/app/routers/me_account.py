@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import USERNAME_PATTERN, Profile, SavedTrail
+from app.models.hike_log import HikeLog
 from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
@@ -237,7 +238,7 @@ def delete_account(
 ):
     """Permanently delete the account and everything it owns.
 
-    Removes the user's gear inventory, saved trails and profile, then the
+    Removes the user's gear inventory, saved trails, journal and profile, then the
     Supabase auth user itself. Uploaded photos are removed by the client
     through the Storage API beforehand (Storage files can't be deleted from
     SQL without orphaning the underlying objects). Shared catalogue data is
@@ -252,6 +253,7 @@ def delete_account(
     db.flush()
     db.execute(delete(UserGearItem).where(UserGearItem.user_id == user.id))
     db.execute(delete(SavedTrail).where(SavedTrail.user_id == user.id))
+    db.execute(delete(HikeLog).where(HikeLog.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))
     if _is_postgres(db):
         db.execute(text("delete from auth.users where id = :id"), {"id": user.id})

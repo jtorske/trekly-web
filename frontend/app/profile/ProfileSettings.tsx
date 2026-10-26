@@ -209,7 +209,7 @@ function DeleteAccount() {
     setError(null);
     try {
       // Photos live in Storage, which the database can't clean up itself.
-      for (const bucket of ["gear-photos", "avatars"] as const) {
+      for (const bucket of ["gear-photos", "avatars", "hike-photos"] as const) {
         const paths = await listOwnImages(bucket, user.id);
         await removeImages(bucket, paths);
       }

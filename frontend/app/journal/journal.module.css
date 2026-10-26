@@ -1,0 +1,875 @@
+/*
+ * Trail Journal: a scrapbook on Trekly's cream-and-topo paper.
+ *
+ * Tokens: --journal-paper / --journal-ink are the page and its ink;
+ * --journal-desk is what the book sits on. Like the rest of the site, the
+ * journal stays on cream in dark mode, so every colour here is explicit and
+ * form controls keep the light scheme (see the B-006 404 fix).
+ */
+
+.page {
+  --journal-paper: #fbf6e2;
+  --journal-paper-edge: #efe6c8;
+  --journal-ink: var(--color-dark-olive);
+  --journal-muted: color-mix(in srgb, var(--color-dark-olive) 74%, transparent);
+  --journal-rule: color-mix(in srgb, var(--color-dark-olive) 16%, transparent);
+  --journal-accent: var(--color-rust-text);
+  --journal-desk: transparent;
+  --journal-desk-ink: var(--color-dark-olive);
+  --journal-desk-muted: var(--color-muted-text);
+  --journal-shadow: 0 2px 4px rgb(40 54 24 / 0.12), 0 24px 48px -18px rgb(40 54 24 / 0.45);
+  --leather: #34401f;
+  --foil: #e6c48c;
+  --hand: var(--font-hand), "Segoe Print", "Bradley Hand", cursive;
+
+  color-scheme: light;
+
+  position: relative;
+  flex: 1 1 auto;
+  background: var(--journal-desk);
+  color: var(--journal-desk-ink);
+  font-family: var(--sans);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 5.5rem 1rem 3rem;
+}
+
+.intro {
+  max-width: 40rem;
+  margin: 0 auto 1.25rem;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  margin-top: 0.35rem;
+  color: var(--journal-desk-muted);
+}
+
+.status {
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--journal-desk-muted);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- the book */
+
+.bookArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Two pages of ratio 0.7 side by side, sized to fit the viewport height. */
+.stage {
+  position: relative;
+  width: min(100%, 66rem, calc((100svh - 16rem) * 1.4));
+  aspect-ratio: 1.4;
+  touch-action: pan-y;
+  user-select: none;
+  transition: transform 700ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.single {
+  width: min(100%, 30rem, calc((100svh - 15rem) * 0.7));
+  aspect-ratio: 0.7;
+}
+
+/* A closed book: shift so the cover sits in the middle. */
+.spread.closed {
+  transform: translateX(-25%);
+}
+
+.bookSkeleton {
+  width: min(100%, 66rem, calc((100svh - 16rem) * 1.4));
+  aspect-ratio: 1.4;
+  margin: 0 auto;
+}
+
+@media (max-width: 859px) {
+  .bookSkeleton {
+    width: min(100%, 30rem);
+    aspect-ratio: 0.7;
+  }
+}
+
+.pages {
+  position: absolute;
+  inset: 0;
+  perspective: 2600px;
+}
+
+.single .pages {
+  perspective: 1600px;
+}
+
+.pages[data-fade] .sheet {
+  animation: fade 260ms ease both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.slot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+}
+
+.leftSlot {
+  left: 0;
+}
+
+.rightSlot {
+  left: 50%;
+}
+
+.singleSlot {
+  inset: 0;
+  width: 100%;
+}
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  background-color: var(--journal-paper);
+  /* Paper grain plus faint contour lines from Trekly's topo map. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .21 0 0 0 0 .09 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  box-shadow: var(--journal-shadow);
+  color: var(--journal-ink);
+}
+
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--journal-ink) 6%, transparent);
+  -webkit-mask: url("/topo/mount-assiniboine.svg") center / 240% no-repeat;
+  mask: url("/topo/mount-assiniboine.svg") center / 240% no-repeat;
+}
+
+/* Gutter shading: pages curve down into the spine. */
+.leftPage {
+  border-radius: 6px 2px 2px 6px;
+  background-image:
+    linear-gradient(to left, rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.04) 5%, transparent 12%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .21 0 0 0 0 .09 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: auto, 180px 180px;
+}
+
+.rightPage {
+  border-radius: 2px 6px 6px 2px;
+  background-image:
+    linear-gradient(to right, rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.04) 5%, transparent 12%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .21 0 0 0 0 .09 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: auto, 180px 180px;
+}
+
+.single .rightPage {
+  border-radius: 3px 8px 8px 3px;
+}
+
+/* The turning leaf: hinged on the spine, a page on each side. */
+.leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 50%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  z-index: 2;
+}
+
+.singleLeaf {
+  left: 0;
+  width: 100%;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+/* Light falls off as the leaf stands up, then returns as it lands. */
+.face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.28), transparent 60%);
+  opacity: 0;
+  animation: shade 820ms ease-in-out both;
+}
+
+.back::after {
+  background: linear-gradient(to left, rgb(0 0 0 / 0.28), transparent 60%);
+}
+
+.turnForward {
+  animation: turnForward 820ms cubic-bezier(0.45, 0.05, 0.3, 1) both;
+}
+
+.turnBack {
+  animation: turnBack 820ms cubic-bezier(0.45, 0.05, 0.3, 1) both;
+}
+
+.turnForwardSingle {
+  animation: turnForward 560ms cubic-bezier(0.45, 0.05, 0.3, 1) both;
+}
+
+.turnBackSingle {
+  animation: turnBack 560ms cubic-bezier(0.45, 0.05, 0.3, 1) both;
+}
+
+.turnForwardSingle .face::after,
+.turnBackSingle .face::after {
+  animation-duration: 560ms;
+}
+
+@keyframes turnForward {
+  from {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(-90deg) translateZ(18px) scaleY(1.015);
+  }
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes turnBack {
+  from {
+    transform: rotateY(-180deg);
+  }
+  50% {
+    transform: rotateY(-90deg) translateZ(18px) scaleY(1.015);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes shade {
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------- controls */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.flipButton {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--journal-desk-ink) 30%, transparent);
+  border-radius: 9999px;
+  color: var(--journal-desk-ink);
+  font-size: 1.15rem;
+  user-select: none;
+  transition: background-color 150ms ease;
+}
+
+.flipButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--journal-desk-ink) 10%, transparent);
+}
+
+.flipButton:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.where {
+  min-width: 9rem;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.hint {
+  margin-top: 0.35rem;
+  color: var(--journal-desk-muted);
+  font-size: 0.8rem;
+}
+
+/* ------------------------------------------------------------- cover */
+
+.cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  padding: 6cqw;
+  background-color: var(--leather);
+  background-image:
+    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.08), transparent 60%),
+    linear-gradient(to right, rgb(0 0 0 / 0.35), transparent 6%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E");
+  color: var(--color-cream);
+}
+
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgb(255 255 255 / 0.07);
+  -webkit-mask: url("/topo/mount-assiniboine.svg") center / 200% no-repeat;
+  mask: url("/topo/mount-assiniboine.svg") center / 200% no-repeat;
+}
+
+.coverFrame {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5cqw;
+  border: 0.5cqw double color-mix(in srgb, var(--foil) 65%, transparent);
+  border-radius: 1.5cqw;
+  padding: 6cqw;
+  text-align: center;
+}
+
+.coverEyebrow {
+  color: var(--foil);
+  font-size: max(0.7rem, 2.8cqw);
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+
+.coverTitle {
+  color: var(--foil);
+  font-family: var(--display);
+  font-size: max(1.8rem, 11cqw);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.5), 0 -1px 0 rgb(255 255 255 / 0.12);
+}
+
+.coverMark {
+  width: 34cqw;
+  fill: none;
+  stroke: var(--foil);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.coverOwner,
+.coverGuest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqw;
+  margin-top: 4cqw;
+}
+
+.coverName {
+  font-family: var(--hand);
+  font-size: max(1.4rem, 8cqw);
+  line-height: 1;
+}
+
+.coverProgress {
+  font-size: max(0.95rem, 4.4cqw);
+  font-variant-numeric: tabular-nums;
+}
+
+.coverProgress strong {
+  color: var(--foil);
+  font-size: 1.4em;
+}
+
+.coverBar {
+  width: 52cqw;
+  height: max(5px, 1.4cqw);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.coverBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--foil);
+}
+
+.coverGuest p {
+  max-width: 60cqw;
+  font-size: max(0.9rem, 3.8cqw);
+  line-height: 1.4;
+}
+
+.coverButton {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--foil);
+  padding: 0.6rem 1.2rem;
+  color: #2a2410;
+  font-size: max(0.9rem, 3.6cqw);
+  font-weight: 600;
+}
+
+.coverButton:hover {
+  background: #f1d6a8;
+}
+
+.coverGuest .coverSmall {
+  font-size: max(0.8rem, 3.1cqw);
+}
+
+.coverSmall a {
+  color: var(--foil);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ------------------------------------------------------------- pages */
+
+.paperInner {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 8cqw 8cqw 10cqw;
+  font-size: max(0.75rem, 3.1cqw);
+}
+
+.pageTitle {
+  font-family: var(--display);
+  font-size: max(1.15rem, 6.4cqw);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.folio {
+  position: absolute;
+  bottom: 4.5cqw;
+  left: 0;
+  right: 0;
+  color: var(--journal-muted);
+  font-size: max(0.7rem, 2.6cqw);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.contents {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6cqw;
+  margin-top: 4cqw;
+}
+
+.contentsRow {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 1.8cqw;
+  border-radius: 4px;
+  padding: 1cqw 0.5cqw;
+  color: inherit;
+  font-size: max(0.78rem, 3.2cqw);
+  text-align: left;
+}
+
+.contentsRow:hover .contentsName {
+  color: var(--journal-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contentsDot {
+  width: max(7px, 2cqw);
+  height: max(7px, 2cqw);
+  flex: none;
+  align-self: center;
+  border-radius: 9999px;
+}
+
+.contentsName {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentsCount {
+  flex: none;
+  color: var(--journal-muted);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.contentsLeader {
+  min-width: 3cqw;
+  flex: 1;
+  border-bottom: 1px dotted var(--journal-rule);
+}
+
+.contentsPage {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend {
+  margin-top: auto;
+  border-top: 1px solid var(--journal-rule);
+  padding-top: 3cqw;
+}
+
+.legendTitle {
+  color: var(--journal-muted);
+  font-size: max(0.7rem, 2.7cqw);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.legend ul {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2cqw;
+  margin-top: 2cqw;
+  text-align: center;
+}
+
+.legend li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqw;
+  font-size: max(0.7rem, 2.7cqw);
+}
+
+.legendBadge {
+  width: 12cqw;
+}
+
+.groupHeader {
+  position: relative;
+  padding-top: 2cqw;
+}
+
+/* A strip of washi tape in the park's colour. */
+.tape {
+  position: absolute;
+  top: -5cqw;
+  left: -2cqw;
+  width: 24cqw;
+  height: 5cqw;
+  opacity: 0.75;
+  transform: rotate(-4deg);
+  clip-path: polygon(2% 0, 98% 6%, 100% 50%, 97% 100%, 1% 94%, 0 45%);
+}
+
+.groupMeta {
+  margin-top: 1cqw;
+  color: var(--journal-muted);
+}
+
+.runningHead {
+  color: var(--journal-muted);
+  font-family: var(--display);
+  font-style: italic;
+}
+
+.slots {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2cqw 4cqw;
+  margin-top: 3cqw;
+}
+
+.slotCell {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  border-radius: 8px;
+  color: inherit;
+  text-align: center;
+}
+
+.slotCell:hover .badge {
+  transform: rotate(-3deg) scale(1.04);
+}
+
+.badgeWrap {
+  position: relative;
+  z-index: 0;
+  display: block;
+}
+
+.badge {
+  width: 25cqw;
+  transition: transform 200ms ease;
+}
+
+.slotCaption {
+  color: var(--journal-muted);
+  font-size: max(0.7rem, 2.7cqw);
+}
+
+.slotDate {
+  color: var(--journal-ink);
+  font-family: var(--hand);
+  font-size: max(0.95rem, 4cqw);
+  line-height: 1;
+}
+
+/* Tucked behind the badge's lower right, below where its name runs. */
+.miniPolaroid {
+  position: absolute;
+  z-index: -1;
+  bottom: -3cqw;
+  right: -10cqw;
+  width: 15cqw;
+  padding: 1cqw 1cqw 3cqw;
+  background: #fffdf6;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+  transform: rotate(9deg);
+}
+
+.miniPolaroid img,
+.miniPolaroid .photoLoading {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.miniNote {
+  position: absolute;
+  z-index: -1;
+  bottom: -2cqw;
+  right: -13cqw;
+  display: -webkit-box;
+  width: 16cqw;
+  overflow: hidden;
+  padding: 1.4cqw;
+  background: #fff8d8;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  color: #3a3a24;
+  font-family: var(--hand);
+  font-size: max(0.6rem, 2.6cqw);
+  line-height: 1.1;
+  text-align: left;
+  transform: rotate(6deg);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.photoLoading {
+  background: color-mix(in srgb, var(--color-dark-olive) 14%, #eee);
+}
+
+.blankPage {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  opacity: 0.35;
+}
+
+.blankPage svg {
+  width: 40cqw;
+  fill: none;
+  stroke: var(--journal-ink);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.medals {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4cqw;
+  align-content: center;
+}
+
+.medal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqw;
+  text-align: center;
+}
+
+.medal svg {
+  width: 26cqw;
+}
+
+.medalBase {
+  fill: none;
+  stroke: color-mix(in srgb, var(--journal-ink) 45%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+
+.medalProgress {
+  fill: none;
+  stroke: var(--color-tan);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.medalIcon {
+  fill: none;
+  stroke: color-mix(in srgb, var(--journal-ink) 50%, transparent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.medalEarned .medalBase {
+  fill: #a8752c;
+  stroke: var(--foil);
+  stroke-width: 4;
+  stroke-dasharray: none;
+}
+
+.medalEarned .medalIcon {
+  stroke: var(--color-cream);
+}
+
+.medalTitle {
+  font-family: var(--display);
+  font-size: max(0.9rem, 3.8cqw);
+  font-weight: 600;
+}
+
+.medalDetail {
+  color: var(--journal-muted);
+  font-size: max(0.7rem, 2.7cqw);
+  line-height: 1.3;
+}
+
+.footnote {
+  color: var(--journal-muted);
+  font-size: max(0.68rem, 2.5cqw);
+  text-align: center;
+}
+
+.backPage {
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  text-align: center;
+}
+
+.handwriting {
+  font-family: var(--hand);
+  font-size: max(1.2rem, 6cqw);
+  line-height: 1.15;
+}
+
+.backLink {
+  color: var(--journal-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------- entry dialog */
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.polaroid {
+  width: min(100%, 20rem);
+  padding: 0.85rem 0.85rem 0;
+  background: #fffdf6;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.12), 0 14px 30px -12px rgb(0 0 0 / 0.45);
+  transform: rotate(-1.5deg);
+}
+
+.polaroidPhoto {
+  display: grid;
+  aspect-ratio: 1;
+  overflow: hidden;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-dark-olive) 10%, #f4efd9);
+}
+
+.polaroidPhoto img,
+.polaroidPhoto .photoLoading {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.polaroidBadge {
+  width: 62%;
+}
+
+.polaroid figcaption {
+  padding: 0.7rem 0.25rem 1rem;
+  color: #2f2f1c;
+  font-size: 1.45rem;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: pre-line;
+}
