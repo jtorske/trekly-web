@@ -30,3 +30,6 @@ services:
         sync: false
       - key: EMAIL_BACKEND
         value: console
+      # No public Swagger UI or OpenAPI schema (also off by default on Render).
+      - key: API_DOCS
+        value: "false"

@@ -8,6 +8,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.backcountry.parks_canada import PROVIDER as PARKS_CANADA
+from app.catalog.search import escape_like
 from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.database import get_db
 from app.models.backcountry import BackcountrySite
@@ -52,8 +53,9 @@ def search_trails(
         Trail.popularity_rank <= TRAIL_CATALOG_LIMIT,
     )
     if q:
-        like = f"%{q}%"
-        query = query.filter(or_(Trail.name.ilike(like), Trail.region.ilike(like)))
+        # Escaped so "%" or "_" in the search box match literally, not everything.
+        like = f"%{escape_like(q)}%"
+        query = query.filter(or_(Trail.name.ilike(like, escape="\\"), Trail.region.ilike(like, escape="\\")))
     if terrain:
         query = query.filter(Trail.terrain_difficulty == terrain)
     if trip == "overnight":

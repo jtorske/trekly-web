@@ -23,7 +23,20 @@ def cors_options(env=os.environ) -> dict:
     }
 
 
-app = FastAPI()
+def docs_enabled(env=os.environ) -> bool:
+    """Swagger UI and the OpenAPI schema: on locally, off on Render.
+
+    API_DOCS=true/false overrides; Render sets RENDER on every service.
+    """
+    setting = env.get("API_DOCS")
+    if setting is not None:
+        return setting.strip().lower() in ("1", "true", "yes")
+    return not env.get("RENDER")
+
+
+app = FastAPI(
+    **({} if docs_enabled() else {"docs_url": None, "redoc_url": None, "openapi_url": None})
+)
 
 app.add_middleware(CORSMiddleware, **cors_options())
 

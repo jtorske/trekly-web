@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 
-from app.main import cors_options
+from app.main import cors_options, docs_enabled
 
 PREVIEW_REGEX = r"https://trekly-web-[a-z0-9-]+-myteam\.vercel\.app"
 
@@ -63,3 +63,11 @@ def test_preflight_for_authorised_request():
     )
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == origin
+
+
+def test_api_docs_are_on_locally_and_off_on_render():
+    assert docs_enabled({}) is True
+    assert docs_enabled({"RENDER": "true"}) is False
+    assert docs_enabled({"RENDER": "true", "API_DOCS": "true"}) is True
+    assert docs_enabled({"API_DOCS": "false"}) is False
+

@@ -59,7 +59,11 @@ def decode_cursor(cursor: str | None) -> int:
     return offset
 
 
-def _escape_like(token: str) -> str:
+def escape_like(token: str) -> str:
+    """Make %, _ and backslashes in user text match literally in a LIKE pattern.
+
+    Pair with a backslash as the escape character: `.like(pattern, escape="\\")`.
+    """
     return token.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
@@ -148,7 +152,7 @@ def search_products(
         tokens = normalized.split()[:MAX_QUERY_TOKENS]
         token_match = and_(
             *(
-                CatalogProduct.search_text.like(f"%{_escape_like(token)}%", escape="\\")
+                CatalogProduct.search_text.like(f"%{escape_like(token)}%", escape="\\")
                 for token in tokens
             )
         )

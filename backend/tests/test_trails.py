@@ -145,6 +145,27 @@ def test_list_search_keeps_popularity_order_and_hides_retired(client, synced):
     assert client.get("/api/trails", params={"q": "Wonderland"}).json() == []
 
 
+def test_list_search_treats_wildcards_as_plain_text(client, session_factory, legacy_us_trail):
+    session = session_factory()
+    sync_trails(
+        session,
+        catalog([entry(1, "Lake Agnes"), entry(2, "100% Ridge"), entry(3, "Snake_Path"), entry(4, "Back\\Slash")]),
+        countries=("CA",),
+        limit=100,
+    )
+    session.commit()
+    session.close()
+
+    def search(q):
+        return [t["name"] for t in client.get("/api/trails", params={"q": q, "limit": 100}).json()]
+
+    assert search("%") == ["100% Ridge"]
+    assert search("_") == ["Snake_Path"]
+    assert search("\\") == ["Back\\Slash"]
+    assert search("e_p") == ["Snake_Path"]
+    assert search("ag%es") == []
+
+
 def test_retired_trail_detail_and_bookmark_still_resolve(client, synced, legacy_us_trail, auth_headers):
     trail_id, user_id = legacy_us_trail
     detail = client.get(f"/api/trails/{trail_id}")
