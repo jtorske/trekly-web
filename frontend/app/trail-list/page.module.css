@@ -196,10 +196,39 @@
   padding: 0 1.5rem;
 }
 
-.count {
+.resultsHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
   margin-bottom: 0.75rem;
+}
+
+.count {
   color: color-mix(in srgb, var(--ink) 80%, transparent);
   font-size: 0.88rem;
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.sortLabel {
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
+}
+
+.sort select {
+  width: auto;
+  padding-block: 0.35rem;
+  font-size: 0.88rem;
+}
+
+.retry {
+  margin-top: 1rem;
 }
 
 .status {
@@ -260,6 +289,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .cardRegion {

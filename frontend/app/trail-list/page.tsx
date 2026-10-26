@@ -9,6 +9,7 @@ import ui from "@/components/ui.module.css";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
+import { TRAIL_SORT_LABELS, isTrailSort, sortTrails, trailTitles, type TrailSort } from "@/lib/trailOrder";
 import { searchTrails, type TrailListItem, type TripType } from "@/lib/trailsApi";
 import { formatTrailDistance, formatTrailElevation, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
@@ -22,6 +23,7 @@ const TRIP_LABELS: Record<TripType, string> = {
   day: "Day hikes",
 };
 const TRIPS = Object.keys(TRIP_LABELS) as TripType[];
+const SORTS = Object.keys(TRAIL_SORT_LABELS) as TrailSort[];
 
 function isTerrain(value: string | null): value is Terrain {
   return value !== null && (TERRAINS as string[]).includes(value);
@@ -34,6 +36,8 @@ function isTrip(value: string | null): value is TripType {
 interface Filters {
   terrain?: Terrain;
   trip?: TripType;
+  /** Not counted as a filter; kept in the URL like one. */
+  sort?: TrailSort;
 }
 
 function FilterGroup<T extends string>({
@@ -74,6 +78,7 @@ function FilterGroup<T extends string>({
 
 function TrailCard({
   trail,
+  title,
   saved,
   pending,
   onToggleSave,
@@ -81,6 +86,7 @@ function TrailCard({
   units,
 }: {
   trail: TrailListItem;
+  title: string;
   saved: boolean;
   pending: boolean;
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
@@ -96,7 +102,7 @@ function TrailCard({
         className={styles.card}
       >
         <div className={styles.cardMain}>
-          <h2 className={styles.cardName}>{trail.name}</h2>
+          <h2 className={styles.cardName}>{title}</h2>
           <p className={styles.cardRegion}>{trail.region}</p>
         </div>
 
@@ -136,7 +142,9 @@ function ExploreContent() {
   const terrain = isTerrain(terrainParam) ? terrainParam : undefined;
   const tripParam = searchParams.get("trip");
   const trip = isTrip(tripParam) ? tripParam : undefined;
-  const filters: Filters = { terrain, trip };
+  const sortParam = searchParams.get("sort");
+  const sort: TrailSort = isTrailSort(sortParam) ? sortParam : "popular";
+  const filters: Filters = { terrain, trip, sort };
   const activeFilters = (terrain ? 1 : 0) + (trip ? 1 : 0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersId = useId();
@@ -152,8 +160,10 @@ function ExploreContent() {
     key: string;
     trails: TrailListItem[] | null;
   } | null>(null);
+  // Bumped by "Try again" so the same search is fetched afresh.
+  const [attempt, setAttempt] = useState(0);
 
-  const requestKey = `${q}|${terrain ?? ""}|${trip ?? ""}`;
+  const requestKey = `${q}|${terrain ?? ""}|${trip ?? ""}|${attempt}`;
 
   const updateUrl = useCallback(
     (nextQuery: string, next: Filters) => {
@@ -161,6 +171,7 @@ function ExploreContent() {
       if (nextQuery) params.set("q", nextQuery);
       if (next.trip) params.set("trip", next.trip);
       if (next.terrain) params.set("terrain", next.terrain);
+      if (next.sort && next.sort !== "popular") params.set("sort", next.sort);
       const search = params.toString();
       router.replace(search ? `/trail-list?${search}` : "/trail-list", {
         scroll: false,
@@ -174,9 +185,9 @@ function ExploreContent() {
   useEffect(() => {
     const trimmed = input.trim();
     if (trimmed === q) return;
-    const timer = window.setTimeout(() => updateUrl(trimmed, { terrain, trip }), 300);
+    const timer = window.setTimeout(() => updateUrl(trimmed, { terrain, trip, sort }), 300);
     return () => window.clearTimeout(timer);
-  }, [input, q, terrain, trip, updateUrl]);
+  }, [input, q, terrain, trip, sort, updateUrl]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -188,20 +199,22 @@ function ExploreContent() {
         }
       });
     return () => controller.abort();
-  }, [q, terrain, trip, requestKey]);
+  }, [q, terrain, trip, attempt, requestKey]);
 
   // Back from sign-in after a guest clicked Save on a card: finish that save.
   useEffect(() => {
     if (!saveParam || authStatus !== "signedIn" || savedTrails.loading || resumedSave.current) return;
     resumedSave.current = true;
-    const done = () => updateUrl(q, { terrain, trip });
+    const done = () => updateUrl(q, { terrain, trip, sort });
     if (savedTrails.savedIds.has(saveParam)) done();
     else savedTrails.toggle(saveParam, true).catch(() => undefined).finally(done);
-  }, [saveParam, authStatus, savedTrails, updateUrl, q, terrain, trip]);
+  }, [saveParam, authStatus, savedTrails, updateUrl, q, terrain, trip, sort]);
 
   const isLoading = result?.key !== requestKey;
   const trails = result?.trails;
   const failed = !isLoading && trails === null;
+  const sorted = trails ? sortTrails(trails, sort) : null;
+  const titles = trailTitles(trails ?? []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -273,7 +286,7 @@ function ExploreContent() {
             />
             <div className={styles.filterFooter}>
               {activeFilters > 0 && (
-                <button type="button" className={ui.ghost} onClick={() => setFilter({})}>
+                <button type="button" className={ui.ghost} onClick={() => setFilter({ sort })}>
                   Clear filters
                 </button>
               )}
@@ -316,13 +329,15 @@ function ExploreContent() {
 
       <section className={styles.results} aria-live="polite" aria-busy={isLoading}>
         {failed ? (
-          <p className={styles.status}>
-            We couldn&apos;t load trails right now. Check that the trail service
-            is running and try again.
-          </p>
-        ) : !trails ? (
+          <div className={styles.status} role="alert">
+            <p>We couldn&apos;t load trails. Check your connection and try again.</p>
+            <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={() => setAttempt((n) => n + 1)}>
+              Try again
+            </button>
+          </div>
+        ) : !sorted ? (
           <p className={styles.status}>Loading trails…</p>
-        ) : trails.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <p className={styles.status}>
             No trails match
             {q ? <> &ldquo;{q}&rdquo;</> : null}
@@ -332,17 +347,35 @@ function ExploreContent() {
           </p>
         ) : (
           <>
-            <p className={styles.count}>
-              {trails.length === RESULT_LIMIT ? `${RESULT_LIMIT}+` : trails.length}{" "}
-              {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
-              {trails.length === 1 ? "trail" : "trails"}
-              {q ? <> matching &ldquo;{q}&rdquo;</> : null}
-            </p>
+            <div className={styles.resultsHead}>
+              {/* The API caps the catalogue at RESULT_LIMIT, so this count is exact. */}
+              <p className={styles.count}>
+                {sorted.length}{" "}
+                {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
+                {sorted.length === 1 ? "trail" : "trails"}
+                {q ? <> matching &ldquo;{q}&rdquo;</> : null}
+              </p>
+              <label className={styles.sort}>
+                <span className={styles.sortLabel}>Sort</span>
+                <select
+                  className={ui.input}
+                  value={sort}
+                  onChange={(event) => setFilter({ ...filters, sort: event.target.value as TrailSort })}
+                >
+                  {SORTS.map((option) => (
+                    <option key={option} value={option}>
+                      {TRAIL_SORT_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
-              {trails.map((trail) => (
+              {sorted.map((trail) => (
                 <TrailCard
                   key={trail.id}
                   trail={trail}
+                  title={titles.get(trail.id) ?? trail.name}
                   saved={savedTrails.savedIds.has(trail.id)}
                   pending={savedTrails.pending.has(trail.id)}
                   onToggleSave={savedTrails.toggle}
