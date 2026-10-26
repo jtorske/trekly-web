@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import availability, gear, me_account, me_hike_logs, me_alerts, me_gear, me_plans, me_setups, trails
+from app.routers import availability, forecast, gear, me_account, me_hike_logs, me_alerts, me_gear, me_plans, me_setups, trails
 
 
 def cors_options(env=os.environ) -> dict:
@@ -42,6 +42,7 @@ app.add_middleware(CORSMiddleware, **cors_options())
 
 app.include_router(trails.router)
 app.include_router(availability.router)
+app.include_router(forecast.router)
 app.include_router(gear.router)
 app.include_router(me_gear.router)
 app.include_router(me_account.router)

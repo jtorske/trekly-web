@@ -1,0 +1,211 @@
+/* Trail page weather: five day cards in the seasonal-conditions card style.
+   Colours are explicit, like the rest of the page, so the section reads the
+   same when the OS is in dark mode. */
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.title {
+  margin-bottom: 0.25rem;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.pointToggle {
+  user-select: none;
+}
+
+.where {
+  margin-bottom: 0.85rem;
+  color: var(--color-muted-text);
+  font-size: 0.88rem;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.days:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 3px;
+  border-radius: 0.9rem;
+}
+
+.day {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 70%, var(--color-cream));
+  padding: 0.85rem 0.55rem 0.75rem;
+  color: var(--color-dark-olive);
+  text-align: center;
+}
+
+.skeletonDay {
+  height: 15.5rem;
+}
+
+/* Phones: a row that scrolls sideways, a card and a bit at a time. */
+@media (max-width: 640px) {
+  .days {
+    display: flex;
+    overflow-x: auto;
+    margin: 0 -1.5rem;
+    padding: 0 1.5rem 0.5rem;
+    scroll-padding: 0 1.5rem;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+  }
+
+  .day,
+  .skeletonDay {
+    flex: 0 0 8.75rem;
+    scroll-snap-align: start;
+  }
+}
+
+.dayName {
+  font-weight: 600;
+}
+
+.date {
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.icon {
+  width: 2.9rem;
+  height: 2.9rem;
+  margin: 0.35rem 0 0.1rem;
+}
+
+.sun {
+  fill: var(--color-tan);
+}
+
+.rays line {
+  stroke: var(--color-tan);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.cloud {
+  fill: #e9ebe2;
+  stroke: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.drops line {
+  stroke: #3d6f8c;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.flakes,
+.flakes circle {
+  fill: #5d7f96;
+}
+
+.fog line {
+  stroke: color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.bolt {
+  fill: none;
+  stroke: var(--color-rust);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.condition {
+  min-height: 2.3em;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+
+.temps {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0.3rem 0 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.high {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.low {
+  color: var(--color-muted-text);
+  font-size: 0.95rem;
+}
+
+.facts {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.2rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+  padding-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.facts dt {
+  color: var(--color-muted-text);
+}
+
+.facts dd {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sunTime {
+  color: var(--color-muted-text);
+  font-size: 0.75rem;
+}
+
+.note {
+  margin-top: 0.9rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 88%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.credit {
+  margin-top: 0.35rem;
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+}
+
+.link {
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

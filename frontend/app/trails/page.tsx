@@ -21,6 +21,7 @@ import {
 import { formatDegrees, formatTemperature, formatTrailDistance, formatTrailElevation, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
 import CampgroundsSection from "./CampgroundsSection";
+import WeatherSection, { useTrailForecast } from "./WeatherSection";
 import styles from "./page.module.css";
 
 const SEASON_LABELS: Record<SeasonalCondition["season"], string> = {
@@ -93,6 +94,7 @@ function TrailView({
   hikeLogs: ReturnType<typeof useHikeLogs>;
 }) {
   const [units, setUnits] = useUnits();
+  const forecast = useTrailForecast(trail.id);
   const nights = trail.typical_duration_nights;
   const hasLocation = trail.latitude != null && trail.longitude != null;
 
@@ -172,6 +174,16 @@ function TrailView({
         typicalNights={trail.typical_duration_nights}
         data={campgrounds}
         failed={campgroundsFailed && ((trail.typical_duration_nights ?? 0) >= 1)}
+        className={styles.section}
+      />
+
+      <WeatherSection
+        state={forecast}
+        units={units}
+        latitude={trail.latitude}
+        longitude={trail.longitude}
+        provinceCode={trail.province_code}
+        countryCode={trail.country_code}
         className={styles.section}
       />
 
