@@ -186,6 +186,9 @@
 }
 
 .segmented button {
+  /* Buttons, not text: a click shouldn't leave a selection highlight. */
+  -webkit-user-select: none;
+  user-select: none;
   border-radius: 9999px;
   padding: 0.3rem 0.8rem;
   color: var(--color-dark-olive);

@@ -263,7 +263,7 @@ export default function WeatherSection({
           Weather
         </h2>
         {forecast.summit && (
-          <div className={`${ui.segmented} ${styles.pointToggle}`} role="group" aria-label="Forecast location">
+          <div className={ui.segmented} role="group" aria-label="Forecast location">
             <button type="button" aria-pressed={point === "trailhead"} onClick={() => setPoint("trailhead")}>
               Trailhead
             </button>

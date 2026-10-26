@@ -17,10 +17,6 @@
   font-weight: 600;
 }
 
-.pointToggle {
-  user-select: none;
-}
-
 .where {
   margin-bottom: 0.85rem;
   color: var(--color-muted-text);
