@@ -98,6 +98,8 @@
   font-size: clamp(2rem, 4.5vw, 2.8rem);
   font-weight: 600;
   line-height: 1.08;
+  /* User-entered names can be one long word. */
+  overflow-wrap: anywhere;
 }
 
 .meta {
@@ -415,6 +417,9 @@
 .setupName {
   font-size: 1.1rem;
   font-weight: 700;
+  /* User-entered names can be one long word. */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .setupName:hover {
@@ -518,4 +523,8 @@
   .mat {
     padding: 1rem;
   }
+}
+
+.listBody {
+  margin-top: 1.5rem;
 }

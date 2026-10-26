@@ -162,6 +162,8 @@
   color: var(--color-dark-olive);
   font-size: 0.83rem;
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .chip:hover {

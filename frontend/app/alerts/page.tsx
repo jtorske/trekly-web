@@ -42,7 +42,9 @@ function AlertCard({
   } else if (alert.status === "active") {
     detail = alert.last_checked_at && alert.last_summary
       ? `Last checked ${WHEN.format(new Date(alert.last_checked_at))}: ${SUMMARY_LABELS[alert.last_summary].toLowerCase()}.`
-      : "Not checked yet. We check every few minutes.";
+      // The poller runs every 30 minutes (.github/workflows/alert-poller.yml),
+      // and GitHub can start scheduled runs late.
+      : "Not checked yet. We check about every 30 minutes.";
   }
 
   return (
@@ -61,7 +63,8 @@ function AlertCard({
       </p>
       {detail && <p className={styles.detail}>{detail}</p>}
       <div className={styles.actions}>
-        {alert.trail && (
+        {/* Checking dates for a cancelled or past alert does nothing useful. */}
+        {alert.trail && (alert.status === "active" || alert.status === "notified") && (
           <Link
             href={`/trails?${new URLSearchParams({
               id: alert.trail.id,

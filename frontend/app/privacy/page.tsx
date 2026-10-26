@@ -36,7 +36,7 @@ export default function PrivacyPage() {
             plain text.
           </li>
           <li>
-            <strong>Google sign-in:</strong> if you choose &ldquo;Sign in with Google,&rdquo; Google
+            <strong>Google sign-in:</strong>{" "}if you choose &ldquo;Sign in with Google,&rdquo; Google
             shares your name, email address, and profile picture with us. We don&apos;t receive your
             Google password or access to your Google account.
           </li>

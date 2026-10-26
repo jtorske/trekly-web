@@ -81,6 +81,21 @@ function CallbackContent() {
     );
   }
 
+  // Opened without a link's code (bookmarked, typed, or revisited): nothing
+  // was confirmed, so don't say it was.
+  if (problem === "signin") {
+    return (
+      <AuthShell
+        title="Nothing to finish here"
+        subtitle="This page completes sign-in from an email link. Open the link from your email, or sign in."
+      >
+        <Link href={`/login${nextQuery(next)}`} className={ui.primary}>
+          Sign in
+        </Link>
+      </AuthShell>
+    );
+  }
+
   return (
     <AuthShell
       title={isRecovery ? "Open the link in the same browser" : "Your email is confirmed"}

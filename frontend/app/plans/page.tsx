@@ -20,10 +20,12 @@ import { plansApi, type PlanNight, type TripPlan } from "@/lib/plansApi";
 import { formatDay, formatStay, localToday, withStayDates } from "@/lib/stay";
 import { getTrailCampgrounds, type TrailCampground } from "@/lib/trailsApi";
 import { formatWeight } from "@/lib/units";
+import { usePlans } from "@/lib/usePlans";
 import { useUnits } from "@/lib/useUnits";
 import FlatLay from "../gear/FlatLay";
 import GearList from "../gear/GearList";
 import { CORE_SLOTS, groupItemsBySlot, missingTripGear, slotForItem } from "../gear/slots";
+import { TripsSection } from "../profile/sections";
 import AlertDialog from "../trails/AlertDialog";
 import PlanDialog from "./PlanDialog";
 import styles from "./page.module.css";
@@ -493,22 +495,26 @@ function PlanSkeleton() {
   );
 }
 
+/** /plans with no id: the same trip list as Profile → Trips. */
+function PlanList() {
+  const plans = usePlans();
+  return (
+    <>
+      <h1 className={styles.title}>Your trips</h1>
+      <div className={styles.listBody}>
+        <TripsSection data={plans} />
+      </div>
+    </>
+  );
+}
+
 function PlanContent() {
   const id = useSearchParams().get("id");
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
         <RequireAuth fallback={<PlanSkeleton />}>
-          {id ? (
-            <PlanView id={id} />
-          ) : (
-            <div className={styles.status}>
-              <h1 className={styles.notFoundTitle}>No plan picked</h1>
-              <Link href="/profile?tab=trips" className={styles.inlineLink}>
-                Your trip plans
-              </Link>
-            </div>
-          )}
+          {id ? <PlanView id={id} /> : <PlanList />}
         </RequireAuth>
       </div>
     </main>

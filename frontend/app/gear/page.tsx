@@ -169,7 +169,7 @@ function GearContent() {
       {authStatus === "signedOut" && (
         <div className={`${ui.notice} ${styles.banner}`}>
           <p>
-            <strong>Sign in to save your setup.</strong> Browse the catalogue now; your gear is saved to your
+            <strong>Sign in to save your setup.</strong>{" "}Browse the catalogue now; your gear is saved to your
             account so it&apos;s there on every device.
           </p>
           <div className={styles.bannerActions}>
@@ -197,7 +197,8 @@ function GearContent() {
               />
             </label>
           )}
-          {isSignedIn && (
+          {/* No counts until the gear has loaded: "0 items" would read as an empty inventory. */}
+          {isSignedIn && gear.status === "ready" && (
             <p className={styles.setupSummary}>
               {activeSetup ? (
                 <>
@@ -240,7 +241,7 @@ function GearContent() {
 
       {gear.status === "error" && (
         <div className={`${ui.error} ${styles.banner}`} role="alert">
-          We couldn&apos;t load your gear: {gear.error}{" "}
+          Your gear didn&apos;t load. {gear.error}{" "}
           <button type="button" className={ui.ghost} onClick={gear.reload}>
             Try again
           </button>
@@ -248,7 +249,7 @@ function GearContent() {
       )}
 
       <div className={styles.board} aria-busy={gear.status === "loading"}>
-        {gear.status === "loading" ? (
+        {gear.status === "error" ? null : gear.status === "loading" ? (
           <div className={styles.loadingGrid} aria-label="Loading your gear">
             {Array.from({ length: 7 }, (_, index) => (
               <div key={index} className={`${ui.skeleton} ${styles.loadingTile}`} />
@@ -266,7 +267,7 @@ function GearContent() {
                 showEmptySlots={showEmptySlots}
                 units={units}
                 canEdit={canEdit}
-                addDisabled={gear.status === "error"}
+                addDisabled={false}
                 snapId={snapId}
                 emptyMessage={
                   showEmptySlots || coreItems.length > 0

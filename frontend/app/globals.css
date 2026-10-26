@@ -36,3 +36,13 @@ body {
   color: var(--foreground);
   font-family: var(--sans);
 }
+
+/* A long unbroken word (a pasted URL, a 80-character title) wraps instead of
+   running off the page. */
+h1,
+h2,
+h3,
+p,
+li {
+  overflow-wrap: break-word;
+}

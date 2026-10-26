@@ -79,7 +79,7 @@ export default function AlertDialog({
     body = (
       <>
         <p className={styles.lead}>
-          We&apos;ll check Parks Canada every so often and email{" "}
+          We&apos;ll check Parks Canada about every 30 minutes and email{" "}
           <strong>{user?.email ?? "you"}</strong> once, as soon as every night is available.
         </p>
         <p className={ui.hint}>Trekly doesn&apos;t book for you, so act quickly when the email arrives.</p>

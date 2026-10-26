@@ -68,7 +68,7 @@ function ProfileContent() {
       <main className={styles.page}>
         <div className={styles.wrap}>
           <p className={ui.error} role="alert">
-            We couldn&apos;t load your profile{error ? `: ${error}` : "."}{" "}
+            Your profile didn&apos;t load. {error ?? "Try again in a moment."}{" "}
             <button type="button" className={ui.ghost} onClick={reload}>
               Try again
             </button>
@@ -81,7 +81,8 @@ function ProfileContent() {
   const name = profile.display_name || profile.username || user?.email?.split("@")[0] || "Trekker";
   // Live counts from the same hooks the sections use, so they always agree.
   const gearCount = gear.status === "ready" ? gear.items.length : profile.counts.gear_items;
-  const savedCount = savedTrails.loading ? profile.counts.saved_trails : savedTrails.saved.length;
+  const savedCount =
+    savedTrails.loading || savedTrails.error ? profile.counts.saved_trails : savedTrails.saved.length;
   const isNew = !profile.display_name && !profile.bio && !profile.avatar_path;
 
   return (
@@ -119,7 +120,7 @@ function ProfileContent() {
             <span className={styles.statLabel}>{savedCount === 1 ? "Saved trail" : "Saved trails"}</span>
           </button>
           <button type="button" className={styles.stat} onClick={() => setTab("trips")}>
-            <span className={styles.statValue}>{plans.loading ? "–" : plans.plans.length}</span>
+            <span className={styles.statValue}>{plans.loading || plans.error ? "–" : plans.plans.length}</span>
             <span className={styles.statLabel}>{plans.plans.length === 1 ? "Planned trip" : "Planned trips"}</span>
           </button>
         </div>

@@ -33,6 +33,10 @@ function ChangeEmail({ email }: { email: string | null }) {
       setStatus({ ok: false, message: "Enter a valid email address." });
       return;
     }
+    if (email && value.trim().toLowerCase() === email.toLowerCase()) {
+      setStatus({ ok: false, message: "That's already your email." });
+      return;
+    }
     setSaving(true);
     setStatus(null);
     try {
@@ -227,8 +231,8 @@ function DeleteAccount() {
   return (
     <div className={styles.form}>
       <p>
-        This permanently deletes your account, profile, photos, saved trails and gear inventory. It can&apos;t
-        be undone. Shared catalogue products aren&apos;t affected.
+        This permanently deletes your account, profile, photos, saved trails, gear inventory and setups, trip
+        plans and campsite alerts. It can&apos;t be undone. Shared catalogue products aren&apos;t affected.
       </p>
       <label className={ui.field}>
         <span className={ui.label}>
