@@ -33,9 +33,9 @@ export function currentAccountHref(
   const tab = new URLSearchParams(search).get("tab");
   if (under(pathname, "/profile")) {
     if (tab === "trips") return "/profile?tab=trips";
-    if (tab === "settings") return "/profile?tab=settings";
     if (tab === "gear") return "/gear";
-    if (tab === "trails") return null;
+    // No menu row for these tabs since ab3955c.
+    if (tab === "trails" || tab === "settings") return null;
     return "/profile";
   }
   if (under(pathname, "/plans")) return "/profile?tab=trips";
