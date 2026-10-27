@@ -9,6 +9,21 @@ export interface TrailSummary {
 
 export type RouteType = "out_and_back" | "loop" | "point_to_point";
 
+/** An approved, credited trail photo (null on a trail means the topo fallback). */
+export interface TrailPhoto {
+  hero_url: string;
+  thumb_url: string;
+  width: number;
+  height: number;
+  photographer: string;
+  /** Null for the site owner's own photos, credited by name only. */
+  license: string | null;
+  license_url: string | null;
+  source_url: string | null;
+  /** Where it was first published, e.g. "Flickr"; null for the owner's photos. */
+  origin: string | null;
+}
+
 export interface TrailListItem extends TrailSummary {
   country_code: string;
   province_code: string | null;
@@ -20,6 +35,7 @@ export interface TrailListItem extends TrailSummary {
   popularity_rank: number | null;
   /** Set once a trail leaves the catalogue; bookmarks to it still resolve. */
   retired_at: string | null;
+  photo?: TrailPhoto | null;
 }
 
 /** "overnight" = backpacking trips (1+ typical nights), "day" = day hikes. */

@@ -112,3 +112,7 @@ backend/.cache/
 
 # Removed Node prototype; local checkouts may still hold its MySQL data and .env
 /campalert-service/
+
+# Commons/Flickr responses and candidates from scripts/find_trail_photos.py
+backend/.photo-search-cache/
+backend/photo_candidates.json

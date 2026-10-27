@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy import CheckConstraint, Column, DateTime, Index, Integer, Numeric, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -57,3 +58,7 @@ class Trail(Base):
     # deleted, so bookmarks, seasonal conditions and campsites keep working.
     retired_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # The credited hero photo, if one has been approved (null means the topo
+    # fallback). Loaded with each trail so lists don't query per row.
+    photo = relationship("TrailPhoto", uselist=False, lazy="selectin", viewonly=True)

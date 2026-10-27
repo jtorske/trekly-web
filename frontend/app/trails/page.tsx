@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import HikeLogButton from "@/components/HikeLogButton";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useSavedTrails } from "@/lib/useSavedTrails";
@@ -114,6 +115,14 @@ function TrailView({
 
   return (
     <article className={styles.article}>
+      <figure className={styles.photo}>
+        <TrailPhoto photo={trail.photo} name={trail.name} variant="hero" />
+        {trail.photo && (
+          <figcaption className={styles.photoCredit}>
+            <PhotoCredit photo={trail.photo} />
+          </figcaption>
+        )}
+      </figure>
       <header className={styles.header}>
         <p className={styles.region}>{trail.region}</p>
         <h1 className={styles.title}>{trail.name}</h1>

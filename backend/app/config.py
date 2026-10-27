@@ -16,3 +16,22 @@ def _csv(value: str) -> tuple[str, ...]:
 # both the trail seed script and the /api/trails list endpoint.
 TRAIL_CATALOG_COUNTRIES = _csv(os.getenv("TRAIL_CATALOG_COUNTRIES", "CA"))
 TRAIL_CATALOG_LIMIT = int(os.getenv("TRAIL_CATALOG_LIMIT", "100"))
+
+
+def photo_admin_user_ids() -> frozenset[str]:
+    """Supabase user ids allowed to review, approve and upload trail photos
+    (PHOTO_ADMIN_USER_IDS, comma-separated). Read on every call so a change
+    to the environment never needs a code path to be re-imported; empty
+    means nobody."""
+    return frozenset(
+        part.strip().lower() for part in os.getenv("PHOTO_ADMIN_USER_IDS", "").split(",") if part.strip()
+    )
+
+
+# Output of scripts/find_trail_photos.py that the review page reads. Local
+# review only: on a server without the file, the page lists no candidates
+# (uploading your own photo still works).
+PHOTO_CANDIDATES_PATH = os.getenv(
+    "PHOTO_CANDIDATES_PATH",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "photo_candidates.json"),
+)

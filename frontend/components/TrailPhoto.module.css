@@ -1,0 +1,89 @@
+.frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background-color: color-mix(in srgb, var(--color-olive) 10%, var(--color-cream));
+}
+
+.hero {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No photo (or it failed to load): the site's contour lines and the trail name. */
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem 1.25rem;
+}
+
+.contours {
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--color-dark-olive) 22%, transparent);
+  -webkit-mask-image: var(--topo-map);
+  mask-image: var(--topo-map);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.fallbackName {
+  position: relative;
+  color: var(--color-dark-olive);
+  font-family: var(--display);
+  font-size: clamp(1.4rem, 1rem + 1.6vw, 2.2rem);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.thumb .fallback {
+  padding: 0.6rem 0.7rem;
+}
+
+.thumb .fallbackName {
+  font-size: 0.95rem;
+}
+
+.credit {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-muted-text);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+a.credit:hover,
+a.credit:focus-visible {
+  color: var(--color-dark-olive);
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    aspect-ratio: 3 / 2;
+  }
+}

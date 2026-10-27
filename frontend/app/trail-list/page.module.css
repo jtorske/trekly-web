@@ -280,8 +280,19 @@
   transform: translateY(-1px);
 }
 
+.cardPhoto {
+  flex-shrink: 0;
+  width: 7.5rem;
+  height: 5rem;
+}
+
 .cardMain {
+  flex: 1;
   min-width: 0;
+}
+
+.cardCredit {
+  padding: 0.25rem 0 0 0.5rem;
 }
 
 .cardName {
@@ -371,6 +382,12 @@
   .card {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .cardPhoto {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   .cardMeta {

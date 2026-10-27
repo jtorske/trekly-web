@@ -2,8 +2,10 @@
 
 The frontend signs users in with Supabase Auth and sends the session's access
 token as `Authorization: Bearer <token>`. We verify it locally against the
-project's published signing keys (JWKS, ES256/RS256), so the backend needs
-only the public project URL — never a service-role key. Projects still on the
+project's published signing keys (JWKS, ES256/RS256), so verifying sign-ins
+needs only the public project URL, never a service-role key. (The one
+service-role key the backend holds is for trail photo uploads and stays in
+app/trail_photos.py.) Projects still on the
 legacy shared secret can set SUPABASE_JWT_SECRET for HS256 tokens.
 
 Environment:

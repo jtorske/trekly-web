@@ -7,3 +7,5 @@ alembic==1.18.5
 python-dotenv==1.2.2
 psycopg2-binary==2.9.12
 pyjwt[crypto]==2.10.1
+# Trail photo processing (resizes untrusted images to WebP); keep current for security fixes.
+pillow==11.3.0

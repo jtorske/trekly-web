@@ -55,6 +55,15 @@
 
 /* Header */
 
+.photo {
+  margin: 0 0 1.5rem;
+}
+
+.photoCredit {
+  margin-top: 0.35rem;
+  text-align: right;
+}
+
 .header {
   margin-bottom: 1.75rem;
 }

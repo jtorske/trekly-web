@@ -1,0 +1,166 @@
+.trail {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  padding-top: 1.5rem;
+}
+
+.current {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  height: 7.5rem;
+}
+
+.body {
+  min-width: 0;
+}
+
+.trailName {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.trailName a:hover {
+  text-decoration: underline;
+}
+
+.trailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.75rem;
+  margin: 0.9rem 0 0;
+  border: 0;
+  padding: 0;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 2px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, white 60%, var(--color-cream));
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.option:focus-within {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.optionChecked {
+  border-color: var(--color-dark-olive);
+}
+
+.topoOption {
+  justify-content: center;
+}
+
+.preview {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--color-olive) 10%, var(--color-cream));
+  object-fit: cover;
+}
+
+.optionTitle {
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optionMeta {
+  color: var(--color-muted-text);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.optionMeta a {
+  text-decoration: underline;
+}
+
+.confidence {
+  border-radius: 9999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.lowRes {
+  background: color-mix(in srgb, var(--color-rust) 18%, transparent);
+  color: var(--color-rust-text);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.high {
+  background: color-mix(in srgb, var(--color-olive) 28%, transparent);
+}
+
+.medium {
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+}
+
+.low,
+.off_topic {
+  background: color-mix(in srgb, var(--color-tan) 32%, transparent);
+  color: #6b4613;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.actions label {
+  cursor: pointer;
+}
+
+.actions label:focus-within {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .trail {
+    grid-template-columns: 1fr;
+  }
+
+  .current {
+    height: 10rem;
+  }
+}

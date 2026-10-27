@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
@@ -101,6 +102,9 @@ function TrailCard({
         href={`/trails?id=${encodeURIComponent(trail.id)}`}
         className={styles.card}
       >
+        <div className={styles.cardPhoto}>
+          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+        </div>
         <div className={styles.cardMain}>
           <h2 className={styles.cardName}>{title}</h2>
           <p className={styles.cardRegion}>{trail.region}</p>
@@ -130,6 +134,8 @@ function TrailCard({
           compact
         />
       </div>
+      {/* Outside the card's link: the credit links to the photo's source. */}
+      <PhotoCredit photo={trail.photo} className={styles.cardCredit} />
     </li>
   );
 }

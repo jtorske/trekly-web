@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
+
+from app.trail_photos import public_photo_url
 
 Terrain = Literal["easy", "moderate", "difficult", "extreme"]
 Season = Literal["spring", "summer", "fall", "winter"]
@@ -19,6 +21,39 @@ class TrailOut(BaseModel):
     )
 
 
+class TrailPhotoOut(BaseModel):
+    """What the page needs to show a trail photo and its credit line."""
+
+    hero_url: str
+    thumb_url: str
+    width: int
+    height: int
+    photographer: str
+    # Null for the site owner's own photos, credited by name only.
+    license: str | None = None
+    license_url: str | None = None
+    source_url: str | None = None
+    # Where it was first published ("Flickr", "Wikimedia Commons"); null for the owner's photos.
+    origin: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _from_row(cls, value):
+        if hasattr(value, "hero_path"):
+            return {
+                "hero_url": public_photo_url(value.hero_path),
+                "thumb_url": public_photo_url(value.thumb_path),
+                "width": value.hero_width,
+                "height": value.hero_height,
+                "photographer": value.photographer,
+                "license": value.license,
+                "license_url": value.license_url,
+                "source_url": value.source_url,
+                "origin": value.origin,
+            }
+        return value
+
+
 class TrailListItemOut(TrailOut):
     country_code: str
     province_code: str | None = None
@@ -31,6 +66,8 @@ class TrailListItemOut(TrailOut):
     # Set when the trail has left the catalogue; it still resolves for
     # bookmarks but no longer appears in search.
     retired_at: datetime | None = None
+    # The approved hero photo; null means show the topo fallback.
+    photo: TrailPhotoOut | None = None
 
 
 class SeasonalConditionOut(BaseModel):
