@@ -16,6 +16,7 @@ export const ACCOUNT_LINKS: AccountLink[] = [
   { href: "/profile?tab=trips", label: "My trips" },
   { href: "/gear", label: "My gear" },
   { href: "/alerts", label: "Alerts" },
+  { href: "/profile?tab=settings", label: "Settings" },
 ];
 
 const under = (pathname: string, prefix: string) =>
@@ -34,8 +35,9 @@ export function currentAccountHref(
   if (under(pathname, "/profile")) {
     if (tab === "trips") return "/profile?tab=trips";
     if (tab === "gear") return "/gear";
-    // No menu row for these tabs since ab3955c.
-    if (tab === "trails" || tab === "settings") return null;
+    if (tab === "settings") return "/profile?tab=settings";
+    // No menu row for this tab since ab3955c.
+    if (tab === "trails") return null;
     return "/profile";
   }
   if (under(pathname, "/plans")) return "/profile?tab=trips";
