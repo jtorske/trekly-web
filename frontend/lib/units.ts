@@ -69,14 +69,14 @@ export function formatDistance(km: number, system: UnitSystem = DEFAULT_UNITS): 
   return `${trim(value, value >= 100 ? 0 : 1)} ${system === "metric" ? "km" : "mi"}`;
 }
 
-/** Whole kilometres or miles, for running totals: "62 / 100 km". */
-export function distanceValue(km: number, system: UnitSystem = DEFAULT_UNITS): number {
-  return system === "metric" ? km : km / KM_PER_MILE;
+/** "100 km" / "62 mi": a distance rounded to a whole number, for goals. */
+export function formatWholeDistance(km: number, system: UnitSystem = DEFAULT_UNITS): string {
+  return `${Math.round(distanceValue(km, system)).toLocaleString("en-US")} ${distanceUnit(system)}`;
 }
 
-/** Kilometres from a distance in the reader's units: 60 (mi) → 96.56 km. */
-export function distanceToKm(value: number, system: UnitSystem = DEFAULT_UNITS): number {
-  return system === "metric" ? value : value * KM_PER_MILE;
+/** A distance in the reader's units, unrounded: 100 km → 62.14 (mi). */
+export function distanceValue(km: number, system: UnitSystem = DEFAULT_UNITS): number {
+  return system === "metric" ? km : km / KM_PER_MILE;
 }
 
 export function distanceUnit(system: UnitSystem = DEFAULT_UNITS): string {

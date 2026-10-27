@@ -113,11 +113,12 @@ test("milestones: first hike, first overnight, 5 parks, 100 km", () => {
   assert.equal(partial[3].earned, false);
   assert.equal(partial[3].progress, 0.425);
   assert.match(partial[3].detail, /42 \/ 100 km/);
-  // Round goals in each system: 100 km, or 60 mi (96.6 km).
-  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 60 mi in total (26 / 60 mi)");
-  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))], "imperial")[3].earned, true);
-  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))])[3].earned, false);
+  // One canonical goal (100 km), labelled in whole units.
+  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 62 mi in total (26 / 62 mi)");
   assert.equal(computeMilestones([log(trail({ distance_km: 97 }))])[3].detail, "Hike 100 km in total (97 / 100 km)");
+  // 99.9 km is 62.07 mi: not earned, so it must not read "62 / 62 mi".
+  assert.equal(computeMilestones([log(trail({ distance_km: 99.9 }))], "imperial")[3].detail, "Hike 62 mi in total (61 / 62 mi)");
+  assert.equal(computeMilestones([log(trail({ distance_km: 100 }))], "imperial")[3].detail, "Hike 62 mi in total (62 / 62 mi)");
   assert.match(partial[2].detail, /1 \/ 5/);
 });
 
@@ -146,4 +147,24 @@ test("photos are scaled down, never up, and odd files are refused", () => {
   assert.equal(photoInputProblem({ type: "image/heic", size: 10 }), "Use a JPEG, PNG or WebP photo.");
   assert.match(photoInputProblem({ type: "image/jpeg", size: 30 * 1024 * 1024 }) ?? "", /25 MB/);
   assert.equal(photoInputProblem({ type: "image/png", size: 10 }), null);
+});
+
+test("switching units never changes which milestones are earned", () => {
+  const histories = [
+    [],
+    [log(trail({ distance_km: 96.6 }))], // 60 mi: not yet 100 km
+    [log(trail({ distance_km: 99.9 }))],
+    [log(trail({ distance_km: 100 }))],
+    [log(trail({ distance_km: 62.1 })), log(trail({ distance_km: 37.9, typical_duration_nights: 2 }))],
+    [log(trail({ distance_km: 150 })), log(trail({ distance_km: null }))],
+    ["A", "B", "C", "D", "E"].map((region) => log(trail({ region: `${region}, AB`, distance_km: 21 }))),
+  ];
+  for (const logs of histories) {
+    const metric = computeMilestones(logs, "metric");
+    const imperial = computeMilestones(logs, "imperial");
+    assert.deepEqual(
+      imperial.map((m) => [m.id, m.earned, m.progress]),
+      metric.map((m) => [m.id, m.earned, m.progress]),
+    );
+  }
 });

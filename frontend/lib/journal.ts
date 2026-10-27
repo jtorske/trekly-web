@@ -1,6 +1,6 @@
 import type { HikeLog } from "./hikeLogsApi";
 import type { TrailListItem } from "./trailsApi";
-import { distanceToKm, distanceValue, formatDistance, type UnitSystem } from "./units.ts";
+import { distanceValue, formatWholeDistance, type UnitSystem } from "./units.ts";
 
 /**
  * The Trail Journal's layout: which trails go on which spread, in which
@@ -163,20 +163,29 @@ export function groupTrails(trails: TrailListItem[]): JournalGroup[] {
   return all.map(({ key, title, subtitle, colour, trails: groupTrails }) => ({ key, title, subtitle, colour, trails: groupTrails }));
 }
 
-const DISTANCE_GOAL: Record<UnitSystem, number> = { metric: 100, imperial: 60 };
+/**
+ * Milestones are earned against canonical metric thresholds, so switching
+ * units never changes what's earned; units only change the labels.
+ */
+const CENTURY_KM = 100;
+
+/** Progress in whole display units, never showing the goal as reached before it is (99.9 km is 62.07 mi). */
+function wholeProgress(km: number, goalKm: number, units: UnitSystem): number {
+  const goal = Math.round(distanceValue(goalKm, units));
+  const done = Math.floor(distanceValue(Math.min(km, goalKm), units));
+  return km >= goalKm ? goal : Math.min(done, goal - 1);
+}
 
 export function computeMilestones(logs: HikeLog[], units: UnitSystem = "metric"): Milestone[] {
   const overnight = logs.some((log) => (log.trail.typical_duration_nights ?? 0) >= 1);
   const parks = new Set(logs.map((log) => log.trail.region)).size;
   // Only trails with a known distance count towards the total.
   const km = logs.reduce((sum, log) => sum + (log.trail.distance_km ?? 0), 0);
-  // A round goal in the reader's units: 100 km, or 60 mi rather than 62.1 mi.
-  const goalKm = distanceToKm(DISTANCE_GOAL[units], units);
   return [
     { id: "first-hike", title: "First steps", detail: "Log your first hike", earned: logs.length > 0, progress: Math.min(logs.length, 1) },
     { id: "first-overnight", title: "Under the stars", detail: "Log an overnight trip", earned: overnight, progress: overnight ? 1 : 0 },
     { id: "five-parks", title: "Park hopper", detail: `Hike in 5 parks or regions (${Math.min(parks, 5)} / 5)`, earned: parks >= 5, progress: Math.min(parks / 5, 1) },
-    { id: "hundred-km", title: "Century", detail: `Hike ${formatDistance(goalKm, units)} in total (${Math.floor(distanceValue(Math.min(km, goalKm), units))} / ${formatDistance(goalKm, units)})`, earned: km >= goalKm, progress: Math.min(km / goalKm, 1) },
+    { id: "hundred-km", title: "Century", detail: `Hike ${formatWholeDistance(CENTURY_KM, units)} in total (${wholeProgress(km, CENTURY_KM, units)} / ${formatWholeDistance(CENTURY_KM, units)})`, earned: km >= CENTURY_KM, progress: Math.min(km / CENTURY_KM, 1) },
   ];
 }
 
