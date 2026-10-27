@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { updateProfile } from "@/lib/accountApi";
-import { getPrivacy, updatePrivacy } from "@/lib/profilesApi";
+import { getPrivacy, onPrivacyUpdated, updatePrivacy } from "@/lib/profilesApi";
 import { announceProfile, useProfile } from "@/lib/useProfile";
 import ui from "./ui.module.css";
 import styles from "./PublicProfileNotice.module.css";
@@ -49,6 +49,9 @@ export default function PublicProfileNotice() {
       .catch(() => undefined);
     return () => controller.abort();
   }, [profile?.username]);
+
+  // A change in Settings → Privacy clears the notice on the server; drop it here too.
+  useEffect(() => onPrivacyUpdated((settings) => setNoticePending(settings.public_notice_pending)), []);
 
   if (!profile || pathname.startsWith("/auth")) return null;
 

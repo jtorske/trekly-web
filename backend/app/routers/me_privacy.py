@@ -70,8 +70,11 @@ def update_privacy(
     db: Session = Depends(get_db),
 ):
     settings = ensure_settings(db, user.id)
-    for field, value in payload.model_dump(exclude_unset=True).items():
-        if value is not None:
-            setattr(settings, field, value)
+    changes = {field: value for field, value in payload.model_dump(exclude_unset=True).items() if value is not None}
+    for field, value in changes.items():
+        setattr(settings, field, value)
+    # Choosing any setting means they've seen the "profiles can be public" notice.
+    if changes:
+        settings.public_notice_pending = False
     db.commit()
     return _out(db, user)

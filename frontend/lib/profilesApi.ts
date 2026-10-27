@@ -98,8 +98,20 @@ export interface HiddenProfile {
 export const getPrivacy = (signal?: AbortSignal) =>
   apiFetch<PrivacySettings>("/api/me/privacy", { auth: true, signal });
 
-export const updatePrivacy = (update: PrivacyUpdate) =>
-  apiFetch<PrivacySettings>("/api/me/privacy", { method: "PATCH", body: update, auth: true });
+const PRIVACY_EVENT = "trekly:privacy-updated";
+
+/** Saves a change and tells every listener (e.g. the corner notice) the new settings. */
+export async function updatePrivacy(update: PrivacyUpdate): Promise<PrivacySettings> {
+  const saved = await apiFetch<PrivacySettings>("/api/me/privacy", { method: "PATCH", body: update, auth: true });
+  window.dispatchEvent(new CustomEvent<PrivacySettings>(PRIVACY_EVENT, { detail: saved }));
+  return saved;
+}
+
+export function onPrivacyUpdated(listener: (settings: PrivacySettings) => void): () => void {
+  const handler = (event: Event) => listener((event as CustomEvent<PrivacySettings>).detail);
+  window.addEventListener(PRIVACY_EVENT, handler);
+  return () => window.removeEventListener(PRIVACY_EVENT, handler);
+}
 
 export const getPublicProfile = (username: string, signal?: AbortSignal) =>
   apiFetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`, { signal });

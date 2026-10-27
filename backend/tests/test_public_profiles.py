@@ -254,6 +254,12 @@ def test_existing_users_notice_can_only_be_dismissed(client, alice_profile, peop
     db.commit()
     db.close()
     assert set_privacy(client, alice, public_notice_pending=False)["public_notice_pending"] is False
+    db = session_factory()
+    db.get(ProfileSettings, alice_id).public_notice_pending = True
+    db.commit()
+    db.close()
+    # Changing any setting also counts as having seen it.
+    assert set_privacy(client, alice, is_private=False)["public_notice_pending"] is False
     assert client.patch("/api/me/privacy", json={"public_notice_pending": True}, headers=alice).status_code == 422
 
 

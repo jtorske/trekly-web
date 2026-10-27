@@ -142,7 +142,7 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
       <Switch
         id="privacy-private"
         label="Private profile"
-        hint="Visitors see only “This profile is private”, your name and your photo."
+        hint="Visitors see only “This profile is private”, your name, username and photo."
         checked={settings.is_private}
         onChange={(value) => change("is_private", value)}
       />

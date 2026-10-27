@@ -220,7 +220,7 @@ function OwnerBanner({
       <div>
         <strong>This is your public profile.</strong>{" "}
         {profile.is_private
-          ? "It's private: visitors see only your name and photo."
+          ? "It's private: visitors see only your name, username and photo."
           : hidden.length > 0
             ? `Hidden from visitors: ${hidden.join(", ")}.`
             : "Visitors see every section below."}
