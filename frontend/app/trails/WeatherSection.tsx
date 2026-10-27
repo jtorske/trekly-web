@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ui from "@/components/ui.module.css";
-import { getTrailForecast, type ForecastDay, type TrailForecast } from "@/lib/forecastApi";
+import { getTrailForecast, type ForecastDay, type ForecastTrail, type TrailForecast } from "@/lib/forecastApi";
 import {
   formatDegrees,
   formatElevation,
@@ -28,15 +28,16 @@ import styles from "./WeatherSection.module.css";
 export type ForecastState = { status: "loading" } | { status: "ready"; forecast: TrailForecast } | { status: "none" };
 
 /**
- * The trail's forecast, fetched once the page has rendered. Any failure
- * (no coordinates, Open-Meteo down, offline) is "none": weather is a nicety
- * and must never break the page.
+ * The trail's forecast, fetched from Open-Meteo by the browser once the page
+ * has rendered. Any failure (no coordinates, Open-Meteo down, offline) is
+ * "none": weather is a nicety and must never break the page.
  */
-export function useTrailForecast(trailId: string): ForecastState {
+export function useTrailForecast(trail: ForecastTrail): ForecastState {
+  const { id: trailId, latitude, longitude, max_elevation_m, elevation_gain_m } = trail;
   const [state, setState] = useState<{ id: string; value: ForecastState } | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    getTrailForecast(trailId, controller.signal)
+    getTrailForecast({ id: trailId, latitude, longitude, max_elevation_m, elevation_gain_m }, controller.signal)
       .then((forecast) =>
         setState({ id: trailId, value: forecast && forecast.trailhead.days.length ? { status: "ready", forecast } : { status: "none" } }),
       )
@@ -44,7 +45,7 @@ export function useTrailForecast(trailId: string): ForecastState {
         if ((error as { name?: string }).name !== "AbortError") setState({ id: trailId, value: { status: "none" } });
       });
     return () => controller.abort();
-  }, [trailId]);
+  }, [trailId, latitude, longitude, max_elevation_m, elevation_gain_m]);
   return state?.id === trailId ? state.value : { status: "loading" };
 }
 

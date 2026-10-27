@@ -113,7 +113,11 @@ test("milestones: first hike, first overnight, 5 parks, 100 km", () => {
   assert.equal(partial[3].earned, false);
   assert.equal(partial[3].progress, 0.425);
   assert.match(partial[3].detail, /42 \/ 100 km/);
-  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 62.1 mi in total (26 / 62.1 mi)");
+  // Round goals in each system: 100 km, or 60 mi (96.6 km).
+  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 60 mi in total (26 / 60 mi)");
+  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))], "imperial")[3].earned, true);
+  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))])[3].earned, false);
+  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))])[3].detail, "Hike 100 km in total (97 / 100 km)");
   assert.match(partial[2].detail, /1 \/ 5/);
 });
 

@@ -74,6 +74,11 @@ export function distanceValue(km: number, system: UnitSystem = DEFAULT_UNITS): n
   return system === "metric" ? km : km / KM_PER_MILE;
 }
 
+/** Kilometres from a distance in the reader's units: 60 (mi) → 96.56 km. */
+export function distanceToKm(value: number, system: UnitSystem = DEFAULT_UNITS): number {
+  return system === "metric" ? value : value * KM_PER_MILE;
+}
+
 export function distanceUnit(system: UnitSystem = DEFAULT_UNITS): string {
   return system === "metric" ? "km" : "mi";
 }

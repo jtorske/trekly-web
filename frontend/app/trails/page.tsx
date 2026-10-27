@@ -94,7 +94,7 @@ function TrailView({
   hikeLogs: ReturnType<typeof useHikeLogs>;
 }) {
   const [units] = useUnits();
-  const forecast = useTrailForecast(trail.id);
+  const forecast = useTrailForecast(trail);
   const nights = trail.typical_duration_nights;
   const hasLocation = trail.latitude != null && trail.longitude != null;
 

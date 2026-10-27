@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   bottleCapacityFilters,
   formatCapacity,
+  distanceToKm,
   formatDegrees,
   formatDistance,
   formatElevation,
@@ -40,6 +41,12 @@ test("conversions and rounding", () => {
   assert.equal(formatSnow(3, "imperial"), "1.2 in");
   assert.equal(formatLength(23), "23 cm");
   assert.equal(formatLength(23, "imperial"), "9.1 in");
+});
+
+test("distances in the reader's units convert back to km", () => {
+  assert.equal(distanceToKm(100), 100);
+  assert.equal(distanceToKm(60, "imperial").toFixed(2), "96.56");
+  assert.equal(formatDistance(distanceToKm(60, "imperial"), "imperial"), "60 mi");
 });
 
 test("everything defaults to metric", () => {
