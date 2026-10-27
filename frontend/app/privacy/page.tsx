@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: October 26, 2026</p>
+        <p className={styles.updated}>Last updated: October 27, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -99,10 +99,32 @@ export default function PrivacyPage() {
 
         <h2>What other users can see</h2>
         <p>
-          Trekly doesn&apos;t have public profiles. Your profile, profile picture, photos, gear,
-          saved trails, trip plans, permit alerts, and email address are only visible to you. If we
-          add sharing features later, they&apos;ll be optional and we&apos;ll update this policy
-          before they launch.
+          Trekly profiles are public by default, so other people can see your profile at its
+          profile link. You choose what appears on it in Settings → Privacy:
+        </p>
+        <ul>
+          <li>Shown even when your profile is private: your display name and profile picture.</li>
+          <li>
+            Public by default, and you can hide each one: your bio, Trail Journal and badges, rank,
+            gear and loadouts, and saved trails.
+          </li>
+          <li>
+            Private by default, and you can choose to show them: your trip plans. Public trip plans
+            show where and when you&apos;ll be on a trail, so think carefully before sharing them.
+          </li>
+          <li>
+            Always private: your email address, your permit alerts, and anything not listed above.
+          </li>
+        </ul>
+        <p>
+          You can make your whole profile private at any time, hide the dates of your hikes, and
+          choose whether search engines can show your profile (off by default). Changes take effect
+          right away. If you joined Trekly before public profiles were introduced, your profile
+          stays private until you change your settings.
+        </p>
+        <p>
+          Other signed-in users can report a profile they believe breaks our Terms of Use. A report
+          includes the profile and the reason given, and is sent to us to review.
         </p>
 
         <h2>Service providers</h2>
@@ -169,6 +191,10 @@ export default function PrivacyPage() {
         <p>You can:</p>
         <ul>
           <li>View and edit your profile and saved data in the app.</li>
+          <li>
+            Choose what&apos;s public on your profile, or make it fully private, in Settings →
+            Privacy.
+          </li>
           <li>Stop any permit alert at any time.</li>
           <li>Ask for a copy of your personal information, or ask us to correct it.</li>
           <li>Delete your account at any time from within the app.</li>
