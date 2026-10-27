@@ -594,3 +594,10 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.switchWarning {
+  color: var(--color-rust-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+}

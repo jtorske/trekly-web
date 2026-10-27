@@ -17,10 +17,15 @@ const SECTION_HINTS: Record<SectionSetting, string> = {
   show_trip_plans: "The trail, dates and length of trips you're planning. Bookings and notes stay private.",
 };
 
+const SECTION_WARNINGS: Partial<Record<SectionSetting, string>> = {
+  show_trip_plans: "Public trip plans show where and when you'll be on the trail.",
+};
+
 function Switch({
   id,
   label,
   hint,
+  warning,
   checked,
   disabled,
   onChange,
@@ -28,6 +33,8 @@ function Switch({
   id: string;
   label: string;
   hint?: string;
+  /** A safety note, read out with the switch. */
+  warning?: string;
   checked: boolean;
   disabled?: boolean;
   onChange: (value: boolean) => void;
@@ -37,6 +44,12 @@ function Switch({
       <span className={styles.switchText}>
         <span className={styles.switchLabel}>{label}</span>
         {hint && <span className={styles.switchHint}>{hint}</span>}
+        {warning && (
+          <span id={`${id}-warning`} className={styles.switchWarning}>
+            <span aria-hidden="true">⚠ </span>
+            {warning}
+          </span>
+        )}
       </span>
       <input
         id={id}
@@ -45,6 +58,7 @@ function Switch({
         className={styles.switch}
         checked={checked}
         disabled={disabled}
+        aria-describedby={warning ? `${id}-warning` : undefined}
         onChange={(event) => onChange(event.target.checked)}
       />
     </label>
@@ -143,6 +157,7 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
             id={`privacy-${key}`}
             label={SECTION_LABELS[key]}
             hint={SECTION_HINTS[key]}
+            warning={SECTION_WARNINGS[key]}
             checked={settings[key]}
             disabled={settings.is_private}
             onChange={(value) => change(key, value)}
