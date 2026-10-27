@@ -478,3 +478,119 @@
 .tripsPast .tripCard {
   opacity: 0.75;
 }
+
+/* Settings → Privacy */
+.privacyLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.switchGroup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+  border-top: 1px solid var(--hair);
+  padding-top: 0.75rem;
+}
+
+.switchLegend {
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.25rem;
+  cursor: pointer;
+}
+
+.switchDisabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.switchText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.switchLabel {
+  font-weight: 600;
+}
+
+.switchHint {
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* A checkbox drawn as a sliding switch; still a native, focusable input. */
+.switch {
+  position: relative;
+  width: 2.6rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 28%, transparent);
+  cursor: inherit;
+  transition: background 150ms ease;
+}
+
+.switch::after {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  content: "";
+  transition: transform 150ms ease;
+}
+
+.switch:checked {
+  background: var(--color-olive);
+}
+
+.switch:checked::after {
+  transform: translateX(1.1rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch::after {
+    transition: none;
+  }
+}
+
+.saveStatus {
+  min-height: 1.3em;
+  color: var(--color-olive);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.saveError {
+  color: var(--color-rust-text);
+}
+
+.publicLink {
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

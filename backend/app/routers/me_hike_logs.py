@@ -1,7 +1,8 @@
 """The signed-in user's Trail Journal: which trails they've hiked, when, and
 an optional note and photo.
 
-Entries are private and keyed to the verified access token. One entry per
+Entries are keyed to the verified access token; others see them only on a
+public profile (app/routers/public_profiles.py). One entry per
 trail: PUT creates it or replaces its fields. Retired trails stay listed
 for anyone who logged them.
 """

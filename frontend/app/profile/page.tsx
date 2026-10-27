@@ -12,6 +12,7 @@ import { useSetups } from "@/app/gear/useSetups";
 import { usePlans } from "@/lib/usePlans";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
+import { publicProfilePath } from "@/lib/profilesApi";
 import { useUnits } from "@/lib/useUnits";
 import EditProfileDialog from "./EditProfileDialog";
 import ProfileSettings from "./ProfileSettings";
@@ -92,7 +93,16 @@ function ProfileContent() {
           <Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={96} alt={`${name}'s profile photo`} />
           <div className={styles.headerText}>
             <h1 className={styles.name}>{name}</h1>
-            {profile.username && <p className={styles.username}>@{profile.username}</p>}
+            {profile.username && (
+              <p className={styles.username}>
+                @{profile.username}
+                {" · "}
+                <Link href={publicProfilePath(profile.username)} className={styles.publicLink}>
+                  View public profile
+                </Link>
+                {profile.visibility === "private" && " (private)"}
+              </p>
+            )}
             {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
             <p className={styles.meta}>
               {[
@@ -232,7 +242,7 @@ function ProfileContent() {
 
           {tab === "trips" && <TripsSection data={plans} />}
 
-          {tab === "settings" && <ProfileSettings profile={profile} />}
+          {tab === "settings" && <ProfileSettings profile={profile} onEditProfile={() => setEditing(true)} />}
         </section>
       </div>
       {editing && <EditProfileDialog profile={profile} onClose={() => setEditing(false)} />}

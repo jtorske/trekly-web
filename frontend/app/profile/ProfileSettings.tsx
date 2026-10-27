@@ -10,6 +10,7 @@ import { listOwnImages, removeImages } from "@/lib/storage";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { formatDistance, formatTemperature, formatWeight, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
+import PrivacySettingsForm from "./PrivacySettings";
 import styles from "./page.module.css";
 
 function Card({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
@@ -300,9 +301,16 @@ function DeleteAccount() {
   );
 }
 
-export default function ProfileSettings({ profile }: { profile: Profile }) {
+export default function ProfileSettings({ profile, onEditProfile }: { profile: Profile; onEditProfile: () => void }) {
   return (
     <div className={styles.settings}>
+      <Card
+        id="privacy"
+        title="Privacy"
+        description="Your profile can be seen by anyone at its public address. Choose what's on it."
+      >
+        <PrivacySettingsForm onEditProfile={onEditProfile} />
+      </Card>
       <Card id="units" title="Units" description="Distances, elevations, gear weights and weather across Trekly.">
         <UnitsSetting />
       </Card>

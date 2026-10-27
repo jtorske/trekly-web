@@ -14,7 +14,8 @@ export interface Profile {
   units: UnitSystem | null;
   member_since: string | null;
   counts: { saved_trails: number; gear_items: number };
-  visibility: "private";
+  /** "public" once there's a username and the profile isn't set to private. */
+  visibility: "public" | "private";
 }
 
 export type ProfileUpdate = Partial<

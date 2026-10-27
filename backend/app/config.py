@@ -35,3 +35,11 @@ PHOTO_CANDIDATES_PATH = os.getenv(
     "PHOTO_CANDIDATES_PATH",
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "photo_candidates.json"),
 )
+
+
+def admin_user_ids() -> frozenset[str]:
+    """Supabase user ids allowed to moderate profiles (ADMIN_USER_IDS,
+    comma-separated). PHOTO_ADMIN_USER_IDS counts too, so the photo admins
+    don't need a second setting. Read on every call; empty means nobody."""
+    ids = os.getenv("ADMIN_USER_IDS", "").split(",")
+    return frozenset(part.strip().lower() for part in ids if part.strip()) | photo_admin_user_ids()

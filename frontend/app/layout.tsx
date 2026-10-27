@@ -3,6 +3,7 @@ import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
+import PublicProfileNotice from "@/components/PublicProfileNotice";
 import SiteFooter from "@/components/SiteFooter";
 import TopoBackground from "@/components/TopoBackground";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
               starts below the first screen and full-height heroes stay full. */}
           <div className="flex min-h-svh flex-1 flex-col">{children}</div>
           <SiteFooter />
+          <PublicProfileNotice />
         </AuthProvider>
       </body>
     </html>

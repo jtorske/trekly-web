@@ -19,9 +19,11 @@ from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import USERNAME_PATTERN, Profile, SavedTrail
 from app.models.hike_log import HikeLog
+from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
+from app.privacy import visibility
 from app.schemas.trail import TrailListItemOut
 
 router = APIRouter(prefix="/api/me", tags=["account"])
@@ -29,6 +31,10 @@ router = APIRouter(prefix="/api/me", tags=["account"])
 # Matches what the client uploads after cropping/re-encoding (see migration 9a769eeb0dae).
 AVATAR_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:webp|jpg)$")
 DELETE_CONFIRMATION = "delete my account"
+# Usernames are public URLs (/u/{username}); keep ones that could pass for Trekly itself.
+RESERVED_USERNAMES = frozenset(
+    {"admin", "administrator", "moderator", "support", "help", "trekly", "trekly_team", "staff", "official", "root", "system"}
+)
 
 
 UnitSystem = Literal["metric", "imperial"]
@@ -50,7 +56,8 @@ class ProfileOut(BaseModel):
     units: UnitSystem | None
     member_since: datetime | None
     counts: ProfileCounts
-    visibility: Literal["private"] = "private"
+    # "public" once the profile has a username and isn't set to private.
+    visibility: Literal["public", "private"]
 
 
 def _clean(value):
@@ -87,6 +94,8 @@ class ProfileUpdate(BaseModel):
             value = value.strip().lower() or None
         if value is not None and not re.fullmatch(USERNAME_PATTERN, value):
             raise ValueError("Use 3–30 lowercase letters, numbers or underscores.")
+        if value in RESERVED_USERNAMES:
+            raise ValueError("That username is reserved. Pick another.")
         return value
 
 
@@ -146,6 +155,7 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         units=profile.units,
         member_since=member_since or profile.created_at,
         counts=counts,
+        visibility="public" if visibility(db, profile).public else "private",
     )
 
 
@@ -260,6 +270,11 @@ def delete_account(
     db.execute(delete(UserGearItem).where(UserGearItem.user_id == user.id))
     db.execute(delete(SavedTrail).where(SavedTrail.user_id == user.id))
     db.execute(delete(HikeLog).where(HikeLog.user_id == user.id))
+    db.execute(delete(ProfileReport).where(
+        (ProfileReport.reporter_id == user.id) | (ProfileReport.profile_id == user.id)
+    ))
+    db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
+    db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))
     if _is_postgres(db):
         db.execute(text("delete from auth.users where id = :id"), {"id": user.id})

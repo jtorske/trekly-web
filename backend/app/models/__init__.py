@@ -14,6 +14,7 @@ from app.models.catalog import (
     CatalogSource,
 )
 from app.models.hike_log import HikeLog
+from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto, TrailPhotoReview
@@ -42,6 +43,9 @@ __all__ = [
     "HikeLog",
     "JobLock",
     "Profile",
+    "ProfileModeration",
+    "ProfileReport",
+    "ProfileSettings",
     "ProviderRequestBudget",
     "SavedTrail",
     "Trail",

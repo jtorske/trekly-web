@@ -1,10 +1,12 @@
 """A user's completed hikes: the Trail Journal.
 
 One row per user per trail, with the date hiked and an optional note and
-photo. Private: the API scopes every query to the authenticated user, and
-row-level security enforces the same rule for direct Supabase access (see
-migration 739722285c4e). Trails are retired, never deleted, so a journal
-entry always keeps its trail.
+photo. Only the owner can change entries. Others can read them only while
+the owner's public profile shows the Trail Journal, through the API (which
+also applies "Hide dates on my hikes") or row-level security, which never
+lets a client read the date columns at all (migrations 739722285c4e,
+214aa07bf743). Trails are retired, never deleted, so a journal entry always
+keeps its trail.
 """
 
 import uuid

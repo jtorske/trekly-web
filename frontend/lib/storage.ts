@@ -1,16 +1,20 @@
 import { NOT_AN_IMAGE, readImageType } from "./imageType";
+import { processPhoto } from "./processPhoto";
 import { getSupabaseClient } from "./supabaseClient";
 
 /**
  * Supabase Storage buckets (see migrations c3d4e5f6a7b8, e5f6a7b8c9d0,
- * 9a769eeb0dae, 739722285c4e). Policies only allow a user to upload, list or
- * delete objects under a folder named after their own user id. gear-photos
- * and hike-photos are private (signed URLs); avatars are publicly readable
- * by URL.
+ * 9a769eeb0dae, 739722285c4e, 214aa07bf743). Policies only allow a user to
+ * upload, list or delete objects under a folder named after their own user
+ * id, and every bucket only takes processed (re-encoded, metadata-free)
+ * WebP/JPEG images. gear-photos and hike-photos are private (signed URLs,
+ * which visitors can also get for photos in a public profile section);
+ * avatars are publicly readable by URL.
  */
 export type Bucket = "gear-photos" | "avatars" | "hike-photos";
 
 const LIMITS: Record<Bucket, number> = {
+  // The photo picked; it's resized to fit 1 MB before upload (lib/processPhoto.ts).
   "gear-photos": 5 * 1024 * 1024,
   // Processed 512px avatars only; see lib/avatarImage.ts for the input limit.
   avatars: 1024 * 1024,
@@ -36,12 +40,13 @@ export async function validateImage(file: File, bucket: Bucket): Promise<string 
 export async function uploadImage(bucket: Bucket, userId: string, file: File): Promise<string> {
   const problem = await validateImage(file, bucket);
   if (problem) throw new Error(problem);
-  // Store it as what it really is (a PNG renamed .jpg is still a PNG).
-  const type = (await readImageType(file)) ?? file.type;
-  const path = `${userId}/${crypto.randomUUID()}.${EXTENSIONS[type]}`;
+  // Re-encoding through a canvas drops EXIF, so a phone photo's GPS
+  // location never leaves the device (gear can be shown on a public profile).
+  const image = await processPhoto(file);
+  const path = `${userId}/${crypto.randomUUID()}.${image.extension}`;
   const { error } = await getSupabaseClient()
     .storage.from(bucket)
-    .upload(path, file, { contentType: type, upsert: false });
+    .upload(path, image.blob, { contentType: image.blob.type, upsert: false });
   if (error) throw new Error(`Upload failed: ${error.message}`);
   return path;
 }

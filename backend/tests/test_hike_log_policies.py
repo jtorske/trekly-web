@@ -103,7 +103,8 @@ def test_owner_can_create_read_update_and_delete_own_entry(conn, users, trail):
     alice, _ = users
     act_as(conn, alice)
     add_log(conn, alice, trail)
-    assert conn.execute(text("SELECT note FROM public.hike_logs")).scalars().all() == ["Lovely day"]
+    # Scoped to this test's trail: other users' public journals are readable too.
+    assert conn.execute(text("SELECT note FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).scalars().all() == ["Lovely day"]
     updated = conn.execute(text("UPDATE public.hike_logs SET note = 'Edited' WHERE trail_id = :trail"), {"trail": trail})
     assert updated.rowcount == 1
     deleted = conn.execute(text("DELETE FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail})
@@ -114,16 +115,19 @@ def test_user_id_defaults_to_the_caller(conn, users, trail):
     alice, _ = users
     act_as(conn, alice)
     conn.execute(text("INSERT INTO public.hike_logs (trail_id, hiked_on) VALUES (:trail, '2026-08-14')"), {"trail": trail})
-    assert conn.execute(text("SELECT user_id FROM public.hike_logs")).scalar_one() == alice
+    assert conn.execute(text("SELECT user_id FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).scalar_one() == alice
 
 
 def test_entries_are_private_to_their_owner(conn, users, trail):
+    """Without a public profile (these users have no username), nobody else
+    sees the entries; and nobody else can ever change them. Public journals
+    are covered in test_profile_privacy_policies.py."""
     alice, bob = users
     act_as(conn, alice)
     add_log(conn, alice, trail)
 
     act_as(conn, bob)
-    assert conn.execute(text("SELECT count(*) FROM public.hike_logs")).scalar_one() == 0
+    assert conn.execute(text("SELECT count(*) FROM public.hike_logs WHERE user_id = :a"), {"a": alice}).scalar_one() == 0
     updated = conn.execute(text("UPDATE public.hike_logs SET note = 'Hacked'"))
     deleted = conn.execute(text("DELETE FROM public.hike_logs"))
     assert updated.rowcount == 0 and deleted.rowcount == 0

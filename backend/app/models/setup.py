@@ -3,7 +3,8 @@
 A setup ("Ultralight 2-Night Kit") references items from the user's own
 inventory — it never copies them, so editing an item updates every setup it
 appears in, and removing an item from the inventory removes it from setups.
-Setups are private to their owner, like the rest of a user's data.
+Only the owner can change setups; others see them only on a public profile
+that shows gear (migration 214aa07bf743).
 """
 
 import uuid

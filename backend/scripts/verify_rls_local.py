@@ -2,7 +2,10 @@
 
 Talks to Supabase's REST API directly (bypassing the Trekly API) as two real
 users and as the anonymous role, and checks that nobody can read or change
-another user's private rows. Refuses to run against anything but localhost.
+another user's private rows, and that public profiles expose only the
+sections and columns their owner allows (migration 214aa07bf743). Alice's
+privacy settings and username are restored at the end. Refuses to run
+against anything but localhost.
 
     python scripts/verify_rls_local.py
 """
@@ -51,8 +54,19 @@ def call(method, path, token=None, body=None, apikey=ANON, extra=None):
 
 def token_for(email):
     status, body = call("POST", "/auth/v1/token?grant_type=password", body={"email": email, "password": PASSWORD})
+    if status == 400:
+        # The account exists with another password (e.g. made by hand); reset it.
+        _, listing = call("GET", "/auth/v1/admin/users?per_page=1000", token=SERVICE, apikey=SERVICE)
+        user = next(u for u in listing["users"] if u["email"] == email)
+        call("PUT", f"/auth/v1/admin/users/{user['id']}", token=SERVICE, apikey=SERVICE, body={"password": PASSWORD})
+        status, body = call("POST", "/auth/v1/token?grant_type=password", body={"email": email, "password": PASSWORD})
     assert status == 200, (email, status, body)
     return body["access_token"], body["user"]["id"]
+
+
+def refused(status, body):
+    """A write that RLS or column grants turned away: an error, or no rows."""
+    return status in (401, 403) or body == []
 
 
 def ensure_user(email):
@@ -74,6 +88,22 @@ ensure_user(users["E2E_USER_B_EMAIL"].strip())
 alice, alice_id = token_for(users["E2E_USER_A_EMAIL"].strip())
 bob, bob_id = token_for(users["E2E_USER_B_EMAIL"].strip())
 
+# Start from a private Alice so the "nobody else sees it" checks below mean
+# something; the public-profile checks further down switch things on.
+SETTINGS = "is_private,show_journal,show_rank,show_gear,show_saved_trails,show_trip_plans,hide_hike_dates,allow_search_indexing"
+_, saved_settings = call("GET", f"/rest/v1/profile_settings?user_id=eq.{alice_id}&select={SETTINGS}", alice)
+_, saved_profile = call("GET", f"/rest/v1/profiles?id=eq.{alice_id}&select=username", alice)
+original_settings, original_username = saved_settings[0], saved_profile[0]["username"]
+
+
+def alice_settings(**changes):
+    status, body = call("PATCH", f"/rest/v1/profile_settings?user_id=eq.{alice_id}", alice, changes,
+                        extra={"Prefer": "return=representation"})
+    assert status == 200 and len(body) == 1, (status, body)
+
+
+alice_settings(is_private=True)
+
 _, alice_gear = call("GET", "/rest/v1/user_gear_items?select=id,user_id", alice)
 check("Alice can read her own gear", bool(alice_gear) and all(r["user_id"] == alice_id for r in alice_gear))
 target = alice_gear[0]["id"] if alice_gear else "00000000-0000-0000-0000-000000000000"
@@ -86,9 +116,9 @@ _, anon_view = call("GET", "/rest/v1/user_gear_items?select=id")
 check("Anonymous sees no gear", anon_view == [] or isinstance(anon_view, dict))
 
 status, updated = call("PATCH", f"/rest/v1/user_gear_items?id=eq.{target}", bob, {"quantity": 42}, extra={"Prefer": "return=representation"})
-check("Bob's update of Alice's gear changes nothing", updated == [])
+check("Bob's update of Alice's gear changes nothing", refused(status, updated))
 status, deleted = call("DELETE", f"/rest/v1/user_gear_items?id=eq.{target}", bob, extra={"Prefer": "return=representation"})
-check("Bob's delete of Alice's gear removes nothing", deleted == [])
+check("Bob's delete of Alice's gear removes nothing", refused(status, deleted))
 _, still = call("GET", f"/rest/v1/user_gear_items?id=eq.{target}&select=quantity", alice)
 check("Alice's item is intact", bool(still) and still[0]["quantity"] != 42)
 
@@ -98,8 +128,8 @@ check("Bob can't insert a row owned by Alice", status in (401, 403))
 
 _, profiles = call("GET", "/rest/v1/profiles?select=id,display_name", bob)
 check("Bob only sees his own profile", all(p["id"] == bob_id for p in profiles or []))
-_, alice_profile = call("PATCH", f"/rest/v1/profiles?id=eq.{alice_id}", bob, {"bio": "hacked"}, extra={"Prefer": "return=representation"})
-check("Bob can't edit Alice's profile", alice_profile == [])
+status, alice_profile = call("PATCH", f"/rest/v1/profiles?id=eq.{alice_id}", bob, {"bio": "hacked"}, extra={"Prefer": "return=representation"})
+check("Bob can't edit Alice's profile", refused(status, alice_profile))
 
 _, saved = call("GET", "/rest/v1/saved_trails?select=trail_id", bob)
 check("Bob sees no saved trails of others", saved == [])
@@ -146,6 +176,55 @@ check("Users can't insert alerts directly", status in (401, 403))
 for table in ("availability_cache", "provider_request_budget", "job_locks"):
     status, rows = call("GET", f"/rest/v1/{table}?select=*", alice)
     check(f"{table} is backend-only", status in (401, 403) or rows == [])
+
+# Public profiles: only switched-on sections, only allowed columns.
+call("PATCH", f"/rest/v1/profiles?id=eq.{alice_id}", alice, {"username": original_username or "alice_rls_check"})
+alice_settings(is_private=False, show_journal=True, show_rank=True, show_gear=True, show_saved_trails=True,
+               show_trip_plans=False, hide_hike_dates=False)
+NEVER_READABLE = ("profiles?select=home_region", "hike_logs?select=hiked_on", "hike_logs?select=created_at",
+                  "user_gear_items?select=notes", "trip_plans?select=notes", "trip_plans?select=party_size",
+                  "hike_logs?select=id&hiked_on=gt.2000-01-01")
+for name, token in (("Bob", bob), ("Anonymous", None)):
+    _, shown = call("GET", f"/rest/v1/profiles?id=eq.{alice_id}&select=username,display_name,bio", token)
+    check(f"{name} sees Alice's public profile", isinstance(shown, list) and len(shown) == 1)
+    _, gear = call("GET", f"/rest/v1/user_gear_items?user_id=eq.{alice_id}&select=id,custom_name", token)
+    check(f"{name} sees Alice's public gear", isinstance(gear, list) and len(gear) == len(alice_gear or []))
+    for query in NEVER_READABLE:
+        status, _ = call("GET", f"/rest/v1/{query}", token)
+        check(f"{name} can't read {query}", status in (401, 403))
+    _, plans = call("GET", f"/rest/v1/trip_plans?user_id=eq.{alice_id}&select=id", token)
+    check(f"{name} can't see Alice's trip plans (private by default)", plans == [] or isinstance(plans, dict))
+    _, nights = call("GET", "/rest/v1/trip_plan_nights?select=trip_plan_id", token)
+    check(f"{name} never sees others' trip plan nights", nights == [] or isinstance(nights, dict))
+    _, alerts = call("GET", f"/rest/v1/availability_alerts?user_id=eq.{alice_id}&select=id", token)
+    check(f"{name} never sees Alice's alerts", alerts == [] or isinstance(alerts, dict))
+    _, others = call("GET", f"/rest/v1/profile_settings?user_id=eq.{alice_id}&select=is_private", token)
+    check(f"{name} can't read Alice's privacy settings", others == [] or isinstance(others, dict))
+    for table in ("profile_moderation", "profile_reports"):
+        status, body = call("GET", f"/rest/v1/{table}?select=*", token)
+        check(f"{name} can't read {table}", status in (401, 403) or body == [])
+    status, _ = call("POST", "/rest/v1/rpc/section_visible", token, {"owner": alice_id, "section": "gear"})
+    check(f"{name} can't call the visibility helper as an RPC", status == 404)
+status, changed = call("PATCH", f"/rest/v1/profile_settings?user_id=eq.{alice_id}", bob, {"is_private": False},
+                       extra={"Prefer": "return=representation"})
+check("Bob can't change Alice's privacy settings", refused(status, changed))
+status, _ = call("POST", "/rest/v1/profile_moderation", alice, {"user_id": alice_id})
+check("Alice can't write moderation rows (can't unhide herself)", status in (401, 403))
+
+# Switching a setting off applies to the very next request.
+alice_settings(show_gear=False)
+_, gear = call("GET", f"/rest/v1/user_gear_items?user_id=eq.{alice_id}&select=id", bob)
+check("Hiding gear hides it from Bob at once", gear == [])
+alice_settings(show_gear=True, is_private=True)
+_, shown = call("GET", f"/rest/v1/profiles?id=eq.{alice_id}&select=username", None)
+check("A private profile is invisible to Anonymous", shown == [] or isinstance(shown, dict))
+_, gear = call("GET", f"/rest/v1/user_gear_items?user_id=eq.{alice_id}&select=id", bob)
+check("A private profile's gear is invisible to Bob", gear == [])
+_, own = call("GET", f"/rest/v1/user_gear_items?user_id=eq.{alice_id}&select=id", alice)
+check("Alice still sees her own gear while private", len(own or []) == len(alice_gear or []))
+
+alice_settings(**original_settings)
+call("PATCH", f"/rest/v1/profiles?id=eq.{alice_id}", alice, {"username": original_username})
 if alert_id:
     call("DELETE", f"/rest/v1/availability_alerts?id=eq.{alert_id}", SERVICE, apikey=SERVICE)
 
