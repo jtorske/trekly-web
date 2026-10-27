@@ -17,13 +17,14 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
-from app.models.account import USERNAME_PATTERN, Profile, SavedTrail
+from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.privacy import visibility
+from app.usernames import RESERVED_MESSAGE, REQUIRED_MESSAGE, TAKEN_MESSAGE, is_taken, normalize, rule_problem
 from app.schemas.trail import TrailListItemOut
 
 router = APIRouter(prefix="/api/me", tags=["account"])
@@ -31,10 +32,6 @@ router = APIRouter(prefix="/api/me", tags=["account"])
 # Matches what the client uploads after cropping/re-encoding (see migration 9a769eeb0dae).
 AVATAR_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:webp|jpg)$")
 DELETE_CONFIRMATION = "delete my account"
-# Usernames are public URLs (/u/{username}); keep ones that could pass for Trekly itself.
-RESERVED_USERNAMES = frozenset(
-    {"admin", "administrator", "moderator", "support", "help", "trekly", "trekly_team", "staff", "official", "root", "system"}
-)
 
 
 UnitSystem = Literal["metric", "imperial"]
@@ -90,12 +87,14 @@ class ProfileUpdate(BaseModel):
     @field_validator("username", mode="before")
     @classmethod
     def _clean_username(cls, value):
+        # Every account keeps a username once it has one; it can change, not go away.
+        if value is None or (isinstance(value, str) and not value.strip()):
+            raise ValueError(REQUIRED_MESSAGE)
         if isinstance(value, str):
-            value = value.strip().lower() or None
-        if value is not None and not re.fullmatch(USERNAME_PATTERN, value):
-            raise ValueError("Use 3–30 lowercase letters, numbers or underscores.")
-        if value in RESERVED_USERNAMES:
-            raise ValueError("That username is reserved. Pick another.")
+            value = normalize(value)
+            problem = rule_problem(value)
+            if problem:
+                raise ValueError(problem)
         return value
 
 
@@ -176,20 +175,18 @@ def update_profile(
         folder, _, name = data["avatar_path"].partition("/")
         if folder != str(user.id) or not AVATAR_NAME.match(name):
             raise HTTPException(status_code=422, detail="Avatars must be uploaded to your own folder.")
-    if data.get("username"):
-        taken = db.scalar(
-            select(Profile.id).where(Profile.username == data["username"], Profile.id != user.id)
-        )
-        if taken is not None:
-            raise HTTPException(status_code=409, detail="That username is taken.")
+    if data.get("username") and is_taken(db, data["username"], by_other_than=user.id):
+        raise HTTPException(status_code=409, detail=TAKEN_MESSAGE)
     for field, value in data.items():
         setattr(profile, field, value)
     try:
         db.commit()
     except IntegrityError as error:
         db.rollback()
-        # Lost a race for the same username.
-        raise HTTPException(status_code=409, detail="That username is taken.") from error
+        # The database's reserved-name trigger, or a lost race for the same username.
+        if "username_reserved" in str(error.orig):
+            raise HTTPException(status_code=422, detail=RESERVED_MESSAGE) from error
+        raise HTTPException(status_code=409, detail=TAKEN_MESSAGE) from error
     db.refresh(profile)
     return _profile_out(db, user, profile)
 

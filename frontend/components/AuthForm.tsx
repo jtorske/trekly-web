@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
+import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
 import {
   emailLooksValid,
   friendlyAuthError,
@@ -14,6 +15,7 @@ import {
   safeNextPath,
 } from "@/lib/authLogic";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { signUpMetadata, suggestionHint, usernameReady } from "@/lib/usernames";
 import styles from "./AuthForm.module.css";
 
 type Mode = "login" | "signup";
@@ -135,11 +137,13 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  const usernameStatus = useUsernameStatus(username);
 
   // Already signed in (e.g. opened /login in a second tab): go where they meant to.
   useEffect(() => {
@@ -164,7 +168,9 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setUnconfirmed(false);
     const valid =
       emailLooksValid(email) &&
-      (mode === "login" ? password.length > 0 : passwordIsValid(password) && confirm === password);
+      (mode === "login"
+        ? password.length > 0
+        : passwordIsValid(password) && confirm === password && usernameReady(usernameStatus));
     if (!valid) return;
 
     setSubmitting(true);
@@ -187,7 +193,9 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         password,
         options: {
           emailRedirectTo: callbackUrl(nextPath),
-          data: displayName.trim() ? { display_name: displayName.trim().slice(0, 60) } : undefined,
+          // The new-user trigger saves the username if it's still free when the
+          // account is created; if not, the app asks for one after sign-in.
+          data: signUpMetadata(displayName, username),
         },
       });
       if (authError) throw authError;
@@ -277,6 +285,17 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             </span>
           )}
         </label>
+
+        {mode === "signup" && (
+          <UsernameField
+            id="signup-username"
+            value={username}
+            onChange={setUsername}
+            status={usernameStatus}
+            suggestFrom={suggestionHint(displayName, email.includes("@") ? email : "")}
+            showError={touched}
+          />
+        )}
 
         <label className={ui.field}>
           <span className={styles.labelRow}>

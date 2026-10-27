@@ -48,6 +48,20 @@ export const unsaveTrail = (trailId: string) =>
     auth: true,
   });
 
+export interface UsernameCheck {
+  username: string;
+  available: boolean;
+  message: string;
+}
+
+/** Whether a username is free and allowed. Open to guests (sign-up asks before there's a session). */
+export const checkUsername = (username: string, signal?: AbortSignal) =>
+  apiFetch<UsernameCheck>(`/api/usernames/check?username=${encodeURIComponent(username)}`, { signal });
+
+/** A free username based on a display name or email, e.g. jordan_torske or jordan_torske2. */
+export const suggestUsername = (hint: string, signal?: AbortSignal) =>
+  apiFetch<{ username: string }>(`/api/usernames/suggest?hint=${encodeURIComponent(hint)}`, { signal });
+
 export const DELETE_CONFIRMATION = "delete my account";
 
 export const deleteAccount = (confirm: string) =>

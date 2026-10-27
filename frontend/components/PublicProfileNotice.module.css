@@ -26,30 +26,9 @@
   line-height: 1.5;
 }
 
-.form {
-  display: flex;
-  gap: 0.5rem;
-}
 
-.inputWrap {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-}
 
-.at {
-  position: absolute;
-  left: 0.75rem;
-  color: var(--color-muted-text);
-  pointer-events: none;
-}
 
-.input {
-  width: 100%;
-  padding-left: 1.6rem;
-}
 
 .actions {
   display: flex;
@@ -57,9 +36,6 @@
   gap: 0.5rem;
 }
 
-.dismiss {
-  align-self: flex-start;
-}
 
 @media (max-width: 640px) {
   .card {

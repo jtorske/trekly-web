@@ -1,0 +1,36 @@
+# Usernames nobody can choose: ones that could pass for Trekly itself, and
+# ones that clash with site routes. One per line, lowercase; `#` starts a
+# comment. Matching is exact and case-insensitive.
+#
+# This file is the only list. The API reads it at startup, and the database
+# keeps a copy in public.reserved_usernames (enforced by a trigger on
+# profiles). After editing, sync the database copy:
+#
+#     python -m scripts.sync_reserved_usernames
+#
+# Names someone already holds aren't taken away; the rule applies when a
+# username is set or changed.
+
+admin
+administrator
+support
+help
+trekly
+api
+u
+settings
+login
+signup
+about
+privacy
+terms
+journal
+gear
+explore
+staff
+moderator
+root
+system
+# Reserved before this list existed.
+official
+trekly_team

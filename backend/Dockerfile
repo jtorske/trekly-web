@@ -11,10 +11,11 @@ WORKDIR /srv
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# catalog_data is read at runtime; alembic and scripts are kept so one-off
+# catalog_data and config are read at runtime; alembic and scripts are kept so one-off
 # jobs (migrations, catalogue syncs) can run from a Render shell.
 COPY app ./app
 COPY catalog_data ./catalog_data
+COPY config ./config
 COPY alembic ./alembic
 COPY alembic.ini .
 COPY scripts ./scripts

@@ -17,6 +17,7 @@ from app.routers import (
     me_setups,
     public_profiles,
     trails,
+    usernames,
 )
 
 
@@ -67,6 +68,7 @@ app.include_router(admin_trail_photos.router)
 app.include_router(me_privacy.router)
 app.include_router(public_profiles.router)
 app.include_router(admin_profiles.router)
+app.include_router(usernames.router)
 
 
 @app.get("/")

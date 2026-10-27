@@ -7,7 +7,7 @@ const profile: Profile = {
   id: "u1",
   email: "hiker@example.com",
   display_name: "Sam",
-  username: null,
+  username: "trail_sam",
   bio: "Loves ridgelines",
   home_region: null,
   avatar_path: null,
@@ -17,7 +17,7 @@ const profile: Profile = {
 };
 
 test("initialValues turns nulls into empty strings", () => {
-  assert.deepEqual(initialValues(profile), { display_name: "Sam", username: "", bio: "Loves ridgelines", home_region: "" });
+  assert.deepEqual(initialValues(profile), { display_name: "Sam", username: "trail_sam", bio: "Loves ridgelines", home_region: "" });
 });
 
 test("isDirty tracks text edits and avatar changes", () => {
@@ -35,6 +35,8 @@ test("validateProfile checks username format and bio length", () => {
   assert.deepEqual(validateProfile({ ...ok, username: "Trail_Sam" }), {});
   assert.ok(validateProfile({ ...ok, username: "ab" }).username);
   assert.ok(validateProfile({ ...ok, username: "no spaces" }).username);
+  // Required: a username can change but not be removed.
+  assert.equal(validateProfile({ ...ok, username: "  " }).username, "Choose a username.");
   assert.ok(validateProfile({ ...ok, bio: "x".repeat(BIO_LIMIT + 1) }).bio);
   assert.deepEqual(validateProfile({ ...ok, bio: "x".repeat(BIO_LIMIT) }), {});
 });

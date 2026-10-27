@@ -15,6 +15,7 @@ from sqlalchemy import (
     Index,
     Text,
     Uuid,
+    text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -41,7 +42,8 @@ class Profile(Base):
         CheckConstraint(
             "units is null or units in ('metric', 'imperial')", name="profiles_units_check"
         ),
-        Index("profiles_username_key", "username", unique=True),
+        # Case-insensitive, though the format check already allows only lowercase.
+        Index("profiles_username_key", text("lower(username)"), unique=True),
     )
 
     # Same value as auth.users.id; the FK to auth.users is added in the migration.

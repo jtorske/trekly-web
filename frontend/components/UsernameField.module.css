@@ -1,0 +1,24 @@
+.inputWrap {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.at {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-muted-text);
+  pointer-events: none;
+}
+
+/* Nested so it outranks ui.input's padding whatever order the sheets load in. */
+.inputWrap .input {
+  padding-left: 1.75rem;
+}
+
+.available {
+  color: var(--color-dark-olive);
+  font-size: 0.8rem;
+  font-weight: 600;
+}

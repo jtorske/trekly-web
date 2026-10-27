@@ -1,4 +1,5 @@
 import type { Profile, ProfileUpdate } from "@/lib/accountApi";
+import { formatProblem, normalizeUsername } from "../../lib/usernames.ts";
 
 export const BIO_LIMIT = 280;
 
@@ -29,10 +30,9 @@ export function isDirty(
 /** Field errors keyed by field name; empty when the values can be saved. */
 export function validateProfile(values: ProfileFormValues): Record<string, string> {
   const errors: Record<string, string> = {};
-  const username = values.username.trim().toLowerCase();
-  if (username && !/^[a-z0-9_]{3,30}$/.test(username)) {
-    errors.username = "Use 3–30 lowercase letters, numbers or underscores.";
-  }
+  // Every account keeps a username; it can change but not be removed.
+  const usernameProblem = formatProblem(normalizeUsername(values.username));
+  if (usernameProblem) errors.username = usernameProblem;
   if (values.bio.length > BIO_LIMIT) errors.bio = `Keep your bio to ${BIO_LIMIT} characters.`;
   return errors;
 }
@@ -41,7 +41,7 @@ export function validateProfile(values: ProfileFormValues): Record<string, strin
 export function profileUpdate(values: ProfileFormValues): ProfileUpdate {
   return {
     display_name: values.display_name.trim() || null,
-    username: values.username.trim().toLowerCase() || null,
+    username: normalizeUsername(values.username),
     bio: values.bio.trim() || null,
     home_region: values.home_region.trim() || null,
   };
