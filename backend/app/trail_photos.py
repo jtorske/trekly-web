@@ -18,6 +18,9 @@ Environment:
 import io
 import json
 import os
+import platform
+import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -40,11 +43,30 @@ ACCEPTED_FORMATS = {"JPEG", "PNG", "WEBP", "MPO"}
 # the Flickr copies Openverse links to), so an approve request can't make the
 # server fetch an arbitrary URL.
 FETCH_HOSTS = ("upload.wikimedia.org", "live.staticflickr.com", ".staticflickr.com")
-USER_AGENT = "Trekly-photo-publish/1.0 (jtorske27@gmail.com)"
+# Wikimedia's User-Agent policy: tool name/version, a way to reach us, the library.
+USER_AGENT = (
+    "TreklyPhotoPublisher/1.0 (https://trekly-web.vercel.app; jtorske27@gmail.com) "
+    f"python-urllib/{platform.python_version()}"
+)
+# Commons originals can be 20+ MB; a 1920px thumbnail is plenty for a 1600px
+# hero, far lighter on Wikimedia, and safe in a 512 MB container.
+COMMONS_THUMB_WIDTH = 1920
+# The API adds tracking parameters ("?utm_source=commons.wikimedia.org..."); they're ignored.
+COMMONS_ORIGINAL = re.compile(r"^https://upload\.wikimedia\.org/wikipedia/commons/(?!thumb/)([0-9a-f]/[0-9a-f]{2})/([^/?#]+)(?:[?#].*)?$")
+# A source asking us to wait at most this long is retried once, within the request.
+RETRY_WITHIN_S = 5
 
 
 class PhotoError(ValueError):
     """The image can't be used; the message is safe to show the admin."""
+
+
+class SourceBusy(RuntimeError):
+    """The image host is rate limiting us (Render's IP is shared); try later."""
+
+    def __init__(self, retry_after: int):
+        super().__init__(f"The image source is busy; try again in {retry_after} seconds.")
+        self.retry_after = retry_after
 
 
 class StorageError(RuntimeError):
@@ -99,6 +121,9 @@ def process_image(data: bytes) -> ProcessedPhoto:
                 raise PhotoError("That image has too many pixels to process.")
             probe.verify()
         with Image.open(io.BytesIO(data)) as image:
+            # JPEGs decode at a reduced scale when that still covers the hero,
+            # so a 40-megapixel original never fills memory.
+            image.draft("RGB", (HERO_WIDTH * 2, HERO_WIDTH * 2))
             image.load()
             image = ImageOps.exif_transpose(image)
             image = _to_srgb(image)
@@ -132,20 +157,54 @@ class _AllowlistRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def fetch_image(url: str) -> bytes:
-    """Download a candidate image from an allowlisted host, capped in size."""
+def _retry_after(error: urllib.error.HTTPError) -> int:
+    try:
+        return max(1, int(error.headers.get("Retry-After") or 60))
+    except ValueError:  # an HTTP date: don't parse it, just wait a minute
+        return 60
+
+
+def fetch_image(url: str, sleep=time.sleep) -> bytes:
+    """Download a candidate image from an allowlisted host, capped in size.
+
+    A 429/503 with a short Retry-After is retried once; a longer one raises
+    SourceBusy so the admin sees when to try again (the server never waits).
+    """
     if not allowed_fetch_url(url):
         raise PhotoError("That image isn't hosted on Wikimedia Commons or Flickr.")
     opener = urllib.request.build_opener(_AllowlistRedirects)
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        with opener.open(request, timeout=60) as response:
-            data = response.read(MAX_SOURCE_BYTES + 1)
-    except (urllib.error.URLError, TimeoutError) as error:
-        raise PhotoError("Couldn't download the image from its source. Try again shortly.") from error
+    for attempt in (1, 2):
+        try:
+            with opener.open(request, timeout=60) as response:
+                data = response.read(MAX_SOURCE_BYTES + 1)
+            break
+        except urllib.error.HTTPError as error:
+            if error.code in (429, 503):
+                wait = _retry_after(error)
+                if attempt == 1 and wait <= RETRY_WITHIN_S:
+                    sleep(wait)
+                    continue
+                raise SourceBusy(wait) from None
+            raise PhotoError(f"The source didn't return the image (HTTP {error.code}).") from None
+        except (urllib.error.URLError, TimeoutError) as error:
+            raise PhotoError("Couldn't download the image from its source. Try again shortly.") from error
     if len(data) > MAX_SOURCE_BYTES:
         raise PhotoError("That image is over 40 MB.")
     return data
+
+
+def fetch_urls(candidate: dict) -> list[str]:
+    """Where to download a candidate from, lightest first: a Commons original
+    is fetched as a 1920px thumbnail when it's wider than that, with the
+    original as the fallback."""
+    url, width = candidate["image_url"], candidate.get("width") or 0
+    match = COMMONS_ORIGINAL.match(url)
+    if match and width > COMMONS_THUMB_WIDTH:
+        path, name = match.groups()
+        thumb = f"https://upload.wikimedia.org/wikipedia/commons/thumb/{path}/{name}/{COMMONS_THUMB_WIDTH}px-{name}"
+        return [thumb, url]
+    return [url]
 
 
 # ---------------------------------------------------------------- storage

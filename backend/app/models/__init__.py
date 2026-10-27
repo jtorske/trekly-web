@@ -17,7 +17,7 @@ from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.trail import Trail
-from app.models.trail_photo import TrailPhoto, TrailPhotoReview
+from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
 from app.models.trail_campground import TrailBookingSystem, TrailCampground
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.models.trip_plan import TripPlan, TripPlanNight
@@ -52,6 +52,7 @@ __all__ = [
     "TrailBookingSystem",
     "TrailCampground",
     "TrailPhoto",
+    "TrailPhotoCandidates",
     "TrailPhotoReview",
     "TrailSeasonalCondition",
     "TripPlan",

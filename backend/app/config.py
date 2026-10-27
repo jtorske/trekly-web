@@ -28,15 +28,6 @@ def photo_admin_user_ids() -> frozenset[str]:
     )
 
 
-# Output of scripts/find_trail_photos.py that the review page reads. Local
-# review only: on a server without the file, the page lists no candidates
-# (uploading your own photo still works).
-PHOTO_CANDIDATES_PATH = os.getenv(
-    "PHOTO_CANDIDATES_PATH",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "photo_candidates.json"),
-)
-
-
 def admin_user_ids() -> frozenset[str]:
     """Supabase user ids allowed to moderate profiles (ADMIN_USER_IDS,
     comma-separated). PHOTO_ADMIN_USER_IDS counts too, so the photo admins

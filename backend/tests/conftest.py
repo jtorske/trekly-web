@@ -38,7 +38,7 @@ GEAR_TABLES = [
                 "backcountry_parks", "backcountry_sites", "trail_campgrounds", "trail_booking_systems",
                 "availability_alerts", "availability_cache", "provider_request_budget", "job_locks",
                 "trip_plans", "trip_plan_nights", "hike_logs", "trail_photos", "trail_photo_reviews",
-                "profile_settings", "profile_moderation", "profile_reports")
+                "trail_photo_candidates", "profile_settings", "profile_moderation", "profile_reports")
 ]
 
 

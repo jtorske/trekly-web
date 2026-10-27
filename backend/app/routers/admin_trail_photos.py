@@ -2,19 +2,16 @@
 
 Every route requires a signed-in user listed in PHOTO_ADMIN_USER_IDS; the
 check runs here on the backend for every request (the frontend only hides
-the page). Candidates come from the search script's output file
-(PHOTO_CANDIDATES_PATH) and are looked up by id on the server, so a client
-can't supply its own image URL, photographer or license.
+the page). Candidates come from the trail_photo_candidates table (loaded by
+scripts/load_photo_candidates.py) and are looked up by id on the server, so a
+client can't supply its own image URL, photographer or license.
 
 Publishing resizes to WebP (app/trail_photos.py), uploads under new names,
 then swaps the trail's photo row; the old files are deleted only after the
 new row is committed, so a trail is never left pointing at missing files.
 """
 
-import json
 import logging
-import os
-from functools import lru_cache
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -23,19 +20,21 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.auth import CurrentUser, get_current_user
-from app.config import PHOTO_CANDIDATES_PATH, TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT, photo_admin_user_ids
+from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT, photo_admin_user_ids
 from app.database import get_db
 from app.models.account import Profile
 from app.models.trail import Trail
-from app.models.trail_photo import TrailPhoto, TrailPhotoReview
+from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
 from app.schemas.trail import TrailListItemOut, TrailPhotoOut
 from app.trail_photos import (
     MAX_SOURCE_BYTES,
     PhotoError,
     PhotoStorage,
     ProcessedPhoto,
+    SourceBusy,
     StorageError,
     fetch_image,
+    fetch_urls,
     new_paths,
     process_image,
     storage_from_env,
@@ -70,22 +69,6 @@ def get_image_fetcher():
 
 
 # ---------------------------------------------------------------- candidates
-
-@lru_cache(maxsize=4)
-def _load_candidates(path: str, mtime: float) -> dict[tuple[str, str | None], dict]:
-    with open(path, encoding="utf-8") as handle:
-        data = json.load(handle)
-    return {(t["name"], t.get("province_code")): t for t in data.get("trails", [])}
-
-
-def candidates_by_trail() -> dict[tuple[str, str | None], dict]:
-    """The search output keyed by (name, province_code), the trails' unique key."""
-    try:
-        mtime = os.path.getmtime(PHOTO_CANDIDATES_PATH)
-    except OSError:
-        return {}
-    return _load_candidates(PHOTO_CANDIDATES_PATH, mtime)
-
 
 class CandidateOut(BaseModel):
     id: str
@@ -136,9 +119,9 @@ def _trail_or_404(db: Session, trail_id: UUID) -> Trail:
     return trail
 
 
-def _candidate(trail: Trail, candidate_id: str) -> dict:
-    entry = candidates_by_trail().get((trail.name, trail.province_code)) or {}
-    for candidate in entry.get("candidates", []):
+def _candidate(db: Session, trail: Trail, candidate_id: str) -> dict:
+    entry = db.get(TrailPhotoCandidates, trail.id)
+    for candidate in entry.candidates if entry else []:
         if candidate["id"] == candidate_id:
             return candidate
     raise HTTPException(status_code=404, detail="No candidate with that id for this trail.")
@@ -229,16 +212,16 @@ def review_list(_admin: CurrentUser = Depends(require_photo_admin), db: Session 
         .all()
     )
     reviews = {r.trail_id: r for r in db.query(TrailPhotoReview).all()}
-    found = candidates_by_trail()
+    found = {r.trail_id: r for r in db.query(TrailPhotoCandidates).all()}
     out = []
     for trail in trails:
-        entry = found.get((trail.name, trail.province_code)) or {}
+        entry = found.get(trail.id)
         out.append(ReviewTrailOut(
             trail=TrailListItemOut.model_validate(trail),
-            destination=entry.get("destination"),
-            best_confidence=entry.get("best_confidence"),
-            default_choice=entry.get("default_choice"),
-            candidates=[CandidateOut.model_validate(c) for c in entry.get("candidates", [])],
+            destination=entry.destination if entry else None,
+            best_confidence=entry.best_confidence if entry else None,
+            default_choice=entry.default_choice if entry else None,
+            candidates=[CandidateOut.model_validate(c) for c in (entry.candidates if entry else [])],
             review=ReviewOut.model_validate(reviews[trail.id]) if trail.id in reviews else None,
         ))
     return out
@@ -254,11 +237,21 @@ def approve(
     db: Session = Depends(get_db),
 ):
     trail = _trail_or_404(db, trail_id)
-    candidate = _candidate(trail, body.candidate_id)
-    try:
-        photo = process_image(fetch(candidate["image_url"]))
-    except PhotoError as error:
-        raise HTTPException(status_code=422, detail=str(error)) from error
+    candidate = _candidate(db, trail, body.candidate_id)
+    photo, problem = None, None
+    for url in fetch_urls(candidate):
+        try:
+            photo = process_image(fetch(url))
+            break
+        except SourceBusy as busy:
+            raise HTTPException(
+                status_code=503, detail=f"{busy} Nothing was changed.",
+                headers={"Retry-After": str(busy.retry_after)},
+            ) from None
+        except PhotoError as error:
+            problem = error  # try the next URL (the original after a thumbnail)
+    if photo is None:
+        raise HTTPException(status_code=422, detail=str(problem))
     credit = {
         "source": candidate["source"],
         "origin": candidate.get("origin"),

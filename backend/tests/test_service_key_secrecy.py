@@ -73,15 +73,9 @@ def setup(client, session_factory, tmp_path, monkeypatch, network):
     trail_id = str(trail.id)
     session.close()
 
-    candidates = tmp_path / "photo_candidates.json"
-    candidates.write_text(
-        '{"trails": [{"name": "Lake Agnes Tea House", "province_code": "AB", "candidates": [{"id": "commons:1", '
-        '"source": "commons", "origin": "Wikimedia Commons", "confidence": "high", "title": "t", "preview_url": '
-        '"https://upload.wikimedia.org/a.jpg", "image_url": "https://upload.wikimedia.org/a.jpg", "width": 2400, '
-        '"height": 1600, "photographer": "P", "license": "CC BY 2.0", "source_url": "https://commons.wikimedia.org/x"}]}]}',
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(admin, "PHOTO_CANDIDATES_PATH", str(candidates))
+    from tests.test_trail_photos import candidate, load
+    load(session_factory, {"trails": [{"name": "Lake Agnes Tea House", "province_code": "AB",
+                                       "candidates": [candidate("commons:1")]}]})
     # The real storage client (it holds the key); only the image download is faked.
     app.dependency_overrides[admin.get_image_fetcher] = lambda: (lambda url: jpeg())
     return trail_id
