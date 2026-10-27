@@ -31,6 +31,9 @@ AVATAR_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:webp|jpg)$")
 DELETE_CONFIRMATION = "delete my account"
 
 
+UnitSystem = Literal["metric", "imperial"]
+
+
 class ProfileCounts(BaseModel):
     saved_trails: int
     gear_items: int
@@ -44,6 +47,7 @@ class ProfileOut(BaseModel):
     bio: str | None
     home_region: str | None
     avatar_path: str | None
+    units: UnitSystem | None
     member_since: datetime | None
     counts: ProfileCounts
     visibility: Literal["private"] = "private"
@@ -64,6 +68,7 @@ class ProfileUpdate(BaseModel):
     bio: str | None = Field(default=None, max_length=280)
     home_region: str | None = Field(default=None, max_length=80)
     avatar_path: str | None = Field(default=None, max_length=200)
+    units: UnitSystem | None = None
 
     _clean_fields = field_validator("display_name", "home_region", mode="before")(_clean)
 
@@ -138,6 +143,7 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         bio=profile.bio,
         home_region=profile.home_region,
         avatar_path=profile.avatar_path,
+        units=profile.units,
         member_since=member_since or profile.created_at,
         counts=counts,
     )

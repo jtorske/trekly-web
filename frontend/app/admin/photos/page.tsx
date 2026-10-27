@@ -7,6 +7,8 @@ import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { pageOf } from "@/lib/paging";
+import { formatDistance } from "@/lib/units";
+import { useUnits } from "@/lib/useUnits";
 import { photoInputProblem } from "@/lib/journalPhoto";
 import {
   CONFIDENCE_LABELS,
@@ -37,6 +39,7 @@ function CandidateOption({
   checked: boolean;
   onSelect: () => void;
 }) {
+  const [units] = useUnits();
   return (
     <label className={`${styles.option} ${checked ? styles.optionChecked : ""}`}>
       <input type="radio" name={name} checked={checked} onChange={onSelect} className={ui.srOnly} />
@@ -57,7 +60,7 @@ function CandidateOption({
       </span>
       <span className={styles.optionMeta}>
         {candidate.width}×{candidate.height}px
-        {candidate.distance_m != null && ` · ${(candidate.distance_m / 1000).toFixed(1)} km from trailhead`}
+        {candidate.distance_m != null && ` · ${formatDistance(candidate.distance_m / 1000, units)} from trailhead`}
         {" · "}
         <a href={candidate.source_url} target="_blank" rel="noopener noreferrer">
           Source

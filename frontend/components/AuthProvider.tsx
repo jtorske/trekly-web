@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut({ scope: "local" });
     } finally {
       // Per-tab drafts (trip plans, pending gear picks) belong to this user.
-      // Preferences such as units live in localStorage and are kept.
+      // Units are an account setting (profiles.units), so nothing to keep here.
       try {
         window.sessionStorage.clear();
       } catch {

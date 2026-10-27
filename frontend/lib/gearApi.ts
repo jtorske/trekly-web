@@ -1,6 +1,8 @@
 import { apiFetch } from "./api";
 
-export type WeightUnit = "g" | "kg" | "oz" | "lb";
+import type { WeightUnit } from "./units";
+
+export type { WeightUnit };
 export type VolumeUnit = "ml" | "l" | "fl_oz" | "cu_in";
 export type Condition = "new" | "good" | "worn" | "needs_repair" | "retired";
 

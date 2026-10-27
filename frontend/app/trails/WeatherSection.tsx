@@ -3,16 +3,21 @@
 import { useEffect, useState } from "react";
 import ui from "@/components/ui.module.css";
 import { getTrailForecast, type ForecastDay, type TrailForecast } from "@/lib/forecastApi";
-import { formatDegrees, formatElevation, formatTemperature, type UnitSystem } from "@/lib/units";
+import {
+  formatDegrees,
+  formatElevation,
+  formatPrecip,
+  formatSnow,
+  formatTemperature,
+  formatWind,
+  type UnitSystem,
+} from "@/lib/units";
 import {
   AVALANCHE_CANADA_URL,
   clockTime,
   dayName,
   describeWeather,
   environmentCanadaUrl,
-  formatPrecip,
-  formatSnow,
-  formatWind,
   shortDate,
   showAvalancheLink,
   todayIn,

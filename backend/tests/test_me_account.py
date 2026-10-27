@@ -46,6 +46,7 @@ def test_profile_is_created_on_first_read_with_sensible_defaults(client, headers
     assert body["display_name"] is None and body["username"] is None
     assert body["counts"] == {"saved_trails": 0, "gear_items": 0}
     assert body["visibility"] == "private"
+    assert body["units"] is None  # never chosen: the app shows metric
     assert body["member_since"]
     # Idempotent: a second read doesn't create a duplicate.
     assert client.get("/api/me/profile", headers=headers(alice)).json()["id"] == str(alice)
@@ -86,6 +87,25 @@ def test_update_profile_persists_and_validates(client, headers, alice):
 )
 def test_profile_validation(client, headers, alice, payload):
     assert client.patch("/api/me/profile", json=payload, headers=headers(alice)).status_code == 422
+
+
+def test_units_setting_is_saved_and_returned(client, headers, alice, bob):
+    saved = client.patch("/api/me/profile", json={"units": "imperial"}, headers=headers(alice))
+    assert saved.status_code == 200
+    assert saved.json()["units"] == "imperial"
+    # It follows the account, not the request: a fresh read returns it.
+    assert client.get("/api/me/profile", headers=headers(alice)).json()["units"] == "imperial"
+    # Other profile edits leave it alone.
+    client.patch("/api/me/profile", json={"bio": "Hi"}, headers=headers(alice))
+    assert client.get("/api/me/profile", headers=headers(alice)).json()["units"] == "imperial"
+    assert client.patch("/api/me/profile", json={"units": "metric"}, headers=headers(alice)).json()["units"] == "metric"
+    assert client.get("/api/me/profile", headers=headers(bob)).json()["units"] is None
+
+
+@pytest.mark.parametrize("value", ["us", "Metric", "", 1])
+def test_units_setting_rejects_unknown_values(client, headers, alice, value):
+    response = client.patch("/api/me/profile", json={"units": value}, headers=headers(alice))
+    assert response.status_code == 422
 
 
 def test_username_must_be_unique(client, headers, alice, bob):

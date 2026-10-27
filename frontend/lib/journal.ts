@@ -1,5 +1,6 @@
 import type { HikeLog } from "./hikeLogsApi";
 import type { TrailListItem } from "./trailsApi";
+import { distanceValue, formatDistance, type UnitSystem } from "./units.ts";
 
 /**
  * The Trail Journal's layout: which trails go on which spread, in which
@@ -162,7 +163,7 @@ export function groupTrails(trails: TrailListItem[]): JournalGroup[] {
   return all.map(({ key, title, subtitle, colour, trails: groupTrails }) => ({ key, title, subtitle, colour, trails: groupTrails }));
 }
 
-export function computeMilestones(logs: HikeLog[]): Milestone[] {
+export function computeMilestones(logs: HikeLog[], units: UnitSystem = "metric"): Milestone[] {
   const overnight = logs.some((log) => (log.trail.typical_duration_nights ?? 0) >= 1);
   const parks = new Set(logs.map((log) => log.trail.region)).size;
   // Only trails with a known distance count towards the total.
@@ -171,7 +172,7 @@ export function computeMilestones(logs: HikeLog[]): Milestone[] {
     { id: "first-hike", title: "First steps", detail: "Log your first hike", earned: logs.length > 0, progress: Math.min(logs.length, 1) },
     { id: "first-overnight", title: "Under the stars", detail: "Log an overnight trip", earned: overnight, progress: overnight ? 1 : 0 },
     { id: "five-parks", title: "Park hopper", detail: `Hike in 5 parks or regions (${Math.min(parks, 5)} / 5)`, earned: parks >= 5, progress: Math.min(parks / 5, 1) },
-    { id: "hundred-km", title: "Century", detail: `Hike 100 km in total (${Math.floor(Math.min(km, 100))} / 100 km)`, earned: km >= 100, progress: Math.min(km / 100, 1) },
+    { id: "hundred-km", title: "Century", detail: `Hike ${formatDistance(100, units)} in total (${Math.floor(distanceValue(Math.min(km, 100), units))} / ${formatDistance(100, units)})`, earned: km >= 100, progress: Math.min(km / 100, 1) },
   ];
 }
 
@@ -189,7 +190,7 @@ export function slugify(title: string): string {
  * Lay out the book. `catalogue` is the live catalogue; retired trails appear
  * only if the user logged them, so their badges are kept.
  */
-export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[]): Journal {
+export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], units: UnitSystem = "metric"): Journal {
   const trails = new Map(catalogue.map((trail) => [trail.id, trail]));
   for (const log of logs) if (!trails.has(log.trail.id)) trails.set(log.trail.id, log.trail);
   const groups = groupTrails([...trails.values()]);
@@ -211,7 +212,7 @@ export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[]): Journ
     sections,
     hiked: [...trails.keys()].filter((id) => hikedIds.has(id)).length,
     total: trails.size,
-    milestones: computeMilestones(logs),
+    milestones: computeMilestones(logs, units),
   };
 }
 

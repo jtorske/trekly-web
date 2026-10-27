@@ -13,6 +13,7 @@ import { buildJournal, sectionIndex } from "@/lib/journal";
 import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
+import { useUnits } from "@/lib/useUnits";
 import Book from "./Book";
 import { useHikePhoto } from "@/lib/useHikePhoto";
 import { formatHikeDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
@@ -138,7 +139,11 @@ function Journal() {
     return () => controller.abort();
   }, [signedIn]);
 
-  const journal = useMemo(() => (catalogue ? buildJournal(catalogue, hikeLogs.logs) : null), [catalogue, hikeLogs.logs]);
+  const [units] = useUnits();
+  const journal = useMemo(
+    () => (catalogue ? buildJournal(catalogue, hikeLogs.logs, units) : null),
+    [catalogue, hikeLogs.logs, units],
+  );
   const ready = journal && signedIn && !hikeLogs.loading && stamped;
   const at = journal ? sectionIndex(journal, params.get("section")) : 0;
 

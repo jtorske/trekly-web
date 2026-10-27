@@ -5,13 +5,11 @@ import {
   dayName,
   describeWeather,
   environmentCanadaUrl,
-  formatPrecip,
-  formatSnow,
-  formatWind,
   shortDate,
   showAvalancheLink,
   todayIn,
 } from "./weather.ts";
+import { formatPrecip, formatSnow, formatWind } from "./units.ts";
 
 test("WMO codes map to a label and an icon", () => {
   assert.deepEqual(describeWeather(0), { label: "Clear", icon: "clear" });
@@ -24,7 +22,7 @@ test("WMO codes map to a label and an icon", () => {
   assert.equal(describeWeather(12345).label, "Unknown");
 });
 
-test("wind, rain and snow follow the unit toggle", () => {
+test("wind, rain and snow follow the units setting", () => {
   assert.equal(formatWind(24.6, "metric"), "25 km/h");
   assert.equal(formatWind(24.6, "imperial"), "15 mph");
   assert.equal(formatPrecip(2.44, "metric"), "2.4 mm");

@@ -38,6 +38,9 @@ class Profile(Base):
             "home_region is null or length(home_region) <= 80",
             name="profiles_home_region_length_check",
         ),
+        CheckConstraint(
+            "units is null or units in ('metric', 'imperial')", name="profiles_units_check"
+        ),
         Index("profiles_username_key", "username", unique=True),
     )
 
@@ -50,6 +53,9 @@ class Profile(Base):
     bio = Column(Text)
     home_region = Column(Text)
     avatar_path = Column(Text)
+    # Display units for the whole app. Null means never chosen, which reads as
+    # metric; data itself is always stored in metric.
+    units = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

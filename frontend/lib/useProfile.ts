@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getProfile, type Profile } from "./accountApi";
 
-const PROFILE_EVENT = "trekly:profile-updated";
+export const PROFILE_EVENT = "trekly:profile-updated";
 
 /** Tell every mounted useProfile() (e.g. the navbar avatar) about a change. */
 export function announceProfile(profile: Profile) {

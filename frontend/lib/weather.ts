@@ -1,8 +1,6 @@
-import type { UnitSystem } from "./units";
-
 /**
- * Display helpers for the trail forecast. The API's values are metric
- * (°C, km/h, mm, cm); these only format them.
+ * Display helpers for the trail forecast: conditions, days and links.
+ * Measurements (°C, km/h, mm, cm) are formatted by lib/units.
  */
 
 export type WeatherIcon = "clear" | "partly" | "cloudy" | "fog" | "drizzle" | "rain" | "freezing" | "snow" | "storm";
@@ -61,28 +59,6 @@ export function describeWeather(code: number | null): { label: string; icon: Wea
     default:
       return { label: "Unknown", icon: "cloudy" };
   }
-}
-
-const round1 = (value: number) => Number(value.toFixed(1)).toString();
-
-/** "15 km/h" / "9 mph". */
-export function formatWind(kmh: number, system: UnitSystem): string {
-  return system === "metric" ? `${Math.round(kmh)} km/h` : `${Math.round(kmh / 1.609344)} mph`;
-}
-
-/** "2.4 mm" / "0.1 in"; tiny amounts read as a trace. */
-export function formatPrecip(mm: number, system: UnitSystem): string {
-  if (mm <= 0) return system === "metric" ? "0 mm" : "0 in";
-  if (system === "metric") return mm < 0.1 ? "trace" : `${round1(mm)} mm`;
-  const inches = mm / 25.4;
-  return inches < 0.01 ? "trace" : `${Number(inches.toFixed(2))} in`;
-}
-
-/** "3 cm" / "1.2 in" of snow; amounts that round to zero read as a trace. */
-export function formatSnow(cm: number, system: UnitSystem): string {
-  const value = system === "metric" ? round1(cm) : round1(cm / 2.54);
-  if (Number(value) === 0) return cm > 0 ? "trace" : system === "metric" ? "0 cm" : "0 in";
-  return `${value} ${system === "metric" ? "cm" : "in"}`;
 }
 
 /** "Today", "Tue", … for a YYYY-MM-DD at the trail, given today's date there. */

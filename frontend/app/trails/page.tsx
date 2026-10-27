@@ -7,7 +7,6 @@ import { useAuth } from "@/components/AuthProvider";
 import HikeLogButton from "@/components/HikeLogButton";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
-import ui from "@/components/ui.module.css";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
@@ -94,7 +93,7 @@ function TrailView({
   onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
   hikeLogs: ReturnType<typeof useHikeLogs>;
 }) {
-  const [units, setUnits] = useUnits();
+  const [units] = useUnits();
   const forecast = useTrailForecast(trail.id);
   const nights = trail.typical_duration_nights;
   const hasLocation = trail.latitude != null && trail.longitude != null;
@@ -110,8 +109,6 @@ function TrailView({
     stats.push({ label: "Typical trip", value: tripLengthLabel(nights) });
   }
   stats.push({ label: "Difficulty", value: TERRAIN_LABELS[trail.terrain] });
-  // Only offer mi/ft vs km/m when something on the page converts.
-  const hasUnits = Boolean(distance || gain || highPoint) || trail.seasonal_conditions.length > 0 || forecast.status === "ready";
 
   return (
     <article className={styles.article}>
@@ -160,16 +157,6 @@ function TrailView({
             returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
           />
         </div>
-        {hasUnits && (
-          <div className={ui.segmented} role="group" aria-label="Units">
-            <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
-              mi/ft
-            </button>
-            <button type="button" aria-pressed={units === "metric"} onClick={() => setUnits("metric")}>
-              km/m
-            </button>
-          </div>
-        )}
       </div>
 
       <section className={styles.section}>

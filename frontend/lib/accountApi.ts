@@ -1,5 +1,6 @@
 import { apiFetch } from "./api";
 import type { TrailListItem } from "./trailsApi";
+import type { UnitSystem } from "./units";
 
 export interface Profile {
   id: string;
@@ -9,13 +10,15 @@ export interface Profile {
   bio: string | null;
   home_region: string | null;
   avatar_path: string | null;
+  /** Display units; null until the user picks, which reads as metric. */
+  units: UnitSystem | null;
   member_since: string | null;
   counts: { saved_trails: number; gear_items: number };
   visibility: "private";
 }
 
 export type ProfileUpdate = Partial<
-  Pick<Profile, "display_name" | "username" | "bio" | "home_region" | "avatar_path">
+  Pick<Profile, "display_name" | "username" | "bio" | "home_region" | "avatar_path" | "units">
 >;
 
 export interface SavedTrail {

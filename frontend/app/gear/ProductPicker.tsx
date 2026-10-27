@@ -20,39 +20,35 @@ import {
   type WeightUnit,
 } from "@/lib/gearApi";
 import { uploadImage, validateImage } from "@/lib/storage";
-import { formatCapacity, formatSpecValue, formatWeight, WEIGHT_BASIS_LABELS, type UnitSystem } from "@/lib/units";
+import {
+  bottleCapacityFilters,
+  formatCapacity,
+  formatSpecValue,
+  formatWeight,
+  gramsFromInput,
+  gramsToInput,
+  WEIGHT_BASIS_LABELS,
+  WEIGHT_INPUT_UNITS,
+  weightFilters,
+  weightInputUnit,
+  type UnitSystem,
+} from "@/lib/units";
 import { GearIcon } from "./icons";
 import type { Slot } from "./slots";
 import styles from "./ProductPicker.module.css";
 
-const WEIGHT_FILTERS: Record<UnitSystem, { label: string; grams: number | null }[]> = {
-  imperial: [
-    { label: "Any weight", grams: null },
-    { label: "Under 8 oz", grams: 227 },
-    { label: "Under 1 lb", grams: 454 },
-    { label: "Under 2 lb", grams: 907 },
-    { label: "Under 3 lb", grams: 1361 },
-  ],
-  metric: [
-    { label: "Any weight", grams: null },
-    { label: "Under 250 g", grams: 250 },
-    { label: "Under 500 g", grams: 500 },
-    { label: "Under 1 kg", grams: 1000 },
-    { label: "Under 1.5 kg", grams: 1500 },
-  ],
-};
+function capacityFilters(slotKey: string, units: UnitSystem): { label: string; min?: number; max?: number }[] | undefined {
+  if (slotKey === "water-bottle") return bottleCapacityFilters(units);
+  return CAPACITY_SLOTS[slotKey];
+}
 
+// Pack volumes read in litres in both systems.
 const CAPACITY_SLOTS: Record<string, { label: string; min?: number; max?: number }[]> = {
   backpack: [
     { label: "Any size" },
     { label: "Under 45 L", max: 45000 },
     { label: "45–60 L", min: 45000, max: 60000 },
     { label: "60 L+", min: 60000 },
-  ],
-  "water-bottle": [
-    { label: "Any size" },
-    { label: "Up to 1 L", max: 1000 },
-    { label: "Over 1 L", min: 1001 },
   ],
 };
 
@@ -144,7 +140,7 @@ export default function ProductPicker({
   const [requestId] = useState(() => crypto.randomUUID());
 
   const categoryFilter = subtype || slot.categories.join(",");
-  const capacityOptions = CAPACITY_SLOTS[slot.key];
+  const capacityOptions = capacityFilters(slot.key, units);
   const capacity = capacityOptions?.[capacityIndex];
   const searchKey = JSON.stringify([query.trim(), categoryFilter, brand, maxWeight, capacity?.min, capacity?.max]);
 
@@ -299,6 +295,7 @@ export default function ProductPicker({
           categoryNames={categoryNames}
           isSignedIn={isSignedIn}
           userId={userId}
+          units={units}
           initial={resume?.kind === "custom" ? resume.draft : null}
           requestId={requestId}
           replacing={replacing ?? null}
@@ -518,7 +515,7 @@ export default function ProductPicker({
               value={maxWeight ?? ""}
               onChange={(event) => setMaxWeight(event.target.value ? Number(event.target.value) : null)}
             >
-              {WEIGHT_FILTERS[units].map((option) => (
+              {weightFilters(units).map((option) => (
                 <option key={option.label} value={option.grams ?? ""}>
                   {option.label}
                 </option>
@@ -644,6 +641,7 @@ function CustomItemForm({
   categoryNames,
   isSignedIn,
   userId,
+  units,
   initial,
   requestId,
   replacing,
@@ -656,6 +654,7 @@ function CustomItemForm({
   categoryNames: Record<string, string>;
   isSignedIn: boolean;
   userId: string | null;
+  units: UnitSystem;
   initial: CustomDraft | null;
   requestId: string;
   replacing: GearItem | null;
@@ -664,17 +663,15 @@ function CustomItemForm({
   onNeedsAuth: (draft: CustomDraft) => void;
   onBusyChange: (busy: boolean) => void;
 }) {
-  const [draft, setDraft] = useState<CustomDraft>(
-    initial ?? {
-      name: "",
-      category: slot.categories[0],
-      brand: "",
-      model: "",
-      weight: "",
-      weightUnit: "oz",
-      notes: "",
-    },
-  );
+  const [draft, setDraft] = useState<CustomDraft>(() => {
+    if (!initial) {
+      return { name: "", category: slot.categories[0], brand: "", model: "", weight: "", weightUnit: weightInputUnit(units), notes: "" };
+    }
+    // A draft stashed before a units change: show its weight in the current units.
+    const weightUnit = weightInputUnit(units, initial.weightUnit);
+    const grams = gramsFromInput(initial.weight, initial.weightUnit);
+    return { ...initial, weightUnit, weight: grams == null ? initial.weight : gramsToInput(grams, weightUnit) };
+  });
   const [photo, setPhoto] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -688,7 +685,7 @@ function CustomItemForm({
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
     if (!draft.name.trim()) nextErrors.name = "Give your item a name.";
-    if (draft.weight.trim() && !(Number(draft.weight) >= 0)) nextErrors.weight = "Enter a positive number.";
+    if (draft.weight.trim() && gramsFromInput(draft.weight, draft.weightUnit) == null) nextErrors.weight = "Enter a positive number.";
     if (photo) {
       const problem = await validateImage(photo, "gear-photos");
       if (problem) nextErrors.photo = problem;
@@ -712,7 +709,8 @@ function CustomItemForm({
         category: draft.category,
         custom_brand: draft.brand.trim() || null,
         custom_model: draft.model.trim() || null,
-        weight_override: draft.weight.trim() ? { value: draft.weight.trim(), unit: draft.weightUnit } : null,
+        // Sent in grams; the unit picker is only for typing.
+        weight_override: draft.weight.trim() ? { value: String(gramsFromInput(draft.weight, draft.weightUnit)), unit: "g" as const } : null,
         notes: draft.notes.trim() || null,
         ...(imagePath ? { image_path: imagePath } : {}),
       };
@@ -789,10 +787,11 @@ function CustomItemForm({
             aria-label="Weight unit"
             onChange={(event) => update({ weightUnit: event.target.value as WeightUnit })}
           >
-            <option value="oz">oz</option>
-            <option value="lb">lb</option>
-            <option value="g">g</option>
-            <option value="kg">kg</option>
+            {WEIGHT_INPUT_UNITS[units].map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
           </select>
         </div>
         {errors.weight && <span className={ui.fieldError}>{errors.weight}</span>}

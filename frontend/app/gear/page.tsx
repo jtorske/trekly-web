@@ -41,7 +41,7 @@ function GearContent() {
   const { status: authStatus, user } = useAuth();
   const gear = useMyGear();
   const setupsData = useSetups();
-  const [units, setUnits] = useUnits();
+  const [units] = useUnits();
 
   const [view, setView] = useState<"flatlay" | "list">("flatlay");
   const [search, setSearch] = useState("");
@@ -220,14 +220,6 @@ function GearContent() {
           )}
         </div>
         <div className={styles.toolbarRight}>
-          <div className={ui.segmented} role="group" aria-label="Units">
-            <button type="button" aria-pressed={units === "imperial"} onClick={() => setUnits("imperial")}>
-              lb/oz
-            </button>
-            <button type="button" aria-pressed={units === "metric"} onClick={() => setUnits("metric")}>
-              kg/g
-            </button>
-          </div>
           <div className={ui.segmented} role="group" aria-label="View">
             <button type="button" aria-pressed={view === "flatlay"} onClick={() => setView("flatlay")}>
               Showcase

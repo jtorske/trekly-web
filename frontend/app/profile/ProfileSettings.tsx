@@ -8,6 +8,8 @@ import { DELETE_CONFIRMATION, deleteAccount, type Profile } from "@/lib/accountA
 import { emailLooksValid, friendlyAuthError, nextQuery, passwordChecks, passwordIsValid } from "@/lib/authLogic";
 import { listOwnImages, removeImages } from "@/lib/storage";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { formatDistance, formatTemperature, formatWeight, type UnitSystem } from "@/lib/units";
+import { useUnits } from "@/lib/useUnits";
 import styles from "./page.module.css";
 
 function Card({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
@@ -168,6 +170,47 @@ function ChangePassword() {
   );
 }
 
+const UNIT_OPTIONS: { value: UnitSystem; label: string }[] = [
+  { value: "metric", label: "Metric" },
+  { value: "imperial", label: "Imperial" },
+];
+
+function UnitsSetting() {
+  const [units, setUnits] = useUnits();
+  const [error, setError] = useState<string | null>(null);
+
+  const choose = async (next: UnitSystem) => {
+    if (next === units) return;
+    setError(null);
+    try {
+      await setUnits(next);
+    } catch {
+      setError("We couldn't save your units. Try again.");
+    }
+  };
+
+  return (
+    <div className={styles.form}>
+      <div className={`${ui.segmented} ${styles.unitsToggle}`} role="group" aria-label="Units">
+        {UNIT_OPTIONS.map((option) => (
+          <button key={option.value} type="button" aria-pressed={units === option.value} onClick={() => choose(option.value)}>
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <p className={ui.hint}>
+        For example {formatDistance(6.6, units)}, {formatWeight(1300, units)} and {formatTemperature(-5, units)}. Applies on
+        every device you sign in on.
+      </p>
+      {error && (
+        <p className={ui.error} role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function SignOut() {
   const { signOut } = useAuth();
   const [confirming, setConfirming] = useState(false);
@@ -260,6 +303,9 @@ function DeleteAccount() {
 export default function ProfileSettings({ profile }: { profile: Profile }) {
   return (
     <div className={styles.settings}>
+      <Card id="units" title="Units" description="Distances, elevations, gear weights and weather across Trekly.">
+        <UnitsSetting />
+      </Card>
       <Card id="email" title="Email">
         <ChangeEmail email={profile.email} />
       </Card>

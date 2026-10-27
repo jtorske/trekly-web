@@ -113,6 +113,7 @@ test("milestones: first hike, first overnight, 5 parks, 100 km", () => {
   assert.equal(partial[3].earned, false);
   assert.equal(partial[3].progress, 0.425);
   assert.match(partial[3].detail, /42 \/ 100 km/);
+  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 62.1 mi in total (26 / 62.1 mi)");
   assert.match(partial[2].detail, /1 \/ 5/);
 });
 

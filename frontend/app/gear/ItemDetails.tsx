@@ -14,7 +14,17 @@ import {
   type WeightUnit,
 } from "@/lib/gearApi";
 import { removeImages, uploadImage, validateImage } from "@/lib/storage";
-import { formatCapacity, formatSpecValue, formatWeight, WEIGHT_BASIS_LABELS, type UnitSystem } from "@/lib/units";
+import {
+  formatCapacity,
+  formatSpecValue,
+  formatWeight,
+  gramsFromInput,
+  gramsToInput,
+  WEIGHT_BASIS_LABELS,
+  WEIGHT_INPUT_UNITS,
+  weightInputUnit,
+  type UnitSystem,
+} from "@/lib/units";
 import type { Slot } from "./slots";
 import styles from "./ItemDetails.module.css";
 
@@ -25,13 +35,6 @@ const CONDITIONS: { value: Condition; label: string }[] = [
   { value: "needs_repair", label: "Needs repair" },
   { value: "retired", label: "Retired" },
 ];
-
-const GRAMS_PER: Record<WeightUnit, number> = { g: 1, kg: 1000, oz: 28.349523125, lb: 453.59237 };
-
-function overrideInUnit(grams: number, unit: WeightUnit): string {
-  // Show what the user typed: 12.5 oz is stored as 354.369 g and round-trips to 12.5.
-  return String(Number((grams / GRAMS_PER[unit]).toFixed(unit === "g" ? 1 : 3)));
-}
 
 export default function ItemDetails({
   item,
@@ -60,10 +63,11 @@ export default function ItemDetails({
   const [brand, setBrand] = useState(item.custom_brand ?? "");
   const [model, setModel] = useState(item.custom_model ?? "");
   const [quantity, setQuantity] = useState(String(item.quantity));
-  const overrideUnit = item.weight.override_unit ?? (units === "metric" ? "g" : "oz");
+  // Typed in the reader's units only; 12.5 oz is stored as 354.369 g and reads back as 12.5.
+  const overrideUnit = weightInputUnit(units, item.weight.override_unit);
   const [weightUnit, setWeightUnit] = useState<WeightUnit>(overrideUnit);
   const [weight, setWeight] = useState(
-    item.weight.override_g != null ? overrideInUnit(item.weight.override_g, overrideUnit) : "",
+    item.weight.override_g != null ? gramsToInput(item.weight.override_g, overrideUnit) : "",
   );
   const [notes, setNotes] = useState(item.notes ?? "");
   const [condition, setCondition] = useState<Condition | "">(item.condition ?? "");
@@ -82,7 +86,7 @@ export default function ItemDetails({
     const nextErrors: Record<string, string> = {};
     const qty = Number(quantity);
     if (!Number.isInteger(qty) || qty < 1 || qty > 99) nextErrors.quantity = "Enter a whole number from 1 to 99.";
-    if (weight.trim() && !(Number(weight) >= 0)) nextErrors.weight = "Enter a positive number.";
+    if (weight.trim() && gramsFromInput(weight, weightUnit) == null) nextErrors.weight = "Enter a positive number.";
     if (isCustom && !name.trim()) nextErrors.name = "Give your item a name.";
     if (photo) {
       const problem = await validateImage(photo, "gear-photos");
@@ -97,7 +101,8 @@ export default function ItemDetails({
     try {
       const update: GearItemInput = {
         quantity: qty,
-        weight_override: weight.trim() ? { value: weight.trim(), unit: weightUnit } : null,
+        // Sent in grams; the unit picker is only for typing.
+        weight_override: weight.trim() ? { value: String(gramsFromInput(weight, weightUnit)), unit: "g" } : null,
         notes: notes.trim() || null,
         condition: condition || null,
       };
@@ -295,10 +300,11 @@ export default function ItemDetails({
               aria-label="Weight unit"
               onChange={(e) => setWeightUnit(e.target.value as WeightUnit)}
             >
-              <option value="oz">oz</option>
-              <option value="lb">lb</option>
-              <option value="g">g</option>
-              <option value="kg">kg</option>
+              {WEIGHT_INPUT_UNITS[units].map((unit) => (
+                <option key={unit} value={unit}>
+                  {unit}
+                </option>
+              ))}
             </select>
           </div>
           {!isCustom && (
