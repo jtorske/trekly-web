@@ -316,6 +316,7 @@ def test_signed_in_visitor_can_report_a_profile(client, alice_profile, people, o
     assert email.to == "treklyusersupport@gmail.com"
     assert "@alice" in email.subject and "spam" in email.subject
     assert "/u/alice" in email.text and "Selling boots" in email.text and str(bob_id) in email.text
+    assert "bob@example.com" not in email.text  # the reporter's account, never their email
     # Support learns who reported, but the report never exposes Alice's private data.
     assert_no_canaries(email.text, "the report email")
 

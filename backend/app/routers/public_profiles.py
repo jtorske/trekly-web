@@ -291,7 +291,8 @@ def report_email(profile: Profile, reporter: CurrentUser, reporter_profile: Prof
             f"Reason: {payload.reason}",
             f"Details: {payload.details or '(none)'}",
             "",
-            f"Reported by: @{reporter_name}, user id {reporter.id}, {reporter.email or 'no email on the token'}",
+            # The reporter's account, not their email address (see the Privacy Policy).
+            f"Reported by: @{reporter_name}, user id {reporter.id}",
             "",
             "To hide the profile, use /admin/profiles on the site.",
         ]

@@ -103,10 +103,14 @@ export default function PrivacyPage() {
           profile link. You choose what appears on it in Settings → Privacy:
         </p>
         <ul>
-          <li>Shown even when your profile is private: your display name and profile picture.</li>
           <li>
-            Public by default, and you can hide each one: your bio, Trail Journal and badges, rank,
-            gear and loadouts, and saved trails.
+            Shown even when your profile is private: your username, display name, and profile
+            picture.
+          </li>
+          <li>Shown whenever your profile is public: your bio.</li>
+          <li>
+            Public by default, and you can hide each one: your Trail Journal and badges, rank, gear
+            and loadouts, and saved trails.
           </li>
           <li>
             Private by default, and you can choose to show them: your trip plans. Public trip plans
@@ -124,7 +128,9 @@ export default function PrivacyPage() {
         </p>
         <p>
           Other signed-in users can report a profile they believe breaks our Terms of Use. A report
-          includes the profile and the reason given, and is sent to us to review.
+          includes the profile, the reason and any details given, and the reporter&apos;s account so
+          we can follow up. It&apos;s sent only to us, and we never tell the reported person who
+          reported them.
         </p>
 
         <h2>Service providers</h2>
