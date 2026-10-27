@@ -3,6 +3,7 @@
 2135 m, fetched 2026-10-26) stands in for it."""
 
 import copy
+import io
 import json
 import socket
 import urllib.error
@@ -260,10 +261,29 @@ def test_fetch_json_turns_connect_timeouts_and_http_errors_into_unavailable(monk
     with pytest.raises(weather.ForecastTimeout):
         weather.fetch_json("https://api.open-meteo.com/v1/forecast")
 
+    def rate_limited(request, timeout):
+        body = io.BytesIO(b'{"error": true, "reason": "Daily API request limit exceeded"}')
+        raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", {}, body)
+
+    monkeypatch.setattr(weather.urllib.request, "urlopen", rate_limited)
+    with pytest.raises(weather.ForecastUnavailable) as caught:
+        weather.fetch_json("https://api.open-meteo.com/v1/forecast")
+    assert not isinstance(caught.value, weather.ForecastTimeout)
+    assert str(caught.value) == "Open-Meteo HTTP 429: Daily API request limit exceeded"
+
     def server_error(request, timeout):
-        raise urllib.error.HTTPError(request.full_url, 503, "Service Unavailable", {}, None)
+        raise urllib.error.HTTPError(request.full_url, 503, "Service Unavailable", {}, io.BytesIO(b"<html>"))
 
     monkeypatch.setattr(weather.urllib.request, "urlopen", server_error)
     with pytest.raises(weather.ForecastUnavailable) as caught:
         weather.fetch_json("https://api.open-meteo.com/v1/forecast")
-    assert not isinstance(caught.value, weather.ForecastTimeout)
+    assert str(caught.value) == "Open-Meteo HTTP 503"
+
+
+def test_failures_are_logged_with_the_reason(client, trails, caplog):
+    error = weather.ForecastUnavailable("Open-Meteo HTTP 429: Daily API request limit exceeded")
+    app.dependency_overrides[get_forecast_fetch] = lambda: FakeOpenMeteo(error=error)
+    with caplog.at_level("WARNING", logger="uvicorn.error"):
+        assert client.get(f"/api/trails/{trails['both']}/forecast").status_code == 502
+    assert "Daily API request limit exceeded" in caplog.text
+    assert trails["both"] in caplog.text

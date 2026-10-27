@@ -1,6 +1,7 @@
 """GET /api/trails/{id}/forecast: a five-day forecast at the trailhead and,
 when known, the high point. See app/weather.py."""
 
+import logging
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
@@ -14,6 +15,8 @@ from app.models.trail import Trail
 from app.weather import ForecastTimeout, ForecastUnavailable, NoForecast, fetch_json, trail_forecast
 
 router = APIRouter(prefix="/api/trails", tags=["trails"])
+# uvicorn's logger, so the reason shows up in the server logs (Render).
+log = logging.getLogger("uvicorn.error")
 
 
 class ForecastDayOut(BaseModel):
@@ -60,7 +63,9 @@ def get_trail_forecast(trail_id: UUID, db: Session = Depends(get_db), fetch=Depe
     except NoForecast as error:
         raise HTTPException(status_code=404, detail="There's no forecast for this trail.") from error
     except ForecastTimeout as error:
+        log.warning("forecast for trail %s timed out: %s", trail_id, error)
         raise HTTPException(status_code=504, detail="The weather service is taking too long. Try again shortly.") from error
     except ForecastUnavailable as error:
+        log.warning("forecast for trail %s unavailable: %s", trail_id, error)
         raise HTTPException(status_code=502, detail="The weather forecast isn't available right now.") from error
     return TrailForecastOut(trail_id=trail.id, fetched_at=fetched_at, **forecast)

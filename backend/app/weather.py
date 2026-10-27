@@ -122,6 +122,15 @@ def fetch_json(url: str, timeout_s: float = TIMEOUT_S) -> Any:
             return json.load(response)
     except (TimeoutError, socket.timeout) as error:
         raise ForecastTimeout(f"Open-Meteo didn't answer within {timeout_s:g}s") from error
+    except urllib.error.HTTPError as error:
+        # Open-Meteo explains refusals in the body, e.g. {"error": true,
+        # "reason": "Daily API request limit exceeded"}.
+        reason = ""
+        try:
+            reason = json.loads(error.read() or b"{}").get("reason") or ""
+        except (ValueError, OSError, AttributeError):
+            pass
+        raise ForecastUnavailable(f"Open-Meteo HTTP {error.code}{': ' + reason if reason else ''}") from error
     except urllib.error.URLError as error:
         if isinstance(error.reason, (TimeoutError, socket.timeout)):
             raise ForecastTimeout(f"Open-Meteo didn't answer within {timeout_s:g}s") from error
