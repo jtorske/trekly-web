@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BADGES_PER_PAGE, buildJournal, computeMilestones, groupColour, groupTrails, regionTitle, spreadCount, spreadOfPage, spreadPages } from "./journal.ts";
+import { badgeGrid, buildJournal, computeMilestones, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify } from "./journal.ts";
 import { badgeOutline, nameFontSize, profileSilhouette } from "./badge.ts";
 import { photoInputProblem, photoSize } from "./journalPhoto.ts";
 import type { HikeLog } from "./hikeLogsApi.ts";
@@ -58,20 +58,37 @@ test("group colours are stable and from the palette", () => {
   assert.match(groupColour("place:CA-BC"), /^#[0-9a-f]{6}$/);
 });
 
-test("each group starts on a left-hand page and fills whole spreads", () => {
+test("the book is contents, one section per group, then milestones", () => {
   const trails = [...Array.from({ length: 13 }, () => trail()), trail({ region: "Whitehorse, YT", province_code: "YT" })];
   const journal = buildJournal(trails, []);
-  assert.equal(journal.pages[0].kind, "cover");
-  const contents = journal.pages.slice(1, 3).flatMap((p) => (p.kind === "contents" ? p.groups : []));
-  assert.equal(contents.length, journal.groups.length, "the contents span the first spread");
-  assert.equal(journal.pages.at(-1)?.kind, "back");
-  assert.equal(journal.pages.at(-2)?.kind, "milestones");
-  for (const start of journal.groupStart.values()) assert.equal(start % 2, 1, "left pages are odd");
-  const banff = journal.pages.filter((p) => p.kind === "group" && p.group.title === "Banff National Park");
-  // 13 trails = 3 pages of 6, padded to 4 so the next group starts on a left page.
-  assert.equal(banff.length, 4);
-  assert.ok(banff.every((p) => p.kind === "group" && p.trails.length <= BADGES_PER_PAGE));
-  assert.equal(journal.pages.length % 2, 1, "cover + whole spreads + milestones/back");
+  assert.deepEqual(
+    journal.sections.map((s) => [s.kind, s.slug]),
+    [["contents", null], ["group", "yukon"], ["group", "banff-national-park"], ["milestones", "milestones"]],
+  );
+  assert.equal(sectionIndex(journal, "banff-national-park"), 2);
+  assert.equal(sectionIndex(journal, "milestones"), 3);
+  assert.equal(sectionIndex(journal, null), 0);
+  assert.equal(sectionIndex(journal, "nowhere"), 0, "unknown sections fall back to the contents");
+});
+
+test("section slugs are URL-safe and unique", () => {
+  assert.equal(slugify("Parc national de la Gaspésie"), "parc-national-de-la-gaspesie");
+  assert.equal(slugify("More of Alberta"), "more-of-alberta");
+  const journal = buildJournal([trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" })], []);
+  assert.deepEqual(journal.sections.map((s) => s.slug), [null, "milestones-2", "milestones"]);
+});
+
+test("a spread splits its trails with the extra one on the left", () => {
+  assert.deepEqual(halves([1, 2, 3, 4, 5]), [[1, 2, 3], [4, 5]]);
+  assert.deepEqual(halves([1]), [[1], []]);
+});
+
+test("badge grids stay portrait and hold every badge", () => {
+  for (const count of [1, 2, 3, 5, 6, 7, 10, 19]) {
+    const { columns, rows } = badgeGrid(count);
+    assert.ok(columns <= 3 && columns * rows >= count && columns * (rows - 1) < count, `${count}`);
+  }
+  assert.deepEqual(badgeGrid(10), { columns: 3, rows: 4 });
 });
 
 test("progress counts the live catalogue plus retired trails the user hiked", () => {
@@ -97,15 +114,6 @@ test("milestones: first hike, first overnight, 5 parks, 100 km", () => {
   assert.equal(partial[3].progress, 0.425);
   assert.match(partial[3].detail, /42 \/ 100 km/);
   assert.match(partial[2].detail, /1 \/ 5/);
-});
-
-test("desktop spreads pair pages around the cover", () => {
-  assert.deepEqual(spreadPages(0), [-1, 0]);
-  assert.deepEqual(spreadPages(2), [3, 4]);
-  assert.equal(spreadOfPage(0), 0);
-  assert.equal(spreadOfPage(3), 2);
-  assert.equal(spreadOfPage(4), 2);
-  assert.equal(spreadCount(7), 4);
 });
 
 test("each difficulty has its own badge outline", () => {

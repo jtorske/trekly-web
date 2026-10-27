@@ -24,8 +24,15 @@
 
   color-scheme: light;
 
+  /* One screen, never scrolled: the book scales into what the navbar leaves. */
+  --nav-h: 5.25rem;
+
   position: relative;
-  flex: 1 1 auto;
+  display: flex;
+  height: 100svh;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--nav-h) 1rem 1rem;
   background: var(--journal-desk);
   color: var(--journal-desk-ink);
   font-family: var(--sans);
@@ -37,29 +44,9 @@
   border-radius: 4px;
 }
 
-.wrap {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 5.5rem 1rem 3rem;
-}
-
-.intro {
-  max-width: 40rem;
-  margin: 0 auto 1.25rem;
+.notice {
+  margin: 0 auto 0.5rem;
   text-align: center;
-}
-
-.title {
-  font-family: var(--display);
-  font-size: clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem);
-  font-weight: 600;
-  font-style: italic;
-  letter-spacing: -0.01em;
-}
-
-.lede {
-  margin-top: 0.35rem;
-  color: var(--journal-desk-muted);
 }
 
 .status {
@@ -80,41 +67,49 @@
 /* ------------------------------------------------------------- the book */
 
 .bookArea {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  flex: 1 1 0;
+  min-height: 0;
+  place-items: center;
+  container-type: size;
 }
 
-/* Two pages of ratio 0.7 side by side, sized to fit the viewport height. */
+/* Two pages of ratio 0.7 side by side, as large as the space allows. */
 .stage {
   position: relative;
-  width: min(100%, 66rem, calc((100svh - 16rem) * 1.4));
+  width: min(100cqw, 76rem, 100cqh * 1.4);
   aspect-ratio: 1.4;
-  touch-action: pan-y;
   user-select: none;
-  transition: transform 700ms cubic-bezier(0.3, 0.7, 0.2, 1);
 }
 
+/* A phone's one page: full width, and taller than a desktop page so more fits. */
 .single {
-  width: min(100%, 30rem, calc((100svh - 15rem) * 0.7));
-  aspect-ratio: 0.7;
+  --page-w: min(100cqw, 30rem, 100cqh * 0.75);
+  width: var(--page-w);
+  height: min(100cqh, var(--page-w) / 0.5);
+  aspect-ratio: auto;
 }
 
-/* A closed book: shift so the cover sits in the middle. */
-.spread.closed {
-  transform: translateX(-25%);
+/* The closed book a signed-out visitor sees. */
+.coverStage {
+  position: relative;
+  width: min(100cqw, 32rem, 100cqh * 0.7);
+  aspect-ratio: 0.7;
+  overflow: hidden;
+  border-radius: 3px 8px 8px 3px;
+  box-shadow: var(--journal-shadow);
+  container-type: inline-size;
 }
 
 .bookSkeleton {
-  width: min(100%, 66rem, calc((100svh - 16rem) * 1.4));
+  width: min(100cqw, 76rem, 100cqh * 1.4);
   aspect-ratio: 1.4;
-  margin: 0 auto;
 }
 
 @media (max-width: 859px) {
   .bookSkeleton {
-    width: min(100%, 30rem);
-    aspect-ratio: 0.7;
+    width: min(100cqw, 30rem, 100cqh * 0.75);
+    aspect-ratio: 0.6;
   }
 }
 
@@ -296,50 +291,6 @@
   }
 }
 
-/* ------------------------------------------------------------- controls */
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-
-.flipButton {
-  display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--journal-desk-ink) 30%, transparent);
-  border-radius: 9999px;
-  color: var(--journal-desk-ink);
-  font-size: 1.15rem;
-  user-select: none;
-  transition: background-color 150ms ease;
-}
-
-.flipButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--journal-desk-ink) 10%, transparent);
-}
-
-.flipButton:disabled {
-  cursor: default;
-  opacity: 0.35;
-}
-
-.where {
-  min-width: 9rem;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
-.hint {
-  margin-top: 0.35rem;
-  color: var(--journal-desk-muted);
-  font-size: 0.8rem;
-}
-
 /* ------------------------------------------------------------- cover */
 
 .cover {
@@ -484,34 +435,117 @@
   display: flex;
   height: 100%;
   flex-direction: column;
-  padding: 8cqw 8cqw 10cqw;
+  padding: 12cqw 8cqw 9cqw;
   font-size: max(0.75rem, 3.1cqw);
 }
 
+/* A phone's page: what SinglePage measures to decide whether to split. */
+.fit {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.fit[data-part="0"],
+.fit[data-part="1"] {
+  animation: fade 220ms ease both;
+}
+
+/* Room at the foot of a split page for the link to its other half. */
+.fit[data-part="0"] > *,
+.fit[data-part="1"] > * {
+  padding-bottom: calc(5cqw + 2.5rem);
+}
+
+/* Top-left of the opening page, like a ribbon marker. */
+.toContents {
+  position: absolute;
+  top: 3.5cqw;
+  left: 6cqw;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.35em;
+  border: 1px solid var(--journal-rule);
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--journal-paper) 85%, transparent);
+  padding: 0.2rem 0.75rem;
+  color: var(--journal-muted);
+  font-size: max(0.72rem, 2.5cqw);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.toContents:hover {
+  border-color: color-mix(in srgb, var(--journal-accent) 45%, transparent);
+  color: var(--journal-accent);
+}
+
+/* Between a phone's two pages of one section. */
+.pageTurn {
+  position: absolute;
+  bottom: 2cqw;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0 0.6rem;
+  color: var(--journal-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pageTurn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pageTurnNext {
+  right: 5cqw;
+}
+
+.pageTurnPrev {
+  left: 5cqw;
+}
+
 .pageTitle {
+  display: -webkit-box;
+  overflow: hidden;
   font-family: var(--display);
   font-size: max(1.15rem, 6.4cqw);
   font-weight: 600;
   font-style: italic;
   line-height: 1.1;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.folio {
-  position: absolute;
-  bottom: 4.5cqw;
-  left: 0;
-  right: 0;
-  color: var(--journal-muted);
-  font-size: max(0.7rem, 2.6cqw);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+.pageTitle:focus {
+  outline: none;
+}
+
+/* The same height on both pages, so the two columns of entries line up. */
+.contentsHeader {
+  height: 16cqw;
+  flex: none;
+}
+
+.contentsOwner {
+  color: var(--journal-ink);
+  font-family: var(--hand);
+  font-size: 1.35em;
 }
 
 .contents {
   display: flex;
   flex-direction: column;
-  gap: 0.6cqw;
-  margin-top: 4cqw;
+  gap: 0.4cqw;
 }
 
 .contentsRow {
@@ -522,7 +556,7 @@
   border-radius: 4px;
   padding: 1cqw 0.5cqw;
   color: inherit;
-  font-size: max(0.78rem, 3.2cqw);
+  font-size: max(0.875rem, 3.2cqw);
   text-align: left;
 }
 
@@ -551,22 +585,18 @@
 .contentsCount {
   flex: none;
   color: var(--journal-muted);
-  font-size: 0.85em;
+  font-size: 0.9em;
   font-variant-numeric: tabular-nums;
 }
 
 .contentsLeader {
   min-width: 3cqw;
   flex: 1;
-  border-bottom: 1px dotted var(--journal-rule);
-}
-
-.contentsPage {
-  flex: none;
-  font-variant-numeric: tabular-nums;
+  border-bottom: 1px dotted color-mix(in srgb, var(--journal-ink) 30%, transparent);
 }
 
 .legend {
+  flex: none;
   margin-top: auto;
   border-top: 1px solid var(--journal-rule);
   padding-top: 3cqw;
@@ -600,20 +630,23 @@
   width: 12cqw;
 }
 
+/* The same height on both pages of a spread, so their badge grids line up. */
 .groupHeader {
   position: relative;
+  height: 22cqw;
+  flex: none;
   padding-top: 2cqw;
 }
 
-/* A strip of washi tape in the park's colour. */
+/* A strip of washi tape in the park's colour (top right, clear of the back button). */
 .tape {
   position: absolute;
-  top: -5cqw;
-  left: -2cqw;
+  top: -6cqw;
+  right: -3cqw;
   width: 24cqw;
   height: 5cqw;
   opacity: 0.75;
-  transform: rotate(-4deg);
+  transform: rotate(4deg);
   clip-path: polygon(2% 0, 98% 6%, 100% 50%, 97% 100%, 1% 94%, 0 45%);
 }
 
@@ -628,17 +661,25 @@
   font-style: italic;
 }
 
+/* Rows share the page's height, so badges shrink to fit rather than overflow. */
 .slots {
   display: grid;
-  flex: 1;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
   gap: 2cqw 4cqw;
-  margin-top: 3cqw;
+}
+
+/* A phone's whole-section page keeps badges readable; if that overflows, it splits. */
+.slotsReadable {
+  min-height: auto;
+  grid-template-rows: repeat(var(--rows), minmax(7rem, 1fr));
 }
 
 .slotCell {
   display: flex;
+  min-width: 0;
   min-height: 0;
   flex-direction: column;
   align-items: center;
@@ -649,6 +690,18 @@
   text-align: center;
 }
 
+/* The badge takes whatever square fits its cell; --b is that size. */
+.badgeBox {
+  --b: min(92cqw, 100cqh, 10rem);
+
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 0;
+  place-items: center;
+  container-type: size;
+}
+
 .slotCell:hover .badge {
   transform: rotate(-3deg) scale(1.04);
 }
@@ -657,14 +710,17 @@
   position: relative;
   z-index: 0;
   display: block;
+  line-height: 0;
 }
 
 .badge {
-  width: 25cqw;
+  display: block;
+  width: var(--b);
   transition: transform 200ms ease;
 }
 
 .slotCaption {
+  flex: none;
   color: var(--journal-muted);
   font-size: max(0.7rem, 2.7cqw);
 }
@@ -680,10 +736,10 @@
 .miniPolaroid {
   position: absolute;
   z-index: -1;
-  bottom: -3cqw;
-  right: -10cqw;
-  width: 15cqw;
-  padding: 1cqw 1cqw 3cqw;
+  bottom: calc(var(--b) * -0.12);
+  right: calc(var(--b) * -0.4);
+  width: calc(var(--b) * 0.6);
+  padding: calc(var(--b) * 0.04) calc(var(--b) * 0.04) calc(var(--b) * 0.12);
   background: #fffdf6;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
   transform: rotate(9deg);
@@ -700,17 +756,17 @@
 .miniNote {
   position: absolute;
   z-index: -1;
-  bottom: -2cqw;
-  right: -13cqw;
+  bottom: calc(var(--b) * -0.08);
+  right: calc(var(--b) * -0.52);
   display: -webkit-box;
-  width: 16cqw;
+  width: calc(var(--b) * 0.64);
   overflow: hidden;
-  padding: 1.4cqw;
+  padding: calc(var(--b) * 0.056);
   background: #fff8d8;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
   color: #3a3a24;
   font-family: var(--hand);
-  font-size: max(0.6rem, 2.6cqw);
+  font-size: max(0.6rem, var(--b) * 0.104);
   line-height: 1.1;
   text-align: left;
   transform: rotate(6deg);
@@ -724,7 +780,8 @@
 
 .blankPage {
   display: grid;
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   place-items: center;
   opacity: 0.35;
 }
@@ -739,7 +796,8 @@
 
 .medals {
   display: grid;
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   grid-template-columns: repeat(2, 1fr);
   gap: 4cqw;
   align-content: center;

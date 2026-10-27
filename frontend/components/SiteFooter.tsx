@@ -26,8 +26,9 @@ export function FooterNotice({ className }: { className?: string }) {
 /** Site-wide footer: transparent, sitting straight on the page background. */
 export default function SiteFooter() {
   const pathname = usePathname();
-  // The landing hero carries its own footer, overlaid on the photo.
-  if (pathname === "/landing" || pathname === "/") return null;
+  // The landing hero carries its own footer, overlaid on the photo; the
+  // Trail Journal is a single screen that never scrolls.
+  if (pathname === "/landing" || pathname === "/" || pathname === "/journal") return null;
 
   return <FooterNotice className={styles.footer} />;
 }

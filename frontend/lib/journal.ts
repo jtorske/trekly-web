@@ -12,7 +12,6 @@ import type { TrailListItem } from "./trailsApi";
  */
 
 export const PARK_SPREAD_MIN = 3;
-export const BADGES_PER_PAGE = 6;
 
 // West to east, then the territories' neighbours; other countries follow.
 const PROVINCE_ORDER = ["YT", "NT", "NU", "BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL"];
@@ -56,13 +55,14 @@ export interface JournalGroup {
   trails: TrailListItem[];
 }
 
-export type JournalPage =
-  | { kind: "cover" }
-  /** The contents run across the first spread; part 1 ends with the badge key. */
-  | { kind: "contents"; groups: JournalGroup[]; part: 0 | 1 }
-  | { kind: "group"; group: JournalGroup; trails: TrailListItem[]; part: number; parts: number }
-  | { kind: "milestones" }
-  | { kind: "back" };
+/**
+ * One stop in the book, opened from the contents: a two-page spread on
+ * desktop, one page (or two, if it doesn't fit) on a phone.
+ */
+export type JournalSection =
+  | { kind: "contents"; slug: null; title: string }
+  | { kind: "group"; slug: string; title: string; group: JournalGroup }
+  | { kind: "milestones"; slug: "milestones"; title: string };
 
 export interface Milestone {
   id: "first-hike" | "first-overnight" | "five-parks" | "hundred-km";
@@ -75,9 +75,8 @@ export interface Milestone {
 
 export interface Journal {
   groups: JournalGroup[];
-  pages: JournalPage[];
-  /** Page index where each group starts (always a left-hand page). */
-  groupStart: Map<string, number>;
+  /** Contents first, then each group, then milestones. */
+  sections: JournalSection[];
   hiked: number;
   total: number;
   milestones: Milestone[];
@@ -163,12 +162,6 @@ export function groupTrails(trails: TrailListItem[]): JournalGroup[] {
   return all.map(({ key, title, subtitle, colour, trails: groupTrails }) => ({ key, title, subtitle, colour, trails: groupTrails }));
 }
 
-function chunk<T>(items: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
-  return chunks.length ? chunks : [[]];
-}
-
 export function computeMilestones(logs: HikeLog[]): Milestone[] {
   const overnight = logs.some((log) => (log.trail.typical_duration_nights ?? 0) >= 1);
   const parks = new Set(logs.map((log) => log.trail.region)).size;
@@ -182,48 +175,60 @@ export function computeMilestones(logs: HikeLog[]): Milestone[] {
   ];
 }
 
+/** "Banff National Park" → "banff-national-park", for ?section= in the URL. */
+export function slugify(title: string): string {
+  return title
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 /**
  * Lay out the book. `catalogue` is the live catalogue; retired trails appear
  * only if the user logged them, so their badges are kept.
- *
- * Page 0 is the cover (alone on the right of a desktop spread), so every
- * odd page is a left-hand page. Groups start on a left page and fill whole
- * spreads.
  */
 export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[]): Journal {
   const trails = new Map(catalogue.map((trail) => [trail.id, trail]));
   for (const log of logs) if (!trails.has(log.trail.id)) trails.set(log.trail.id, log.trail);
   const groups = groupTrails([...trails.values()]);
 
-  const half = Math.ceil(groups.length / 2);
-  const pages: JournalPage[] = [
-    { kind: "cover" },
-    { kind: "contents", groups: groups.slice(0, half), part: 0 },
-    { kind: "contents", groups: groups.slice(half), part: 1 },
-  ];
-  const groupStart = new Map<string, number>();
+  const taken = new Set(["milestones"]);
+  const sections: JournalSection[] = [{ kind: "contents", slug: null, title: "Contents" }];
   for (const group of groups) {
-    groupStart.set(group.key, pages.length);
-    const chunks = chunk(group.trails, BADGES_PER_PAGE);
-    if (chunks.length % 2) chunks.push([]);
-    chunks.forEach((part, index) =>
-      pages.push({ kind: "group", group, trails: part, part: index, parts: chunks.length }),
-    );
+    const base = slugify(group.title) || "section";
+    let slug = base;
+    for (let n = 2; taken.has(slug); n += 1) slug = `${base}-${n}`;
+    taken.add(slug);
+    sections.push({ kind: "group", slug, title: group.title, group });
   }
-  pages.push({ kind: "milestones" }, { kind: "back" });
+  sections.push({ kind: "milestones", slug: "milestones", title: "Milestones" });
 
   const hikedIds = new Set(logs.map((log) => log.trail.id));
   return {
     groups,
-    pages,
-    groupStart,
+    sections,
     hiked: [...trails.keys()].filter((id) => hikedIds.has(id)).length,
     total: trails.size,
     milestones: computeMilestones(logs),
   };
 }
 
-/** Desktop spreads: spread 0 is [-, cover], spread k is [2k-1, 2k]. */
-export const spreadOfPage = (page: number) => Math.ceil(page / 2);
-export const spreadPages = (spread: number): [number, number] => [spread * 2 - 1, spread * 2];
-export const spreadCount = (pages: number) => spreadOfPage(pages - 1) + 1;
+/** The section a ?section= value names; unknown or missing means the contents. */
+export function sectionIndex(journal: Journal, slug: string | null): number {
+  const index = slug ? journal.sections.findIndex((section) => section.slug === slug) : 0;
+  return Math.max(index, 0);
+}
+
+/** Split a list across the two pages of a spread, the extra one on the left. */
+export function halves<T>(items: T[]): [T[], T[]] {
+  const cut = Math.ceil(items.length / 2);
+  return [items.slice(0, cut), items.slice(cut)];
+}
+
+/** Columns and rows for `count` badges on one page (portrait, so never wider than 3). */
+export function badgeGrid(count: number): { columns: number; rows: number } {
+  const columns = count <= 1 ? 1 : count <= 6 ? 2 : 3;
+  return { columns, rows: Math.max(1, Math.ceil(count / columns)) };
+}

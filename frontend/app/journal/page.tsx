@@ -1,20 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Dialog from "@/components/Dialog";
 import HikeLogDialog from "@/components/HikeLogDialog";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import type { HikeLog } from "@/lib/hikeLogsApi";
-import { buildJournal } from "@/lib/journal";
+import { buildJournal, sectionIndex } from "@/lib/journal";
 import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
 import Book from "./Book";
 import { useHikePhoto } from "@/lib/useHikePhoto";
-import { formatHikeDate, renderJournalPage, type PageContext } from "./JournalPages";
+import { formatHikeDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
 import styles from "./journal.module.css";
 
 const CATALOGUE_SIZE = 100;
@@ -110,18 +111,24 @@ function EntryDialog({
   );
 }
 
-export default function JournalPage() {
+function Journal() {
   const { status, user } = useAuth();
   const { profile } = useProfile();
   const hikeLogs = useHikeLogs();
+  const router = useRouter();
+  const params = useSearchParams();
+  const signedIn = status === "signedIn";
   const guest = status !== "signedIn" && status !== "loading";
   const [catalogue, setCatalogue] = useState<TrailListItem[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [request, setRequest] = useState<{ page: number; seq: number } | null>(null);
   const [open, setOpen] = useState<{ log: HikeLog; colour: string; editing: boolean } | null>(null);
   const { stamped, mark } = useStamped(user?.id ?? null);
+  // Whether the current section was opened from the contents in this visit,
+  // so "Back to contents" can step back through history instead of adding to it.
+  const [fromContents, setFromContents] = useState(false);
 
   useEffect(() => {
+    if (!signedIn) return;
     const controller = new AbortController();
     searchTrails("", controller.signal, { limit: CATALOGUE_SIZE })
       .then(setCatalogue)
@@ -129,60 +136,78 @@ export default function JournalPage() {
         if ((error as { name?: string }).name !== "AbortError") setFailed(true);
       });
     return () => controller.abort();
-  }, []);
+  }, [signedIn]);
 
-  const logs = useMemo(() => (guest ? [] : hikeLogs.logs), [guest, hikeLogs.logs]);
-  const journal = useMemo(() => (catalogue ? buildJournal(catalogue, logs) : null), [catalogue, logs]);
-  const ready = journal && (guest || (status === "signedIn" && !hikeLogs.loading && stamped));
+  const journal = useMemo(() => (catalogue ? buildJournal(catalogue, hikeLogs.logs) : null), [catalogue, hikeLogs.logs]);
+  const ready = journal && signedIn && !hikeLogs.loading && stamped;
+  const at = journal ? sectionIndex(journal, params.get("section")) : 0;
+
+  const openSection = useCallback(
+    (slug: string | null) => {
+      if (slug) {
+        setFromContents(true);
+        router.push(`/journal?section=${encodeURIComponent(slug)}`, { scroll: false });
+      } else if (fromContents) {
+        setFromContents(false);
+        router.back();
+      } else {
+        router.replace("/journal", { scroll: false });
+      }
+    },
+    [router, fromContents],
+  );
 
   const owner = profile?.display_name ?? user?.email?.split("@")[0] ?? null;
   const ctx: PageContext | null = journal
     ? {
         journal,
-        logs: new Map(logs.map((log) => [log.trail.id, log])),
+        logs: new Map(hikeLogs.logs.map((log) => [log.trail.id, log])),
         owner,
-        guest,
         stamped: stamped ?? new Set(),
         onStamped: mark,
         onOpenEntry: (log, colour) => setOpen({ log, colour, editing: false }),
-        onJump: (page) => setRequest((r) => ({ page, seq: (r?.seq ?? 0) + 1 })),
+        onOpen: openSection,
       }
     : null;
 
   let body;
-  if (failed) {
+  if (guest) {
+    body = (
+      <section className={styles.bookArea} aria-label="Trail Journal">
+        <div className={styles.coverStage}>
+          <GuestCover />
+        </div>
+      </section>
+    );
+  } else if (failed) {
     body = <p className={styles.status}>We couldn&apos;t load the trail catalogue. Check your connection and try again.</p>;
   } else if (!ready || !ctx) {
-    body = <div className={`${ui.skeleton} ${styles.bookSkeleton}`} aria-busy="true" aria-label="Loading your journal" />;
+    body = (
+      <div className={styles.bookArea}>
+        <div className={`${ui.skeleton} ${styles.bookSkeleton}`} aria-busy="true" aria-label="Loading your journal" />
+      </div>
+    );
   } else {
     body = (
       <Book
-        count={ctx.journal.pages.length}
-        render={(index, active) => renderJournalPage(ctx, index, active)}
-        request={request}
-        label={guest ? "Trail Journal (sample)" : `${owner ?? "Your"} Trail Journal`}
+        count={ctx.journal.sections.length}
+        at={at}
+        render={(index, view, active) => renderJournalPage(ctx, index, view, active)}
+        name={(index) => ctx.journal.sections[index].title}
+        label={`${owner ?? "Your"} Trail Journal`}
       />
     );
   }
 
   return (
     <main className={styles.page}>
-      <div className={styles.wrap}>
-        <header className={styles.intro}>
-          <h1 className={styles.title}>Trail Journal</h1>
-          <p className={styles.lede}>
-            {guest
-              ? "A scrapbook of every trail you hike. Sign in to start stamping yours."
-              : "Your private scrapbook. Mark a trail as hiked from its page to stamp its badge."}
-          </p>
-          {hikeLogs.error && !guest && (
-            <p className={ui.error} role="alert">
-              {hikeLogs.error}
-            </p>
-          )}
-        </header>
-        {body}
-      </div>
+      <h1 className={styles.srOnly}>Trail Journal</h1>
+      {hikeLogs.error && signedIn && (
+        <p className={`${ui.error} ${styles.notice}`} role="alert">
+          {hikeLogs.error}
+        </p>
+      )}
+      {body}
 
       {open && !open.editing && (
         <EntryDialog log={open.log} colour={open.colour} onClose={() => setOpen(null)} onEdit={() => setOpen({ ...open, editing: true })} />
@@ -197,5 +222,14 @@ export default function JournalPage() {
         />
       )}
     </main>
+  );
+}
+
+export default function JournalPage() {
+  // useSearchParams needs a Suspense boundary for the static build.
+  return (
+    <Suspense fallback={<main className={styles.page} />}>
+      <Journal />
+    </Suspense>
   );
 }
