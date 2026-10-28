@@ -83,8 +83,9 @@ def alice_profile(client, world, fetch, people, session_factory):  # noqa: F811
     photo = f"{alice_id}/{uuid.uuid4()}.webp"
     assert client.put(f"/api/me/hike-logs/{trail}", json={"hiked_on": "2026-08-14", "note": "Larches!", "photo_path": photo},
                       headers=alice).status_code == 201
-    item = client.post("/api/me/gear", json={"custom_name": "Old stove", "category": "stoves", "notes": "CANARY-GEAR-NOTE"},
-                       headers=alice).json()
+    gear_photo = f"{alice_id}/{uuid.uuid4()}.webp"
+    item = client.post("/api/me/gear", json={"custom_name": "Old stove", "category": "stoves", "notes": "CANARY-GEAR-NOTE",
+                                             "image_path": gear_photo}, headers=alice).json()
     assert client.post("/api/me/setups", json={"name": "Skyline kit", "item_ids": [item["id"]]}, headers=alice).status_code == 201
     assert client.put(f"/api/me/saved-trails/{trail}", headers=alice).status_code == 201
 
@@ -95,7 +96,7 @@ def alice_profile(client, world, fetch, people, session_factory):  # noqa: F811
     db.add(AvailabilityAlert(user_id=alice_id, email="canary-alert@example.com", site_id=world["shovel"],
                              start_date=date(2026, 11, 2), nights=1, party_size=2, status="active"))
     db.commit()
-    ids = {"plan": str(plan.id), "item": item["id"], "trail": trail, "photo": photo}
+    ids = {"plan": str(plan.id), "item": item["id"], "trail": trail, "photo": photo, "gear_photo": gear_photo}
     db.close()
     return ids
 
@@ -149,11 +150,22 @@ def test_public_payload_has_only_declared_fields(client, alice_profile, people):
     assert set(body) == {"username", "display_name", "avatar_path", "is_private", "allow_indexing", "bio", "rank",
                          "journal", "gear", "saved_trails", "trip_plans"}
     assert set(body["gear"]["items"][0]) == {"id", "kind", "display_name", "brand_name", "category", "product", "variant",
-                                            "custom_brand", "custom_model", "quantity", "weight", "capacity", "image_path"}
+                                            "custom_brand", "custom_model", "quantity", "weight", "capacity"}
     assert set(body["trip_plans"][0]) == {"id", "trail", "title", "start_date", "nights"}
     assert_no_canaries(json.dumps(body), "the public profile")
     for forbidden in ("email", "home_region", "notes", "party_size", "alerts", "itinerary", "condition"):
         assert f'"{forbidden}"' not in json.dumps(body)
+
+
+def test_gear_photos_stay_with_the_owner(client, alice_profile, people):
+    """Users' own gear photos are never public, so they never need moderating."""
+    _, alice = people["alice"]
+    [own] = client.get("/api/me/gear", headers=alice).json()["items"]
+    assert own["image_path"] == alice_profile["gear_photo"]
+    for headers in ({}, people["bob"][1], alice):
+        body = json.dumps(public(client, headers=headers).json())
+        assert alice_profile["gear_photo"] not in body
+        assert '"image_path"' not in body
 
 
 def test_signed_in_visitors_see_exactly_what_guests_see(client, alice_profile, people):

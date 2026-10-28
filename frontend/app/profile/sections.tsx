@@ -8,6 +8,7 @@ import GearList from "@/app/gear/GearList";
 import { summarize } from "@/app/gear/useMyGear";
 import { slotForItem, zoneCoverage } from "@/app/gear/slots";
 import GearThumb from "@/components/GearThumb";
+import { matImage } from "@/lib/gearImage";
 import type { GearSetup } from "@/lib/setupsApi";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
@@ -246,8 +247,7 @@ export function SetupsSection({
                 <GearThumb
                   key={item.id}
                   icon={slotForItem(item).icon}
-                  productImage={item.product?.image}
-                  photoPath={item.image_path}
+                  productImage={matImage(item)}
                   alt=""
                   size="sm"
                 />

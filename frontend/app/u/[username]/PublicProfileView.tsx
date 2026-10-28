@@ -8,6 +8,7 @@ import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
+import { matImage } from "@/lib/gearImage";
 import TrailBadge from "@/components/TrailBadge";
 import {
   FeaturedBadges,
@@ -351,8 +352,7 @@ function GearSection({ gear, units }: { gear: NonNullable<PublicProfile["gear"]>
                     <GearThumb
                       key={item.id}
                       icon={slotForItem(asGearItem(item)).icon}
-                      productImage={item.product?.image}
-                      photoPath={item.image_path}
+                      productImage={matImage(item)}
                       alt=""
                       size="sm"
                     />

@@ -32,7 +32,7 @@ export type PrivacyUpdate = Partial<Omit<PrivacySettings, "username" | "hidden_b
 
 export type PublicGearItem = Pick<
   GearItem,
-  "id" | "kind" | "display_name" | "brand_name" | "category" | "product" | "variant" | "custom_brand" | "custom_model" | "quantity" | "weight" | "capacity" | "image_path"
+  "id" | "kind" | "display_name" | "brand_name" | "category" | "product" | "variant" | "custom_brand" | "custom_model" | "quantity" | "weight" | "capacity"
 >;
 
 export interface PublicSetup {
@@ -144,6 +144,7 @@ export function asGearItem(item: PublicGearItem): GearItem {
     custom_specs: [],
     notes: null,
     condition: null,
+    image_path: null,
     created_at: "",
     updated_at: "",
   } as GearItem;

@@ -1,6 +1,7 @@
 "use client";
 
 import GearThumb from "@/components/GearThumb";
+import { matImage } from "@/lib/gearImage";
 import ui from "@/components/ui.module.css";
 import type { GearItem } from "@/lib/gearApi";
 import { formatWeight, type UnitSystem } from "@/lib/units";
@@ -42,8 +43,7 @@ export default function GearList({
           <>
             <GearThumb
               icon={slot.icon}
-              productImage={item.product?.image}
-              photoPath={item.image_path}
+              productImage={matImage(item)}
               alt=""
               size={compact ? "sm" : "md"}
             />

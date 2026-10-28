@@ -1,6 +1,8 @@
 "use client";
 
-import type { GearItem } from "@/lib/gearApi";
+import { useState } from "react";
+import type { GearItem, ProductImage } from "@/lib/gearApi";
+import { matImage } from "@/lib/gearImage";
 import { formatWeight, type UnitSystem } from "@/lib/units";
 import { PlusMark, Silhouette } from "./silhouettes";
 import type { Slot } from "./slots";
@@ -9,6 +11,15 @@ import styles from "./FlatLay.module.css";
 function itemSubtitle(item: GearItem): string {
   if (item.kind === "custom") return [item.custom_brand, item.custom_model].filter(Boolean).join(" ") || "Custom item";
   return item.variant ? `${item.brand_name} · ${item.variant.name}` : (item.brand_name ?? "");
+}
+
+/** The catalogue photo, or the slot's silhouette when there's none or it fails to load. */
+function PieceArt({ slotKey, image }: { slotKey: string; image: ProductImage | null }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  if (!image || image.url === failedUrl) return <Silhouette slotKey={slotKey} />;
+  // Catalogue images come from many licensed hosts; see GearThumb.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={image.url} alt="" className={styles.photo} loading="lazy" onError={() => setFailedUrl(image.url)} />;
 }
 
 interface Props {
@@ -29,8 +40,9 @@ interface Props {
 
 /**
  * The Main setup as a flat-lay "knolling" mat: each core slot has a fixed
- * place sized like the real item, drawn as a line silhouette. Extra items in
- * a slot sit beside the first as smaller silhouettes.
+ * place sized like the real item, shown as its catalogue photo or drawn as a
+ * line silhouette. Never the owner's own photo (lib/gearImage.ts). Extra
+ * items in a slot sit beside the first, smaller.
  */
 export default function FlatLay({
   slots,
@@ -58,7 +70,7 @@ export default function FlatLay({
         aria-label={`Edit ${slot.noun}: ${name}`}
       >
         <span className={styles.art}>
-          <Silhouette slotKey={slot.key} />
+          <PieceArt slotKey={slot.key} image={matImage(item)} />
           {item.quantity > 1 && <span className={styles.qty}>×{item.quantity}</span>}
         </span>
         <span className={styles.caption}>

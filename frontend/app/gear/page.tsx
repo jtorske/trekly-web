@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import GearThumb from "@/components/GearThumb";
+import { matImage } from "@/lib/gearImage";
 import ui from "@/components/ui.module.css";
 import { nextQuery } from "@/lib/authLogic";
 import { listCategories, type GearItem } from "@/lib/gearApi";
@@ -325,7 +326,7 @@ function GearContent() {
                                 aria-label={`${item.display_name}, ${slot.label}. View or edit`}
                               >
                                 {item.quantity > 1 && <span className={styles.qty}>×{item.quantity}</span>}
-                                <GearThumb icon={slot.icon} productImage={item.product?.image} photoPath={item.image_path} alt="" size="md" />
+                                <GearThumb icon={slot.icon} productImage={matImage(item)} alt="" size="md" />
                                 <span className={styles.tileName}>{item.product?.name ?? item.display_name}</span>
                                 <span className={styles.tileMeta}>{item.brand_name ?? "Custom"}</span>
                               </button>

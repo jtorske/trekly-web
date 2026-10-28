@@ -7,9 +7,10 @@ import { getSupabaseClient } from "./supabaseClient";
  * 9a769eeb0dae, 739722285c4e, 214aa07bf743). Policies only allow a user to
  * upload, list or delete objects under a folder named after their own user
  * id, and every bucket only takes processed (re-encoded, metadata-free)
- * WebP/JPEG images. gear-photos and hike-photos are private (signed URLs,
- * which visitors can also get for photos in a public profile section);
- * avatars are publicly readable by URL.
+ * WebP/JPEG images. gear-photos and hike-photos are private (signed URLs).
+ * Visitors can also get hike-photos in a public journal, but gear-photos
+ * stay owner-only (migration 6e2f4b8d1a37); avatars are publicly readable
+ * by URL.
  */
 export type Bucket = "gear-photos" | "avatars" | "hike-photos";
 
@@ -41,7 +42,7 @@ export async function uploadImage(bucket: Bucket, userId: string, file: File): P
   const problem = await validateImage(file, bucket);
   if (problem) throw new Error(problem);
   // Re-encoding through a canvas drops EXIF, so a phone photo's GPS
-  // location never leaves the device (gear can be shown on a public profile).
+  // location never leaves the device (journal photos can be public).
   const image = await processPhoto(file);
   const path = `${userId}/${crypto.randomUUID()}.${image.extension}`;
   const { error } = await getSupabaseClient()

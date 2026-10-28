@@ -80,6 +80,16 @@
   flex: 1 1 auto;
 }
 
+/* Catalogue photos are cut out on a transparent background, so they sit on
+   the mat like the silhouettes do. */
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .svg {
   position: absolute;
   inset: 0;

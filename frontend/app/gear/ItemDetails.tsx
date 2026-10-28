@@ -186,7 +186,7 @@ export default function ItemDetails({
         <GearThumb
           icon={slot.icon}
           productImage={item.product?.image}
-          photoPath={removePhoto ? null : item.image_path}
+          ownPhotoPath={removePhoto ? null : item.image_path}
           alt={item.display_name}
           size="lg"
         />

@@ -297,14 +297,24 @@ def objects(conn, bucket, name):
 def test_photos_follow_their_section(conn, world, who):
     visitor(conn, world, who)
     assert objects(conn, "hike-photos", world["hike_photo"])
-    assert objects(conn, "gear-photos", world["gear_photo"])
-    # Uploaded but not used by any public row: stays private.
-    assert not objects(conn, "gear-photos", world["stray_photo"])
 
-    settings(conn, world, show_journal=False, show_gear=False)
+    settings(conn, world, show_journal=False)
     visitor(conn, world, who)
     assert not objects(conn, "hike-photos", world["hike_photo"])
+
+
+@pytest.mark.parametrize("who", VISITORS)
+def test_gear_photos_are_owner_only_even_in_public_gear(conn, world, who):
+    """Migration 6e2f4b8d1a37: visitors get the catalogue photo or icon instead."""
+    visitor(conn, world, who)
+    assert visible(conn, world, who, "gear")
     assert not objects(conn, "gear-photos", world["gear_photo"])
+    assert not objects(conn, "gear-photos", world["stray_photo"])
+    assert refused(conn, "SELECT image_path FROM public.user_gear_items")
+
+    act_as(conn, world["alice"])
+    assert objects(conn, "gear-photos", world["gear_photo"])
+    assert objects(conn, "gear-photos", world["stray_photo"])
 
 
 def test_referencing_someone_elses_photo_doesnt_publish_it(conn, world):

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
+import { matImage } from "@/lib/gearImage";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import type { GearItem } from "@/lib/gearApi";
@@ -140,7 +141,7 @@ export default function SetupDialog({
               return (
                 <label key={item.id} className={styles.item}>
                   <input type="checkbox" checked={selected.has(item.id)} onChange={() => toggle(item.id)} />
-                  <GearThumb icon={slot.icon} productImage={item.product?.image} photoPath={item.image_path} alt="" size="sm" />
+                  <GearThumb icon={slot.icon} productImage={matImage(item)} alt="" size="sm" />
                   <span className={styles.itemText}>
                     <span className={styles.itemName}>{item.display_name}</span>
                     <span className={ui.hint}>{slot.label}</span>

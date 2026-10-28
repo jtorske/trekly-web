@@ -2,7 +2,7 @@
 
 Every response is built from explicit *Public* models, so a field only
 leaves the API if it's declared here: never an email, home region, alert,
-gear or plan note, party size, booking, or anything from a hidden section.
+gear or plan note, gear photo, party size, booking, or anything from a hidden section.
 The answer is the same for every viewer, including the owner (whose page
 adds its own controls on the client), so there's nothing a signed-in
 visitor can see that a guest can't. Responses are never cached, so a
@@ -77,7 +77,8 @@ class PublicGearItem(BaseModel):
     quantity: int
     weight: WeightOut
     capacity: CapacityOut
-    image_path: str | None
+    # No image_path: the owner's own gear photos are never shown to others
+    # (migration 6e2f4b8d1a37); visitors see the catalogue photo or icon.
 
 
 class PublicSetup(BaseModel):
