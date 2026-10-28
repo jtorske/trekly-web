@@ -33,6 +33,7 @@ test("sign-up can't go ahead without an available username", () => {
   assert.equal(usernameReady(status("available")), true);
   // API unreachable: the database trigger and the username step still apply.
   assert.equal(usernameReady(status("unchecked")), true);
+  assert.equal(usernameReady(status("current")), true);
 });
 
 test("sign-up metadata always carries the username, normalized", () => {

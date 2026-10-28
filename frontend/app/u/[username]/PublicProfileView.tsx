@@ -230,7 +230,7 @@ function OwnerBanner({
         <button type="button" className={ui.secondary} onClick={onPreview}>
           Preview as visitor
         </button>
-        <Link href="/profile?tab=settings#privacy" className={ui.ghost}>
+        <Link href="/settings/privacy" className={ui.ghost}>
           Privacy settings
         </Link>
         <Link href="/profile" className={ui.ghost}>

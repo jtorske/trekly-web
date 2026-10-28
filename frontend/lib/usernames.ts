@@ -20,16 +20,17 @@ export function formatProblem(username: string): string | null {
 }
 
 export type UsernameStatus = {
-  state: "empty" | "invalid" | "checking" | "available" | "taken" | "unchecked";
+  state: "empty" | "invalid" | "checking" | "available" | "taken" | "unchecked" | "current";
   message: string;
 };
 
 /**
  * Whether a form may go ahead with this username. "unchecked" means the API
- * couldn't be asked; the save is checked again server-side either way.
+ * couldn't be asked; "current" is the name the account already has. The save
+ * is checked again server-side either way.
  */
 export function usernameReady(status: UsernameStatus): boolean {
-  return status.state === "available" || status.state === "unchecked";
+  return status.state === "available" || status.state === "unchecked" || status.state === "current";
 }
 
 /** Sign-up user metadata; the new-user trigger reads `username` and `display_name`. */

@@ -14,7 +14,7 @@ const ROW_ICONS: Record<string, LucideIcon> = {
   "/profile?tab=trips": Tent,
   "/gear": Backpack,
   "/alerts": Bell,
-  "/profile?tab=settings": Settings,
+  "/settings": Settings,
 };
 
 function RowIcon({ icon: Icon }: { icon: LucideIcon | undefined }) {

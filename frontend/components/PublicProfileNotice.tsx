@@ -51,7 +51,7 @@ export default function PublicProfileNotice() {
           className={ui.primary}
           onClick={() => {
             dismiss();
-            router.push("/profile?tab=settings#privacy");
+            router.push("/settings/privacy");
           }}
         >
           Review privacy settings

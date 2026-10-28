@@ -1,31 +1,22 @@
 "use client";
 
+// The forms for the Units, Email and password, Sign out and Delete account
+// sections of Settings.
+
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import { DELETE_CONFIRMATION, deleteAccount, type Profile } from "@/lib/accountApi";
+import { DELETE_CONFIRMATION, deleteAccount } from "@/lib/accountApi";
 import { emailLooksValid, friendlyAuthError, nextQuery, passwordChecks, passwordIsValid } from "@/lib/authLogic";
 import { listOwnImages, removeImages } from "@/lib/storage";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { formatDistance, formatTemperature, formatWeight, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
-import PrivacySettingsForm from "./PrivacySettings";
-import styles from "./page.module.css";
+import styles from "./settings.module.css";
 
-function Card({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
-  return (
-    <section id={id} className={styles.card} aria-labelledby={`${id}-title`}>
-      <h2 id={`${id}-title`} className={styles.cardTitle}>
-        {title}
-      </h2>
-      {description && <p className={styles.cardDescription}>{description}</p>}
-      {children}
-    </section>
-  );
-}
 
-function ChangeEmail({ email }: { email: string | null }) {
+export function ChangeEmail({ email }: { email: string | null }) {
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -45,7 +36,7 @@ function ChangeEmail({ email }: { email: string | null }) {
     try {
       const { error } = await getSupabaseClient().auth.updateUser(
         { email: value.trim() },
-        { emailRedirectTo: `${window.location.origin}/auth/callback${nextQuery("/profile?tab=settings")}` },
+        { emailRedirectTo: `${window.location.origin}/auth/callback${nextQuery("/settings/email-and-password")}` },
       );
       if (error) throw error;
       setStatus({
@@ -83,7 +74,7 @@ function ChangeEmail({ email }: { email: string | null }) {
   );
 }
 
-function ChangePassword() {
+export function ChangePassword() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [nonce, setNonce] = useState("");
@@ -176,7 +167,7 @@ const UNIT_OPTIONS: { value: UnitSystem; label: string }[] = [
   { value: "imperial", label: "Imperial" },
 ];
 
-function UnitsSetting() {
+export function UnitsSetting() {
   const [units, setUnits] = useUnits();
   const [error, setError] = useState<string | null>(null);
 
@@ -212,7 +203,7 @@ function UnitsSetting() {
   );
 }
 
-function SignOut() {
+export function SignOut() {
   const { signOut } = useAuth();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -239,7 +230,7 @@ function SignOut() {
   );
 }
 
-function DeleteAccount() {
+export function DeleteAccount() {
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
@@ -297,35 +288,6 @@ function DeleteAccount() {
           {busy ? "Deleting…" : "Permanently delete my account"}
         </button>
       </div>
-    </div>
-  );
-}
-
-export default function ProfileSettings({ profile, onEditProfile }: { profile: Profile; onEditProfile: () => void }) {
-  return (
-    <div className={styles.settings}>
-      <Card
-        id="privacy"
-        title="Privacy"
-        description="Your profile can be seen by anyone at its public address. Choose what's on it."
-      >
-        <PrivacySettingsForm onEditProfile={onEditProfile} />
-      </Card>
-      <Card id="units" title="Units" description="Distances, elevations, gear weights and weather across Trekly.">
-        <UnitsSetting />
-      </Card>
-      <Card id="email" title="Email">
-        <ChangeEmail email={profile.email} />
-      </Card>
-      <Card id="password" title="Password">
-        <ChangePassword />
-      </Card>
-      <Card id="session" title="Sign out" description="Ends your session in this browser. Your data stays saved to your account.">
-        <SignOut />
-      </Card>
-      <Card id="delete" title="Delete account">
-        <DeleteAccount />
-      </Card>
     </div>
   );
 }

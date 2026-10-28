@@ -5,7 +5,7 @@ import Link from "next/link";
 import ui from "@/components/ui.module.css";
 import { getPrivacy, publicProfilePath, updatePrivacy, type PrivacySettings, type PrivacyUpdate } from "@/lib/profilesApi";
 import { SECTION_LABELS, type SectionSetting } from "@/lib/publicProfile";
-import styles from "./page.module.css";
+import styles from "./settings.module.css";
 
 type Toggle = keyof PrivacyUpdate & keyof PrivacySettings;
 

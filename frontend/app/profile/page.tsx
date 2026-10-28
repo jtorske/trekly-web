@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -14,8 +14,7 @@ import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { useUnits } from "@/lib/useUnits";
-import EditProfileDialog from "./EditProfileDialog";
-import ProfileSettings from "./ProfileSettings";
+import { legacySettingsHref, sectionHref } from "@/app/settings/settingsSections";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import styles from "./page.module.css";
 
@@ -24,7 +23,6 @@ const TABS = [
   { key: "gear", label: "My gear" },
   { key: "trails", label: "Saved trails" },
   { key: "trips", label: "Trips" },
-  { key: "settings", label: "Settings" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -56,9 +54,13 @@ function ProfileContent() {
   const setups = useSetups();
   const plans = usePlans();
   const [units] = useUnits();
-  const [editing, setEditing] = useState(false);
 
   const requested = searchParams.get("tab");
+  // Settings used to be a tab here; old links and emails still point at it.
+  useEffect(() => {
+    if (requested === "settings") router.replace(legacySettingsHref(window.location.hash));
+  }, [requested, router]);
+
   const tab: TabKey = TABS.some((t) => t.key === requested) ? (requested as TabKey) : "overview";
   const setTab = (key: TabKey) =>
     router.replace(key === "overview" ? "/profile" : `/profile?tab=${key}`, { scroll: false });
@@ -115,9 +117,9 @@ function ProfileContent() {
                 .join(" · ")}
             </p>
           </div>
-          <button type="button" className={`${ui.secondary} ${styles.editButton}`} onClick={() => setEditing(true)}>
+          <Link href={sectionHref("edit-profile")} className={`${ui.secondary} ${styles.editButton}`}>
             Edit profile
-          </button>
+          </Link>
         </header>
 
         <div className={styles.stats}>
@@ -168,9 +170,9 @@ function ProfileContent() {
               {isNew && (
                 <div className={ui.notice}>
                   <strong>Welcome to Trekly.</strong>{" "}
-                  <button type="button" className={ui.ghost} onClick={() => setEditing(true)}>
+                  <Link href={sectionHref("edit-profile")} className={ui.ghost}>
                     Add a name and photo
-                  </button>
+                  </Link>
                   , lay out the gear you own, and bookmark trails you want to hike.
                 </div>
               )}
@@ -241,11 +243,8 @@ function ProfileContent() {
           )}
 
           {tab === "trips" && <TripsSection data={plans} />}
-
-          {tab === "settings" && <ProfileSettings profile={profile} onEditProfile={() => setEditing(true)} />}
         </section>
       </div>
-      {editing && <EditProfileDialog profile={profile} onClose={() => setEditing(false)} />}
     </main>
   );
 }

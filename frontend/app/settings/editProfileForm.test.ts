@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BIO_LIMIT, closeAction, initialValues, isDirty, profileUpdate, staleAvatar, validateProfile } from "./editProfileForm.ts";
+import { BIO_LIMIT, initialValues, isDirty, profileUpdate, staleAvatar, validateProfile } from "./editProfileForm.ts";
 import type { Profile } from "../../lib/accountApi.ts";
 
 const profile: Profile = {
@@ -55,7 +55,6 @@ test("a pending photo change counts as unsaved", () => {
   const croppedPhoto = { blob: {}, extension: "webp" };
   assert.equal(isDirty(initial, initial, { file: croppedPhoto, remove: false }), true);
   assert.equal(isDirty(initial, initial, { file: null, remove: true }), true);
-  assert.equal(closeAction({ dirty: isDirty(initial, initial, { file: croppedPhoto, remove: false }), confirming: false }), "confirm");
 });
 
 test("staleAvatar deletes the old file only when it was replaced or removed", () => {
@@ -63,11 +62,4 @@ test("staleAvatar deletes the old file only when it was replaced or removed", ()
   assert.equal(staleAvatar("u1/old.webp", null), "u1/old.webp");
   assert.equal(staleAvatar("u1/old.webp", "u1/old.webp"), null);
   assert.equal(staleAvatar(null, "u1/new.webp"), null);
-});
-
-test("closeAction asks before discarding unsaved changes", () => {
-  assert.equal(closeAction({ dirty: false, confirming: false }), "close");
-  assert.equal(closeAction({ dirty: true, confirming: false }), "confirm");
-  // A second close request (e.g. Escape) while asking backs out of the prompt.
-  assert.equal(closeAction({ dirty: true, confirming: true }), "keep-editing");
 });
