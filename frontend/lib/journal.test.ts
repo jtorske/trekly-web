@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { badgeGrid, buildJournal, computeMilestones, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify } from "./journal.ts";
+import { badgeGrid, buildJournal, computeMilestones, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify, summarizeJournal } from "./journal.ts";
 import { badgeOutline, nameFontSize, profileSilhouette } from "./badge.ts";
 import { photoInputProblem, photoSize } from "./journalPhoto.ts";
 import type { HikeLog } from "./hikeLogsApi.ts";
@@ -167,4 +167,42 @@ test("switching units never changes which milestones are earned", () => {
       metric.map((m) => [m.id, m.earned, m.progress]),
     );
   }
+});
+
+test("journal summary: counts, nights and region progress, most complete first", () => {
+  const banff = [1, 2, 3, 4].map(() => trail({ region: "Banff National Park, AB" }));
+  const jasper = [1, 2, 3].map(() => trail({ region: "Jasper National Park, AB", typical_duration_nights: 2 }));
+  const catalogue = [...banff, ...jasper];
+  const hikes = [log(banff[0], "2026-06-01"), log(jasper[0], "2026-07-01"), log(jasper[1], "2026-08-01")];
+  const summary = summarizeJournal(catalogue, hikes);
+  assert.equal(summary.hiked, 3);
+  assert.equal(summary.total, 7);
+  assert.equal(summary.places, 2);
+  assert.equal(summary.overnights, 2);
+  assert.equal(summary.nights, 4);
+  assert.deepEqual(summary.regions.map((r) => `${r.title} ${r.hiked}/${r.total}`), ["Jasper National Park 2/3", "Banff National Park 1/4"]);
+  // Newest first, coloured like the book.
+  assert.deepEqual(summary.recent.map((r) => r.hike.trail.id), [jasper[1].id, jasper[0].id, banff[0].id]);
+  const book = buildJournal(catalogue, hikes);
+  assert.equal(summary.recent[2].colour, book.groups.find((g) => g.title === "Banff National Park")?.colour);
+});
+
+test("journal summary totals distance and elevation only when every hike has them", () => {
+  const known = trail({ distance_km: 12.5, elevation_gain_m: 600 });
+  const unknown = trail({ distance_km: null, elevation_gain_m: 300 });
+  const full = summarizeJournal([known], [log(known)]);
+  assert.equal(full.distanceKm, 12.5);
+  assert.equal(full.elevationM, 600);
+  const partial = summarizeJournal([known, unknown], [log(known), log(unknown)]);
+  assert.equal(partial.distanceKm, null);
+  assert.equal(partial.elevationM, 900);
+  assert.equal(summarizeJournal([known], []).distanceKm, null);
+});
+
+test("journal summary keeps the given order when dates are hidden, and stops at six stamps", () => {
+  const trails = Array.from({ length: 8 }, () => trail());
+  const undated = trails.map((t) => ({ trail: t, hiked_on: null }));
+  const summary = summarizeJournal(trails, undated);
+  assert.deepEqual(summary.recent.map((r) => r.hike.trail.id), trails.slice(0, 6).map((t) => t.id));
+  assert.ok(summary.recent.every((r) => r.hike.hiked_on === null));
 });

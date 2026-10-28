@@ -16,6 +16,7 @@ import pytest
 
 from app.main import app
 from app.models.availability import AvailabilityAlert
+from app.models.trail import Trail
 from app.models.trip_plan import TripPlan
 from app.notify import Email
 from app.routers.public_profiles import get_email_sender
@@ -223,6 +224,55 @@ def test_hidden_dates_are_removed_not_just_hidden(client, alice_profile, people)
     assert "2026-08-14" not in json.dumps(public(client).json())
     # The owner's own journal still has the date.
     assert client.get("/api/me/hike-logs", headers=alice).json()[0]["hiked_on"] == "2026-08-14"
+
+
+@pytest.fixture
+def three_hikes(client, alice_profile, people, session_factory):
+    """Two more hikes, so order could give dates away: Skyline (Aug 14) is the most recent."""
+    _, alice = people["alice"]
+    db = session_factory()
+    extra = [Trail(name=name, region="Banff National Park, AB", country_code="CA", province_code="AB",
+                   terrain_difficulty="easy", typical_duration_nights=0) for name in ("Agnes Lake", "Boom Lake")]
+    db.add_all(extra)
+    db.commit()
+    ids = [str(trail.id) for trail in extra]
+    db.close()
+    for trail, day in zip(ids, ("2026-06-02", "2026-07-03")):
+        assert client.put(f"/api/me/hike-logs/{trail}", json={"hiked_on": day}, headers=alice).status_code == 201
+    return ["2026-08-14", "2026-06-02", "2026-07-03"]
+
+
+def test_journal_tab_data_follows_the_journal_switch(client, alice_profile, three_hikes, people):
+    _, alice = people["alice"]
+    body = public(client).json()
+    assert len(body["journal"]["entries"]) == 3 and len(body["featured_badges"]) == 3
+    set_privacy(client, alice, show_journal=False)
+    body = public(client).json()
+    assert body["journal"] is None and body["featured_badges"] is None
+    for day in three_hikes:
+        assert day not in json.dumps(body)
+    set_privacy(client, alice, show_journal=True)
+    assert len(public(client).json()["journal"]["entries"]) == 3
+
+
+def test_hidden_dates_leave_no_date_and_no_date_order_anywhere(client, alice_profile, three_hikes, people):
+    _, alice = people["alice"]
+    shown = public(client).json()
+    # Dates on: newest first, and the dates are there.
+    assert [e["trail"]["name"] for e in shown["journal"]["entries"]] == ["Skyline Trail", "Boom Lake", "Agnes Lake"]
+    assert [e["hiked_on"] for e in shown["journal"]["entries"]] == ["2026-08-14", "2026-07-03", "2026-06-02"]
+
+    set_privacy(client, alice, hide_hike_dates=True)
+    body = public(client).json()
+    text = json.dumps(body)
+    for day in three_hikes:
+        assert day not in text
+    # No timestamps of any kind on journal entries either.
+    assert set(body["journal"]["entries"][0]) == {"trail", "hiked_on", "note", "photo_path"}
+    assert all(e["hiked_on"] is None for e in body["journal"]["entries"])
+    # Alphabetical everywhere, so "recent" can't be read off the order.
+    assert [e["trail"]["name"] for e in body["journal"]["entries"]] == ["Agnes Lake", "Boom Lake", "Skyline Trail"]
+    assert [b["trail"]["name"] for b in body["featured_badges"]] == ["Agnes Lake", "Boom Lake", "Skyline Trail"]
 
 
 def test_search_indexing_is_opt_in(client, alice_profile, people):

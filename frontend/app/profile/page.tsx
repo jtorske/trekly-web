@@ -32,6 +32,7 @@ import {
   type TabItem,
 } from "./ProfileShell";
 import BadgePicker from "./BadgePicker";
+import JournalTab from "./JournalTab";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
 
@@ -44,7 +45,7 @@ function OwnerCard({
   return <IdentityCard {...card} avatar={photo.avatar} notice={photo.status} />;
 }
 
-const TAB_KEYS = ["overview", "gear", "trails", "trips"] as const;
+const TAB_KEYS = ["overview", "gear", "trails", "trips", "journal"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 function ProfileContent() {
@@ -116,6 +117,7 @@ function ProfileContent() {
     { key: "gear", label: "My gear", count: gearCount },
     { key: "trails", label: "Saved trails", count: savedCount },
     { key: "trips", label: "Trips", count: tripCount },
+    { key: "journal", label: "Journal", count: hikeCount },
   ];
 
   const aside = (
@@ -247,6 +249,8 @@ function ProfileContent() {
             <SavedTrailList data={savedTrails} units={units} />
           </SectionCard>
         )}
+
+        {tab === "journal" && <JournalTab hikes={hikes.loading ? null : hikes.logs} owner units={units} />}
 
         {tab === "trips" && (
           <SectionCard id="trips" title="Trips" count={tripCount ?? undefined}>

@@ -20,6 +20,7 @@ import {
   type StatRow,
   type TabItem,
 } from "@/app/profile/ProfileShell";
+import JournalTab from "@/app/profile/JournalTab";
 import shell from "@/app/profile/shell.module.css";
 import ui from "@/components/ui.module.css";
 import GearList from "@/app/gear/GearList";
@@ -161,7 +162,7 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   // Only the sections the owner shares come back from the API (all null when private).
   const tabs: TabItem<PublicTab>[] = [];
-  if (profile.journal) tabs.push({ key: "journal", label: "Trail Journal", count: profile.journal.entries.length });
+  if (profile.journal) tabs.push({ key: "journal", label: "Journal", count: profile.journal.entries.length });
   if (profile.gear) tabs.push({ key: "gear", label: "Gear", count: profile.gear.items.length });
   if (profile.saved_trails) tabs.push({ key: "trails", label: "Saved trails", count: profile.saved_trails.length });
   if (profile.trip_plans) tabs.push({ key: "trips", label: "Trips", count: profile.trip_plans.length });
@@ -233,7 +234,12 @@ export default function PublicProfileView({ username }: { username: string }) {
         <>
           <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label={`${name}'s profile sections`} />
           <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={shell.main}>
-            {tab === "journal" && profile.journal && <JournalSection journal={profile.journal} />}
+            {tab === "journal" && profile.journal && (
+              <>
+                <JournalTab hikes={profile.journal.entries} owner={false} units={units} />
+                {profile.journal.entries.length > 0 && <JournalSection journal={profile.journal} />}
+              </>
+            )}
             {tab === "gear" && profile.gear && <GearSection gear={profile.gear} units={units} />}
             {tab === "trails" && profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />}
             {tab === "trips" && profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />}
@@ -314,7 +320,7 @@ function JournalPhoto({ path, alt }: { path: string; alt: string }) {
 
 function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journal"]> }) {
   return (
-    <SectionCard id="journal" title="Trail Journal" count={journal.entries.length}>
+    <SectionCard id="all-hikes" title="All hikes" count={journal.entries.length}>
       <Milestones entries={journal.entries} />
       {journal.entries.length === 0 ? (
         <p className={styles.quiet}>No hikes logged yet.</p>

@@ -10,8 +10,8 @@ import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { buildJournal, sectionIndex } from "@/lib/journal";
-import { searchTrails, type TrailListItem } from "@/lib/trailsApi";
 import { useHikeLogs } from "@/lib/useHikeLogs";
+import { useTrailCatalogue } from "@/lib/useTrailCatalogue";
 import { useProfile } from "@/lib/useProfile";
 import { useUnits } from "@/lib/useUnits";
 import Book from "./Book";
@@ -19,7 +19,6 @@ import { useHikePhoto } from "@/lib/useHikePhoto";
 import { formatHikeDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
 import styles from "./journal.module.css";
 
-const CATALOGUE_SIZE = 100;
 const stampKey = (userId: string) => `trekly:journal-stamped:${userId}`;
 
 function readStamped(userId: string): Set<string> {
@@ -120,24 +119,12 @@ function Journal() {
   const params = useSearchParams();
   const signedIn = status === "signedIn";
   const guest = status !== "signedIn" && status !== "loading";
-  const [catalogue, setCatalogue] = useState<TrailListItem[] | null>(null);
-  const [failed, setFailed] = useState(false);
+  const { catalogue, failed } = useTrailCatalogue(signedIn);
   const [open, setOpen] = useState<{ log: HikeLog; colour: string; editing: boolean } | null>(null);
   const { stamped, mark } = useStamped(user?.id ?? null);
   // Whether the current section was opened from the contents in this visit,
   // so "Back to contents" can step back through history instead of adding to it.
   const [fromContents, setFromContents] = useState(false);
-
-  useEffect(() => {
-    if (!signedIn) return;
-    const controller = new AbortController();
-    searchTrails("", controller.signal, { limit: CATALOGUE_SIZE })
-      .then(setCatalogue)
-      .catch((error: unknown) => {
-        if ((error as { name?: string }).name !== "AbortError") setFailed(true);
-      });
-    return () => controller.abort();
-  }, [signedIn]);
 
   const [units] = useUnits();
   const journal = useMemo(

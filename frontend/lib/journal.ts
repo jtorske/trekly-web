@@ -229,6 +229,66 @@ export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], units:
   };
 }
 
+/** How many of a group's trails are in `hiked` (trail ids). */
+export function hikedInGroup(group: JournalGroup, hiked: { has: (id: string) => boolean }): number {
+  return group.trails.filter((trail) => hiked.has(trail.id)).length;
+}
+
+/** How many catalogue trails the journal and the profile's Journal tab load. */
+export const CATALOGUE_SIZE = 100;
+
+/** A hike as the profile sees it: a visitor's copy has no date when the owner hides dates. */
+export type SummaryHike = { trail: TrailListItem; hiked_on: string | null };
+
+export interface JournalSummary {
+  hiked: number;
+  total: number;
+  /** Distinct parks and regions hiked in. */
+  places: number;
+  overnights: number;
+  nights: number;
+  /** Only when every hiked trail has one; otherwise null (a partial total would mislead). */
+  distanceKm: number | null;
+  elevationM: number | null;
+  /** The latest hikes, newest first; in the given order when there are no dates. */
+  recent: { hike: SummaryHike; colour: string }[];
+  /** Groups with a hike in them, the most complete first. */
+  regions: { key: string; title: string; colour: string; hiked: number; total: number }[];
+}
+
+export const RECENT_STAMPS = 6;
+
+/**
+ * The Trail Journal in numbers, for the profile's Journal tab. Built on
+ * buildJournal, so the counts, groups and colours match the book.
+ */
+export function summarizeJournal(catalogue: TrailListItem[], hikes: SummaryHike[]): JournalSummary {
+  const journal = buildJournal(catalogue, hikes as HikeLog[]);
+  const hiked = new Set(hikes.map((hike) => hike.trail.id));
+  const colourOf = new Map(journal.groups.flatMap((group) => group.trails.map((trail) => [trail.id, group.colour] as const)));
+  const trails = hikes.map((hike) => hike.trail);
+  const every = (known: (trail: TrailListItem) => number | null) =>
+    trails.length > 0 && trails.every((trail) => known(trail) != null)
+      ? trails.reduce((sum, trail) => sum + Number(known(trail)), 0)
+      : null;
+  const dated = hikes.every((hike) => hike.hiked_on);
+  const ordered = dated ? [...hikes].sort((a, b) => (b.hiked_on as string).localeCompare(a.hiked_on as string)) : hikes;
+  return {
+    hiked: journal.hiked,
+    total: journal.total,
+    places: new Set(trails.map((trail) => trail.region)).size,
+    overnights: trails.filter((trail) => (trail.typical_duration_nights ?? 0) >= 1).length,
+    nights: trails.reduce((sum, trail) => sum + (trail.typical_duration_nights ?? 0), 0),
+    distanceKm: every((trail) => trail.distance_km),
+    elevationM: every((trail) => trail.elevation_gain_m),
+    recent: ordered.slice(0, RECENT_STAMPS).map((hike) => ({ hike, colour: colourOf.get(hike.trail.id) ?? groupColour(hike.trail.region) })),
+    regions: journal.groups
+      .map((group) => ({ key: group.key, title: group.title, colour: group.colour, hiked: hikedInGroup(group, hiked), total: group.trails.length }))
+      .filter((region) => region.hiked > 0)
+      .sort((a, b) => b.hiked / b.total - a.hiked / a.total || b.hiked - a.hiked || a.title.localeCompare(b.title)),
+  };
+}
+
 /** The section a ?section= value names; unknown or missing means the contents. */
 export function sectionIndex(journal: Journal, slug: string | null): number {
   const index = slug ? journal.sections.findIndex((section) => section.slug === slug) : 0;

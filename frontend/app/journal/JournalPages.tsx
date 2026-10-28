@@ -5,7 +5,7 @@ import Link from "next/link";
 import TrailBadge from "@/components/TrailBadge";
 import { MILESTONE_ICONS } from "@/lib/badge";
 import type { HikeLog } from "@/lib/hikeLogsApi";
-import { BADGE_COLOURS, badgeGrid, halves, type Journal, type JournalGroup, type JournalSection, type Milestone } from "@/lib/journal";
+import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type JournalGroup, type JournalSection, type Milestone } from "@/lib/journal";
 import { useHikePhoto } from "@/lib/useHikePhoto";
 import type { TrailListItem } from "@/lib/trailsApi";
 import type { View } from "./Book";
@@ -68,9 +68,7 @@ function PageTitle({ children }: { children: ReactNode }) {
   );
 }
 
-function hikedIn(group: JournalGroup, logs: Map<string, HikeLog>) {
-  return group.trails.filter((trail) => logs.has(trail.id)).length;
-}
+const hikedIn = (group: JournalGroup, logs: Map<string, HikeLog>) => hikedInGroup(group, logs);
 
 type ContentsEntry = { slug: string; title: string; colour: string; count: string; noun: string };
 
