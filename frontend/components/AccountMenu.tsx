@@ -3,10 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { Backpack, Bell, LogOut, Settings, Tent, type LucideIcon } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
 import { ACCOUNT_LINKS, PROFILE_HREF, currentAccountHref } from "@/lib/accountMenu";
 import styles from "./AccountMenu.module.css";
+
+/** Decorative icons for the account rows, keyed by href; the labels name them. */
+const ROW_ICONS: Record<string, LucideIcon> = {
+  "/profile?tab=trips": Tent,
+  "/gear": Backpack,
+  "/alerts": Bell,
+  "/profile?tab=settings": Settings,
+};
+
+function RowIcon({ icon: Icon }: { icon: LucideIcon | undefined }) {
+  return Icon ? <Icon className={styles.icon} size={18} aria-hidden="true" /> : null;
+}
 
 export interface AccountIdentity {
   displayName: string | null;
@@ -34,6 +47,7 @@ export function AccountRows({
   const { signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const item = asMenuItems ? ({ role: "menuitem", tabIndex: -1 } as const) : {};
+  const name = identity.displayName || identity.email || "Your account";
   const currentProps = (href: string) => (current === href ? { "aria-current": "page" as const } : {});
 
   return (
@@ -41,7 +55,9 @@ export function AccountRows({
       <Link href={PROFILE_HREF} className={`${styles.row} ${styles.profileRow}`} {...item} {...currentProps(PROFILE_HREF)} onClick={onChoose}>
         <Avatar path={identity.avatarPath} name={identity.displayName} email={identity.email} size={40} />
         <span className={styles.profileText}>
-          <span className={styles.name}>{identity.displayName || identity.email || "Your account"}</span>
+          <span className={styles.name} title={name}>
+            {name}
+          </span>
           <span className={styles.showProfile}>Show profile</span>
         </span>
         <span className={styles.chevron} aria-hidden="true">
@@ -51,10 +67,12 @@ export function AccountRows({
       {ACCOUNT_LINKS.map((link) =>
         link.href.startsWith("mailto:") ? (
           <a key={link.href} href={link.href} className={styles.row} {...item} onClick={onChoose}>
+            <RowIcon icon={ROW_ICONS[link.href]} />
             {link.label}
           </a>
         ) : (
           <Link key={link.href} href={link.href} className={styles.row} {...item} {...currentProps(link.href)} onClick={onChoose}>
+            <RowIcon icon={ROW_ICONS[link.href]} />
             {link.label}
           </Link>
         ),
@@ -69,6 +87,7 @@ export function AccountRows({
           void signOut("/landing");
         }}
       >
+        <RowIcon icon={LogOut} />
         {signingOut ? "Logging out…" : "Log out"}
       </button>
     </>

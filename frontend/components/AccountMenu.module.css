@@ -95,6 +95,11 @@
   color: var(--menu-text);
 }
 
+.icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
 .row:focus-visible {
   outline: 2px solid var(--menu-ring);
   outline-offset: -2px;
@@ -120,11 +125,15 @@
   flex-direction: column;
 }
 
+/* Wraps to two lines before clipping; the full name is in its title. */
 .name {
+  display: -webkit-box;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .showProfile {
