@@ -5,10 +5,12 @@
 
 import type { Terrain } from "./terrain";
 
-export type TrailSort = "popular" | "name" | "easiest" | "hardest" | "shortest" | "longest";
+export type TrailSort = "popular" | "nearest" | "name" | "easiest" | "hardest" | "shortest" | "longest";
 
 export const TRAIL_SORT_LABELS: Record<TrailSort, string> = {
   popular: "Most popular",
+  /** Only offered while the searcher's location is in use. */
+  nearest: "Nearest",
   name: "Name (A–Z)",
   easiest: "Easiest first",
   hardest: "Hardest first",
@@ -27,6 +29,8 @@ interface Sortable {
   terrain: Terrain;
   typical_duration_nights: number | null;
   distance_km: number | null;
+  /** From the searcher; set by the API only when a location was sent. */
+  distance_away_km?: number | null;
 }
 
 const byName = (a: Sortable, b: Sortable) => a.name.localeCompare(b.name, "en", { sensitivity: "base" });
@@ -44,10 +48,18 @@ function compareLength(a: Sortable, b: Sortable, direction: 1 | -1): number {
   return 0;
 }
 
+function compareNullsLast(x: number | null | undefined, y: number | null | undefined): number {
+  if (x == null && y == null) return 0;
+  if (x == null) return 1;
+  if (y == null) return -1;
+  return x - y;
+}
+
 /** A sorted copy; ties keep the incoming (popularity) order. */
 export function sortTrails<T extends Sortable>(trails: T[], sort: TrailSort): T[] {
   const compare: Record<TrailSort, ((a: T, b: T) => number) | null> = {
     popular: null,
+    nearest: (a, b) => compareNullsLast(a.distance_away_km, b.distance_away_km),
     name: byName,
     easiest: (a, b) => TERRAIN_ORDER[a.terrain] - TERRAIN_ORDER[b.terrain],
     hardest: (a, b) => TERRAIN_ORDER[b.terrain] - TERRAIN_ORDER[a.terrain],

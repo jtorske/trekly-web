@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 from app.database import Base
 
 TERRAIN_DIFFICULTIES = ("easy", "moderate", "difficult", "extreme")
+PARK_TYPES = ("national", "provincial", "regional", "none")
 
 
 class Trail(Base):
@@ -24,8 +25,15 @@ class Trail(Base):
             "(distance_km > 0 and route_type in ('out_and_back','loop','point_to_point'))",
             name="trails_distance_check",
         ),
+        CheckConstraint(
+            "park_type in ('national','provincial','regional','none')",
+            name="trails_park_type_check",
+        ),
         UniqueConstraint("name", "province_code", name="trails_name_province_key"),
         Index("trails_country_rank_idx", "country_code", "popularity_rank"),
+        Index("trails_province_code_idx", "province_code"),
+        Index("trails_park_type_idx", "park_type"),
+        Index("trails_park_name_idx", "park_name"),
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -35,6 +43,13 @@ class Trail(Base):
     # (e.g. "CA" / "AB").
     country_code = Column(Text, nullable=False)
     province_code = Column(Text)
+    # The park the trail is in, from the catalogue. park_type is national
+    # (Parks Canada), provincial (provincial and territorial parks, Quebec's
+    # parcs nationaux, Kananaskis Country), regional (regional or municipal)
+    # or none. A named place that isn't a park keeps its name with type none.
+    # Both null for retired trails that were never classified.
+    park_name = Column(Text)
+    park_type = Column(Text)
     latitude = Column(Numeric(9, 6))
     longitude = Column(Numeric(9, 6))
     elevation_gain_m = Column(Integer)

@@ -1,10 +1,10 @@
+import math
 from functools import lru_cache
-from typing import Literal
 from urllib.parse import urlencode
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.backcountry.parks_canada import PROVIDER as PARKS_CANADA
@@ -17,6 +17,11 @@ from app.models.trail_campground import TrailBookingSystem, TrailCampground
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.schemas.trail import (
     CampgroundParkOut,
+    NearIn,
+    ParkFacetOut,
+    ParkTypeFacetOut,
+    ParkTypeFilter,
+    ProvinceFacetOut,
     SeasonalConditionOut,
     Terrain,
     TrailBookingLinkOut,
@@ -24,7 +29,12 @@ from app.schemas.trail import (
     TrailCampgroundOut,
     TrailCampgroundsOut,
     TrailDetailOut,
+    TrailFacetsOut,
     TrailListItemOut,
+    TrailSearchIn,
+    TrailSearchItemOut,
+    TrailSearchOut,
+    TripType,
 )
 from app.trail_campgrounds import MAPPING_PATH, load_mapping
 
@@ -33,11 +43,99 @@ router = APIRouter(prefix="/api/trails", tags=["trails"])
 SEASON_ORDER = {"spring": 0, "summer": 1, "fall": 2, "winter": 3}
 
 
+def live_trails():
+    """Live catalogue only: configured countries, not retired, within the cap."""
+    return (
+        Trail.retired_at.is_(None),
+        Trail.country_code.in_(TRAIL_CATALOG_COUNTRIES),
+        Trail.popularity_rank.is_not(None),
+        Trail.popularity_rank <= TRAIL_CATALOG_LIMIT,
+    )
+
+
+# Explore's three park-type options; "other" is regional parks and no park.
+PARK_TYPE_BUCKET = case(
+    (Trail.park_type == "national", "national"),
+    (Trail.park_type == "provincial", "provincial"),
+    else_="other",
+)
+PARK_TYPE_FILTERS: tuple[ParkTypeFilter, ...] = ("national", "provincial", "other")
+EARTH_RADIUS_KM = 6371.0
+
+
+def distance_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """Great-circle (haversine) distance."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = p2 - p1, math.radians(lng2 - lng1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * EARTH_RADIUS_KM * math.asin(math.sqrt(a))
+
+
+def distances_from(db: Session, near: NearIn) -> dict[UUID, float]:
+    """Km from `near` to each live trail that has coordinates. The catalogue
+    is capped at TRAIL_CATALOG_LIMIT rows, so this is one small read."""
+    rows = db.execute(
+        select(Trail.id, Trail.latitude, Trail.longitude).where(
+            *live_trails(), Trail.latitude.is_not(None), Trail.longitude.is_not(None)
+        )
+    )
+    return {
+        trail_id: distance_km(near.lat, near.lng, float(lat), float(lng))
+        for trail_id, lat, lng in rows
+    }
+
+
+def filter_conditions(
+    q: str = "",
+    terrain: Terrain | None = None,
+    trip: TripType | None = None,
+    provinces: list[str] = (),
+    park_types: list[ParkTypeFilter] = (),
+    parks: list[str] = (),
+    within_ids: set[UUID] | None = None,
+) -> dict[str, list]:
+    """WHERE clauses keyed by filter, so a facet can leave out its own."""
+    conditions: dict[str, list] = {}
+    if q:
+        # Escaped so "%" or "_" in the search box match literally, not everything.
+        like = f"%{escape_like(q)}%"
+        conditions["q"] = [or_(
+            Trail.name.ilike(like, escape="\\"),
+            Trail.region.ilike(like, escape="\\"),
+            Trail.park_name.ilike(like, escape="\\"),
+        )]
+    if terrain:
+        conditions["terrain"] = [Trail.terrain_difficulty == terrain]
+    if trip == "overnight":
+        conditions["trip"] = [Trail.typical_duration_nights >= 1]
+    elif trip == "day":
+        conditions["trip"] = [Trail.typical_duration_nights == 0]
+    if provinces:
+        conditions["province"] = [Trail.province_code.in_([p.upper() for p in provinces])]
+    if park_types:
+        options = [Trail.park_type == t for t in ("national", "provincial") if t in park_types]
+        if "other" in park_types:
+            options.append(or_(Trail.park_type.is_(None), Trail.park_type.in_(("regional", "none"))))
+        conditions["park_type"] = [or_(*options)]
+    if parks:
+        conditions["park"] = [Trail.park_name.in_(parks)]
+    if within_ids is not None:
+        conditions["near"] = [Trail.id.in_(within_ids)]
+    return conditions
+
+
+def where(conditions: dict[str, list], leave_out: str | None = None) -> list:
+    return [*live_trails(), *(c for key, cs in conditions.items() if key != leave_out for c in cs)]
+
+
 @router.get("", response_model=list[TrailListItemOut])
 def search_trails(
     q: str = "",
     terrain: Terrain | None = None,
-    trip: Literal["overnight", "day"] | None = None,
+    trip: TripType | None = None,
+    province: list[str] = Query([]),
+    park_type: list[ParkTypeFilter] = Query([]),
+    park: list[str] = Query([]),
     limit: int = Query(10, ge=1, le=TRAIL_CATALOG_LIMIT),
     db: Session = Depends(get_db),
 ):
@@ -45,24 +143,77 @@ def search_trails(
 
     `trip=overnight` keeps backpacking trips (one or more typical nights);
     `trip=day` keeps day hikes. Trails with an unknown length match neither.
+    `province`, `park_type` and `park` repeat to match any of their values.
     """
-    query = db.query(Trail).filter(
-        Trail.retired_at.is_(None),
-        Trail.country_code.in_(TRAIL_CATALOG_COUNTRIES),
-        Trail.popularity_rank.is_not(None),
-        Trail.popularity_rank <= TRAIL_CATALOG_LIMIT,
+    conditions = filter_conditions(q, terrain, trip, province, park_type, park)
+    return db.scalars(
+        select(Trail).where(*where(conditions)).order_by(Trail.popularity_rank, Trail.name).limit(limit)
+    ).all()
+
+
+def trail_facets(db: Session, conditions: dict[str, list]) -> TrailFacetsOut:
+    """Each option counted under every other filter. Options with no matches
+    stay in the lists (count 0) so the page can grey them out."""
+    def counts(column, leave_out):
+        return dict(db.execute(
+            select(column, func.count()).where(*where(conditions, leave_out)).group_by(column)
+        ).all())
+
+    province_counts = counts(Trail.province_code, "province")
+    provinces = db.scalars(
+        select(Trail.province_code).where(*live_trails(), Trail.province_code.is_not(None)).distinct()
+    ).all()
+
+    type_counts = counts(PARK_TYPE_BUCKET, "park_type")
+
+    park_counts = counts(Trail.park_name, "park")
+    parks: dict[str, ParkFacetOut] = {}
+    for name, kind, province in db.execute(
+        select(Trail.park_name, Trail.park_type, Trail.province_code)
+        .where(*live_trails(), Trail.park_name.is_not(None))
+        .distinct()
+    ):
+        park = parks.setdefault(
+            name, ParkFacetOut(name=name, park_type=kind or "none", province_codes=[], count=park_counts.get(name, 0))
+        )
+        if province and province not in park.province_codes:
+            park.province_codes.append(province)
+
+    return TrailFacetsOut(
+        provinces=[ProvinceFacetOut(code=code, count=province_counts.get(code, 0)) for code in sorted(provinces)],
+        park_types=[ParkTypeFacetOut(type=kind, count=type_counts.get(kind, 0)) for kind in PARK_TYPE_FILTERS],
+        parks=sorted(parks.values(), key=lambda p: p.name.casefold()),
     )
-    if q:
-        # Escaped so "%" or "_" in the search box match literally, not everything.
-        like = f"%{escape_like(q)}%"
-        query = query.filter(or_(Trail.name.ilike(like, escape="\\"), Trail.region.ilike(like, escape="\\")))
-    if terrain:
-        query = query.filter(Trail.terrain_difficulty == terrain)
-    if trip == "overnight":
-        query = query.filter(Trail.typical_duration_nights >= 1)
-    elif trip == "day":
-        query = query.filter(Trail.typical_duration_nights == 0)
-    return query.order_by(Trail.popularity_rank, Trail.name).limit(limit).all()
+
+
+@router.post("/search", response_model=TrailSearchOut)
+def search_trails_with_facets(body: TrailSearchIn, db: Session = Depends(get_db)):
+    """Explore's search: the trails, the total, and the filter counts.
+
+    A POST so `near` travels in the body: request URLs land in access logs,
+    and the searcher's position is used for this response only, never stored
+    or logged.
+    """
+    limit = min(body.limit, TRAIL_CATALOG_LIMIT)
+    distances = distances_from(db, body.near) if body.near else {}
+    within = None
+    if body.near and body.near.radius_km is not None:
+        within = {trail_id for trail_id, km in distances.items() if km <= body.near.radius_km}
+    conditions = filter_conditions(
+        body.q.strip(), body.terrain, body.trip, body.provinces, body.park_types, body.parks, within
+    )
+
+    total = db.scalar(select(func.count()).select_from(Trail).where(*where(conditions)))
+    rows = db.scalars(
+        select(Trail).where(*where(conditions)).order_by(Trail.popularity_rank, Trail.name).limit(limit)
+    ).all()
+    trails = []
+    for row in rows:
+        item = TrailSearchItemOut.model_validate(row)
+        km = distances.get(row.id)
+        item.distance_away_km = round(km, 1) if km is not None else None
+        trails.append(item)
+    return TrailSearchOut(trails=trails, total=total, facets=trail_facets(db, conditions))
 
 
 @router.get("/{trail_id}", response_model=TrailDetailOut)

@@ -203,6 +203,26 @@ def test_shipped_catalogue_is_valid():
     assert any(t["name"] == "West Coast Trail" for t in trails)
 
 
+def test_shipped_catalogue_parks_are_classified():
+    trails = load_catalog()["trails"]
+    for t in trails:
+        assert t["park_type"] in ("national", "provincial", "regional", "none"), t["name"]
+        if t["park_type"] != "none":
+            assert t["park_name"], t["name"]
+    by_name = {t["name"]: t for t in trails}
+    assert (by_name["Lake Agnes Tea House"]["park_name"], by_name["Lake Agnes Tea House"]["park_type"]) == (
+        "Banff National Park", "national")
+    # Quebec's parcs nationaux are provincial parks.
+    assert all(t["park_type"] == "provincial" for t in trails if t["region"].startswith("Parc national"))
+    # Locals search by Kananaskis, so it stands in for the parks inside it.
+    assert all(
+        (t["park_name"], t["park_type"]) == ("Kananaskis Country", "provincial")
+        for t in trails if t["region"].startswith("Kananaskis Country")
+    )
+    signal_hill = next(t for t in trails if t["region"].startswith("Signal Hill"))
+    assert (signal_hill["park_name"], signal_hill["park_type"]) == ("Signal Hill National Historic Site", "none")
+
+
 def test_list_filters_by_trip_type(client, synced, session_factory):
     session = session_factory()
     for trail in session.query(Trail).filter(Trail.name.in_(["Trail 002", "Trail 005"])):
@@ -220,3 +240,144 @@ def test_list_filters_by_trip_type(client, synced, session_factory):
     assert names(trip="overnight", q="Trail 005") == ["Trail 005"]
     assert names(trip="overnight", terrain="extreme") == []
     assert client.get("/api/trails", params={"trip": "weekend"}).status_code == 422
+
+
+PARK_ROWS = [
+    # rank, name, province, park, park type, terrain, nights, lat, lng
+    (1, "Lake Agnes", "AB", "Banff National Park", "national", "easy", 0, 51.42, -116.21),
+    (2, "Sulphur Skyline", "AB", "Jasper National Park", "national", "moderate", 0, 52.97, -117.68),
+    (3, "Rawson Lake", "AB", "Kananaskis Country", "provincial", "moderate", 0, 50.62, -115.16),
+    (4, "Joffre Lakes", "BC", "Joffre Lakes Provincial Park", "provincial", "moderate", 0, 50.37, -122.50),
+    (5, "Berg Lake", "BC", "Mount Robson Provincial Park", "provincial", "difficult", 3, 53.04, -119.21),
+    (6, "Grouse Grind", "BC", "Grouse Mountain Regional Park", "regional", "difficult", 0, 49.38, -123.08),
+    (7, "Mount Cheam", "BC", None, "none", "moderate", 0, 49.17, -121.68),
+    (8, "Signal Hill", "NL", "Signal Hill National Historic Site", "none", "easy", 0, 47.57, -52.68),
+]
+
+
+@pytest.fixture
+def parks_catalogue(session_factory, client):
+    session = session_factory()
+    sync_trails(
+        session,
+        catalog([
+            entry(rank, name, province=province, park_name=park, park_type=kind, terrain_difficulty=terrain,
+                  typical_duration_nights=nights, latitude=lat, longitude=lng)
+            for rank, name, province, park, kind, terrain, nights, lat, lng in PARK_ROWS
+        ]),
+        countries=("CA",),
+        limit=100,
+    )
+    session.commit()
+    session.close()
+
+
+def search(client, **body):
+    response = client.post("/api/trails/search", json={"limit": 100, **body})
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def result_names(result):
+    return [t["name"] for t in result["trails"]]
+
+
+def counts_by(facet, key):
+    return {option[key]: option["count"] for option in facet}
+
+
+def test_sync_copies_park_fields(session_factory, parks_catalogue):
+    session = session_factory()
+    trail = session.query(Trail).filter_by(name="Rawson Lake").one()
+    assert (trail.park_name, trail.park_type) == ("Kananaskis Country", "provincial")
+    session.close()
+
+
+def test_list_filters_by_province_park_type_and_park(client, parks_catalogue):
+    def listed(**params):
+        return [t["name"] for t in client.get("/api/trails", params={"limit": 100, **params}).json()]
+
+    assert listed(province="NL") == ["Signal Hill"]
+    assert listed(province=["NL", "ab"]) == ["Lake Agnes", "Sulphur Skyline", "Rawson Lake", "Signal Hill"]
+    assert listed(park_type="national") == ["Lake Agnes", "Sulphur Skyline"]
+    # "other" is regional parks plus trails in no park.
+    assert listed(park_type="other") == ["Grouse Grind", "Mount Cheam", "Signal Hill"]
+    assert listed(park_type=["national", "other"], province="BC") == ["Grouse Grind", "Mount Cheam"]
+    assert listed(park=["Banff National Park", "Signal Hill National Historic Site"]) == ["Lake Agnes", "Signal Hill"]
+    assert listed(q="kananaskis") == ["Rawson Lake"]
+    assert client.get("/api/trails", params={"park_type": "regional"}).status_code == 422
+    first = client.get("/api/trails", params={"limit": 1}).json()[0]
+    assert (first["park_name"], first["park_type"]) == ("Banff National Park", "national")
+
+
+def test_search_combines_filters_with_trip_terrain_and_query(client, parks_catalogue):
+    assert result_names(search(client, provinces=["BC"], terrain="moderate")) == ["Joffre Lakes", "Mount Cheam"]
+    assert result_names(search(client, park_types=["provincial"], trip="overnight")) == ["Berg Lake"]
+    assert result_names(search(client, q="lake", provinces=["AB"], park_types=["national"])) == ["Lake Agnes"]
+    empty = search(client, parks=["Banff National Park"], provinces=["BC"])
+    assert (empty["trails"], empty["total"]) == ([], 0)
+
+
+def test_search_total_counts_past_the_limit(client, parks_catalogue):
+    result = search(client, provinces=["BC"], limit=2)
+    assert result_names(result) == ["Joffre Lakes", "Berg Lake"]
+    assert result["total"] == 4
+
+
+def test_facet_counts_apply_every_other_filter(client, parks_catalogue):
+    facets = search(client)["facets"]
+    assert facets["provinces"] == [{"code": "AB", "count": 3}, {"code": "BC", "count": 4}, {"code": "NL", "count": 1}]
+    assert facets["park_types"] == [
+        {"type": "national", "count": 2}, {"type": "provincial", "count": 3}, {"type": "other", "count": 3}]
+    assert [p["name"] for p in facets["parks"]] == [
+        "Banff National Park", "Grouse Mountain Regional Park", "Jasper National Park", "Joffre Lakes Provincial Park",
+        "Kananaskis Country", "Mount Robson Provincial Park", "Signal Hill National Historic Site"]
+    assert facets["parks"][-1] == {
+        "name": "Signal Hill National Historic Site", "park_type": "none", "province_codes": ["NL"], "count": 1}
+
+    # Picking Alberta leaves the province counts alone (their own filter is
+    # left out) but narrows every other facet; options at 0 stay listed.
+    facets = search(client, provinces=["AB"])["facets"]
+    assert counts_by(facets["provinces"], "code") == {"AB": 3, "BC": 4, "NL": 1}
+    assert counts_by(facets["park_types"], "type") == {"national": 2, "provincial": 1, "other": 0}
+    parks = counts_by(facets["parks"], "name")
+    assert parks["Banff National Park"] == 1 and parks["Joffre Lakes Provincial Park"] == 0
+    assert len(parks) == 7
+
+    # Two filters at once: each facet sees the other one, plus terrain.
+    facets = search(client, provinces=["BC"], park_types=["provincial"], terrain="moderate")["facets"]
+    assert counts_by(facets["provinces"], "code") == {"AB": 1, "BC": 1, "NL": 0}
+    assert counts_by(facets["park_types"], "type") == {"national": 0, "provincial": 1, "other": 1}
+    parks = counts_by(facets["parks"], "name")
+    assert parks["Joffre Lakes Provincial Park"] == 1 and parks["Kananaskis Country"] == 0
+
+    # The park facet leaves out the park filter, so other parks stay pickable.
+    facets = search(client, parks=["Banff National Park"])["facets"]
+    assert counts_by(facets["parks"], "name")["Jasper National Park"] == 1
+    assert counts_by(facets["provinces"], "code") == {"AB": 1, "BC": 0, "NL": 0}
+
+
+def test_near_filters_by_radius_and_reports_distance(client, parks_catalogue):
+    canmore = {"lat": 51.09, "lng": -115.36}
+    everything = search(client, near=canmore)
+    assert everything["total"] == 8
+    away = {t["name"]: t["distance_away_km"] for t in everything["trails"]}
+    assert 55 < away["Lake Agnes"] < 75 and away["Signal Hill"] > 4000
+
+    near = search(client, near={**canmore, "radius_km": 100})
+    assert result_names(near) == ["Lake Agnes", "Rawson Lake"]
+    assert near["total"] == 2
+    # The radius narrows the counts too.
+    assert counts_by(near["facets"]["provinces"], "code") == {"AB": 2, "BC": 0, "NL": 0}
+    assert result_names(search(client, near={**canmore, "radius_km": 100}, park_types=["provincial"])) == [
+        "Rawson Lake"]
+
+    assert search(client)["trails"][0]["distance_away_km"] is None
+    for bad in ({"lat": 91, "lng": 0}, {"lat": 0, "lng": 0, "radius_km": 0}):
+        assert client.post("/api/trails/search", json={"near": bad}).status_code == 422
+
+
+def test_search_hides_retired_trails_from_results_and_facets(client, parks_catalogue, legacy_us_trail):
+    result = search(client, q="Wonderland")
+    assert result["total"] == 0
+    assert "WA" not in {p["code"] for p in result["facets"]["provinces"]}

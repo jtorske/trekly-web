@@ -64,3 +64,13 @@ test("clashing trail names get their park; unique names don't", () => {
   assert.equal(titles.get("2"), "Skyline Trail (Cape Breton Highlands National Park)");
   assert.equal(titles.get("3"), "Grouse Grind");
 });
+
+test("nearest sorts by distance from the searcher, unknown last", () => {
+  const away = [
+    { ...trail("a", "A", "easy", 0), distance_away_km: 120 },
+    { ...trail("b", "B", "easy", 0), distance_away_km: null },
+    { ...trail("c", "C", "easy", 0), distance_away_km: 8.5 },
+  ];
+  assert.deepEqual(sortTrails(away, "nearest").map((t) => t.id), ["c", "a", "b"]);
+  assert.equal(isTrailSort("nearest"), true);
+});

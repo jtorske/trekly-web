@@ -79,6 +79,11 @@ export function distanceValue(km: number, system: UnitSystem = DEFAULT_UNITS): n
   return system === "metric" ? km : km / KM_PER_MILE;
 }
 
+/** Back to km from a distance in "km" or "mi": 25 mi → 40.23. */
+export function kmFromDistance(value: number, unit: "km" | "mi"): number {
+  return unit === "km" ? value : value * KM_PER_MILE;
+}
+
 export function distanceUnit(system: UnitSystem = DEFAULT_UNITS): string {
   return system === "metric" ? "km" : "mi";
 }

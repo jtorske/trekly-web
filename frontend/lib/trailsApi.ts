@@ -24,9 +24,19 @@ export interface TrailPhoto {
   origin: string | null;
 }
 
+/** national = Parks Canada; provincial includes territorial parks, Quebec's
+ * parcs nationaux and Kananaskis Country; regional = regional or municipal. */
+export type ParkType = "national" | "provincial" | "regional" | "none";
+
+/** Explore's park-type filter: "other" is regional parks and no park. */
+export type ParkTypeFilter = "national" | "provincial" | "other";
+
 export interface TrailListItem extends TrailSummary {
   country_code: string;
   province_code: string | null;
+  /** Can be set with park_type "none" for a named place that isn't a park. */
+  park_name: string | null;
+  park_type: ParkType | null;
   typical_duration_nights: number | null;
   route_type: RouteType | null;
   /** Round trip for an out-and-back, the loop, or the full one-way length. */
@@ -74,6 +84,53 @@ export async function searchTrails(
   if (options.limit) params.set("limit", String(options.limit));
 
   const res = await fetch(`${API_BASE}/api/trails?${params}`, { signal });
+  if (!res.ok) throw new Error("Failed to search trails");
+  return res.json();
+}
+
+export interface TrailSearchRequest {
+  q?: string;
+  terrain?: Terrain;
+  trip?: TripType;
+  provinces?: string[];
+  park_types?: ParkTypeFilter[];
+  parks?: string[];
+  /** Used for this request only; the API never stores or logs it. */
+  near?: { lat: number; lng: number; radius_km?: number };
+  limit?: number;
+}
+
+export interface TrailSearchItem extends TrailListItem {
+  /** Straight-line km from `near`; null without it. */
+  distance_away_km: number | null;
+}
+
+/** Every option, counted under all the other active filters. */
+export interface TrailFacets {
+  provinces: { code: string; count: number }[];
+  park_types: { type: ParkTypeFilter; count: number }[];
+  parks: { name: string; park_type: ParkType; province_codes: string[]; count: number }[];
+}
+
+export interface TrailSearchResult {
+  trails: TrailSearchItem[];
+  /** All matches, before `limit`. */
+  total: number;
+  facets: TrailFacets;
+}
+
+/**
+ * Explore's search: trails, total and filter counts in one call. A POST so
+ * the searcher's position travels in the body, never in a URL that could be
+ * logged.
+ */
+export async function searchExplore(request: TrailSearchRequest, signal?: AbortSignal): Promise<TrailSearchResult> {
+  const res = await fetch(`${API_BASE}/api/trails/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+    signal,
+  });
   if (!res.ok) throw new Error("Failed to search trails");
   return res.json();
 }

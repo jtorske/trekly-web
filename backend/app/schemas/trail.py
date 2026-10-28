@@ -8,6 +8,10 @@ from app.trail_photos import public_photo_url
 
 Terrain = Literal["easy", "moderate", "difficult", "extreme"]
 Season = Literal["spring", "summer", "fall", "winter"]
+ParkType = Literal["national", "provincial", "regional", "none"]
+# Explore's park-type filter: "other" is regional parks and trails in no park.
+ParkTypeFilter = Literal["national", "provincial", "other"]
+TripType = Literal["overnight", "day"]
 
 
 class TrailOut(BaseModel):
@@ -57,6 +61,8 @@ class TrailPhotoOut(BaseModel):
 class TrailListItemOut(TrailOut):
     country_code: str
     province_code: str | None = None
+    park_name: str | None = None
+    park_type: ParkType | None = None
     typical_duration_nights: int | None = None
     route_type: Literal["out_and_back", "loop", "point_to_point"] | None = None
     # Round trip for out-and-backs, the loop, or the full one-way length.
@@ -68,6 +74,65 @@ class TrailListItemOut(TrailOut):
     retired_at: datetime | None = None
     # The approved hero photo; null means show the topo fallback.
     photo: TrailPhotoOut | None = None
+
+
+class NearIn(BaseModel):
+    """The searcher's position, used for this request only and never stored."""
+
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
+    # Null ranks by distance without cutting anything off.
+    radius_km: float | None = Field(default=None, gt=0, le=1000)
+
+
+class TrailSearchIn(BaseModel):
+    q: str = ""
+    terrain: Terrain | None = None
+    trip: TripType | None = None
+    # Each list matches any of its values; the lists combine with AND.
+    provinces: list[str] = Field(default=[], max_length=20)
+    park_types: list[ParkTypeFilter] = Field(default=[], max_length=3)
+    parks: list[str] = Field(default=[], max_length=50)
+    near: NearIn | None = None
+    limit: int = Field(default=10, ge=1)
+
+
+class TrailSearchItemOut(TrailListItemOut):
+    # Straight-line km from `near`; null without it or without coordinates.
+    distance_away_km: float | None = None
+
+
+class ProvinceFacetOut(BaseModel):
+    code: str
+    count: int
+
+
+class ParkTypeFacetOut(BaseModel):
+    type: ParkTypeFilter
+    count: int
+
+
+class ParkFacetOut(BaseModel):
+    name: str
+    park_type: ParkType
+    province_codes: list[str]
+    count: int
+
+
+class TrailFacetsOut(BaseModel):
+    """Every option, each counted under all the other active filters (its own
+    dimension left out), so a count says what picking that option adds."""
+
+    provinces: list[ProvinceFacetOut]
+    park_types: list[ParkTypeFacetOut]
+    parks: list[ParkFacetOut]
+
+
+class TrailSearchOut(BaseModel):
+    trails: list[TrailSearchItemOut]
+    # All matches, before `limit`.
+    total: int
+    facets: TrailFacetsOut
 
 
 class SeasonalConditionOut(BaseModel):

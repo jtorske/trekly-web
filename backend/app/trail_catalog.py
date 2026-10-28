@@ -21,7 +21,7 @@ CATALOG_PATH = Path(__file__).resolve().parents[1] / "catalog_data" / "trails_ca
 
 # Fields copied from a catalogue entry onto the trail row.
 TRAIL_FIELDS = (
-    "region", "country_code", "province_code", "latitude", "longitude",
+    "region", "park_name", "park_type", "country_code", "province_code", "latitude", "longitude",
     "route_type", "distance_km", "elevation_gain_m", "max_elevation_m", "terrain_difficulty",
     "typical_duration_nights", "climate_zone", "description",
 )
