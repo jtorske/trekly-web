@@ -42,6 +42,7 @@ export default function Avatar({
   return (
     <span
       className={styles.avatar}
+      data-avatar
       style={{ width: size, height: size, fontSize: size * 0.38 }}
       aria-hidden={alt ? undefined : true}
       {...label}

@@ -82,9 +82,9 @@
   display: flex;
 }
 
-/* Avatar sizes itself inline; the slot decides the size per breakpoint. */
-.avatarSlot > span,
-.avatarSlot > button > span {
+/* Avatar sizes itself inline; the slot decides the size per breakpoint
+   (ProfilePhoto's button reads --avatar too). */
+.avatarSlot [data-avatar] {
   width: var(--avatar) !important;
   height: var(--avatar) !important;
   font-size: calc(var(--avatar) * 0.38) !important;

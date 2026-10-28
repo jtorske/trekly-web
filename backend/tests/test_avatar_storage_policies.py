@@ -148,6 +148,40 @@ def test_user_cannot_overwrite_or_delete_another_users_avatar(conn, users):
     assert not (metadata or {}).get("hacked")
 
 
+def exists(conn, name):
+    conn.execute(text("RESET ROLE"))
+    return conn.execute(
+        text("SELECT count(*) FROM storage.objects WHERE bucket_id = 'avatars' AND name = :name"), {"name": name}
+    ).scalar_one() == 1
+
+
+def test_changing_photo_leaves_only_the_new_file(conn, users):
+    """The client's replace (lib/avatarChange.ts): upload the new photo, then delete the old one."""
+    alice, _ = users
+    old, new = avatar_name(alice), avatar_name(alice, "jpg")
+    act_as(conn, alice)
+    upload(conn, old)
+    upload(conn, new)
+    assert delete(conn, old).rowcount == 1
+    assert not exists(conn, old) and exists(conn, new)
+
+
+def test_removing_photo_really_deletes_it_and_only_the_owner_can(conn, users):
+    """A refused delete matches no rows, which Storage reports as an empty list; the client treats that as a failure."""
+    alice, bob = users
+    name = avatar_name(alice)
+    act_as(conn, alice)
+    upload(conn, name)
+
+    act_as(conn, bob)
+    assert delete(conn, name).rowcount == 0
+    assert exists(conn, name)
+
+    act_as(conn, alice)
+    assert delete(conn, name).rowcount == 1
+    assert not exists(conn, name)
+
+
 def test_owner_cannot_overwrite_in_place_either(conn, users):
     """Every change is a new file, which is what makes the URL cache-safe."""
     alice, _ = users

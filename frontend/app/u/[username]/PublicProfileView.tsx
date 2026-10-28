@@ -156,6 +156,8 @@ export default function PublicProfileView({ username }: { username: string }) {
   const name = displayName(profile);
   const showOwnerControls = isOwner && !preview;
   const canReport = Boolean(user) && !isOwner;
+  // An owner who changes their photo elsewhere sees it here at once (useProfile hears every change).
+  const avatarPath = isOwner && me ? me.avatar_path : profile.avatar_path;
 
   // Only the sections the owner shares come back from the API (all null when private).
   const tabs: TabItem<PublicTab>[] = [];
@@ -198,7 +200,7 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   const aside = (
     <IdentityCard
-      avatar={<Avatar path={profile.avatar_path} name={profile.display_name} email={null} size={120} alt={`${name}'s profile photo`} />}
+      avatar={<Avatar path={avatarPath} name={profile.display_name} email={null} size={120} alt={`${name}'s profile photo`} />}
       name={name}
       username={profile.username}
       bio={profile.bio}

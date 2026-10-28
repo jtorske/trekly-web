@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BIO_LIMIT, initialValues, isDirty, profileUpdate, staleAvatar, validateProfile } from "./editProfileForm.ts";
+import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm.ts";
 import type { Profile } from "../../lib/accountApi.ts";
 
 const profile: Profile = {
@@ -20,13 +20,11 @@ test("initialValues turns nulls into empty strings", () => {
   assert.deepEqual(initialValues(profile), { display_name: "Sam", username: "trail_sam", bio: "Loves ridgelines", home_region: "" });
 });
 
-test("isDirty tracks text edits and avatar changes", () => {
+test("isDirty tracks text edits (the photo saves on its own)", () => {
   const initial = initialValues(profile);
-  const noAvatar = { file: null, remove: false };
-  assert.equal(isDirty({ ...initial }, initial, noAvatar), false);
-  assert.equal(isDirty({ ...initial, bio: "Loves valleys" }, initial, noAvatar), true);
-  assert.equal(isDirty(initial, initial, { file: {}, remove: false }), true);
-  assert.equal(isDirty(initial, initial, { file: null, remove: true }), true);
+  assert.equal(isDirty({ ...initial }, initial), false);
+  assert.equal(isDirty({ ...initial, bio: "Loves valleys" }, initial), true);
+  assert.equal(isDirty({ ...initial, home_region: "PNW" }, initial), true);
 });
 
 test("validateProfile checks username format and bio length", () => {
@@ -48,18 +46,4 @@ test("profileUpdate trims, lowercases the username and clears blanks", () => {
     bio: null,
     home_region: "PNW",
   });
-});
-
-test("a pending photo change counts as unsaved", () => {
-  const initial = initialValues(profile);
-  const croppedPhoto = { blob: {}, extension: "webp" };
-  assert.equal(isDirty(initial, initial, { file: croppedPhoto, remove: false }), true);
-  assert.equal(isDirty(initial, initial, { file: null, remove: true }), true);
-});
-
-test("staleAvatar deletes the old file only when it was replaced or removed", () => {
-  assert.equal(staleAvatar("u1/old.webp", "u1/new.webp"), "u1/old.webp");
-  assert.equal(staleAvatar("u1/old.webp", null), "u1/old.webp");
-  assert.equal(staleAvatar("u1/old.webp", "u1/old.webp"), null);
-  assert.equal(staleAvatar(null, "u1/new.webp"), null);
 });

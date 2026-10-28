@@ -154,6 +154,23 @@ def test_cannot_point_profile_at_another_users_avatar(client, headers, alice, bo
     assert client.patch("/api/me/profile", json={"avatar_path": path}, headers=headers(alice)).status_code == 422
 
 
+def test_changing_or_removing_your_avatar_never_touches_another_users(client, headers, alice, bob):
+    alices = f"{alice}/{uuid.uuid4()}.webp"
+    bobs = f"{bob}/{uuid.uuid4()}.webp"
+    assert client.patch("/api/me/profile", json={"avatar_path": alices}, headers=headers(alice)).status_code == 200
+    assert client.patch("/api/me/profile", json={"avatar_path": bobs}, headers=headers(bob)).status_code == 200
+
+    # Bob replaces, then removes, his photo; there is no way to name Alice's profile.
+    replaced = f"{bob}/{uuid.uuid4()}.jpg"
+    assert client.patch("/api/me/profile", json={"avatar_path": replaced}, headers=headers(bob)).json()["avatar_path"] == replaced
+    assert client.patch("/api/me/profile", json={"avatar_path": None}, headers=headers(bob)).json()["avatar_path"] is None
+    # Nor can he point his profile at hers to claim it.
+    assert client.patch("/api/me/profile", json={"avatar_path": alices}, headers=headers(bob)).status_code == 422
+
+    assert client.get("/api/me/profile", headers=headers(alice)).json()["avatar_path"] == alices
+    assert client.get("/api/me/profile", headers=headers(bob)).json()["avatar_path"] is None
+
+
 def test_save_and_unsave_trails(client, headers, alice, trails):
     first = client.put(f"/api/me/saved-trails/{trails[0]}", headers=headers(alice))
     assert first.status_code == 201

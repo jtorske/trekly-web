@@ -1,15 +1,16 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, type ComponentProps } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
-import Avatar from "@/components/Avatar";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
+import { useProfilePhoto } from "@/app/settings/ProfilePhoto";
 import { useMyGear } from "@/app/gear/useMyGear";
 import { useSetups } from "@/app/gear/useSetups";
+import type { Profile } from "@/lib/accountApi";
 import { usePlans } from "@/lib/usePlans";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
@@ -31,6 +32,15 @@ import {
 } from "./ProfileShell";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
+
+/** The owner's card: the same as a visitor's, but the photo is a button that changes it. */
+function OwnerCard({
+  profile,
+  ...card
+}: { profile: Profile } & Omit<ComponentProps<typeof IdentityCard>, "avatar" | "notice">) {
+  const photo = useProfilePhoto(profile, { size: 120, alt: `${card.name}'s profile photo` });
+  return <IdentityCard {...card} avatar={photo.avatar} notice={photo.status} />;
+}
 
 const TAB_KEYS = ["overview", "gear", "trails", "trips"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
@@ -98,8 +108,8 @@ function ProfileContent() {
   ];
 
   const aside = (
-    <IdentityCard
-      avatar={<Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={120} alt={`${name}'s profile photo`} />}
+    <OwnerCard
+      profile={profile}
       name={name}
       username={profile.username}
       links={

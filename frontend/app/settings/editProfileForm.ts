@@ -19,12 +19,9 @@ export function initialValues(profile: Profile): ProfileFormValues {
   };
 }
 
-export function isDirty(
-  values: ProfileFormValues,
-  initial: ProfileFormValues,
-  avatar: { file: unknown; remove: boolean },
-): boolean {
-  return JSON.stringify(values) !== JSON.stringify(initial) || avatar.file != null || avatar.remove;
+/** The photo isn't part of this: it saves on its own (ProfilePhoto). */
+export function isDirty(values: ProfileFormValues, initial: ProfileFormValues): boolean {
+  return JSON.stringify(values) !== JSON.stringify(initial);
 }
 
 /** Field errors keyed by field name; empty when the values can be saved. */
@@ -45,9 +42,4 @@ export function profileUpdate(values: ProfileFormValues): ProfileUpdate {
     bio: values.bio.trim() || null,
     home_region: values.home_region.trim() || null,
   };
-}
-
-/** The stored avatar to delete after a save: the old one, if it was replaced or removed. */
-export function staleAvatar(previous: string | null, saved: string | null): string | null {
-  return previous && previous !== saved ? previous : null;
 }

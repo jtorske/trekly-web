@@ -78,6 +78,7 @@ export function IdentityCard({
   name,
   username,
   links,
+  notice,
   bio,
   region,
   joined,
@@ -92,6 +93,8 @@ export function IdentityCard({
   username: string | null;
   /** "View public profile" and similar, under the username. */
   links?: ReactNode;
+  /** Under the name, e.g. photo upload progress and errors. */
+  notice?: ReactNode;
   bio?: string | null;
   region?: string | null;
   joined?: string | null;
@@ -111,6 +114,8 @@ export function IdentityCard({
           {links && <div className={styles.links}>{links}</div>}
         </div>
       </div>
+
+      {notice}
 
       {bio && <p className={styles.bio}>{bio}</p>}
 

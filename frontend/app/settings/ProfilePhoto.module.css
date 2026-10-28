@@ -1,0 +1,178 @@
+/*
+ * The owner's clickable profile photo (ProfilePhoto.tsx). The overlay text
+ * is cream on a 72% dark-olive scrim over any photo, at least 7:1.
+ */
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  position: relative;
+  /* --avatar comes from a layout that resizes the photo (the profile card). */
+  width: var(--avatar, var(--photo-size));
+  height: var(--avatar, var(--photo-size));
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+  container-type: inline-size;
+}
+
+.trigger:disabled {
+  cursor: progress;
+}
+
+.trigger:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 3px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 72%, transparent);
+  color: var(--color-cream);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.trigger:hover .overlay,
+.trigger:focus-visible .overlay,
+.overlayBusy {
+  opacity: 1;
+}
+
+.overlayText {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Too small for words: the camera says it. */
+@container (max-width: 90px) {
+  .overlayText {
+    display: none;
+  }
+}
+
+.spinner {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Touch screens have no hover, so a camera badge shows the photo is editable. */
+.badge {
+  position: absolute;
+  right: 4%;
+  bottom: 4%;
+  display: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 2px solid var(--color-cream);
+  border-radius: 999px;
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+@media (hover: none) {
+  .badge {
+    display: grid;
+  }
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  width: 14rem;
+  flex-direction: column;
+  gap: 0.125rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 55%, var(--color-cream));
+  box-shadow:
+    0 2px 6px -2px rgba(40, 54, 24, 0.12),
+    0 16px 36px -14px rgba(40, 54, 24, 0.35);
+  padding: 0.5rem;
+  color: var(--color-dark-olive);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  color: var(--color-dark-olive);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: color-mix(in srgb, var(--color-olive) 15%, transparent);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--color-olive);
+  outline-offset: -2px;
+}
+
+.danger {
+  color: var(--color-rust-text);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .item {
+    transition: none;
+  }
+
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

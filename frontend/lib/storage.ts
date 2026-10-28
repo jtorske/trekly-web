@@ -1,3 +1,4 @@
+import { undeletedPaths } from "./avatarChange";
 import { NOT_AN_IMAGE, readImageType } from "./imageType";
 import { processPhoto } from "./processPhoto";
 import { getSupabaseClient } from "./supabaseClient";
@@ -55,6 +56,18 @@ export async function uploadImage(bucket: Bucket, userId: string, file: File): P
 export async function removeImages(bucket: Bucket, paths: string[]): Promise<void> {
   if (paths.length === 0) return;
   await getSupabaseClient().storage.from(bucket).remove(paths);
+}
+
+/**
+ * Like removeImages, but throws unless Storage confirms every path was
+ * deleted. A delete the policies refuse still "succeeds" with an empty list.
+ */
+export async function deleteImages(bucket: Bucket, paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  const { data, error } = await getSupabaseClient().storage.from(bucket).remove(paths);
+  if (error) throw new Error(`Delete failed: ${error.message}`);
+  const left = undeletedPaths(paths, data);
+  if (left.length) throw new Error(`Storage didn't delete ${left.join(", ")}.`);
 }
 
 /** Every object in the user's own folder (used before account deletion). */
