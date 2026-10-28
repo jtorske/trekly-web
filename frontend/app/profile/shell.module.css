@@ -1,0 +1,591 @@
+/*
+ * The two-column profile layout (ProfileShell.tsx), shared by /profile and
+ * /u/[username]. Spacing sits on an 8px scale (0.5rem steps; 0.25rem for
+ * the odd half step). The topo background comes from the page behind.
+ */
+.page {
+  --ink: var(--color-dark-olive);
+  --paper: var(--color-cream);
+  --hair: color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  --hair-strong: color-mix(in srgb, var(--color-dark-olive) 28%, transparent);
+  --surface: color-mix(in srgb, white 72%, var(--paper));
+  --muted: var(--color-muted-text);
+  --shadow: 0 1px 2px rgba(40, 54, 24, 0.06), 0 8px 24px -12px rgba(40, 54, 24, 0.18);
+  --shadow-hover: 0 2px 4px rgba(40, 54, 24, 0.08), 0 14px 32px -14px rgba(40, 54, 24, 0.3);
+  --radius: 1rem;
+
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 100%;
+  /* clip, not hidden: hidden would make this the sticky card's scroller. */
+  overflow-x: clip;
+  padding-bottom: 4rem;
+  color: var(--ink);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.wrap {
+  display: flex;
+  max-width: 76rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 0 auto;
+  padding: 6.5rem 1.5rem 0;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  align-items: start;
+  gap: 2rem;
+}
+
+.aside {
+  position: sticky;
+  /* Set by ProfileLayout; negative when the card is taller than the window. */
+  top: var(--sticky-top, 6.5rem);
+}
+
+.main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Identity card */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.avatarSlot {
+  --avatar: 120px;
+  display: flex;
+}
+
+/* Avatar sizes itself inline; the slot decides the size per breakpoint. */
+.avatarSlot > span,
+.avatarSlot > button > span {
+  width: var(--avatar) !important;
+  height: var(--avatar) !important;
+  font-size: calc(var(--avatar) * 0.38) !important;
+}
+
+.identityText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.name {
+  font-family: var(--display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.username {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.88rem;
+}
+
+.links a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.links a:hover {
+  color: var(--color-rust-text);
+}
+
+.bio {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.meta li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta svg {
+  flex-shrink: 0;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-olive) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-olive) 10%, var(--paper));
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rankLevel {
+  display: inline-grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-olive);
+  color: var(--color-cream);
+  font-size: 0.75rem;
+}
+
+.badges {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.badges li {
+  display: flex;
+  justify-content: center;
+}
+
+.badge {
+  width: 100%;
+  max-width: 5rem;
+}
+
+.badgesLabel {
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.action > * {
+  width: 100%;
+  justify-content: center;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--hair);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: -0.5rem;
+}
+
+.stat {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  color: var(--ink);
+  font-size: 0.94rem;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.stat:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-olive) 12%, transparent);
+}
+
+.stat:disabled {
+  cursor: default;
+}
+
+.statIcon {
+  flex-shrink: 0;
+  color: var(--color-olive);
+}
+
+.statLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.statValue {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.statSkeleton {
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Tabs */
+
+.tabBar {
+  position: relative;
+  border-bottom: 1px solid var(--hair);
+}
+
+.tabBar::before,
+.tabBar::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 2.5rem;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.tabBar::before {
+  left: 0;
+  background: linear-gradient(to right, var(--paper), transparent);
+}
+
+.tabBar::after {
+  right: 0;
+  background: linear-gradient(to left, var(--paper), transparent);
+}
+
+.tabBar[data-fade-start]::before,
+.tabBar[data-fade-end]::after {
+  opacity: 1;
+}
+
+.tabs {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 0.75rem 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.tab:hover {
+  background: color-mix(in srgb, var(--color-olive) 8%, transparent);
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--ink);
+}
+
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.tabCount {
+  min-width: 1.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.tab[aria-selected="true"] .tabCount {
+  background: color-mix(in srgb, var(--color-rust) 18%, transparent);
+  color: var(--color-rust-text);
+}
+
+.tabCountSkeleton {
+  width: 1.5rem;
+  height: 1.125rem;
+  border-radius: 999px;
+}
+
+.indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-rust);
+  transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), width 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Main pane cards */
+
+.section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.sectionCount {
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.94rem;
+  font-weight: 500;
+}
+
+.sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--color-rust-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 120ms ease;
+}
+
+.sectionLink:hover {
+  background: color-mix(in srgb, var(--color-rust) 10%, transparent);
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  align-items: start;
+  gap: 1.5rem;
+}
+
+/* Skeletons, sized like what they stand in for. */
+
+.skeletonAvatar {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.skeletonName {
+  width: 11rem;
+  height: 2rem;
+}
+
+.skeletonShort {
+  width: 7rem;
+  height: 1rem;
+}
+
+.skeletonButton {
+  height: 2.75rem;
+  border-radius: 999px;
+}
+
+.skeletonStat {
+  height: 2.75rem;
+}
+
+.skeletonTabs {
+  height: 3rem;
+}
+
+.skeletonSection {
+  height: 14rem;
+  border-radius: var(--radius);
+}
+
+/* Tablet and phone: the card becomes a compact header above the tabs. */
+@media (max-width: 900px) {
+  .wrap {
+    gap: 1rem;
+    padding: 6rem 1rem 0;
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .aside {
+    position: static;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .identity {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .avatarSlot {
+    --avatar: 72px;
+  }
+
+  .skeletonAvatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .name {
+    font-size: 1.5rem;
+  }
+
+  .meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+
+  .badges {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 30rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.15rem;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .stats {
+    display: grid;
+    /* One row however many stats are public. */
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .stat {
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    border: 1px solid var(--hair);
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .statIcon {
+    display: none;
+  }
+
+  .statLabel {
+    flex: none;
+    order: 2;
+    color: var(--muted);
+    line-height: 1.2;
+  }
+
+  .statValue {
+    order: 1;
+    font-family: var(--display);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator,
+  .stat,
+  .tab,
+  .tabBar::before,
+  .tabBar::after {
+    transition: none;
+  }
+}

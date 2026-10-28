@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Backpack, Bookmark, Layers, Tent, type LucideIcon } from "lucide-react";
 import ui from "@/components/ui.module.css";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import GearList from "@/app/gear/GearList";
@@ -19,18 +20,23 @@ import { formatTrailElevation, formatWeight, type UnitSystem } from "@/lib/units
 import styles from "./page.module.css";
 
 export function EmptyState({
+  icon: Icon,
   title,
   children,
   action,
 }: {
+  icon: LucideIcon;
   title: string;
   children: React.ReactNode;
   action?: { href: string; label: string };
 }) {
   return (
     <div className={styles.empty}>
+      <span className={styles.emptyIcon} aria-hidden="true">
+        <Icon size={24} />
+      </span>
       <h3 className={styles.emptyTitle}>{title}</h3>
-      <p>{children}</p>
+      <p className={styles.emptyText}>{children}</p>
       {action && (
         <Link href={action.href} className={ui.primary}>
           {action.label}
@@ -87,7 +93,7 @@ export function SavedTrailList({ data, units, limit }: { data: SavedData; units:
   if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
   if (data.saved.length === 0) {
     return (
-      <EmptyState title="No saved trails yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+      <EmptyState icon={Bookmark} title="No saved trails yet" action={{ href: "/trail-list", label: "Explore trails" }}>
         Bookmark trails you&apos;d like to hike and they&apos;ll collect here. Saving a trail doesn&apos;t mark
         it as hiked or planned.
       </EmptyState>
@@ -132,7 +138,7 @@ export function GearSection({ gear, units, limit }: { gear: GearData; units: Uni
   if (gear.status === "error") return <SectionError message={gear.error ?? "Couldn't load your gear."} onRetry={gear.reload} />;
   if (gear.items.length === 0) {
     return (
-      <EmptyState title="Your gear mat is empty" action={{ href: "/gear", label: "Add your first piece of gear" }}>
+      <EmptyState icon={Backpack} title="Your gear mat is empty" action={{ href: "/gear", label: "Add your first piece of gear" }}>
         Add the equipment you own — from the catalogue or as custom items — and it&apos;ll show up here and on
         your Gear mat.
       </EmptyState>
@@ -182,7 +188,7 @@ export function TripsSection({
   if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
   if (data.plans.length === 0) {
     return (
-      <EmptyState title="No trip plans yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+      <EmptyState icon={Tent} title="No trip plans yet" action={{ href: "/trail-list", label: "Explore trails" }}>
         Open an overnight trail and choose &ldquo;Plan this trip&rdquo; to lay out each night, your gear and what
         you&apos;ve booked.
       </EmptyState>
@@ -225,7 +231,7 @@ export function SetupsSection({
   if (data.error) return <SectionError message={data.error} onRetry={data.reload} />;
   if (data.setups.length === 0) {
     return (
-      <EmptyState title="No setups yet" action={{ href: "/gear", label: "Create a setup" }}>
+      <EmptyState icon={Layers} title="No setups yet" action={{ href: "/gear", label: "Create a setup" }}>
         Group the gear you carry together — like &ldquo;Ultralight 2-Night Kit&rdquo; — to see each kit at a glance.
       </EmptyState>
     );

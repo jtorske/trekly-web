@@ -3,11 +3,23 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Backpack, Bookmark, Flag, Footprints, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
 import TrailBadge from "@/components/TrailBadge";
+import {
+  FeaturedBadges,
+  IdentityCard,
+  ProfileLayout,
+  ProfileSkeleton,
+  ProfileTabs,
+  SectionCard,
+  type StatRow,
+  type TabItem,
+} from "@/app/profile/ProfileShell";
+import shell from "@/app/profile/shell.module.css";
 import ui from "@/components/ui.module.css";
 import GearList from "@/app/gear/GearList";
 import { slotForItem } from "@/app/gear/slots";
@@ -35,6 +47,8 @@ import { formatWeight } from "@/lib/units";
 import { useProfile } from "@/lib/useProfile";
 import { useUnits } from "@/lib/useUnits";
 import styles from "./public.module.css";
+
+type PublicTab = "journal" | "gear" | "trails" | "trips";
 
 type Load =
   | { status: "loading" }
@@ -87,29 +101,26 @@ export default function PublicProfileView({ username }: { username: string }) {
   }, [isOwner]);
 
   const load: Load = state && state.username === handle ? state.load : { status: "loading" };
-  const setPreview = (on: boolean) => router.replace(on ? `?preview=1` : `/u/${encodeURIComponent(handle)}`, { scroll: false });
+  // Preview and the open tab both live in the query string; changing one keeps the other.
+  const go = (changes: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value === null) params.delete(key);
+      else params.set(key, value);
+    }
+    const query = params.toString();
+    router.replace(`/u/${encodeURIComponent(handle)}${query ? `?${query}` : ""}`, { scroll: false });
+  };
+  const setPreview = (on: boolean) => go({ preview: on ? "1" : null });
+  const setTab = (key: PublicTab) => go({ tab: key });
 
-  if (load.status === "loading") {
-    return (
-      <main className={profileStyles.page} aria-busy="true">
-        <div className={profileStyles.wrap}>
-          <div className={profileStyles.header}>
-            <div className={`${ui.skeleton} ${profileStyles.skeletonAvatar}`} />
-            <div className={profileStyles.headerText}>
-              <div className={`${ui.skeleton} ${profileStyles.skeletonLine}`} />
-              <div className={`${ui.skeleton} ${profileStyles.skeletonLineShort}`} />
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  if (load.status === "loading") return <ProfileSkeleton />;
 
   if (load.status !== "ready") {
     const hiddenByModerators = isOwner && privacy?.hidden_by_moderators;
     return (
-      <main className={profileStyles.page}>
-        <div className={`${profileStyles.wrap} ${styles.narrow}`}>
+      <main className={shell.page}>
+        <div className={`${shell.wrap} ${styles.narrow}`}>
           <div className={styles.messageCard}>
             {hiddenByModerators ? (
               <>
@@ -145,63 +156,89 @@ export default function PublicProfileView({ username }: { username: string }) {
   const showOwnerControls = isOwner && !preview;
   const canReport = Boolean(user) && !isOwner;
 
+  // Only the sections the owner shares come back from the API (all null when private).
+  const tabs: TabItem<PublicTab>[] = [];
+  if (profile.journal) tabs.push({ key: "journal", label: "Trail Journal", count: profile.journal.entries.length });
+  if (profile.gear) tabs.push({ key: "gear", label: "Gear", count: profile.gear.items.length });
+  if (profile.saved_trails) tabs.push({ key: "trails", label: "Saved trails", count: profile.saved_trails.length });
+  if (profile.trip_plans) tabs.push({ key: "trips", label: "Trips", count: profile.trip_plans.length });
+  const requested = searchParams.get("tab");
+  const tab = tabs.find((t) => t.key === requested)?.key ?? tabs[0]?.key ?? null;
+
+  const stats: StatRow[] = [];
+  if (profile.gear) {
+    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear") });
+  }
+  if (profile.saved_trails) {
+    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails") });
+  }
+  if (profile.trip_plans) {
+    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips") });
+  }
+  if (profile.journal) {
+    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal") });
+  }
+
+  const banner = (preview || showOwnerControls) && (
+    <>
+      {preview && (
+        <div className={styles.previewBar} role="status">
+          <span>
+            <strong>Previewing as a visitor.</strong> This is exactly what others see.
+          </span>
+          <button type="button" className={ui.secondary} onClick={() => setPreview(false)}>
+            Exit preview
+          </button>
+        </div>
+      )}
+      {showOwnerControls && <OwnerBanner profile={profile} privacy={privacy} onPreview={() => setPreview(true)} />}
+    </>
+  );
+
+  const aside = (
+    <IdentityCard
+      avatar={<Avatar path={profile.avatar_path} name={profile.display_name} email={null} size={120} alt={`${name}'s profile photo`} />}
+      name={name}
+      username={profile.username}
+      bio={profile.bio}
+      rank={profile.rank}
+      badges={profile.journal && <FeaturedBadges trails={featuredEntries(profile.journal.entries).map((entry) => entry.trail)} />}
+      stats={stats}
+      footer={
+        canReport && (
+          <button type="button" className={`${ui.ghost} ${styles.reportButton}`} onClick={() => setReporting(true)}>
+            <Flag size={14} aria-hidden="true" />
+            Report profile
+          </button>
+        )
+      }
+    />
+  );
+
   return (
-    <main className={profileStyles.page}>
-      <div className={profileStyles.wrap}>
-        {preview && (
-          <div className={styles.previewBar} role="status">
-            <span>
-              <strong>Previewing as a visitor.</strong> This is exactly what others see.
-            </span>
-            <button type="button" className={ui.secondary} onClick={() => setPreview(false)}>
-              Exit preview
-            </button>
+    <ProfileLayout banner={banner} aside={aside}>
+      {profile.is_private ? (
+        <div className={styles.messageCard}>
+          <h2 className={styles.messageTitle}>This profile is private</h2>
+          <p>{name} keeps their hikes, gear and trails to themselves.</p>
+        </div>
+      ) : tab === null ? (
+        <div className={styles.messageCard}>
+          <p className={styles.quiet}>{name} hasn&apos;t shared anything else yet.</p>
+        </div>
+      ) : (
+        <>
+          <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label={`${name}'s profile sections`} />
+          <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={shell.main}>
+            {tab === "journal" && profile.journal && <JournalSection journal={profile.journal} />}
+            {tab === "gear" && profile.gear && <GearSection gear={profile.gear} units={units} />}
+            {tab === "trails" && profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />}
+            {tab === "trips" && profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />}
           </div>
-        )}
-        {showOwnerControls && <OwnerBanner profile={profile} privacy={privacy} onPreview={() => setPreview(true)} />}
-
-        <header className={`${profileStyles.header} ${styles.header}`}>
-          <Avatar path={profile.avatar_path} name={profile.display_name} email={null} size={96} alt={`${name}'s profile photo`} />
-          <div className={profileStyles.headerText}>
-            <h1 className={profileStyles.name}>{name}</h1>
-            <p className={profileStyles.username}>@{profile.username}</p>
-            {profile.rank && (
-              <p className={styles.rank}>
-                <span className={styles.rankLevel} aria-hidden="true">
-                  {profile.rank.level}
-                </span>
-                {profile.rank.title}
-              </p>
-            )}
-            {profile.bio && <p className={profileStyles.bio}>{profile.bio}</p>}
-          </div>
-          {canReport && (
-            <button type="button" className={`${ui.ghost} ${styles.reportButton}`} onClick={() => setReporting(true)}>
-              Report profile
-            </button>
-          )}
-        </header>
-
-        {profile.is_private ? (
-          <div className={styles.messageCard}>
-            <h2 className={styles.messageTitle}>This profile is private</h2>
-            <p>{name} keeps their hikes, gear and trails to themselves.</p>
-          </div>
-        ) : (
-          <>
-            {profile.journal && <FeaturedBadges entries={profile.journal.entries} />}
-            {profile.journal && <JournalSection journal={profile.journal} />}
-            {profile.gear && <GearSection gear={profile.gear} units={units} />}
-            {profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />}
-            {profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />}
-            {!profile.journal && !profile.gear && !profile.saved_trails && !profile.trip_plans && (
-              <p className={styles.quiet}>{name} hasn&apos;t shared anything else yet.</p>
-            )}
-          </>
-        )}
-      </div>
+        </>
+      )}
       {reporting && <ReportDialog username={profile.username} name={name} onClose={() => setReporting(false)} />}
-    </main>
+    </ProfileLayout>
   );
 }
 
@@ -241,44 +278,18 @@ function OwnerBanner({
   );
 }
 
-function Section({ id, title, children, count }: { id: string; title: string; count?: number; children: React.ReactNode }) {
-  return (
-    <section className={styles.section} aria-labelledby={`${id}-title`}>
-      <div className={profileStyles.sectionHead}>
-        <h2 id={`${id}-title`} className={profileStyles.sectionTitle}>
-          {title}
-          {count != null && <span className={styles.count}> {count}</span>}
-        </h2>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function FeaturedBadges({ entries }: { entries: PublicJournalEntry[] }) {
-  const featured = featuredEntries(entries);
+function Milestones({ entries }: { entries: PublicJournalEntry[] }) {
   // computeMilestones only reads each entry's trail.
   const milestones = computeMilestones(entries as unknown as HikeLog[]).filter((m) => m.earned);
-  if (featured.length === 0) return null;
+  if (milestones.length === 0) return null;
   return (
-    <Section id="badges" title="Featured badges">
-      <ul className={styles.badges}>
-        {featured.map((entry) => (
-          <li key={entry.trail.id} className={styles.badgeItem}>
-            <TrailBadge name={entry.trail.name} terrain={entry.trail.terrain} colour={badgeColour(entry)} hiked className={styles.badge} />
-          </li>
-        ))}
-      </ul>
-      {milestones.length > 0 && (
-        <ul className={styles.milestones} aria-label="Milestones earned">
-          {milestones.map((milestone) => (
-            <li key={milestone.id} className={ui.chip}>
-              {milestone.title}
-            </li>
-          ))}
-        </ul>
-      )}
-    </Section>
+    <ul className={styles.milestones} aria-label="Milestones earned">
+      {milestones.map((milestone) => (
+        <li key={milestone.id} className={ui.chip}>
+          {milestone.title}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -300,7 +311,8 @@ function JournalPhoto({ path, alt }: { path: string; alt: string }) {
 
 function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journal"]> }) {
   return (
-    <Section id="journal" title="Trail Journal" count={journal.entries.length}>
+    <SectionCard id="journal" title="Trail Journal" count={journal.entries.length}>
+      <Milestones entries={journal.entries} />
       {journal.entries.length === 0 ? (
         <p className={styles.quiet}>No hikes logged yet.</p>
       ) : (
@@ -322,13 +334,13 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
           ))}
         </ul>
       )}
-    </Section>
+    </SectionCard>
   );
 }
 
 function GearSection({ gear, units }: { gear: NonNullable<PublicProfile["gear"]>; units: ReturnType<typeof useUnits>[0] }) {
   return (
-    <Section id="gear" title="Gear and loadouts" count={gear.items.length}>
+    <SectionCard id="gear" title="Gear and loadouts" count={gear.items.length}>
       {gear.setups.length > 0 && (
         <ul className={profileStyles.setups}>
           {gear.setups.map((setup) => (
@@ -362,13 +374,13 @@ function GearSection({ gear, units }: { gear: NonNullable<PublicProfile["gear"]>
       ) : (
         <GearList items={gear.items.map(asGearItem)} units={units} />
       )}
-    </Section>
+    </SectionCard>
   );
 }
 
 function SavedTrailsSection({ trails }: { trails: NonNullable<PublicProfile["saved_trails"]> }) {
   return (
-    <Section id="saved" title="Saved trails" count={trails.length}>
+    <SectionCard id="saved" title="Saved trails" count={trails.length}>
       {trails.length === 0 ? (
         <p className={styles.quiet}>No saved trails yet.</p>
       ) : (
@@ -391,13 +403,13 @@ function SavedTrailsSection({ trails }: { trails: NonNullable<PublicProfile["sav
           ))}
         </ul>
       )}
-    </Section>
+    </SectionCard>
   );
 }
 
 function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_plans"]> }) {
   return (
-    <Section id="plans" title="Trip plans" count={plans.length}>
+    <SectionCard id="plans" title="Trip plans" count={plans.length}>
       {plans.length === 0 ? (
         <p className={styles.quiet}>No trip plans yet.</p>
       ) : (
@@ -413,7 +425,7 @@ function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_pl
           ))}
         </ul>
       )}
-    </Section>
+    </SectionCard>
   );
 }
 

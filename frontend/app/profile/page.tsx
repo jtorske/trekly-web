@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import RequireAuth from "@/components/RequireAuth";
@@ -10,38 +11,29 @@ import ui from "@/components/ui.module.css";
 import { useMyGear } from "@/app/gear/useMyGear";
 import { useSetups } from "@/app/gear/useSetups";
 import { usePlans } from "@/lib/usePlans";
+import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { publicProfilePath } from "@/lib/profilesApi";
+import { FEATURED_BADGES } from "@/lib/publicProfile";
+import { rankFor } from "@/lib/rank";
 import { useUnits } from "@/lib/useUnits";
 import { legacySettingsHref, sectionHref } from "@/app/settings/settingsSections";
+import {
+  FeaturedBadges,
+  IdentityCard,
+  ProfileLayout,
+  ProfileSkeleton,
+  ProfileTabs,
+  SectionCard,
+  joinedLabel,
+  type TabItem,
+} from "./ProfileShell";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
-import styles from "./page.module.css";
+import shell from "./shell.module.css";
 
-const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "gear", label: "My gear" },
-  { key: "trails", label: "Saved trails" },
-  { key: "trips", label: "Trips" },
-] as const;
-
-type TabKey = (typeof TABS)[number]["key"];
-
-function ProfileSkeleton() {
-  return (
-    <main className={styles.page} aria-busy="true">
-      <div className={styles.wrap}>
-        <div className={styles.header}>
-          <div className={`${ui.skeleton} ${styles.skeletonAvatar}`} />
-          <div className={styles.headerText}>
-            <div className={`${ui.skeleton} ${styles.skeletonLine}`} />
-            <div className={`${ui.skeleton} ${styles.skeletonLineShort}`} />
-          </div>
-        </div>
-      </div>
-    </main>
-  );
-}
+const TAB_KEYS = ["overview", "gear", "trails", "trips"] as const;
+type TabKey = (typeof TAB_KEYS)[number];
 
 function ProfileContent() {
   const router = useRouter();
@@ -53,6 +45,7 @@ function ProfileContent() {
   const savedTrails = useSavedTrails();
   const setups = useSetups();
   const plans = usePlans();
+  const hikes = useHikeLogs();
   const [units] = useUnits();
 
   const requested = searchParams.get("tab");
@@ -61,15 +54,15 @@ function ProfileContent() {
     if (requested === "settings") router.replace(legacySettingsHref(window.location.hash));
   }, [requested, router]);
 
-  const tab: TabKey = TABS.some((t) => t.key === requested) ? (requested as TabKey) : "overview";
+  const tab: TabKey = TAB_KEYS.includes(requested as TabKey) ? (requested as TabKey) : "overview";
   const setTab = (key: TabKey) =>
     router.replace(key === "overview" ? "/profile" : `/profile?tab=${key}`, { scroll: false });
 
   if (loading) return <ProfileSkeleton />;
   if (error || !profile) {
     return (
-      <main className={styles.page}>
-        <div className={styles.wrap}>
+      <main className={shell.page}>
+        <div className={shell.wrap}>
           <p className={ui.error} role="alert">
             Your profile didn&apos;t load. {error ?? "Try again in a moment."}{" "}
             <button type="button" className={ui.ghost} onClick={reload}>
@@ -83,169 +76,162 @@ function ProfileContent() {
 
   const name = profile.display_name || profile.username || user?.email?.split("@")[0] || "Trekker";
   // Live counts from the same hooks the sections use, so they always agree.
-  const gearCount = gear.status === "ready" ? gear.items.length : profile.counts.gear_items;
-  const savedCount =
-    savedTrails.loading || savedTrails.error ? profile.counts.saved_trails : savedTrails.saved.length;
+  const gearCount = gear.status === "ready" ? gear.items.length : gear.status === "loading" ? null : profile.counts.gear_items;
+  const savedCount = savedTrails.loading
+    ? null
+    : savedTrails.error
+      ? profile.counts.saved_trails
+      : savedTrails.saved.length;
+  const tripCount = plans.loading || plans.error ? null : plans.plans.length;
+  const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
   const isNew = !profile.display_name && !profile.bio && !profile.avatar_path;
+  const featured = [...hikes.logs]
+    .sort((a, b) => b.hiked_on.localeCompare(a.hiked_on))
+    .slice(0, FEATURED_BADGES)
+    .map((log) => log.trail);
+
+  const tabs: TabItem<TabKey>[] = [
+    { key: "overview", label: "Overview" },
+    { key: "gear", label: "My gear", count: gearCount },
+    { key: "trails", label: "Saved trails", count: savedCount },
+    { key: "trips", label: "Trips", count: tripCount },
+  ];
+
+  const aside = (
+    <IdentityCard
+      avatar={<Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={120} alt={`${name}'s profile photo`} />}
+      name={name}
+      username={profile.username}
+      links={
+        profile.username && (
+          <>
+            <Link href={publicProfilePath(profile.username)}>View public profile</Link>
+            {profile.visibility === "private" && <span className={ui.hint}>(private)</span>}
+          </>
+        )
+      }
+      bio={profile.bio}
+      region={profile.home_region}
+      joined={joinedLabel(profile.member_since)}
+      rank={hikeCount === null ? null : rankFor(hikeCount)}
+      badges={<FeaturedBadges trails={featured} />}
+      action={
+        <Link href={sectionHref("edit-profile")} className={ui.secondary}>
+          <Pencil size={16} aria-hidden="true" />
+          Edit profile
+        </Link>
+      }
+      stats={[
+        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear") },
+        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails") },
+        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips") },
+        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, href: "/journal" },
+      ]}
+    />
+  );
 
   return (
-    <main className={styles.page}>
-      <div className={styles.wrap}>
-        <header className={styles.header}>
-          <Avatar path={profile.avatar_path} name={profile.display_name} email={profile.email} size={96} alt={`${name}'s profile photo`} />
-          <div className={styles.headerText}>
-            <h1 className={styles.name}>{name}</h1>
-            {profile.username && (
-              <p className={styles.username}>
-                @{profile.username}
-                {" · "}
-                <Link href={publicProfilePath(profile.username)} className={styles.publicLink}>
-                  View public profile
+    <ProfileLayout aside={aside}>
+      <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label="Profile sections" />
+
+      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={shell.main}>
+        {tab === "overview" && (
+          <>
+            {isNew && (
+              <div className={ui.notice}>
+                <strong>Welcome to Trekly.</strong>{" "}
+                <Link href={sectionHref("edit-profile")} className={ui.ghost}>
+                  Add a name and photo
                 </Link>
-                {profile.visibility === "private" && " (private)"}
-              </p>
+                , lay out the gear you own, and bookmark trails you want to hike.
+              </div>
             )}
-            {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
-            <p className={styles.meta}>
-              {[
-                profile.home_region,
-                profile.member_since
-                  ? `Joined ${new Date(profile.member_since).toLocaleDateString(undefined, { month: "long", year: "numeric" })}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </div>
-          <Link href={sectionHref("edit-profile")} className={`${ui.secondary} ${styles.editButton}`}>
-            Edit profile
-          </Link>
-        </header>
-
-        <div className={styles.stats}>
-          <button type="button" className={styles.stat} onClick={() => setTab("gear")}>
-            <span className={styles.statValue}>{gearCount}</span>
-            <span className={styles.statLabel}>{gearCount === 1 ? "Gear item" : "Gear items"}</span>
-          </button>
-          <button type="button" className={styles.stat} onClick={() => setTab("trails")}>
-            <span className={styles.statValue}>{savedCount}</span>
-            <span className={styles.statLabel}>{savedCount === 1 ? "Saved trail" : "Saved trails"}</span>
-          </button>
-          <button type="button" className={styles.stat} onClick={() => setTab("trips")}>
-            <span className={styles.statValue}>{plans.loading || plans.error ? "–" : plans.plans.length}</span>
-            <span className={styles.statLabel}>{plans.plans.length === 1 ? "Planned trip" : "Planned trips"}</span>
-          </button>
-        </div>
-
-        <div className={styles.tabs} role="tablist" aria-label="Profile sections">
-          {TABS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              role="tab"
-              id={`tab-${item.key}`}
-              aria-selected={tab === item.key}
-              aria-controls={`panel-${item.key}`}
-              tabIndex={tab === item.key ? 0 : -1}
-              className={styles.tab}
-              onClick={() => setTab(item.key)}
-              onKeyDown={(event) => {
-                const index = TABS.findIndex((t) => t.key === tab);
-                if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-                  event.preventDefault();
-                  const next = TABS[(index + (event.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
-                  setTab(next.key);
-                  document.getElementById(`tab-${next.key}`)?.focus();
-                }
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <section id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel}>
-          {tab === "overview" && (
-            <div className={styles.overview}>
-              {isNew && (
-                <div className={ui.notice}>
-                  <strong>Welcome to Trekly.</strong>{" "}
-                  <Link href={sectionHref("edit-profile")} className={ui.ghost}>
-                    Add a name and photo
+            <SectionCard
+              id="setups"
+              title="My setups"
+              action={
+                setups.setups.length > 0 && (
+                  <Link href="/gear" className={shell.sectionLink}>
+                    Manage setups →
                   </Link>
-                  , lay out the gear you own, and bookmark trails you want to hike.
-                </div>
-              )}
-              <div>
-                <div className={styles.sectionHead}>
-                  <h2 className={styles.sectionTitle}>My setups</h2>
-                  {setups.setups.length > 0 && (
-                    <Link href="/gear" className={ui.ghost}>
-                      Open Gear →
-                    </Link>
-                  )}
-                </div>
-                <SetupsSection data={setups} units={units} />
-              </div>
-              <div className={styles.overviewGrid}>
-                <div>
-                  <div className={styles.sectionHead}>
-                    <h2 className={styles.sectionTitle}>Recently added gear</h2>
-                    {gearCount > 0 && (
-                      <Link href="/gear" className={ui.ghost}>
-                        Open Gear mat →
-                      </Link>
-                    )}
-                  </div>
-                  <GearSection gear={gear} units={units} limit={4} />
-                </div>
-                <div>
-                  <div className={styles.sectionHead}>
-                    <h2 className={styles.sectionTitle}>Recently saved trails</h2>
-                    {savedCount > 0 && (
-                      <button type="button" className={ui.ghost} onClick={() => setTab("trails")}>
-                        See all →
-                      </button>
-                    )}
-                  </div>
-                  <SavedTrailList data={savedTrails} units={units} limit={4} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {tab === "gear" && (
-            <>
-              <div className={styles.sectionHead}>
-                <h2 className={styles.sectionTitle}>My gear</h2>
-                <Link href="/gear" className={ui.primary}>
-                  Manage on the Gear mat
-                </Link>
-              </div>
-              <GearSection gear={gear} units={units} />
-              <div className={styles.sectionHead}>
-                <h2 className={styles.sectionTitle}>Setups</h2>
-              </div>
+                )
+              }
+            >
               <SetupsSection data={setups} units={units} />
-            </>
-          )}
+            </SectionCard>
+            <div className={shell.overviewGrid}>
+              <SectionCard
+                id="recent-gear"
+                title="Recently added gear"
+                action={
+                  Boolean(gearCount) && (
+                    <Link href="/gear" className={shell.sectionLink}>
+                      View all gear →
+                    </Link>
+                  )
+                }
+              >
+                <GearSection gear={gear} units={units} limit={4} />
+              </SectionCard>
+              <SectionCard
+                id="recent-trails"
+                title="Recently saved trails"
+                action={
+                  Boolean(savedCount) && (
+                    <button type="button" className={shell.sectionLink} onClick={() => setTab("trails")}>
+                      See all →
+                    </button>
+                  )
+                }
+              >
+                <SavedTrailList data={savedTrails} units={units} limit={4} />
+              </SectionCard>
+            </div>
+          </>
+        )}
 
-          {tab === "trails" && (
-            <>
-              <div className={styles.sectionHead}>
-                <h2 className={styles.sectionTitle}>Saved trails</h2>
-                <Link href="/saved-trails" className={ui.ghost}>
-                  Full collection →
+        {tab === "gear" && (
+          <>
+            <SectionCard
+              id="gear"
+              title="My gear"
+              count={gearCount ?? undefined}
+              action={
+                <Link href="/gear" className={shell.sectionLink}>
+                  Manage on the Gear mat →
                 </Link>
-              </div>
-              <SavedTrailList data={savedTrails} units={units} />
-            </>
-          )}
+              }
+            >
+              <GearSection gear={gear} units={units} />
+            </SectionCard>
+            <SectionCard id="gear-setups" title="Setups" count={setups.loading ? undefined : setups.setups.length}>
+              <SetupsSection data={setups} units={units} />
+            </SectionCard>
+          </>
+        )}
 
-          {tab === "trips" && <TripsSection data={plans} />}
-        </section>
+        {tab === "trails" && (
+          <SectionCard
+            id="trails"
+            title="Saved trails"
+            count={savedCount ?? undefined}
+            action={
+              <Link href="/saved-trails" className={shell.sectionLink}>
+                Full collection →
+              </Link>
+            }
+          >
+            <SavedTrailList data={savedTrails} units={units} />
+          </SectionCard>
+        )}
+
+        {tab === "trips" && (
+          <SectionCard id="trips" title="Trips" count={tripCount ?? undefined}>
+            <TripsSection data={plans} />
+          </SectionCard>
+        )}
       </div>
-    </main>
+    </ProfileLayout>
   );
 }
 
