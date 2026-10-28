@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, type ComponentProps } from "react";
+import { Suspense, useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
@@ -16,12 +16,13 @@ import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { publicProfilePath } from "@/lib/profilesApi";
-import { FEATURED_BADGES } from "@/lib/publicProfile";
+import type { FeaturedBadges } from "@/lib/featuredBadges";
+import { getFeaturedBadges } from "@/lib/featuredBadgesApi";
 import { rankFor } from "@/lib/rank";
 import { useUnits } from "@/lib/useUnits";
 import { legacySettingsHref, sectionHref } from "@/app/settings/settingsSections";
 import {
-  FeaturedBadges,
+  FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
   ProfileSkeleton,
@@ -30,6 +31,7 @@ import {
   joinedLabel,
   type TabItem,
 } from "./ProfileShell";
+import BadgePicker from "./BadgePicker";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
 
@@ -56,6 +58,20 @@ function ProfileContent() {
   const setups = useSetups();
   const plans = usePlans();
   const hikes = useHikeLogs();
+  const [featured, setFeatured] = useState<FeaturedBadges | null>(null);
+  const [pickingBadges, setPickingBadges] = useState(false);
+  const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
+
+  // Deleting a hike can remove a featured badge, so reload when the count changes.
+  useEffect(() => {
+    const controller = new AbortController();
+    getFeaturedBadges(controller.signal)
+      .then(setFeatured)
+      .catch((error: unknown) => {
+        if ((error as { name?: string }).name !== "AbortError") setFeatured({ picked: false, badges: [] });
+      });
+    return () => controller.abort();
+  }, [hikeCount]);
   const [units] = useUnits();
 
   const requested = searchParams.get("tab");
@@ -93,12 +109,7 @@ function ProfileContent() {
       ? profile.counts.saved_trails
       : savedTrails.saved.length;
   const tripCount = plans.loading || plans.error ? null : plans.plans.length;
-  const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
   const isNew = !profile.display_name && !profile.bio && !profile.avatar_path;
-  const featured = [...hikes.logs]
-    .sort((a, b) => b.hiked_on.localeCompare(a.hiked_on))
-    .slice(0, FEATURED_BADGES)
-    .map((log) => log.trail);
 
   const tabs: TabItem<TabKey>[] = [
     { key: "overview", label: "Overview" },
@@ -124,7 +135,9 @@ function ProfileContent() {
       region={profile.home_region}
       joined={joinedLabel(profile.member_since)}
       rank={hikeCount === null ? null : rankFor(hikeCount)}
-      badges={<FeaturedBadges trails={featured} />}
+      badges={
+        <FeaturedBadgeSlots badges={featured?.badges ?? []} loading={!featured} onEdit={() => setPickingBadges(true)} />
+      }
       action={
         <Link href={sectionHref("edit-profile")} className={ui.secondary}>
           <Pencil size={16} aria-hidden="true" />
@@ -241,6 +254,17 @@ function ProfileContent() {
           </SectionCard>
         )}
       </div>
+      {pickingBadges && featured && (
+        <BadgePicker
+          logs={hikes.logs}
+          current={featured.badges}
+          onClose={() => setPickingBadges(false)}
+          onSaved={(saved) => {
+            setFeatured(saved);
+            setPickingBadges(false);
+          }}
+        />
+      )}
     </ProfileLayout>
   );
 }

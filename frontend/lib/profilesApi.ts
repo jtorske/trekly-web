@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { FeaturedBadge } from "./featuredBadges";
 import type { GearItem } from "./gearApi";
 import type { TrailListItem } from "./trailsApi";
 
@@ -71,6 +72,8 @@ export interface PublicProfile {
   bio: string | null;
   rank: { level: number; title: string } | null;
   journal: { hide_dates: boolean; entries: PublicJournalEntry[] } | null;
+  /** Shown with the Trail Journal (same switch); the owner's picks or their latest badges. */
+  featured_badges: FeaturedBadge[] | null;
   gear: { items: PublicGearItem[]; setups: PublicSetup[] } | null;
   saved_trails: TrailListItem[] | null;
   trip_plans: PublicTripPlan[] | null;

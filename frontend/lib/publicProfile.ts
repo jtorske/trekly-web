@@ -1,17 +1,10 @@
-import type { PrivacySettings, PublicJournalEntry, PublicProfile } from "./profilesApi";
+import type { PrivacySettings, PublicProfile } from "./profilesApi";
 
 /**
  * Pure helpers for the public profile page (/u/[username]). Everything they
  * read came from the API's visitor view, so nothing here can reveal more
  * than the owner allowed.
  */
-
-export const FEATURED_BADGES = 6;
-
-/** The first few journal entries, in the API's order (newest first, or by name when dates are hidden). */
-export function featuredEntries(entries: PublicJournalEntry[], limit = FEATURED_BADGES): PublicJournalEntry[] {
-  return entries.slice(0, limit);
-}
 
 export const SECTION_LABELS = {
   show_journal: "Trail Journal and badges",

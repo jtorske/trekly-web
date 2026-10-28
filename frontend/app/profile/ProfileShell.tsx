@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { CalendarDays, MapPin, type LucideIcon } from "lucide-react";
+import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
+import MilestoneBadge from "@/components/MilestoneBadge";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import { groupColour } from "@/lib/journal";
 import type { Rank } from "@/lib/rank";
-import type { TrailListItem } from "@/lib/trailsApi";
+import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
 import styles from "./shell.module.css";
 
 /** Below the fixed navbar (px), and the gap kept under a tall card. */
@@ -198,27 +199,75 @@ function StatLink({ stat }: { stat: StatRow }) {
   );
 }
 
-/** Up to six Trail Journal badges for the identity card; nothing when there are none. */
-export function FeaturedBadges({ trails }: { trails: Pick<TrailListItem, "id" | "name" | "terrain" | "region">[] }) {
-  if (trails.length === 0) return null;
+/** A featured badge's art: the trail's Trail Journal badge, or a milestone medal. */
+export function BadgeArt({ badge, className }: { badge: FeaturedBadge; className?: string }) {
+  if (badge.kind === "milestone") return <MilestoneBadge id={badge.milestone} title={badgeName(badge)} className={className} />;
+  const { trail } = badge;
+  return <TrailBadge name={trail.name} terrain={trail.terrain} colour={groupColour(`region:${trail.region}`)} hiked className={className} />;
+}
+
+/**
+ * The identity card's three featured badge slots. A trail badge opens its
+ * trail; the name shows on hover and focus. Owners also see empty slots,
+ * the Edit button and, with no badges yet, how to earn one; visitors see
+ * only filled slots, and nothing at all without any.
+ */
+export function FeaturedBadgeSlots({
+  badges,
+  loading = false,
+  onEdit,
+}: {
+  badges: FeaturedBadge[];
+  loading?: boolean;
+  /** Present for the owner. */
+  onEdit?: () => void;
+}) {
+  const owner = Boolean(onEdit);
+  if (!owner && badges.length === 0) return null;
+  const slots = owner ? MAX_FEATURED : badges.length;
   return (
     <div>
-      <p className={styles.badgesLabel} id="featured-badges">
-        Featured badges
-      </p>
-      <ul className={styles.badges} aria-labelledby="featured-badges">
-        {trails.map((trail) => (
-          <li key={trail.id}>
-            <TrailBadge
-              name={trail.name}
-              terrain={trail.terrain}
-              colour={groupColour(`region:${trail.region}`)}
-              hiked
-              className={styles.badge}
-            />
-          </li>
-        ))}
+      <div className={styles.badgesHead}>
+        <p className={styles.badgesLabel} id="featured-badges">
+          Featured badges
+        </p>
+        {onEdit && (badges.length > 0 || loading) && (
+          <button type="button" className={styles.badgesEdit} onClick={onEdit} disabled={loading}>
+            <Pencil size={14} aria-hidden="true" />
+            Edit<span className={ui.srOnly}> featured badges</span>
+          </button>
+        )}
+      </div>
+      <ul className={styles.badges} aria-labelledby="featured-badges" aria-busy={loading || undefined}>
+        {Array.from({ length: slots }, (_, index) => {
+          const badge = badges[index];
+          if (loading) return <li key={index} className={`${ui.skeleton} ${styles.badgeSkeleton}`} aria-hidden="true" />;
+          if (!badge) return <li key={index} className={styles.badgeEmpty} aria-label="Empty badge slot" />;
+          const name = badgeName(badge);
+          const art = <BadgeArt badge={badge} className={styles.badge} />;
+          return (
+            <li key={badgeKey(badge)} className={styles.badgeSlot}>
+              {badge.kind === "trail" ? (
+                <Link href={`/trails?id=${encodeURIComponent(badge.trail.id)}`} className={styles.badgeLink} aria-label={`${name}: open the trail`}>
+                  {art}
+                </Link>
+              ) : (
+                <span className={styles.badgeLink} tabIndex={0}>
+                  {art}
+                </span>
+              )}
+              <span className={styles.badgeTip} aria-hidden="true">
+                {name}
+              </span>
+            </li>
+          );
+        })}
       </ul>
+      {owner && !loading && badges.length === 0 && (
+        <p className={styles.badgesHint}>
+          <Link href="/trail-list">Hike a trail to earn your first badge</Link>
+        </p>
+      )}
     </div>
   );
 }

@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.auth import CurrentUser, get_current_user
 from app.catalog.presenters import effective_weight, gear_item_out
 from app.database import get_db
+from app.featured import FeaturedBadgeOut, featured_badges
 from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
 from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
@@ -114,6 +115,8 @@ class PublicProfileOut(BaseModel):
     bio: str | None = None
     rank: PublicRank | None = None
     journal: PublicJournal | None = None
+    # Shown with the Trail Journal: same switch, and no dates either way.
+    featured_badges: list[FeaturedBadgeOut] | None = None
     gear: PublicGear | None = None
     saved_trails: list[TrailListItemOut] | None = None
     trip_plans: list[PublicTripPlan] | None = None
@@ -237,6 +240,7 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> Pub
         out.rank = PublicRank(level=level, title=title)
     if seen.shows("journal"):
         out.journal = _journal(db, profile.id, seen.hide_dates)
+        _, out.featured_badges = featured_badges(db, profile.id, hide_dates=seen.hide_dates)
     if seen.shows("gear"):
         out.gear = _gear(db, profile.id)
     if seen.shows("saved_trails"):

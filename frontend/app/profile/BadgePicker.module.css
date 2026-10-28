@@ -1,0 +1,207 @@
+/* The featured badge picker (BadgePicker.tsx), inside the shared Dialog. */
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: var(--color-dark-olive);
+}
+
+.heading {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.orderHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.count {
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.order {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.orderItem,
+.orderEmpty {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.orderItem {
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  background: color-mix(in srgb, white 70%, var(--color-cream));
+  cursor: grab;
+}
+
+.dragging {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.orderEmpty {
+  justify-content: center;
+  border: 2px dashed color-mix(in srgb, var(--color-dark-olive) 20%, transparent);
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+.grip {
+  flex-shrink: 0;
+  color: var(--color-muted-text);
+}
+
+.position {
+  width: 1.25rem;
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.orderArt {
+  width: 2.75rem;
+  flex-shrink: 0;
+}
+
+.orderName {
+  min-width: 0;
+  flex: 1;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.orderButtons {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--color-dark-olive);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+}
+
+.iconButton:disabled {
+  opacity: 0.3;
+}
+
+.hint {
+  margin-top: 0.5rem;
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+.hint[role="alert"] {
+  color: var(--color-rust-text);
+  font-weight: 600;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0 1rem;
+}
+
+.search svg {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-muted-text);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  padding-left: 2.25rem;
+}
+
+.none {
+  color: var(--color-muted-text);
+}
+
+.group + .group {
+  margin-top: 1rem;
+}
+
+.groupTitle {
+  margin-bottom: 0.5rem;
+  color: var(--color-muted-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: 0.5rem;
+}
+
+.choice {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.choice:hover {
+  background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+}
+
+.chosen {
+  border-color: var(--color-olive);
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+}
+
+.unavailable {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.choiceArt {
+  width: 4rem;
+}
+
+.choiceName {
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice {
+    transition: none;
+  }
+}

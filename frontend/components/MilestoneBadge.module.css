@@ -1,0 +1,20 @@
+/* Matches .medalEarned in app/journal/journal.module.css. */
+.badge {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.base {
+  fill: #a8752c;
+  stroke: #e6c48c;
+  stroke-width: 4;
+}
+
+.icon {
+  fill: none;
+  stroke: var(--color-cream);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

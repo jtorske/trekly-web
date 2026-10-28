@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import TrailBadge from "@/components/TrailBadge";
+import { MILESTONE_ICONS } from "@/lib/badge";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { BADGE_COLOURS, badgeGrid, halves, type Journal, type JournalGroup, type JournalSection, type Milestone } from "@/lib/journal";
 import { useHikePhoto } from "@/lib/useHikePhoto";
@@ -251,12 +252,6 @@ function GroupPage({
 function Medal({ milestone }: { milestone: Milestone }) {
   const r = 46;
   const circumference = 2 * Math.PI * r;
-  const icons: Record<Milestone["id"], string> = {
-    "first-hike": "M26 80 52 46l10 12 8-10 24 32M60 54V28l16 6-16 6",
-    "first-overnight": "M30 76 60 34l30 42Zm30-42v42M74 30a8 8 0 1 1-8-10 6 6 0 0 0 8 10Z",
-    "five-parks": "M26 76l16-26 10 14 12-22 20 34Z",
-    "hundred-km": "M28 70c10-24 24-6 32-20s16-16 32-8",
-  };
   return (
     <li className={`${styles.medal} ${milestone.earned ? styles.medalEarned : ""}`}>
       <svg viewBox="0 0 120 120" aria-hidden="true">
@@ -271,7 +266,7 @@ function Medal({ milestone }: { milestone: Milestone }) {
             transform="rotate(-90 60 60)"
           />
         )}
-        <path d={icons[milestone.id]} className={styles.medalIcon} />
+        <path d={MILESTONE_ICONS[milestone.id]} className={styles.medalIcon} />
       </svg>
       <p className={styles.medalTitle}>{milestone.title}</p>
       <p className={styles.medalDetail}>

@@ -11,7 +11,7 @@ import GearThumb from "@/components/GearThumb";
 import { matImage } from "@/lib/gearImage";
 import TrailBadge from "@/components/TrailBadge";
 import {
-  FeaturedBadges,
+  FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
   ProfileSkeleton,
@@ -39,7 +39,7 @@ import {
   type PublicProfile,
   type ReportReason,
 } from "@/lib/profilesApi";
-import { displayName, featuredEntries, formatHikeDate, hiddenSections } from "@/lib/publicProfile";
+import { displayName, formatHikeDate, hiddenSections } from "@/lib/publicProfile";
 import { signedImageUrl } from "@/lib/storage";
 import { formatStay } from "@/lib/stay";
 import { TERRAIN_LABELS } from "@/lib/terrain";
@@ -205,7 +205,7 @@ export default function PublicProfileView({ username }: { username: string }) {
       username={profile.username}
       bio={profile.bio}
       rank={profile.rank}
-      badges={profile.journal && <FeaturedBadges trails={featuredEntries(profile.journal.entries).map((entry) => entry.trail)} />}
+      badges={profile.featured_badges && <FeaturedBadgeSlots badges={profile.featured_badges} />}
       stats={stats}
       footer={
         canReport && (

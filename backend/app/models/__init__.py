@@ -13,6 +13,7 @@ from app.models.catalog import (
     CatalogProductVariant,
     CatalogSource,
 )
+from app.models.featured_badge import FeaturedBadge
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
@@ -38,6 +39,7 @@ __all__ = [
     "CatalogProductSource",
     "CatalogProductVariant",
     "CatalogSource",
+    "FeaturedBadge",
     "GearSetup",
     "GearSetupItem",
     "HikeLog",

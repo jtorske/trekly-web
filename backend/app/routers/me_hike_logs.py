@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.auth import get_current_user_id
 from app.database import get_db
+from app.featured import prune_featured
 from app.models.hike_log import MAX_NOTE_LENGTH, HikeLog
 from app.models.trail import Trail
 from app.routers.availability import get_today
@@ -143,7 +144,9 @@ def delete_hike_log(
     db: Session = Depends(get_db),
 ):
     """Idempotent: removing a trail that isn't logged still returns 204. The
-    client removes the entry's photo from Storage itself."""
+    client removes the entry's photo from Storage itself. Its featured badge
+    goes with it, as do milestone badges it no longer earns."""
     db.execute(delete(HikeLog).where(HikeLog.user_id == user_id, HikeLog.trail_id == trail_id))
     db.commit()
+    prune_featured(db, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

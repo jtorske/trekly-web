@@ -91,3 +91,11 @@ export function profileSilhouette(profile: number[] | null | undefined, box: [nu
   const line = points.map((value, i) => `${round(x + i * step)} ${round(y + height - ((value - low) / span) * height * 0.85)}`);
   return `M${x} ${y + height}L${line.join("L")}L${x + width} ${y + height}Z`;
 }
+
+/** Line icons for the milestone medals (Trail Journal and profile), in a 120 square. */
+export const MILESTONE_ICONS = {
+  "first-hike": "M26 80 52 46l10 12 8-10 24 32M60 54V28l16 6-16 6",
+  "first-overnight": "M30 76 60 34l30 42Zm30-42v42M74 30a8 8 0 1 1-8-10 6 6 0 0 0 8 10Z",
+  "five-parks": "M26 76l16-26 10 14 12-22 20 34Z",
+  "hundred-km": "M28 70c10-24 24-6 32-20s16-16 32-8",
+} as const;

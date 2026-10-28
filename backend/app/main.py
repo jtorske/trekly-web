@@ -10,6 +10,7 @@ from app.routers import (
     gear,
     me_account,
     me_alerts,
+    me_featured_badges,
     me_gear,
     me_hike_logs,
     me_plans,
@@ -64,6 +65,7 @@ app.include_router(me_setups.router)
 app.include_router(me_alerts.router)
 app.include_router(me_plans.router)
 app.include_router(me_hike_logs.router)
+app.include_router(me_featured_badges.router)
 app.include_router(admin_trail_photos.router)
 app.include_router(me_privacy.router)
 app.include_router(public_profiles.router)
