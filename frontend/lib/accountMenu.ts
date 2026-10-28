@@ -13,8 +13,8 @@ export const SUPPORT_EMAIL = "treklyusersupport@gmail.com";
 
 /** The rows under the profile header row, before Log out. */
 export const ACCOUNT_LINKS: AccountLink[] = [
-  { href: "/profile?tab=trips", label: "My trips" },
-  { href: "/gear", label: "My gear" },
+  { href: "/profile?tab=trips", label: "Trips" },
+  { href: "/gear", label: "Gear" },
   { href: "/alerts", label: "Alerts" },
   { href: "/profile?tab=settings", label: "Settings" },
 ];
@@ -25,7 +25,7 @@ const under = (pathname: string, prefix: string) =>
 /**
  * The href of the account row for the page being viewed (the profile header
  * row is PROFILE_HREF), or null. Profile tabs are told apart by `?tab=`; a
- * single trip plan counts as My trips, and the profile's gear tab as My gear.
+ * single trip plan counts as Trips, and the profile's gear tab as Gear.
  */
 export function currentAccountHref(
   pathname: string,
