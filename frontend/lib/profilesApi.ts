@@ -21,6 +21,8 @@ export interface PrivacySettings {
   show_trip_plans: boolean;
   hide_hike_dates: boolean;
   allow_search_indexing: boolean;
+  /** "Show me in community features": "Hiked by" on trail pages. In effect only while the journal is public. */
+  show_in_community: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;
@@ -119,10 +121,11 @@ export function onPrivacyUpdated(listener: (settings: PrivacySettings) => void):
 export const getPublicProfile = (username: string, signal?: AbortSignal) =>
   apiFetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`, { signal });
 
-export const reportProfile = (username: string, reason: ReportReason, details: string) =>
+/** Reports a profile, or with `trailId`, their trip note on that trail. */
+export const reportProfile = (username: string, reason: ReportReason, details: string, trailId?: string) =>
   apiFetch<{ status: string }>(`/api/profiles/${encodeURIComponent(username)}/report`, {
     method: "POST",
-    body: { reason, details: details.trim() || null },
+    body: { reason, details: details.trim() || null, ...(trailId ? { trail_id: trailId } : {}) },
     auth: true,
   });
 

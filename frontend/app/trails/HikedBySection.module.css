@@ -1,0 +1,184 @@
+.title {
+  margin-bottom: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* Avatars overlap slightly, each ringed in the page colour. */
+
+.hikers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+}
+
+.avatars {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0.4rem;
+}
+
+.avatars li {
+  margin-left: -0.4rem;
+}
+
+.avatarLink {
+  display: block;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px var(--paper);
+  transition: transform 0.15s ease;
+}
+
+.avatarLink:hover {
+  position: relative;
+  transform: translateY(-2px);
+}
+
+.others {
+  color: var(--color-muted-text);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+/* Trip notes */
+
+.notesTitle {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.note {
+  border: 1px solid var(--hair);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  padding: 0.9rem 1rem 1rem;
+}
+
+.noteHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.noteAvatar {
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+
+.noteWho {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.noteName {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noteName:hover {
+  color: var(--color-rust-text);
+}
+
+/* "@name · date"; on phones the date gets its own line instead. */
+.noteMeta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.35rem;
+  color: var(--color-muted-text);
+  font-size: 0.82rem;
+}
+
+.noteMeta > * {
+  overflow-wrap: anywhere;
+}
+
+.noteMeta > * + *::before {
+  margin-right: 0.35rem;
+  content: "·";
+}
+
+.report {
+  flex-shrink: 0;
+  min-height: 2.25rem;
+  font-size: 0.82rem;
+}
+
+.noteBody {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.65rem;
+}
+
+.noteText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.noteText p {
+  color: color-mix(in srgb, var(--ink) 88%, transparent);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.readMore {
+  margin-top: 0.25rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--color-rust-text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.readMore:hover {
+  text-decoration: underline;
+}
+
+.notePhoto {
+  display: block;
+  flex-shrink: 0;
+  width: 7rem;
+  height: 5.25rem;
+  border-radius: 0.6rem;
+  object-fit: cover;
+}
+
+@media (max-width: 480px) {
+  .noteBody {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .notePhoto {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .noteMeta {
+    flex-direction: column;
+  }
+
+  .noteMeta > * + *::before {
+    content: none;
+  }
+}

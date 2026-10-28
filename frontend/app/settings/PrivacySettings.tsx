@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ui from "@/components/ui.module.css";
+import { communityBlocker } from "@/lib/hikedBy";
 import { getPrivacy, publicProfilePath, updatePrivacy, type PrivacySettings, type PrivacyUpdate } from "@/lib/profilesApi";
 import { SECTION_LABELS, type SectionSetting } from "@/lib/publicProfile";
 import styles from "./settings.module.css";
@@ -26,6 +27,7 @@ function Switch({
   label,
   hint,
   warning,
+  disabledReason,
   checked,
   disabled,
   onChange,
@@ -35,33 +37,43 @@ function Switch({
   hint?: string;
   /** A safety note, read out with the switch. */
   warning?: string;
+  /** Why it's disabled; shown below the dimmed row at full strength. */
+  disabledReason?: string;
   checked: boolean;
   disabled?: boolean;
   onChange: (value: boolean) => void;
 }) {
+  const described = [warning && `${id}-warning`, disabledReason && `${id}-reason`].filter(Boolean).join(" ");
   return (
-    <label className={`${styles.switchRow} ${disabled ? styles.switchDisabled : ""}`} htmlFor={id}>
-      <span className={styles.switchText}>
-        <span className={styles.switchLabel}>{label}</span>
-        {hint && <span className={styles.switchHint}>{hint}</span>}
-        {warning && (
-          <span id={`${id}-warning`} className={styles.switchWarning}>
-            <span aria-hidden="true">⚠ </span>
-            {warning}
-          </span>
-        )}
-      </span>
-      <input
-        id={id}
-        type="checkbox"
-        role="switch"
-        className={styles.switch}
-        checked={checked}
-        disabled={disabled}
-        aria-describedby={warning ? `${id}-warning` : undefined}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-    </label>
+    <>
+      <label className={`${styles.switchRow} ${disabled ? styles.switchDisabled : ""}`} htmlFor={id}>
+        <span className={styles.switchText}>
+          <span className={styles.switchLabel}>{label}</span>
+          {hint && <span className={styles.switchHint}>{hint}</span>}
+          {warning && (
+            <span id={`${id}-warning`} className={styles.switchWarning}>
+              <span aria-hidden="true">⚠ </span>
+              {warning}
+            </span>
+          )}
+        </span>
+        <input
+          id={id}
+          type="checkbox"
+          role="switch"
+          className={styles.switch}
+          checked={checked}
+          disabled={disabled}
+          aria-describedby={described || undefined}
+          onChange={(event) => onChange(event.target.checked)}
+        />
+      </label>
+      {disabledReason && (
+        <p id={`${id}-reason`} className={styles.switchReason}>
+          {disabledReason}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -163,6 +175,19 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
             onChange={(value) => change(key, value)}
           />
         ))}
+      </fieldset>
+
+      <fieldset className={styles.switchGroup}>
+        <legend className={styles.switchLegend}>Community</legend>
+        <Switch
+          id="privacy-community"
+          label="Show me in community features"
+          hint="Your photo and username appear under “Hiked by” on the trails you've logged, with your trip notes, so other hikers can find your profile. Off until you turn it on."
+          disabledReason={communityBlocker(settings) ?? undefined}
+          checked={settings.show_in_community}
+          disabled={communityBlocker(settings) !== null}
+          onChange={(value) => change("show_in_community", value)}
+        />
       </fieldset>
 
       <fieldset className={styles.switchGroup}>

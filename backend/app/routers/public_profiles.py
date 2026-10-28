@@ -266,6 +266,8 @@ class ReportIn(BaseModel):
 
     reason: Literal[REPORT_REASONS]  # type: ignore[valid-type]
     details: str | None = Field(default=None, max_length=MAX_REPORT_DETAILS)
+    # Set when reporting their trip note on this trail's "Hiked by" section.
+    trail_id: UUID | None = None
 
     @field_validator("details", mode="before")
     @classmethod
@@ -285,15 +287,30 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def report_email(profile: Profile, reporter: CurrentUser, reporter_profile: Profile | None, payload: ReportIn) -> Email:
+def report_email(
+    profile: Profile,
+    reporter: CurrentUser,
+    reporter_profile: Profile | None,
+    payload: ReportIn,
+    trip_note: HikeLog | None = None,
+) -> Email:
     app_url = os.getenv("APP_URL", "http://localhost:3000").rstrip("/")
     reporter_name = (reporter_profile.username if reporter_profile else None) or "(no username)"
+    note_lines = (
+        [
+            f"Trip note on: {trip_note.trail.name} ({app_url}/trails?id={trip_note.trail_id})",
+            f"Note: {trip_note.note}",
+        ]
+        if trip_note
+        else []
+    )
     text = "\n".join(
         [
-            "A profile was reported on Trekly.",
+            f"{'A trip note' if trip_note else 'A profile'} was reported on Trekly.",
             "",
             f"Profile: @{profile.username} ({app_url}/u/{profile.username})",
             f"Profile user id: {profile.id}",
+            *note_lines,
             f"Reason: {payload.reason}",
             f"Details: {payload.details or '(none)'}",
             "",
@@ -303,7 +320,8 @@ def report_email(profile: Profile, reporter: CurrentUser, reporter_profile: Prof
             "To hide the profile, use /admin/profiles on the site.",
         ]
     )
-    return Email(to=REPORTS_TO, subject=f"Profile report: @{profile.username} ({payload.reason})", text=text)
+    kind = "Trip note report" if trip_note else "Profile report"
+    return Email(to=REPORTS_TO, subject=f"{kind}: @{profile.username} ({payload.reason})", text=text)
 
 
 @router.post("/{username}/report", status_code=status.HTTP_202_ACCEPTED)
@@ -315,10 +333,21 @@ def report_profile(
     sender: EmailSender = Depends(get_email_sender),
 ):
     """Email support about a profile. Signed-in users only, and rate-limited:
-    REPORTS_PER_DAY reports a day, and one per profile a day."""
-    profile, _ = find_listed(db, username)
+    REPORTS_PER_DAY reports a day, and one per profile a day. A trip note
+    counts as its owner's profile, and can only be reported while it shows
+    in "Hiked by"."""
+    profile, seen = find_listed(db, username)
     if profile.id == user.id:
         raise HTTPException(status_code=422, detail="You can't report your own profile.")
+    trip_note = None
+    if payload.trail_id is not None:
+        trip_note = db.scalar(
+            select(HikeLog)
+            .where(HikeLog.user_id == profile.id, HikeLog.trail_id == payload.trail_id, HikeLog.note.is_not(None))
+            .options(joinedload(HikeLog.trail))
+        )
+        if trip_note is None or not seen.in_community:
+            raise HTTPException(status_code=404, detail="Trip note not found")
     since = _now() - timedelta(days=1)
     recent = db.scalars(
         select(ProfileReport.profile_id).where(
@@ -334,7 +363,7 @@ def report_profile(
                          details=payload.details, created_at=_now()))
     db.flush()
     try:
-        sender.send(report_email(profile, user, db.get(Profile, user.id), payload))
+        sender.send(report_email(profile, user, db.get(Profile, user.id), payload, trip_note))
     except Exception as error:
         db.rollback()  # not sent, so it doesn't count against the limit
         raise HTTPException(

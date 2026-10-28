@@ -18,6 +18,7 @@ from app.routers import (
     me_rank,
     me_setups,
     public_profiles,
+    trail_hikers,
     trails,
     usernames,
 )
@@ -58,6 +59,7 @@ app = FastAPI(
 app.add_middleware(CORSMiddleware, **cors_options())
 
 app.include_router(trails.router)
+app.include_router(trail_hikers.router)
 app.include_router(availability.router)
 app.include_router(gear.router)
 app.include_router(me_gear.router)

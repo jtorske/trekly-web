@@ -91,6 +91,9 @@ def world(conn):
         text("UPDATE public.profiles SET username = :u, display_name = 'Alice', bio = 'Hiker', home_region = 'Secret Valley' WHERE id = :id"),
         {"u": f"alice_{alice.hex[:8]}", "id": alice},
     )
+    # Opted in to community features, so her hike logs are readable through
+    # REST at all (migration 9d4f2a6c8e13); the community tests turn it off.
+    conn.execute(text("UPDATE public.profile_settings SET show_in_community = true WHERE user_id = :id"), {"id": alice})
     trail = conn.execute(
         text(
             "INSERT INTO public.trails (id, name, region, country_code, terrain_difficulty) "
@@ -340,3 +343,64 @@ def test_gear_photos_now_only_take_processed_images(conn, world):
                        {"n": f"{world['alice']}/{name}"}, reason="row-level security")
     conn.execute(text("INSERT INTO storage.objects (bucket_id, name) VALUES ('gear-photos', :n)"),
                  {"n": f"{world['alice']}/{uuid.uuid4()}.webp"})
+
+
+# ------------------------------------------------------- community features
+# "Hiked by" on trail pages (migration 9d4f2a6c8e13): a trail's hike logs
+# show someone only while they've opted in and their journal is public.
+
+HIKED_BY = "SELECT user_id, note, photo_path FROM public.hike_logs WHERE trail_id = :trail"
+
+
+def hiked_by(conn, world, who):
+    visitor(conn, world, who)
+    return [row[0] for row in rows(conn, HIKED_BY, {"trail": world["trail"]})]
+
+
+def test_community_is_off_for_new_and_existing_users(conn, world):
+    as_admin(conn)
+    assert rows(conn, "SELECT show_in_community FROM public.profile_settings WHERE user_id = :id", {"id": world["bob"]}) == [(False,)]
+    # The migration added it NOT NULL DEFAULT false, so every existing row started off.
+    default = conn.execute(text(
+        "SELECT column_default, is_nullable FROM information_schema.columns "
+        "WHERE table_schema = 'public' AND table_name = 'profile_settings' AND column_name = 'show_in_community'"
+    )).one()
+    assert default == ("false", "NO")
+
+
+@pytest.mark.parametrize("who", VISITORS)
+def test_hiked_by_lists_only_opted_in_hikers(conn, world, who):
+    assert hiked_by(conn, world, who) == [world["alice"]]
+    settings(conn, world, show_in_community=False)
+    assert hiked_by(conn, world, who) == []
+    # Her public journal photo is still visible on her profile.
+    visitor(conn, world, who)
+    assert objects(conn, "hike-photos", world["hike_photo"])
+
+
+@pytest.mark.parametrize("who", VISITORS)
+@pytest.mark.parametrize("change", [{"is_private": True}, {"show_journal": False}], ids=["private", "journal-hidden"])
+def test_opting_in_needs_a_public_journal(conn, world, who, change):
+    settings(conn, world, **change)
+    assert hiked_by(conn, world, who) == []
+    settings(conn, world, **{key: not value for key, value in change.items()})
+    assert hiked_by(conn, world, who) == [world["alice"]]
+
+
+@pytest.mark.parametrize("who", VISITORS)
+def test_hiked_by_skips_admin_hidden_profiles(conn, world, who):
+    as_admin(conn)
+    conn.execute(text("INSERT INTO public.profile_moderation (user_id) VALUES (:id)"), {"id": world["alice"]})
+    assert hiked_by(conn, world, who) == []
+
+
+def test_owners_change_only_their_own_community_setting(conn, world):
+    settings(conn, world, show_in_community=False)
+    act_as(conn, world["bob"])
+    updated = conn.execute(text("UPDATE public.profile_settings SET show_in_community = true WHERE user_id = :a"),
+                           {"a": world["alice"]})
+    assert updated.rowcount == 0
+    act_as(conn, world["alice"])
+    assert len(rows(conn, HIKED_BY, {"trail": world["trail"]})) == 1  # her own rows, opted in or not
+    act_as(conn, None)
+    assert refused(conn, "UPDATE public.profile_settings SET show_in_community = true")

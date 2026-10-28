@@ -217,7 +217,9 @@ def test_owner_can_upload_read_and_delete_own_photo(conn, users):
     name = photo_name(alice)
     act_as(conn, alice)
     upload(conn, name)
-    assert conn.execute(text("SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos'")).scalar_one() == 1
+    # Scoped to this photo: other users' public journal photos are readable too.
+    count = "SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos' AND name = :name"
+    assert conn.execute(text(count), {"name": name}).scalar_one() == 1
     assert delete_object(conn, name).rowcount == 1
 
 
@@ -230,7 +232,8 @@ def test_others_cannot_upload_read_or_delete_a_users_photos(conn, users):
     act_as(conn, bob)
     insert = "INSERT INTO storage.objects (bucket_id, name) VALUES ('hike-photos', :name)"
     assert refused(conn, insert, {"name": photo_name(alice)})
-    assert conn.execute(text("SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos'")).scalar_one() == 0
+    count = "SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos' AND name = :name"
+    assert conn.execute(text(count), {"name": name}).scalar_one() == 0
     updated = conn.execute(
         text("UPDATE storage.objects SET metadata = '{\"hacked\": true}'::jsonb WHERE bucket_id = 'hike-photos' AND name = :name"),
         {"name": name},
@@ -239,7 +242,8 @@ def test_others_cannot_upload_read_or_delete_a_users_photos(conn, users):
     assert delete_object(conn, name).rowcount == 0
 
     act_as(conn, None)
-    assert conn.execute(text("SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos'")).scalar_one() == 0
+    count = "SELECT count(*) FROM storage.objects WHERE bucket_id = 'hike-photos' AND name = :name"
+    assert conn.execute(text(count), {"name": name}).scalar_one() == 0
 
 
 @pytest.mark.parametrize("name", ["photo.jpg", "{uuid}.png", "{uuid}.webp.exe", "nested/{uuid}.webp"])

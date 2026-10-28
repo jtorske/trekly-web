@@ -1,0 +1,11 @@
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.reason {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}

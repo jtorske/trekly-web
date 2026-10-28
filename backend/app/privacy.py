@@ -7,6 +7,10 @@ so bypasses RLS. Both use the same rows and the same rule:
     a section is visible to visitors when the owner has a username, isn't
     hidden by an admin, isn't private, and has that section switched on.
 
+Community features ("Hiked by" on trail pages) count as one more section:
+the Trail Journal switch and "Show me in community features" must both be
+on (migration 9d4f2a6c8e13).
+
 Missing settings count as private. Nothing here is cached, so a change to a
 setting applies to the very next request.
 """
@@ -14,6 +18,7 @@ setting applies to the very next request.
 from dataclasses import dataclass
 from uuid import UUID
 
+from sqlalchemy import ColumnElement, and_, exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -43,6 +48,10 @@ class Visibility:
     def indexable(self) -> bool:
         return self.public and bool(self.settings.allow_search_indexing)
 
+    @property
+    def in_community(self) -> bool:
+        return self.shows("journal") and bool(self.settings.show_in_community)
+
 
 def visibility(db: Session, profile: Profile) -> Visibility:
     hidden = db.get(ProfileModeration, profile.id) is not None
@@ -50,6 +59,21 @@ def visibility(db: Session, profile: Profile) -> Visibility:
     settings = db.get(ProfileSettings, profile.id)
     public = listed and settings is not None and not settings.is_private
     return Visibility(listed=listed, public=public, settings=settings)
+
+
+def in_community(user_id: ColumnElement) -> ColumnElement[bool]:
+    """SQL for Visibility.in_community, for listing many users at once."""
+    return exists(
+        select(Profile.id)
+        .join(ProfileSettings, ProfileSettings.user_id == Profile.id)
+        .where(
+            Profile.id == user_id,
+            Profile.username.is_not(None),
+            ~ProfileSettings.is_private,
+            and_(ProfileSettings.show_journal, ProfileSettings.show_in_community),
+            ~exists().where(ProfileModeration.user_id == Profile.id),
+        )
+    )
 
 
 def ensure_settings(db: Session, user_id: UUID) -> ProfileSettings:

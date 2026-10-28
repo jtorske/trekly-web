@@ -21,6 +21,7 @@ import {
 import { formatDegrees, formatTemperature, formatTrailDistance, formatTrailElevation, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
 import CampgroundsSection from "./CampgroundsSection";
+import HikedBySection from "./HikedBySection";
 import WeatherSection, { useTrailForecast } from "./WeatherSection";
 import styles from "./page.module.css";
 
@@ -167,6 +168,13 @@ function TrailView({
           <p className={styles.muted}>We don&apos;t have a description for this trail yet.</p>
         )}
       </section>
+
+      <HikedBySection
+        trailId={trail.id}
+        trailName={trail.name}
+        refreshKey={hikeLogs.byTrail.get(trail.id)?.updated_at ?? "none"}
+        className={styles.section}
+      />
 
       <CampgroundsSection
         trailId={trail.id}

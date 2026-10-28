@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Flag, Footprints, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
-import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
+import HikePhoto from "@/components/HikePhoto";
+import ReportDialog from "@/components/ReportDialog";
 import { matImage } from "@/lib/gearImage";
 import TrailBadge from "@/components/TrailBadge";
 import {
@@ -30,18 +31,14 @@ import { ApiError } from "@/lib/api";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { computeMilestones, groupColour } from "@/lib/journal";
 import {
-  REPORT_REASONS,
   asGearItem,
   getPrivacy,
   getPublicProfile,
-  reportProfile,
   type PrivacySettings,
   type PublicJournalEntry,
   type PublicProfile,
-  type ReportReason,
 } from "@/lib/profilesApi";
 import { displayName, formatHikeDate, hiddenSections } from "@/lib/publicProfile";
-import { signedImageUrl } from "@/lib/storage";
 import { formatStay } from "@/lib/stay";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
@@ -302,22 +299,6 @@ function Milestones({ entries }: { entries: PublicJournalEntry[] }) {
   );
 }
 
-function JournalPhoto({ path, alt }: { path: string; alt: string }) {
-  const [url, setUrl] = useState<{ path: string; url: string | null } | null>(null);
-  useEffect(() => {
-    let live = true;
-    // Visitors can sign it only while the journal is public (storage RLS).
-    signedImageUrl("hike-photos", path).then((signed) => live && setUrl({ path, url: signed }));
-    return () => {
-      live = false;
-    };
-  }, [path]);
-  const current = url?.path === path ? url.url : null;
-  if (!current) return <span className={`${styles.photo} ${ui.skeleton}`} aria-hidden="true" />;
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={current} alt={alt} className={styles.photo} loading="lazy" />;
-}
-
 function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journal"]> }) {
   return (
     <SectionCard id="all-hikes" title="All hikes" count={journal.entries.length}>
@@ -338,7 +319,9 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
                 </span>
                 {entry.note && <p className={styles.note}>{entry.note}</p>}
               </div>
-              {entry.photo_path && <JournalPhoto path={entry.photo_path} alt={`Photo from ${entry.trail.name}`} />}
+              {entry.photo_path && (
+                <HikePhoto path={entry.photo_path} alt={`Photo from ${entry.trail.name}`} className={styles.photo} />
+              )}
             </li>
           ))}
         </ul>
@@ -434,96 +417,5 @@ function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_pl
         </ul>
       )}
     </SectionCard>
-  );
-}
-
-function ReportDialog({ username, name, onClose }: { username: string; name: string; onClose: () => void }) {
-  const [reason, setReason] = useState<ReportReason | "">("");
-  const [details, setDetails] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!reason) {
-      setResult({ ok: false, message: "Choose a reason." });
-      return;
-    }
-    setBusy(true);
-    setResult(null);
-    try {
-      await reportProfile(username, reason, details);
-      setResult({ ok: true, message: "Thanks. Our team will review this profile." });
-    } catch (caught) {
-      setResult({ ok: false, message: caught instanceof Error ? caught.message : "Your report didn't send. Try again." });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const sent = result?.ok;
-  return (
-    <Dialog
-      title={`Report ${name}`}
-      subtitle="Reports go to the Trekly team. The person you report isn't told who sent it."
-      onClose={onClose}
-      busy={busy}
-      size="sm"
-      footer={
-        sent ? (
-          <button type="button" className={ui.primary} onClick={onClose}>
-            Done
-          </button>
-        ) : (
-          <>
-            <button type="button" className={ui.ghost} onClick={onClose} disabled={busy}>
-              Cancel
-            </button>
-            <button type="submit" form="report-form" className={ui.danger} disabled={busy}>
-              {busy ? "Sending…" : "Send report"}
-            </button>
-          </>
-        )
-      }
-    >
-      {sent ? (
-        <p className={ui.success} role="status">
-          {result.message}
-        </p>
-      ) : (
-        <form id="report-form" className={profileStyles.form} onSubmit={submit} noValidate>
-          <fieldset className={styles.reasons}>
-            <legend className={ui.label}>What&apos;s wrong with this profile?</legend>
-            {REPORT_REASONS.map((option) => (
-              <label key={option.value} className={styles.reason}>
-                <input
-                  type="radio"
-                  name="reason"
-                  value={option.value}
-                  checked={reason === option.value}
-                  onChange={() => setReason(option.value)}
-                />
-                {option.label}
-              </label>
-            ))}
-          </fieldset>
-          <label className={ui.field}>
-            <span className={ui.label}>Details (optional)</span>
-            <textarea
-              className={ui.input}
-              rows={3}
-              maxLength={1000}
-              value={details}
-              onChange={(event) => setDetails(event.target.value)}
-            />
-          </label>
-          {result && (
-            <p className={ui.error} role="alert">
-              {result.message}
-            </p>
-          )}
-        </form>
-      )}
-    </Dialog>
   );
 }

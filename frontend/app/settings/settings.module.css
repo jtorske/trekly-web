@@ -353,6 +353,15 @@
   opacity: 0.55;
 }
 
+.switchReason {
+  margin: -0.2rem 0 0.4rem;
+  padding: 0 0.25rem;
+  color: var(--color-rust-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .switchText {
   display: flex;
   min-width: 0;

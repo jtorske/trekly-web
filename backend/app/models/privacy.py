@@ -42,6 +42,10 @@ class ProfileSettings(Base):
     show_trip_plans = Column(Boolean, nullable=False, default=False, server_default=false())
     hide_hike_dates = Column(Boolean, nullable=False, default=False, server_default=false())
     allow_search_indexing = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Show me in community features" ("Hiked by" on trail pages). Off for
+    # everyone until they opt in, and only in effect while the journal is
+    # public (migration 9d4f2a6c8e13).
+    show_in_community = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
