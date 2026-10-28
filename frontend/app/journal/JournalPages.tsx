@@ -2,11 +2,13 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
+import RankEmblem from "@/components/RankEmblem";
 import TrailBadge from "@/components/TrailBadge";
 import { MILESTONE_ICONS } from "@/lib/badge";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type JournalGroup, type JournalSection, type Milestone } from "@/lib/journal";
 import { useHikePhoto } from "@/lib/useHikePhoto";
+import { useRank } from "@/lib/useRank";
 import type { TrailListItem } from "@/lib/trailsApi";
 import type { View } from "./Book";
 import styles from "./journal.module.css";
@@ -86,6 +88,20 @@ function contentsEntries(ctx: PageContext): ContentsEntry[] {
   });
 }
 
+/** The owner's rank on the opening page (the journal is only ever its owner's). */
+function JournalRank() {
+  const { rank } = useRank();
+  if (!rank) return null;
+  return (
+    <span className={styles.contentsRank}>
+      {" · "}
+      <RankEmblem level={rank.rank.level} className={styles.contentsRankEmblem} />
+      <span className={styles.srOnly}>Rank: </span>
+      {rank.rank.title}
+    </span>
+  );
+}
+
 function Contents({ ctx, entries, first, last }: { ctx: PageContext; entries: ContentsEntry[]; first: boolean; last: boolean }) {
   const { journal, owner } = ctx;
   return (
@@ -96,6 +112,7 @@ function Contents({ ctx, entries, first, last }: { ctx: PageContext; entries: Co
           <p className={styles.groupMeta}>
             {owner && <span className={styles.contentsOwner}>{owner}&apos;s journal · </span>}
             {journal.hiked} of {journal.total} trails hiked
+            <JournalRank />
           </p>
         </header>
       ) : (

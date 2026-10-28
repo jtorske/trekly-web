@@ -655,6 +655,18 @@
   color: var(--journal-muted);
 }
 
+.contentsRank {
+  white-space: nowrap;
+  color: var(--journal-ink);
+}
+
+.contentsRank .contentsRankEmblem {
+  display: inline-block;
+  width: 1.35em;
+  margin-right: 0.25em;
+  vertical-align: -0.35em;
+}
+
 .runningHead {
   color: var(--journal-muted);
   font-family: var(--display);

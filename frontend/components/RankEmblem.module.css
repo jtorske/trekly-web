@@ -1,0 +1,32 @@
+/* The generated rank emblem (RankEmblem.tsx); trimmed like the trail badges. */
+.emblem {
+  display: block;
+  flex-shrink: 0;
+}
+
+.outline {
+  stroke: #e6c48c;
+  stroke-width: 3;
+}
+
+.ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-cream) 55%, transparent);
+  stroke-dasharray: 3 4;
+  stroke-width: 2;
+}
+
+.mountain {
+  fill: color-mix(in srgb, var(--color-dark-olive) 70%, black);
+  stroke: var(--color-cream);
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.snow {
+  fill: var(--color-cream);
+}
+
+.pip {
+  fill: #e6c48c;
+}

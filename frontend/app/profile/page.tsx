@@ -18,7 +18,7 @@ import { useSavedTrails } from "@/lib/useSavedTrails";
 import { publicProfilePath } from "@/lib/profilesApi";
 import type { FeaturedBadges } from "@/lib/featuredBadges";
 import { getFeaturedBadges } from "@/lib/featuredBadgesApi";
-import { rankFor } from "@/lib/rank";
+import { useRank } from "@/lib/useRank";
 import { useUnits } from "@/lib/useUnits";
 import { legacySettingsHref, sectionHref } from "@/app/settings/settingsSections";
 import {
@@ -32,6 +32,7 @@ import {
   type TabItem,
 } from "./ProfileShell";
 import BadgePicker from "./BadgePicker";
+import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
@@ -59,6 +60,7 @@ function ProfileContent() {
   const setups = useSetups();
   const plans = usePlans();
   const hikes = useHikeLogs();
+  const { rank: myRank } = useRank();
   const [featured, setFeatured] = useState<FeaturedBadges | null>(null);
   const [pickingBadges, setPickingBadges] = useState(false);
   const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
@@ -136,7 +138,8 @@ function ProfileContent() {
       bio={profile.bio}
       region={profile.home_region}
       joined={joinedLabel(profile.member_since)}
-      rank={hikeCount === null ? null : rankFor(hikeCount)}
+      rank={myRank?.rank ?? null}
+      rankDetail={myRank && <RankProgress mine={myRank} />}
       badges={
         <FeaturedBadgeSlots badges={featured?.badges ?? []} loading={!featured} onEdit={() => setPickingBadges(true)} />
       }

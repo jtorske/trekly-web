@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 import PublicProfileNotice from "@/components/PublicProfileNotice";
 import SiteFooter from "@/components/SiteFooter";
+import RankCelebration from "@/components/RankCelebration";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
 import UsernameGate from "@/components/UsernameGate";
@@ -53,6 +54,7 @@ export default function RootLayout({
           <SiteFooter />
           <PublicProfileNotice />
           <Toaster />
+          <RankCelebration />
         </AuthProvider>
       </body>
     </html>

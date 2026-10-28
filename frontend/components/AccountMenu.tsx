@@ -6,6 +6,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Backpack, Bell, LogOut, Settings, Tent, type LucideIcon } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
+import RankEmblem from "./RankEmblem";
+import { useRank } from "@/lib/useRank";
 import { ACCOUNT_LINKS, PROFILE_HREF, currentAccountHref } from "@/lib/accountMenu";
 import styles from "./AccountMenu.module.css";
 
@@ -45,6 +47,7 @@ export function AccountRows({
   onChoose: () => void;
 }) {
   const { signOut } = useAuth();
+  const { rank } = useRank();
   const [signingOut, setSigningOut] = useState(false);
   const item = asMenuItems ? ({ role: "menuitem", tabIndex: -1 } as const) : {};
   const name = identity.displayName || identity.email || "Your account";
@@ -58,6 +61,12 @@ export function AccountRows({
           <span className={styles.name} title={name}>
             {name}
           </span>
+          {rank && (
+            <span className={styles.rank}>
+              <RankEmblem level={rank.rank.level} className={styles.rankEmblem} />
+              {rank.rank.title}
+            </span>
+          )}
           <span className={styles.showProfile}>Show profile</span>
         </span>
         <span className={styles.chevron} aria-hidden="true">

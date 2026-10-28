@@ -20,7 +20,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.auth import CurrentUser, get_current_user
@@ -34,7 +34,8 @@ from app.models.setup import GearSetup
 from app.models.trip_plan import TripPlan
 from app.models.user_gear import UserGearItem
 from app.notify import Email, EmailSender, email_sender_from_env
-from app.privacy import Visibility, rank_for, visibility
+from app.points import user_rank
+from app.privacy import Visibility, visibility
 from app.routers.me_gear import _item_query
 from app.schemas.gear import CapacityOut, CategoryRef, ProductSummaryOut, VariantOut, WeightOut
 from app.schemas.trail import TrailListItemOut
@@ -235,9 +236,9 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> Pub
         return out
     out.bio = profile.bio
     if seen.shows("rank"):
-        hikes = db.scalar(select(func.count()).select_from(HikeLog).where(HikeLog.user_id == profile.id)) or 0
-        level, title = rank_for(hikes)
-        out.rank = PublicRank(level=level, title=title)
+        # The name and level only: points are the owner's business (app/routers/me_rank.py).
+        _, rank = user_rank(db, profile.id)
+        out.rank = PublicRank(level=rank.level, title=rank.title)
     if seen.shows("journal"):
         out.journal = _journal(db, profile.id, seen.hide_dates)
         _, out.featured_badges = featured_badges(db, profile.id, hide_dates=seen.hide_dates)

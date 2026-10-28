@@ -64,22 +64,3 @@ def ensure_settings(db: Session, user_id: UUID) -> ProfileSettings:
     except IntegrityError:
         db.rollback()  # created concurrently by the trigger or another request
     return db.get(ProfileSettings, user_id)
-
-
-# Rank: how many trails someone has logged in their Trail Journal.
-RANKS = (
-    (50, "Trail Legend"),
-    (25, "Backcountry Veteran"),
-    (10, "Pathfinder"),
-    (3, "Trail Regular"),
-    (1, "Day Tripper"),
-    (0, "Trailhead"),
-)
-
-
-def rank_for(hikes: int) -> tuple[int, str]:
-    """(level 1–6, title) for a number of logged trails."""
-    for index, (threshold, title) in enumerate(RANKS):
-        if hikes >= threshold:
-            return len(RANKS) - index, title
-    raise AssertionError("unreachable")

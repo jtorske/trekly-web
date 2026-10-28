@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import Link from "next/link";
 import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
+import RankEmblem from "@/components/RankEmblem";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import { groupColour } from "@/lib/journal";
@@ -84,6 +85,7 @@ export function IdentityCard({
   region,
   joined,
   rank,
+  rankDetail,
   badges,
   action,
   stats,
@@ -100,6 +102,8 @@ export function IdentityCard({
   region?: string | null;
   joined?: string | null;
   rank?: Rank | null;
+  /** Under the rank name: the owner's progress (visitors get the name and emblem only). */
+  rankDetail?: ReactNode;
   badges?: ReactNode;
   action?: ReactNode;
   stats: StatRow[];
@@ -138,15 +142,16 @@ export function IdentityCard({
       )}
 
       {rank && (
-        <p className={styles.rank}>
-          <span className={styles.rankLevel} aria-hidden="true">
-            {rank.level}
-          </span>
-          <span>
-            <span className={ui.srOnly}>Rank {rank.level}: </span>
-            {rank.title}
-          </span>
-        </p>
+        <div className={styles.rank}>
+          <RankEmblem level={rank.level} className={styles.rankEmblem} />
+          <div className={styles.rankText}>
+            <p className={styles.rankTitle}>
+              <span className={ui.srOnly}>Rank: </span>
+              {rank.title}
+            </p>
+            {rankDetail}
+          </div>
+        </div>
       )}
 
       {badges}

@@ -483,14 +483,6 @@ def test_only_admins_can_moderate(client, alice_profile, people, admin):
 # ------------------------------------------------------------------- rank
 
 
-@pytest.mark.parametrize("hikes, level, title", [(0, 1, "Trailhead"), (1, 2, "Day Tripper"), (3, 3, "Trail Regular"),
-                                                  (10, 4, "Pathfinder"), (25, 5, "Backcountry Veteran"), (80, 6, "Trail Legend")])
-def test_rank_tiers(hikes, level, title):
-    from app.privacy import rank_for
-
-    assert rank_for(hikes) == (level, title)
-
-
 def test_account_deletion_removes_privacy_rows(client, alice_profile, people, session_factory, admin, outbox):
     alice_id, alice = people["alice"]
     _, bob = people["bob"]

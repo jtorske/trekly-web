@@ -1,25 +1,48 @@
 /**
- * Rank: how many trails someone has logged in their Trail Journal. Mirrors
- * rank_for in backend/app/privacy.py, which ranks public profiles; this one
- * lets owners see their own rank even when it's hidden from visitors.
+ * Ranks come from points the server computes from hike logs (backend
+ * app/points.py, values in app/points_config.py); nothing here scores
+ * anything. These are the shapes, the progress label, and when to
+ * celebrate a rank-up.
  */
-const RANKS = [
-  [50, "Trail Legend"],
-  [25, "Backcountry Veteran"],
-  [10, "Pathfinder"],
-  [3, "Trail Regular"],
-  [1, "Day Tripper"],
-  [0, "Trailhead"],
-] as const;
 
 export interface Rank {
-  /** 1 (Trailhead) to 6 (Trail Legend). */
+  /** 1 (Trailhead Rookie) to 7 (Mountain Legend). */
   level: number;
   title: string;
 }
 
-export function rankFor(hikes: number): Rank {
-  const index = RANKS.findIndex(([threshold]) => hikes >= threshold);
-  const at = index === -1 ? RANKS.length - 1 : index;
-  return { level: RANKS.length - at, title: RANKS[at][1] };
+export interface MyRank {
+  points: number;
+  rank: Rank & { threshold: number };
+  /** null at the top rank. */
+  next: (Rank & { threshold: number }) | null;
+  /** 0–1 from this rank's threshold to the next one's. */
+  progress: number;
+  breakdown: { trails: number; nights: number; regions: number; milestones: number };
+}
+
+export interface RankRules {
+  trail_points: Record<"easy" | "moderate" | "difficult" | "extreme", number>;
+  points_per_night: number;
+  new_region_points: number;
+  milestone_points: number;
+  ranks: (Rank & { threshold: number })[];
+}
+
+/** "120 / 250 points to Switchback Regular", or the total at the top rank. */
+export function progressLabel(mine: MyRank): string {
+  if (!mine.next) return `${mine.points.toLocaleString()} points · the top rank`;
+  return `${mine.points.toLocaleString()} / ${mine.next.threshold.toLocaleString()} points to ${mine.next.title}`;
+}
+
+/** Why the rank was re-fetched: only logging a new hike can celebrate. */
+export type RankCause = "load" | "hike-added" | "hike-changed";
+
+/**
+ * A rank-up is celebrated once, right after logging the hike that earned
+ * it: never on a page load, never for an edit or deletion (which can only
+ * keep or lower the rank), and never without a known rank to compare with.
+ */
+export function shouldCelebrate(previous: Rank | null, next: Rank, cause: RankCause): boolean {
+  return cause === "hike-added" && previous !== null && next.level > previous.level;
 }

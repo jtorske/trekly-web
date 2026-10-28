@@ -1,19 +1,29 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { rankFor } from "./rank.ts";
+import { progressLabel, shouldCelebrate, type MyRank } from "./rank.ts";
 
-test("rank thresholds match the backend's rank_for", () => {
-  const cases: [number, number, string][] = [
-    [0, 1, "Trailhead"],
-    [1, 2, "Day Tripper"],
-    [2, 2, "Day Tripper"],
-    [3, 3, "Trail Regular"],
-    [9, 3, "Trail Regular"],
-    [10, 4, "Pathfinder"],
-    [25, 5, "Backcountry Veteran"],
-    [49, 5, "Backcountry Veteran"],
-    [50, 6, "Trail Legend"],
-    [400, 6, "Trail Legend"],
-  ];
-  for (const [hikes, level, title] of cases) assert.deepEqual(rankFor(hikes), { level, title }, `${hikes} hikes`);
+const rookie = { level: 1, title: "Trailhead Rookie" };
+const tripper = { level: 2, title: "Day Tripper" };
+
+test("a rank-up celebrates only right after logging a hike", () => {
+  assert.equal(shouldCelebrate(rookie, tripper, "hike-added"), true);
+  // Never on page load, even if the rank went up since the last visit.
+  assert.equal(shouldCelebrate(rookie, tripper, "load"), false);
+  assert.equal(shouldCelebrate(null, tripper, "hike-added"), false);
+  // Edits and deletions never celebrate, and nor does staying put or going down.
+  assert.equal(shouldCelebrate(rookie, tripper, "hike-changed"), false);
+  assert.equal(shouldCelebrate(tripper, tripper, "hike-added"), false);
+  assert.equal(shouldCelebrate(tripper, rookie, "hike-added"), false);
+});
+
+test("the progress label names the next rank, or says it's the top", () => {
+  const mine: MyRank = {
+    points: 120,
+    rank: { ...tripper, threshold: 50 },
+    next: { level: 3, title: "Switchback Regular", threshold: 250 },
+    progress: 0.35,
+    breakdown: { trails: 60, nights: 0, regions: 30, milestones: 25 },
+  };
+  assert.equal(progressLabel(mine), "120 / 250 points to Switchback Regular");
+  assert.equal(progressLabel({ ...mine, points: 3100, next: null }), "3,100 points · the top rank");
 });

@@ -136,6 +136,18 @@
   overflow-wrap: anywhere;
 }
 
+.rank {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.rankEmblem {
+  width: 1.1rem;
+}
+
 .showProfile {
   color: var(--menu-muted);
   font-size: 0.8rem;
