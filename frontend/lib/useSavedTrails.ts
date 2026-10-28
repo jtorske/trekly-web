@@ -3,10 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { listSavedTrails, saveTrail, unsaveTrail, type SavedTrail } from "./accountApi";
+import { toast } from "./toast";
+import { isPendingRemoval, removeWithUndo, reveal } from "./undo";
+import { useHidden } from "./useHidden";
+
+const savedKey = (trailId: string) => `saved:${trailId}`;
 
 /**
- * The signed-in user's bookmarked trails. Toggling is optimistic (the button
- * flips immediately) and rolls back if the server rejects the change.
+ * The signed-in user's bookmarked trails. Saving toasts once the server
+ * confirms; removing hides the trail at once and offers Undo, and the delete
+ * only goes out when that toast closes (see lib/undo).
  */
 export function useSavedTrails() {
   const { user } = useAuth();
@@ -27,29 +33,42 @@ export function useSavedTrails() {
     return () => controller.abort();
   }, [userId, token]);
 
+  const isHidden = useHidden();
   const current = state && state.userId === userId ? state : null;
-  const saved = current?.saved ?? [];
+  const saved = (current?.saved ?? []).filter((entry) => !isHidden(savedKey(entry.trail.id)));
   const savedIds = new Set(saved.map((entry) => entry.trail.id));
 
   const toggle = useCallback(
-    async (trailId: string, makeSaved: boolean): Promise<void> => {
+    async function run(trailId: string, makeSaved: boolean): Promise<void> {
       if (!userId) throw new Error("Sign in to save trails.");
-      setPending((p) => new Set(p).add(trailId));
-      const snapshot = current?.saved ?? [];
+      const key = savedKey(trailId);
       if (!makeSaved) {
-        setState((s) => (s ? { ...s, saved: s.saved.filter((entry) => entry.trail.id !== trailId) } : s));
+        // Hidden now; the delete waits for the Undo toast to close.
+        removeWithUndo({
+          key,
+          message: "Removed from saved",
+          what: "remove the trail from saved",
+          commit: () => unsaveTrail(trailId),
+          onCommitted: () => setState((s) => (s ? { ...s, saved: s.saved.filter((entry) => entry.trail.id !== trailId) } : s)),
+        });
+        return;
       }
+      // Saving again before the Undo toast closes: the delete never went out.
+      if (isPendingRemoval(key)) {
+        reveal(key);
+        toast.success("Trail saved", { link: { label: "View saved", href: "/saved-trails" } });
+        return;
+      }
+      reveal(key);
+      setPending((p) => new Set(p).add(trailId));
       try {
-        if (makeSaved) {
-          const entry = await saveTrail(trailId);
-          setState((s) =>
-            s ? { ...s, saved: [entry, ...s.saved.filter((e) => e.trail.id !== trailId)] } : { userId, saved: [entry], error: null },
-          );
-        } else {
-          await unsaveTrail(trailId);
-        }
+        const entry = await saveTrail(trailId);
+        setState((s) =>
+          s ? { ...s, saved: [entry, ...s.saved.filter((e) => e.trail.id !== trailId)] } : { userId, saved: [entry], error: null },
+        );
+        toast.success("Trail saved", { link: { label: "View saved", href: "/saved-trails" } });
       } catch (error) {
-        setState((s) => (s ? { ...s, saved: snapshot } : s));
+        toast.failure("save the trail", error, () => void run(trailId, true).catch(() => undefined));
         throw error;
       } finally {
         setPending((p) => {
@@ -59,7 +78,7 @@ export function useSavedTrails() {
         });
       }
     },
-    [userId, current],
+    [userId],
   );
 
   return {

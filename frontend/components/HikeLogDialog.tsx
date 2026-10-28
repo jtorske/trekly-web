@@ -8,6 +8,7 @@ import { useAuth } from "./AuthProvider";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
 import { photoInputProblem } from "@/lib/journalPhoto";
 import { processPhoto } from "@/lib/processPhoto";
+import { formProblem, toast } from "@/lib/toast";
 import { localToday } from "@/lib/stay";
 import { removeImages, uploadHikePhoto } from "@/lib/storage";
 import { useHikePhoto } from "@/lib/useHikePhoto";
@@ -66,7 +67,9 @@ export default function HikeLogDialog({
     } catch (caught) {
       // Don't leave an orphaned upload behind if the entry didn't save.
       if (uploaded) await removeImages("hike-photos", [uploaded]).catch(() => undefined);
-      setError(caught instanceof Error ? caught.message : "That didn't save. Try again.");
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure("save your hike", caught, () => void save());
       setBusy(null);
     }
   };
@@ -78,7 +81,7 @@ export default function HikeLogDialog({
       await onRemove();
       onClose();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That didn't remove. Try again.");
+      toast.failure("remove this hike", caught, () => void remove());
       setBusy(null);
     }
   };

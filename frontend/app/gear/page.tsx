@@ -8,7 +8,11 @@ import GearThumb from "@/components/GearThumb";
 import { matImage } from "@/lib/gearImage";
 import ui from "@/components/ui.module.css";
 import { nextQuery } from "@/lib/authLogic";
-import { listCategories, type GearItem } from "@/lib/gearApi";
+import { deleteMyGear, listCategories, type GearItem } from "@/lib/gearApi";
+import { removeImages } from "@/lib/storage";
+import { toast } from "@/lib/toast";
+import { removeWithUndo } from "@/lib/undo";
+import { useHidden } from "@/lib/useHidden";
 import type { GearSetup } from "@/lib/setupsApi";
 import { formatWeight } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
@@ -49,7 +53,6 @@ function GearContent() {
   const [picker, setPicker] = useState<PickerState | null>(null);
   const [details, setDetails] = useState<GearItem | null>(null);
   const [setupDialog, setSetupDialog] = useState<{ setup: GearSetup | null } | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
   const [snapId, setSnapId] = useState<string | null>(null);
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
   const resumed = useRef(false);
@@ -84,16 +87,16 @@ function GearContent() {
     if (pending && slot) queueMicrotask(() => setPicker({ slot, replacing: null, resume: pending }));
   }, [searchParams, gear.status, router]);
 
+  // The new item's snap-into-place on the mat plays once.
   useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => {
-      setToast(null);
-      setSnapId(null);
-    }, 4000);
+    if (!snapId) return;
+    const timer = window.setTimeout(() => setSnapId(null), 4000);
     return () => window.clearTimeout(timer);
-  }, [toast]);
+  }, [snapId]);
 
-  const allItems = gear.items;
+  // Items waiting on an Undo toast are already gone from the mat and list.
+  const isHidden = useHidden();
+  const allItems = useMemo(() => gear.items.filter((item) => !isHidden(`gear:${item.id}`)), [gear.items, isHidden]);
   const ownedCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const item of allItems) {
@@ -131,8 +134,23 @@ function GearContent() {
     setPicker(null);
     setDetails(null);
     if (action === "added") setSnapId(item.id);
-    setToast(action === "added" ? `Added ${item.display_name} to your gear.` : `Replaced with ${item.display_name}.`);
+    toast.success(action === "added" ? `Added ${item.display_name} to your gear` : `Replaced with ${item.display_name}`);
   };
+
+  const removeItem = (item: GearItem) =>
+    removeWithUndo({
+      key: `gear:${item.id}`,
+      message: `Removed ${item.display_name} from your gear`,
+      what: `remove ${item.display_name}`,
+      commit: async () => {
+        await deleteMyGear(item.id);
+        if (item.image_path) removeImages("gear-photos", [item.image_path]).catch(() => undefined);
+      },
+      onCommitted: () => {
+        gear.remove(item.id);
+        setupsData.reload();
+      },
+    });
 
   return (
     <main className={styles.page}>
@@ -385,10 +403,6 @@ function GearContent() {
         )}
       </div>
 
-      <p className={styles.toast} role="status" aria-live="polite">
-        {toast}
-      </p>
-
       {picker && (
         <ProductPicker
           slot={picker.slot}
@@ -415,13 +429,11 @@ function GearContent() {
             gear.upsert(item);
             setupsData.reload();
             setDetails(null);
-            setToast(`Saved changes to ${item.display_name}.`);
+            toast.success(`Saved changes to ${item.display_name}`);
           }}
           onDeleted={(item) => {
-            gear.remove(item.id);
-            setupsData.reload();
             setDetails(null);
-            setToast(`Removed ${item.display_name} from your gear.`);
+            removeItem(item);
           }}
           onReplace={(item) => {
             setDetails(null);
@@ -436,16 +448,23 @@ function GearContent() {
           items={allItems}
           setup={setupDialog.setup}
           onSaved={(setup) => {
+            const before = setupDialog.setup;
             setupsData.reload();
             setSetupDialog(null);
             selectSetup(setup.id);
-            setToast(`Saved ${setup.name}.`);
+            toast.success(
+              !before
+                ? `Created ${setup.name}`
+                : before.name !== setup.name
+                  ? `Renamed to ${setup.name}`
+                  : `Saved ${setup.name}`,
+            );
           }}
           onDeleted={() => {
             setupsData.reload();
             setSetupDialog(null);
             selectSetup(null);
-            setToast("Setup deleted. Your gear is unchanged.");
+            toast.success("Setup deleted. Your gear is unchanged.");
           }}
           onClose={() => setSetupDialog(null)}
         />

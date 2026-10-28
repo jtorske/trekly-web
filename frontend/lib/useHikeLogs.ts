@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { deleteHikeLog, listHikeLogs, putHikeLog, type HikeLog, type HikeLogInput } from "./hikeLogsApi";
 import { removeImages } from "./storage";
+import { toast } from "./toast";
 
 /**
  * The signed-in user's Trail Journal entries. Saving or removing an entry
@@ -35,6 +36,8 @@ export function useHikeLogs() {
       const previous = logs?.find((log) => log.trail.id === trailId);
       const saved = await putHikeLog(trailId, input);
       setState((s) => (s ? { ...s, logs: [saved, ...s.logs.filter((log) => log.trail.id !== trailId)] } : s));
+      if (previous) toast.success("Hike log updated");
+      else toast.success("Stamped in your Trail Journal", { link: { label: "Open journal", href: "/journal" } });
       if (previous?.photo_path && previous.photo_path !== saved.photo_path) {
         await removeImages("hike-photos", [previous.photo_path]).catch(() => undefined);
       }
@@ -48,6 +51,7 @@ export function useHikeLogs() {
       const previous = logs?.find((log) => log.trail.id === trailId);
       await deleteHikeLog(trailId);
       setState((s) => (s ? { ...s, logs: s.logs.filter((log) => log.trail.id !== trailId) } : s));
+      toast.success("Hike log removed");
       if (previous?.photo_path) await removeImages("hike-photos", [previous.photo_path]).catch(() => undefined);
     },
     [logs],

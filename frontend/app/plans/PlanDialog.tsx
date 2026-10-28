@@ -7,7 +7,7 @@ import DateInput from "@/components/DateInput";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { useAuth } from "@/components/AuthProvider";
-import { ApiError } from "@/lib/api";
+import { formProblem, toast } from "@/lib/toast";
 import { MAX_NIGHTS, MAX_PARTY, type Stay } from "@/lib/availabilityApi";
 import { nextQuery } from "@/lib/authLogic";
 import {
@@ -134,12 +134,15 @@ export default function PlanDialog({
         onSaved?.(saved);
       } else {
         const saved = await plansApi.create(trailId, input(false));
+        toast.success("Trip plan created");
         // Stay busy until the plan page opens, so a slow navigation can't
         // invite a second save.
         router.push(`/plans?id=${encodeURIComponent(saved.id)}`);
       }
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : "That plan didn't save. Try again.");
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure("save the trip plan", caught);
       setConfirming(null);
       setBusy(false);
     }

@@ -6,6 +6,7 @@ import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { updateProfile, type Profile } from "@/lib/accountApi";
+import { toast } from "@/lib/toast";
 import { announceProfile } from "@/lib/useProfile";
 import { usernameReady } from "@/lib/usernames";
 import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
@@ -23,8 +24,6 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [triedSave, setTriedSave] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const usernameStatus = useUsernameStatus(values.username, profile.username);
   const name = profile.display_name || profile.username || "Your";
@@ -48,27 +47,19 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
       return next;
     });
 
-  const edited = () => {
-    setFailure(null);
-    setSaved(false);
-  };
-
   const discard = () => {
     setValues(initial);
     setErrors({});
     setTriedSave(false);
-    setFailure(null);
   };
 
   const set = (key: keyof typeof values) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues((current) => ({ ...current, [key]: event.target.value }));
-    edited();
   };
 
   const setUsername = (username: string) => {
     setValues((current) => ({ ...current, username }));
     setFieldError("username", null);
-    edited();
   };
 
   const save = async (event: FormEvent) => {
@@ -81,7 +72,6 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
     if (Object.keys(nextErrors).length || !usernameReady(usernameStatus) || !user) return;
 
     setSaving(true);
-    setFailure(null);
     try {
       const result = await updateProfile(profileUpdate(values));
       announceProfile(result);
@@ -89,12 +79,13 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
       setInitial(next);
       setValues(next);
       setTriedSave(false);
-      setSaved(true);
+      const renamed = result.username && result.username !== profile.username;
+      toast.success(renamed ? `Username changed to @${result.username}` : "Profile saved");
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
         setErrors({ username: caught.message });
       } else {
-        setFailure(caught instanceof Error ? caught.message : "That didn't save.");
+        toast.failure("save your profile", caught);
       }
     } finally {
       setSaving(false);
@@ -172,15 +163,7 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
           />
         </label>
 
-        {failure && (
-          <p className={ui.error} role="alert">
-            {failure}
-          </p>
-        )}
         <div className={styles.formActions}>
-          <p className={styles.saveStatus} role="status" aria-live="polite">
-            {saved && !dirty ? "Saved." : ""}
-          </p>
           {dirty && (
             <button type="button" className={ui.ghost} onClick={discard} disabled={saving}>
               Discard changes

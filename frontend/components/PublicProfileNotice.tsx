@@ -13,6 +13,20 @@ import styles from "./PublicProfileNotice.module.css";
  * dismissed. (Choosing a username is a required step of its own; see
  * UsernameGate.)
  */
+/** Toasts stack above the card instead of covering it (see Toaster.module.css). */
+function reserveToastSpace(card: HTMLElement | null) {
+  if (!card) return;
+  const root = document.documentElement;
+  const observer = new ResizeObserver(() =>
+    root.style.setProperty("--bottom-ui-offset", `calc(${card.offsetHeight}px + 0.5rem)`),
+  );
+  observer.observe(card);
+  return () => {
+    observer.disconnect();
+    root.style.removeProperty("--bottom-ui-offset");
+  };
+}
+
 export default function PublicProfileNotice() {
   const router = useRouter();
   const pathname = usePathname();
@@ -37,7 +51,7 @@ export default function PublicProfileNotice() {
     updatePrivacy({ public_notice_pending: false }).catch(() => undefined);
   };
   return (
-    <aside className={styles.card} aria-labelledby="public-notice-title">
+    <aside className={styles.card} aria-labelledby="public-notice-title" ref={reserveToastSpace}>
       <h2 id="public-notice-title" className={styles.title}>
         Profiles can now be public
       </h2>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { nextQuery } from "@/lib/authLogic";
@@ -29,20 +28,14 @@ export default function SaveTrailButton({
 }) {
   const { status } = useAuth();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
   const click = async () => {
-    setError(null);
     if (status !== "signedIn") {
       const separator = returnTo.includes("?") ? "&" : "?";
       router.push(`/login${nextQuery(`${returnTo}${separator}save=${trailId}`)}`);
       return;
     }
-    try {
-      await onToggle(trailId, !saved);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That didn't save. Try again.");
-    }
+    // Success and failure both toast (see useSavedTrails).
+    await onToggle(trailId, !saved).catch(() => undefined);
   };
 
   return (
@@ -64,11 +57,6 @@ export default function SaveTrailButton({
         </svg>
         {!compact && <span>{saved ? "Saved" : "Save trail"}</span>}
       </button>
-      {error && (
-        <span className={styles.error} role="alert">
-          {error}
-        </span>
-      )}
     </span>
   );
 }

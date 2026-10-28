@@ -5,7 +5,7 @@ import Link from "next/link";
 import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
 import ui from "@/components/ui.module.css";
-import { ApiError } from "@/lib/api";
+import { formProblem, toast } from "@/lib/toast";
 import { nextQuery } from "@/lib/authLogic";
 import {
   addMyGear,
@@ -253,7 +253,9 @@ export default function ProductPicker({
       }
     } catch (error) {
       // Nothing on the mat changes unless the save succeeded.
-      setSaveError(error instanceof ApiError ? error.message : "That didn't save. Try again.");
+      const problem = formProblem(error);
+      if (problem) setSaveError(problem);
+      else toast.failure(replacing ? "replace the item" : "add the item", error, () => void confirm());
       setSaving(false);
     }
   };
@@ -719,7 +721,9 @@ function CustomItemForm({
         : await addMyGear({ ...payload, client_request_id: requestId });
       onSaved(saved);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That didn't save. Try again.");
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure(replacing ? "replace the item" : "add the item", caught);
       setSaving(false);
       onBusyChange(false);
     }

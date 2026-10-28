@@ -5,10 +5,10 @@ import Link from "next/link";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { useAuth } from "@/components/AuthProvider";
-import { ApiError } from "@/lib/api";
 import { alertsApi, type Stay } from "@/lib/availabilityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { formatStay } from "@/lib/stay";
+import { formProblem, toast } from "@/lib/toast";
 import styles from "./AlertDialog.module.css";
 
 /**
@@ -35,7 +35,6 @@ export default function AlertDialog({
   const { status, user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   const create = async () => {
     setBusy(true);
@@ -48,10 +47,12 @@ export default function AlertDialog({
         nights: stay.nights,
         party_size: stay.party,
       });
-      setDone(true);
+      toast.success("Alert set. We'll email you if a site opens up", { link: { label: "View alerts", href: "/alerts" } });
+      onClose();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : "That alert didn't save. Try again.");
-    } finally {
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure("set the alert", caught, () => void create());
       setBusy(false);
     }
   };
@@ -59,23 +60,7 @@ export default function AlertDialog({
   const party = `party of ${stay.party}`;
   let body;
   let footer;
-  if (done) {
-    body = (
-      <p className={ui.success} role="status">
-        Alert set. We&apos;ll email {user?.email ?? "you"} once every night of this stay is available.
-      </p>
-    );
-    footer = (
-      <>
-        <Link href="/alerts" className={ui.secondary}>
-          View your alerts
-        </Link>
-        <button type="button" className={ui.primary} onClick={onClose} data-autofocus>
-          Done
-        </button>
-      </>
-    );
-  } else if (status === "signedIn") {
+  if (status === "signedIn") {
     body = (
       <>
         <p className={styles.lead}>

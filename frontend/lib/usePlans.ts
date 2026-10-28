@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { plansApi, type TripPlanSummary } from "./plansApi";
+import { useHidden } from "./useHidden";
 
-/** The signed-in user's trip plans, soonest first. */
+/** The signed-in user's trip plans, soonest first. A plan waiting on its Undo toast is left out. */
 export function usePlans() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -24,10 +25,11 @@ export function usePlans() {
     return () => controller.abort();
   }, [userId, token]);
 
+  const isHidden = useHidden();
   const current = state && state.userId === userId ? state : null;
   return {
     loading: Boolean(userId) && !current,
-    plans: current?.plans ?? [],
+    plans: (current?.plans ?? []).filter((plan) => !isHidden(`plan:${plan.id}`)),
     error: current?.error ?? null,
     reload: useCallback(() => setToken((t) => t + 1), []),
   };

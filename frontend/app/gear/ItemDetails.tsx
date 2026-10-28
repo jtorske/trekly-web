@@ -4,9 +4,8 @@ import { useState, type FormEvent } from "react";
 import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
 import ui from "@/components/ui.module.css";
-import { ApiError } from "@/lib/api";
+import { formProblem, toast } from "@/lib/toast";
 import {
-  deleteMyGear,
   updateMyGear,
   type Condition,
   type GearItem,
@@ -126,24 +125,15 @@ export default function ItemDetails({
       onSaved(saved);
     } catch (caught) {
       if (uploaded) removeImages("gear-photos", [uploaded]).catch(() => undefined);
-      setError(caught instanceof ApiError ? caught.message : caught instanceof Error ? caught.message : "That didn't save.");
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure(`save ${item.display_name}`, caught);
       setBusy(false);
     }
   };
 
-  const remove = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await deleteMyGear(item.id);
-      if (item.image_path) removeImages("gear-photos", [item.image_path]).catch(() => undefined);
-      onDeleted(item);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That didn't delete. Try again.");
-      setBusy(false);
-      setConfirmingDelete(false);
-    }
-  };
+  // The page hides the item and deletes it once its Undo toast closes.
+  const remove = () => onDeleted(item);
 
   return (
     <Dialog

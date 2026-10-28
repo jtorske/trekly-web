@@ -319,26 +319,6 @@
   text-align: center;
 }
 
-.toast {
-  position: fixed;
-  bottom: 1.25rem;
-  left: 50%;
-  z-index: 60;
-  transform: translateX(-50%);
-  border-radius: 9999px;
-  background: var(--color-dark-olive);
-  padding: 0;
-  color: var(--color-cream);
-  font-size: 0.9rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.toast:not(:empty) {
-  padding: 0.6rem 1.2rem;
-  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
-}
-
 /* Setups */
 
 .chipCount {
@@ -453,11 +433,6 @@
 
   .searchInput {
     width: 100%;
-  }
-
-  .toast {
-    max-width: calc(100vw - 2rem);
-    white-space: normal;
   }
 }
 

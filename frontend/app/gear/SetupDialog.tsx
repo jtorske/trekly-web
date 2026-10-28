@@ -5,7 +5,7 @@ import Dialog from "@/components/Dialog";
 import GearThumb from "@/components/GearThumb";
 import { matImage } from "@/lib/gearImage";
 import ui from "@/components/ui.module.css";
-import { ApiError } from "@/lib/api";
+import { formProblem, toast } from "@/lib/toast";
 import type { GearItem } from "@/lib/gearApi";
 import { createSetup, deleteSetup, updateSetup, type GearSetup } from "@/lib/setupsApi";
 import { slotForItem } from "./slots";
@@ -58,7 +58,9 @@ export default function SetupDialog({
       const saved = setup ? await updateSetup(setup.id, input) : await createSetup(input);
       onSaved(saved);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : "That didn't save. Try again.");
+      const problem = formProblem(caught);
+      if (problem) setError(problem);
+      else toast.failure("save the setup", caught);
       setBusy(false);
     }
   };
@@ -70,7 +72,7 @@ export default function SetupDialog({
       await deleteSetup(setup.id);
       onDeleted(setup.id);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That didn't delete.");
+      toast.failure("delete the setup", caught, () => void remove());
       setBusy(false);
     }
   };

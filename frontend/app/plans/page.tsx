@@ -7,6 +7,8 @@ import Dialog from "@/components/Dialog";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
+import { formProblem, toast } from "@/lib/toast";
+import { removeWithUndo } from "@/lib/undo";
 import {
   PLAN_STATUS_LABELS,
   groupSizeWarning,
@@ -283,10 +285,15 @@ function PlanView({ id }: { id: string }) {
   const toggleBooked = async (night: PlanNight) => {
     setPendingNight(night.night_index);
     setActionError(null);
+    const booking = !night.booked_by_me;
+    const label = `Night ${night.night_index + 1}`;
     try {
-      setState({ id, plan: await plansApi.setBooked(plan.id, night.night_index, !night.booked_by_me), error: null });
+      setState({ id, plan: await plansApi.setBooked(plan.id, night.night_index, booking), error: null });
+      toast.success(booking ? `${label} marked as booked` : `${label} no longer marked as booked`);
     } catch (caught) {
-      setActionError(caught instanceof ApiError ? caught.message : "That didn't save. Try again.");
+      const problem = formProblem(caught);
+      if (problem) setActionError(problem);
+      else toast.failure(booking ? "mark the night as booked" : "unmark the night", caught, () => void toggleBooked(night));
     } finally {
       setPendingNight(null);
     }
@@ -304,16 +311,18 @@ function PlanView({ id }: { id: string }) {
     }
   };
 
-  const remove = async () => {
+  // Leaves for the trip list straight away; the delete goes out once the
+  // Undo toast closes, and Undo puts the plan back in the list.
+  const remove = () => {
     setBusy(true);
-    try {
-      await plansApi.remove(plan.id);
-      router.push("/profile?tab=trips");
-    } catch (caught) {
-      setActionError(caught instanceof ApiError ? caught.message : "That plan didn't delete. Try again.");
-      setDeleting(false);
-      setBusy(false);
-    }
+    const planId = plan.id;
+    removeWithUndo({
+      key: `plan:${planId}`,
+      message: "Trip plan deleted",
+      what: "delete the trip plan",
+      commit: () => plansApi.remove(planId),
+    });
+    router.push("/profile?tab=trips");
   };
 
   const draftItinerary: DraftNight[] = plan.itinerary.map((n) => ({ choice: n.choice, siteId: n.site?.id ?? null }));
@@ -440,6 +449,7 @@ function PlanView({ id }: { id: string }) {
           onSaved={(saved) => {
             setState({ id, plan: saved, error: null });
             setEditing(false);
+            toast.success("Trip plan updated");
           }}
         />
       )}

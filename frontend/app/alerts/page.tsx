@@ -8,6 +8,7 @@ import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { alertsApi, type CampgroundAlert } from "@/lib/availabilityApi";
 import { SUMMARY_LABELS, formatStay, sentence } from "@/lib/stay";
+import { formProblem, toast } from "@/lib/toast";
 import profile from "@/app/profile/page.module.css";
 import styles from "./page.module.css";
 
@@ -122,7 +123,11 @@ function AlertsContent() {
     return () => controller.abort();
   }, [load]);
 
-  const act = async (alert: CampgroundAlert, action: () => Promise<CampgroundAlert | void>) => {
+  const act = async (
+    alert: CampgroundAlert,
+    action: () => Promise<CampgroundAlert | void>,
+    done: { success: string; what: string },
+  ): Promise<void> => {
     setBusyId(alert.id);
     setActionError(null);
     try {
@@ -132,8 +137,11 @@ function AlertsContent() {
           ? (current ?? []).map((a) => (a.id === alert.id ? updated : a))
           : (current ?? []).filter((a) => a.id !== alert.id),
       );
+      toast.success(done.success);
     } catch (error) {
-      setActionError(error instanceof ApiError ? error.message : "That didn't work. Try again.");
+      const problem = formProblem(error);
+      if (problem) setActionError(problem);
+      else toast.failure(done.what, error, () => void act(alert, action, done));
     } finally {
       setBusyId(null);
     }
@@ -173,8 +181,10 @@ function AlertsContent() {
             alert={alert}
             busy={busyId === alert.id}
             onCancel={() => setConfirming(alert)}
-            onRearm={() => act(alert, () => alertsApi.rearm(alert.id))}
-            onRemove={() => act(alert, () => alertsApi.remove(alert.id))}
+            onRearm={() =>
+              act(alert, () => alertsApi.rearm(alert.id), { success: "Alert turned back on", what: "turn the alert back on" })
+            }
+            onRemove={() => act(alert, () => alertsApi.remove(alert.id), { success: "Alert removed", what: "remove the alert" })}
           />
         ))}
       </ul>
@@ -215,7 +225,7 @@ function AlertsContent() {
                 data-autofocus
                 onClick={async () => {
                   const alert = confirming;
-                  await act(alert, () => alertsApi.cancel(alert.id));
+                  await act(alert, () => alertsApi.cancel(alert.id), { success: "Alert cancelled", what: "cancel the alert" });
                   setConfirming(null);
                 }}
               >

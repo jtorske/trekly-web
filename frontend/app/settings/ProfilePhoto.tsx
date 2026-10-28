@@ -21,6 +21,7 @@ import { validateAvatarFile } from "@/lib/avatarImage";
 import { NOT_AN_IMAGE, readImageType } from "@/lib/imageType";
 import type { ProcessedAvatar } from "@/lib/processAvatar";
 import { deleteImages, uploadAvatar } from "@/lib/storage";
+import { toast } from "@/lib/toast";
 import { announceProfile } from "@/lib/useProfile";
 import AvatarCropper from "./AvatarCropper";
 import styles from "./ProfilePhoto.module.css";
@@ -125,8 +126,9 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     setError(null);
     try {
       await replaceAvatar(avatarSteps(user.id), profile.avatar_path, image, setProgress);
+      toast.success("Profile photo updated");
     } catch (caught) {
-      setError(caught instanceof Error ? `Your photo didn't save. ${caught.message}` : "Your photo didn't save. Try again.");
+      toast.failure("save your photo", caught, () => void savePhoto(image));
     } finally {
       URL.revokeObjectURL(url);
       setPreview(null);
@@ -145,9 +147,15 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     try {
       await removeAvatar(avatarSteps(user.id), previous);
       setRetryPath(null);
+      toast.success("Profile photo removed");
     } catch (caught) {
-      if (caught instanceof AvatarCleanupError) setRetryPath(caught.retryPath);
-      setError(caught instanceof Error ? caught.message : "Your photo wasn't removed. Try again.");
+      // Off the profile but its file is left: the inline message offers to finish.
+      if (caught instanceof AvatarCleanupError) {
+        setRetryPath(caught.retryPath);
+        setError(caught.message);
+      } else {
+        toast.failure("remove your photo", caught, () => void removePhoto());
+      }
     } finally {
       setSaving(null);
       triggerRef.current?.focus();

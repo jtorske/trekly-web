@@ -11,6 +11,7 @@ import { DELETE_CONFIRMATION, deleteAccount } from "@/lib/accountApi";
 import { emailLooksValid, friendlyAuthError, nextQuery, passwordChecks, passwordIsValid } from "@/lib/authLogic";
 import { listOwnImages, removeImages } from "@/lib/storage";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { toast } from "@/lib/toast";
 import { formatDistance, formatTemperature, formatWeight, type UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
 import styles from "./settings.module.css";
@@ -39,6 +40,7 @@ export function ChangeEmail({ email }: { email: string | null }) {
         { emailRedirectTo: `${window.location.origin}/auth/callback${nextQuery("/settings/email-and-password")}` },
       );
       if (error) throw error;
+      toast.success("Check your inbox to confirm");
       setStatus({
         ok: true,
         message: `Check both ${email ?? "your current address"} and ${value.trim()} — confirm the change from the links we sent.`,
@@ -112,7 +114,7 @@ export function ChangePassword() {
       setConfirm("");
       setNonce("");
       setNeedsCode(false);
-      setStatus({ ok: true, message: "Password updated." });
+      toast.success("Password updated");
     } catch (caught) {
       setStatus({ ok: false, message: friendlyAuthError(caught) });
     } finally {
@@ -176,8 +178,9 @@ export function UnitsSetting() {
     setError(null);
     try {
       await setUnits(next);
-    } catch {
-      setError("We couldn't save your units. Try again.");
+      toast.info(next === "imperial" ? "Units set to imperial (mi, ft, lb, °F)" : "Units set to metric (km, m, kg, °C)");
+    } catch (caught) {
+      toast.failure("save your units", caught, () => void choose(next));
     }
   };
 
