@@ -5,9 +5,10 @@ server (app/points.py). Distance and elevation don't count yet: too many
 trails are missing them. Changing a value here re-ranks everyone on their
 next request; nothing is stored.
 
-Catalogue check (2026-10-28, 116 trails in 60 parks or regions): every
-trail is 5,410 points; 15 random trails come to about 820 (most land
-between 665 and 995); Mountain Legend at 2,800 is roughly 45-50 trails.
+Catalogue check (2026-10-28, the 100 active trails in 49 parks or
+regions): every trail is 4,170 points; 15 random trails come to about 745
+(most land between 610 and 900); Mountain Legend at 2,800 takes roughly
+60-65 trails.
 """
 
 # Each hiked trail, by its terrain difficulty.
