@@ -72,20 +72,30 @@ function PageTitle({ children }: { children: ReactNode }) {
 
 const hikedIn = (group: JournalGroup, logs: Map<string, HikeLog>) => hikedInGroup(group, logs);
 
-type ContentsEntry = { slug: string; title: string; colour: string; count: string; noun: string };
+type ContentsEntry = { slug: string; title: string; colour: string; done: number; total: number; noun: string };
 
 function contentsEntries(ctx: PageContext): ContentsEntry[] {
   return ctx.journal.sections.flatMap((section): ContentsEntry[] => {
     if (section.kind === "group") {
       const { group } = section;
-      return [{ slug: section.slug, title: group.title, colour: group.colour, count: `${hikedIn(group, ctx.logs)}/${group.trails.length}`, noun: "hiked" }];
+      return [{ slug: section.slug, title: group.title, colour: group.colour, done: hikedIn(group, ctx.logs), total: group.trails.length, noun: "hiked" }];
     }
     if (section.kind === "milestones") {
       const earned = ctx.journal.milestones.filter((m) => m.earned).length;
-      return [{ slug: section.slug, title: section.title, colour: "var(--color-tan)", count: `${earned}/${ctx.journal.milestones.length}`, noun: "earned" }];
+      return [{ slug: section.slug, title: section.title, colour: "var(--color-tan)", done: earned, total: ctx.journal.milestones.length, noun: "earned" }];
     }
     return [];
   });
+}
+
+/** A small inked check, stamped beside a finished section. */
+function DoneStamp({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m7.5 12.5 3 3 6-7" />
+    </svg>
+  );
 }
 
 /** The owner's rank on the opening page (the journal is only ever its owner's). */
@@ -93,58 +103,118 @@ function JournalRank() {
   const { rank } = useRank();
   if (!rank) return null;
   return (
-    <span className={styles.contentsRank}>
-      {" · "}
-      <RankEmblem level={rank.rank.level} className={styles.contentsRankEmblem} />
+    <span className={styles.rankChip}>
+      <RankEmblem level={rank.rank.level} className={styles.rankChipEmblem} />
       <span className={styles.srOnly}>Rank: </span>
-      {rank.rank.title}
+      <span className={styles.rankChipTitle}>{rank.rank.title}</span>
     </span>
   );
 }
 
-function Contents({ ctx, entries, first, last }: { ctx: PageContext; entries: ContentsEntry[]; first: boolean; last: boolean }) {
+function Contents({
+  ctx,
+  entries,
+  rows,
+  first,
+  last,
+}: {
+  ctx: PageContext;
+  entries: ContentsEntry[];
+  /** Row slots on the page; both pages of a spread share one count, so their rows line up. */
+  rows: number;
+  first: boolean;
+  last: boolean;
+}) {
   const { journal, owner } = ctx;
+  // From every entry, not just this page's, so the column matches across the spread.
+  const countWidth = Math.max(...contentsEntries(ctx).map((entry) => `${entry.done}/${entry.total}`.length));
   return (
-    <div className={styles.paperInner}>
-      {first ? (
-        <header className={styles.contentsHeader}>
-          <PageTitle>Contents</PageTitle>
-          <p className={styles.groupMeta}>
-            {owner && <span className={styles.contentsOwner}>{owner}&apos;s journal · </span>}
-            {journal.hiked} of {journal.total} trails hiked
-            <JournalRank />
-          </p>
-        </header>
-      ) : (
-        <header className={styles.contentsHeader}>
-          <p className={styles.runningHead}>Contents, continued</p>
-        </header>
-      )}
-      <ol className={styles.contents}>
-        {entries.map((entry) => (
-          <li key={entry.slug}>
-            <button type="button" className={styles.contentsRow} onClick={() => ctx.onOpen(entry.slug)}>
-              <span className={styles.contentsDot} style={{ background: entry.colour }} aria-hidden="true" />
-              <span className={styles.contentsName}>{entry.title}</span>
-              <span className={styles.contentsLeader} aria-hidden="true" />
-              <span className={styles.contentsCount}>
-                {entry.count}
-                <span className={styles.srOnly}> {entry.noun}</span>
+    <div className={`${styles.paperInner} ${styles.contentsPage}`}>
+      {/* Both pages' headers and footers have fixed, equal heights, so the rows between them match across the spread. */}
+      <header className={styles.contentsHeader}>
+        {first ? (
+          <>
+            <PageTitle>Contents</PageTitle>
+            <p className={styles.contentsOwner}>{owner && <>{owner}&apos;s journal</>}</p>
+            <div className={styles.contentsProgress}>
+              <span className={styles.progressBar} aria-hidden="true">
+                <span style={{ width: `${journal.total ? (journal.hiked / journal.total) * 100 : 0}%` }} />
               </span>
-            </button>
-          </li>
-        ))}
+              <span className={styles.progressText}>
+                {journal.hiked} / {journal.total} trails hiked
+              </span>
+              <JournalRank />
+            </div>
+          </>
+        ) : (
+          <p className={`${styles.pageTitle} ${styles.contentsContinued}`}>Contents, continued</p>
+        )}
+      </header>
+      <ol className={styles.contents} style={{ "--rows": Math.max(rows, 1), "--count-ch": countWidth } as CSSProperties}>
+        {entries.map((entry) => {
+          const started = entry.done > 0;
+          const complete = entry.total > 0 && entry.done >= entry.total;
+          return (
+            <li key={entry.slug}>
+              <button
+                type="button"
+                className={`${styles.contentsRow} ${started ? styles.contentsStarted : ""}`}
+                onClick={() => ctx.onOpen(entry.slug)}
+              >
+                <span className={styles.contentsDot} style={{ background: entry.colour }} aria-hidden="true" />
+                <span className={styles.contentsName}>{entry.title}</span>
+                {complete && <DoneStamp className={styles.contentsStamp} />}
+                <span className={styles.contentsLeader} aria-hidden="true" />
+                <span className={styles.contentsCount}>
+                  {entry.done}/{entry.total}
+                  <span className={styles.srOnly}>
+                    {" "}
+                    {entry.noun}
+                    {complete && ", complete"}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ol>
-      {last && (
-        <div className={styles.legend}>
+      {last ? (
+        <div className={styles.contentsFoot}>
           <p className={styles.legendTitle}>Badge shapes</p>
           <ul>
             {(["easy", "moderate", "difficult", "extreme"] as const).map((terrain) => (
               <li key={terrain}>
-                <TrailBadge name="" terrain={terrain} colour={BADGE_COLOURS[0]} hiked className={styles.legendBadge} />
+                <span className={styles.footSample}>
+                  <TrailBadge name="" terrain={terrain} colour={BADGE_COLOURS[0]} hiked className={styles.legendBadge} />
+                </span>
                 <span>{terrain[0].toUpperCase() + terrain.slice(1)}</span>
               </li>
             ))}
+          </ul>
+        </div>
+      ) : (
+        <div className={styles.contentsFoot} aria-hidden="true">
+          <p className={styles.legendTitle}>Reading the contents</p>
+          <ul>
+            <li>
+              <span className={styles.footSample}>
+                <span className={styles.keyCount}>0/4</span>
+              </span>
+              <span>Not started</span>
+            </li>
+            <li>
+              <span className={`${styles.footSample} ${styles.contentsStarted}`}>
+                <span className={styles.keyCount}>1/4</span>
+              </span>
+              <span>Under way</span>
+            </li>
+            <li>
+              <span className={`${styles.footSample} ${styles.contentsStarted}`}>
+                <DoneStamp className={styles.keyStamp} />
+                <span className={styles.keyCount}>4/4</span>
+              </span>
+              <span>Complete</span>
+            </li>
           </ul>
         </div>
       )}
@@ -390,13 +460,15 @@ function renderSection(ctx: PageContext, section: JournalSection, view: View, ac
     case "contents": {
       const entries = contentsEntries(ctx);
       const [left, right] = halves(entries);
-      if (view === "left") return <Contents ctx={ctx} entries={left} first last={false} />;
-      if (view === "right") return <Contents ctx={ctx} entries={right} first={false} last />;
+      // halves puts any extra entry on the left, so it sets the row count for both pages.
+      const rows = left.length;
+      if (view === "left") return <Contents ctx={ctx} entries={left} rows={rows} first last={false} />;
+      if (view === "right") return <Contents ctx={ctx} entries={right} rows={rows} first={false} last />;
       return (
         <SinglePage
-          all={<Contents ctx={ctx} entries={entries} first last />}
-          first={<Contents ctx={ctx} entries={left} first last={false} />}
-          second={<Contents ctx={ctx} entries={right} first={false} last />}
+          all={<Contents ctx={ctx} entries={entries} rows={entries.length} first last />}
+          first={<Contents ctx={ctx} entries={left} rows={rows} first last={false} />}
+          second={<Contents ctx={ctx} entries={right} rows={rows} first={false} last />}
         />
       );
     }

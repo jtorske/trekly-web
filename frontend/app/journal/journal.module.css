@@ -530,33 +530,142 @@
   outline: none;
 }
 
-/* The same height on both pages, so the two columns of entries line up. */
+/*
+ * The contents spread. Header and footer have fixed heights (sums of the
+ * same max() sizes their text uses), so on both pages the rows get the same
+ * band and line up across the gutter; the footers end on the page's last line.
+ */
+.contentsPage {
+  --ch-title: max(1.15rem, 6.4cqw);
+  --ch-owner: max(1.05rem, 4.6cqw);
+  --ch-meta: max(0.75rem, 2.9cqw);
+  --cf-text: max(0.7rem, 2.7cqw);
+  --cf-sample: 12cqw;
+  --contents-space: max(24px, 5cqw);
+}
+
 .contentsHeader {
-  height: 16cqw;
+  display: grid;
+  height: calc(var(--ch-title) * 1.15 + var(--ch-owner) * 1.3 + var(--ch-meta) * 2.1 + 2cqw);
   flex: none;
+  grid-template-rows: calc(var(--ch-title) * 1.15) calc(var(--ch-owner) * 1.3) calc(var(--ch-meta) * 2.1);
+  row-gap: 1cqw;
+  align-items: end;
+  margin-bottom: var(--contents-space);
+}
+
+.contentsHeader .pageTitle {
+  line-height: 1.15;
+  -webkit-line-clamp: 1;
+}
+
+/* Same face as the title, a size down, on the same line. */
+.contentsContinued {
+  color: var(--journal-muted);
+  font-size: calc(var(--ch-title) * 0.72);
 }
 
 .contentsOwner {
+  overflow: hidden;
   color: var(--journal-ink);
   font-family: var(--hand);
-  font-size: 1.35em;
+  font-size: var(--ch-owner);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.contents {
+/* One line, always: the bar gives way first, then the rank title truncates. */
+.contentsProgress {
   display: flex;
-  flex-direction: column;
-  gap: 0.4cqw;
+  min-width: 0;
+  align-items: center;
+  gap: 2.2cqw;
+  align-self: center;
+  color: var(--journal-muted);
+  font-size: var(--ch-meta);
+  white-space: nowrap;
+}
+
+.progressBar {
+  height: max(4px, 1cqw);
+  min-width: 2.5rem;
+  max-width: 26cqw;
+  /* Takes only the room the text and rank chip leave. */
+  flex: 1 1 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--journal-rule);
+}
+
+.progressBar span {
+  display: block;
+  height: 100%;
+  min-width: max(4px, 1cqw);
+  border-radius: inherit;
+  background: var(--journal-accent);
+}
+
+.progressText {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.rankChip {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 0.35em;
+  border: 1px solid var(--journal-rule);
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--journal-paper) 70%, transparent);
+  padding: 0.1em 0.7em 0.1em 0.15em;
+  color: var(--journal-ink);
+  font-weight: 600;
+}
+
+.rankChip .rankChipEmblem {
+  width: 1.6em;
+  flex: none;
+}
+
+.rankChipTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@container (max-width: 15rem) {
+  .progressBar {
+    display: none;
+  }
+}
+
+/* Rows share the band between header and footer evenly. */
+.contents {
+  display: grid;
+  flex: 1 1 0;
+  grid-template-rows: repeat(var(--rows), minmax(min-content, 1fr));
+}
+
+.contents li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
 }
 
 .contentsRow {
   display: flex;
   width: 100%;
+  min-width: 0;
   align-items: baseline;
   gap: 1.8cqw;
   border-radius: 4px;
-  padding: 1cqw 0.5cqw;
+  padding: 0.5cqw 0.5cqw;
   color: inherit;
   font-size: max(0.875rem, 3.2cqw);
+  line-height: 1.4;
   text-align: left;
 }
 
@@ -582,52 +691,120 @@
   white-space: nowrap;
 }
 
+/*
+ * The same width on every page (the widest count, set as --count-ch), right
+ * aligned; the leader's dots run on through the spare width up to the figure.
+ */
 .contentsCount {
+  display: flex;
+  width: calc(var(--count-ch, 5) * 1ch);
   flex: none;
+  align-items: baseline;
+  justify-content: flex-end;
   color: var(--journal-muted);
   font-size: 0.9em;
   font-variant-numeric: tabular-nums;
 }
 
-.contentsLeader {
-  min-width: 3cqw;
+.contentsCount::before {
+  content: "";
   flex: 1;
+  margin-right: 0.6em;
   border-bottom: 1px dotted color-mix(in srgb, var(--journal-ink) 30%, transparent);
 }
 
-.legend {
+.contentsLeader {
+  min-width: 3cqw;
+  flex: 1;
+  /* Runs straight on into the count's own dots. */
+  margin-right: -1.8cqw;
+  border-bottom: 1px dotted color-mix(in srgb, var(--journal-ink) 30%, transparent);
+}
+
+/* Sections with at least one hike (or milestone): progress at a glance. */
+.contentsStarted .contentsName {
+  font-weight: 700;
+}
+
+.contentsStarted .contentsCount,
+.contentsStarted .keyCount {
+  color: var(--journal-accent);
+  font-weight: 700;
+}
+
+.contentsStamp,
+.keyStamp {
   flex: none;
-  margin-top: auto;
+  fill: color-mix(in srgb, var(--journal-accent) 12%, transparent);
+  stroke: var(--journal-accent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(-10deg);
+}
+
+.contentsStamp {
+  width: 1.05em;
+  align-self: center;
+  margin-left: -0.6cqw;
+}
+
+/* Right: the badge legend; left: a key to the entries. Same box, same height. */
+.contentsFoot {
+  height: calc(3cqw + var(--cf-text) * 1.5 + 2cqw + var(--cf-sample) + 1cqw + var(--cf-text) * 1.5);
+  flex: none;
+  margin-top: var(--contents-space);
   border-top: 1px solid var(--journal-rule);
   padding-top: 3cqw;
 }
 
 .legendTitle {
   color: var(--journal-muted);
-  font-size: max(0.7rem, 2.7cqw);
+  font-size: var(--cf-text, max(0.7rem, 2.7cqw));
   font-weight: 600;
   letter-spacing: 0.12em;
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
-.legend ul {
+.contentsFoot ul {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   gap: 2cqw;
   margin-top: 2cqw;
   text-align: center;
 }
 
-.legend li {
+.contentsFoot li {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1cqw;
-  font-size: max(0.7rem, 2.7cqw);
+  font-size: var(--cf-text);
+  line-height: 1.5;
+}
+
+.footSample {
+  display: flex;
+  height: var(--cf-sample);
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
 }
 
 .legendBadge {
-  width: 12cqw;
+  width: var(--cf-sample);
+}
+
+.keyCount {
+  color: var(--journal-muted);
+  font-size: max(0.95rem, 3.6cqw);
+  font-variant-numeric: tabular-nums;
+}
+
+.keyStamp {
+  width: max(1rem, 4cqw);
 }
 
 /* The same height on both pages of a spread, so their badge grids line up. */
@@ -653,18 +830,6 @@
 .groupMeta {
   margin-top: 1cqw;
   color: var(--journal-muted);
-}
-
-.contentsRank {
-  white-space: nowrap;
-  color: var(--journal-ink);
-}
-
-.contentsRank .contentsRankEmblem {
-  display: inline-block;
-  width: 1.35em;
-  margin-right: 0.25em;
-  vertical-align: -0.35em;
 }
 
 .runningHead {
