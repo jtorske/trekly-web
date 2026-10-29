@@ -62,8 +62,13 @@ export default function Toaster() {
   }, [toasts]);
 
   useLayoutEffect(() => {
+    // showPopover() throws on an element outside the page. That happens when a
+    // dialog closes in the same render a toast arrives (the gear picker after
+    // "Added … to your gear"): the stack leaves with the dialog it was portalled
+    // into. The MutationObserver above then moves it back to the body, and this
+    // effect runs again (host changed) to show it there.
     const stack = stackRef.current;
-    if (!stack || typeof stack.showPopover !== "function") return;
+    if (!stack?.isConnected || typeof stack.showPopover !== "function") return;
     if (toasts.length === 0) {
       if (stack.matches(":popover-open")) stack.hidePopover();
       return;

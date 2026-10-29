@@ -12,49 +12,59 @@ import type { Rank } from "@/lib/rank";
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
 import styles from "./shell.module.css";
 
-/** Below the fixed navbar (px), and the gap kept under a tall card. */
-const STICKY_TOP = 104;
-const STICKY_GAP = 16;
-
 /**
  * The two-column profile layout shared by /profile (the owner) and
- * /u/[username] (read-only): a sticky identity card on the left and a tabbed
- * main pane. Below 900px the card becomes a compact header above the tabs.
+ * /u/[username] (read-only): the identity card on the left and a tabbed main
+ * pane. On desktop the page is exactly one screen: the card stays put
+ * (scrolling inside itself if it must) and only the tab content scrolls, in
+ * ProfilePanel. Below 900px the card becomes a compact header above the tabs
+ * and the page scrolls as usual.
  */
 export function ProfileLayout({ banner, aside, children }: { banner?: ReactNode; aside: ReactNode; children: ReactNode }) {
-  const asideRef = useRef<HTMLElement>(null);
-
-  // A card taller than the window sticks by its bottom edge instead, so its
-  // stats stay reachable: it scrolls with the page until its end is in view.
-  useEffect(() => {
-    const aside = asideRef.current;
-    if (!aside) return;
-    const place = () => {
-      const top = Math.min(STICKY_TOP, window.innerHeight - aside.offsetHeight - STICKY_GAP);
-      aside.style.setProperty("--sticky-top", `${top}px`);
-    };
-    place();
-    const observer = new ResizeObserver(place);
-    observer.observe(aside);
-    window.addEventListener("resize", place);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", place);
-    };
-  }, []);
-
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
         {banner}
         <div className={styles.columns}>
-          <aside ref={asideRef} className={styles.aside}>
-            {aside}
-          </aside>
-          <div className={styles.main}>{children}</div>
+          <aside className={styles.aside}>{aside}</aside>
+          <div className={styles.pane}>{children}</div>
         </div>
       </div>
     </main>
+  );
+}
+
+/**
+ * The tab panel under ProfileTabs: the one scrolling region on desktop, with a
+ * soft fade at the bottom while there's more below. Back at the top on every
+ * tab change.
+ */
+export function ProfilePanel({ tab, children }: { tab: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const panel = ref.current;
+    if (!panel) return;
+    panel.scrollTop = 0;
+    const update = () => {
+      panel.toggleAttribute("data-more", panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1);
+    };
+    update();
+    // The content grows as sections load, and the panel resizes with the window.
+    const observer = new ResizeObserver(update);
+    observer.observe(panel);
+    if (panel.firstElementChild) observer.observe(panel.firstElementChild);
+    panel.addEventListener("scroll", update, { passive: true });
+    return () => {
+      observer.disconnect();
+      panel.removeEventListener("scroll", update);
+    };
+  }, [tab]);
+
+  return (
+    <div ref={ref} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel}>
+      <div className={styles.main}>{children}</div>
+    </div>
   );
 }
 
@@ -438,7 +448,7 @@ export function ProfileSkeleton() {
               </div>
             </div>
           </aside>
-          <div className={styles.main}>
+          <div className={styles.pane}>
             <div className={`${ui.skeleton} ${styles.skeletonTabs}`} />
             <div className={`${ui.skeleton} ${styles.skeletonSection}`} />
             <div className={`${ui.skeleton} ${styles.skeletonSection}`} />

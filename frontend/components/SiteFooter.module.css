@@ -23,3 +23,9 @@
     padding: 1.25rem 1rem 1.5rem;
   }
 }
+
+@media (min-width: 901px) {
+  .shellPage {
+    display: none;
+  }
+}

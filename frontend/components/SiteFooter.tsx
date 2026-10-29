@@ -29,6 +29,8 @@ export default function SiteFooter() {
   // The landing hero carries its own footer, overlaid on the photo; the
   // Trail Journal is a single screen that never scrolls.
   if (pathname === "/landing" || pathname === "/" || pathname === "/journal") return null;
+  // Profiles are one screen on desktop too, with the tab content scrolling.
+  const shell = pathname === "/profile" || pathname.startsWith("/u/");
 
-  return <FooterNotice className={styles.footer} />;
+  return <FooterNotice className={`${styles.footer} ${shell ? styles.shellPage : ""}`} />;
 }

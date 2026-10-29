@@ -56,7 +56,7 @@ export function useSavedTrails() {
       // Saving again before the Undo toast closes: the delete never went out.
       if (isPendingRemoval(key)) {
         reveal(key);
-        toast.success("Trail saved", { link: { label: "View saved", href: "/saved-trails" } });
+        toast.success("Trail saved", { link: { label: "View saved", href: "/profile?tab=trails" } });
         return;
       }
       reveal(key);
@@ -66,7 +66,7 @@ export function useSavedTrails() {
         setState((s) =>
           s ? { ...s, saved: [entry, ...s.saved.filter((e) => e.trail.id !== trailId)] } : { userId, saved: [entry], error: null },
         );
-        toast.success("Trail saved", { link: { label: "View saved", href: "/saved-trails" } });
+        toast.success("Trail saved", { link: { label: "View saved", href: "/profile?tab=trails" } });
       } catch (error) {
         toast.failure("save the trail", error, () => void run(trailId, true).catch(() => undefined));
         throw error;

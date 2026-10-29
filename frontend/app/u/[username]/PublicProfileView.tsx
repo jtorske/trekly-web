@@ -15,6 +15,7 @@ import {
   FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
+  ProfilePanel,
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
@@ -230,7 +231,7 @@ export default function PublicProfileView({ username }: { username: string }) {
       ) : (
         <>
           <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label={`${name}'s profile sections`} />
-          <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={shell.main}>
+          <ProfilePanel tab={tab}>
             {tab === "journal" && profile.journal && (
               <>
                 <JournalTab hikes={profile.journal.entries} owner={false} units={units} />
@@ -240,7 +241,7 @@ export default function PublicProfileView({ username }: { username: string }) {
             {tab === "gear" && profile.gear && <GearSection gear={profile.gear} units={units} />}
             {tab === "trails" && profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />}
             {tab === "trips" && profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />}
-          </div>
+          </ProfilePanel>
         </>
       )}
       {reporting && <ReportDialog username={profile.username} name={name} onClose={() => setReporting(false)} />}

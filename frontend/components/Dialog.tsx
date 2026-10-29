@@ -102,7 +102,7 @@ export default function Dialog({
       // reopen and route it through onClose so unsaved-changes checks run.
       onClose={() => {
         const dialog = ref.current;
-        if (unmounting.current || !dialog || dialog.open) return;
+        if (unmounting.current || !dialog?.isConnected || dialog.open) return;
         dialog.showModal();
         if (!busyRef.current) onClose();
       }}

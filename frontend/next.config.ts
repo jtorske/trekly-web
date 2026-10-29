@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async redirects() {
+    return [
+      // Saved trails live on a profile tab now; old links and bookmarks land there.
+      { source: "/saved-trails", destination: "/profile?tab=trails", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

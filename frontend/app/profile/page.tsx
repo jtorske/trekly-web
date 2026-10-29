@@ -25,6 +25,7 @@ import {
   FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
+  ProfilePanel,
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
@@ -162,7 +163,7 @@ function ProfileContent() {
     <ProfileLayout aside={aside}>
       <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label="Profile sections" />
 
-      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={shell.main}>
+      <ProfilePanel tab={tab}>
         {tab === "overview" && (
           <>
             {isNew && (
@@ -239,16 +240,7 @@ function ProfileContent() {
         )}
 
         {tab === "trails" && (
-          <SectionCard
-            id="trails"
-            title="Saved trails"
-            count={savedCount ?? undefined}
-            action={
-              <Link href="/saved-trails" className={shell.sectionLink}>
-                Full collection →
-              </Link>
-            }
-          >
+          <SectionCard id="trails" title="Saved trails" count={savedCount ?? undefined}>
             <SavedTrailList data={savedTrails} units={units} />
           </SectionCard>
         )}
@@ -260,7 +252,7 @@ function ProfileContent() {
             <TripsSection data={plans} />
           </SectionCard>
         )}
-      </div>
+      </ProfilePanel>
       {pickingBadges && featured && (
         <BadgePicker
           logs={hikes.logs}
