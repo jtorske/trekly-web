@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: October 27, 2026</p>
+        <p className={styles.updated}>Last updated: October 28, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -123,14 +123,18 @@ export default function PrivacyPage() {
         <p>
           You can make your whole profile private at any time, hide the dates of your hikes, and
           choose whether search engines can show your profile (off by default). Changes take effect
-          right away. If you joined Trekly before public profiles were introduced, your profile
+          right away. If you also turn on Show me in community features (off by default), the trail
+          pages for trails you&apos;ve hiked can show your username, display name and profile
+          picture, plus any notes and photos you&apos;ve added to those hikes, without dates if
+          you&apos;ve chosen to hide them. Other users can report a trip note they believe breaks our Terms of Use. If
+          you joined Trekly before public profiles were introduced, your profile
           stays private until you change your settings.
         </p>
         <p>
           Other signed-in users can report a profile they believe breaks our Terms of Use. A report
-          includes the profile, the reason and any details given, and the reporter&apos;s account so
-          we can follow up. It&apos;s sent only to us, and we never tell the reported person who
-          reported them.
+          includes the profile, the trip note if one was reported, the reason and any details
+          given, and the reporter&apos;s account so we can follow up. It&apos;s sent only to us, and
+          we never tell the reported person who reported them.
         </p>
 
         <h2>Service providers</h2>
