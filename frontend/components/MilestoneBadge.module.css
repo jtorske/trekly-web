@@ -1,20 +1,98 @@
-/* Matches .medalEarned in app/journal/journal.module.css. */
+/*
+ * Milestone medals, in the Trail Journal and on profiles. The ring is the
+ * tier: bronze, silver or gold. The ink falls back to the site's olive
+ * outside the journal (which sets --journal-ink).
+ */
 .badge {
+  --ring: #b4693a;
+  --ink: var(--journal-ink, var(--color-dark-olive));
+
   display: block;
   width: 100%;
   height: auto;
+  overflow: visible;
+}
+
+.badge[data-tier="silver"] {
+  --ring: #a3adb6;
+}
+
+.badge[data-tier="gold"] {
+  --ring: #d9a531;
 }
 
 .base {
-  fill: #a8752c;
-  stroke: #e6c48c;
-  stroke-width: 4;
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 45%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
 }
 
 .icon {
   fill: none;
-  stroke: var(--color-cream);
+  stroke: color-mix(in srgb, var(--ink) 50%, transparent);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.progress {
+  fill: none;
+  stroke: var(--color-tan);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.earned .base {
+  fill: #3a4524;
+  stroke: var(--ring);
+  stroke-width: 7;
+  stroke-dasharray: none;
+}
+
+.earned .inner {
+  fill: none;
+  stroke: var(--ring);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.earned .icon {
+  stroke: var(--color-cream);
+}
+
+/* The first time an earned medal is shown: pressed in like an ink stamp. */
+.stamp {
+  transform-origin: center;
+  animation: stamp 620ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-14deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.92) rotate(3deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: fadeIn 300ms ease both;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
 }

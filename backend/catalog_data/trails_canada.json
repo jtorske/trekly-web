@@ -57,7 +57,10 @@
         "flags": [
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 2,
@@ -280,7 +283,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 8,
@@ -548,7 +554,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 15,
@@ -962,7 +971,10 @@
           "province: starts in AB (Sunshine Village), destination in BC; kept BC",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 26,
@@ -1032,7 +1044,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 28,
@@ -1317,7 +1332,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 36,
@@ -1423,7 +1441,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 39,
@@ -1458,7 +1479,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 40,
@@ -1670,7 +1694,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 46,
@@ -2281,7 +2308,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 63,
@@ -2328,7 +2358,10 @@
         "flags": [
           "route_type: treated as out-and-back via Healy Pass; some parties exit via Redearth Creek as a point-to-point trip"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 64,
@@ -2367,7 +2400,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 65,
@@ -2444,7 +2480,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 67,
@@ -2479,7 +2518,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 68,
@@ -2514,7 +2556,10 @@
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 69,
@@ -3263,7 +3308,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 90,
@@ -3422,7 +3470,10 @@
         "flags": [
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
         ]
-      }
+      },
+      "tags": [
+        "larch"
+      ]
     },
     {
       "rank": 94,

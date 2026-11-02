@@ -23,7 +23,7 @@ CATALOG_PATH = Path(__file__).resolve().parents[1] / "catalog_data" / "trails_ca
 TRAIL_FIELDS = (
     "region", "park_name", "park_type", "country_code", "province_code", "latitude", "longitude",
     "route_type", "distance_km", "elevation_gain_m", "max_elevation_m", "terrain_difficulty",
-    "typical_duration_nights", "climate_zone", "description",
+    "typical_duration_nights", "climate_zone", "description", "tags",
 )
 
 
@@ -52,6 +52,8 @@ def popularity_score(rank: int, total: int) -> Decimal:
 
 
 def _normalize(name: str, value):
+    if name == "tags":
+        return sorted(value or [])
     if value is None:
         return None
     if name in ("latitude", "longitude"):

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { thenRefreshMilestones } from "./useMilestones";
 import type { GearItem } from "./gearApi";
 
 export interface GearSetup {
@@ -22,11 +23,14 @@ export interface SetupInput {
 export const listSetups = (signal?: AbortSignal) =>
   apiFetch<GearSetup[]>("/api/me/setups", { auth: true, signal });
 
+// A full setup can earn Packed and ready.
 export const createSetup = (input: SetupInput) =>
-  apiFetch<GearSetup>("/api/me/setups", { method: "POST", body: input, auth: true });
+  thenRefreshMilestones(apiFetch<GearSetup>("/api/me/setups", { method: "POST", body: input, auth: true }));
 
 export const updateSetup = (id: string, input: SetupInput) =>
-  apiFetch<GearSetup>(`/api/me/setups/${encodeURIComponent(id)}`, { method: "PATCH", body: input, auth: true });
+  thenRefreshMilestones(
+    apiFetch<GearSetup>(`/api/me/setups/${encodeURIComponent(id)}`, { method: "PATCH", body: input, auth: true }),
+  );
 
 export const deleteSetup = (id: string) =>
   apiFetch<void>(`/api/me/setups/${encodeURIComponent(id)}`, { method: "DELETE", auth: true });

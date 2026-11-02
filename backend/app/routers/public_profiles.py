@@ -27,6 +27,7 @@ from app.auth import CurrentUser, get_current_user
 from app.catalog.presenters import effective_weight, gear_item_out
 from app.database import get_db
 from app.featured import FeaturedBadgeOut, featured_badges
+from app.milestones import MilestoneBadgeOut, badge_out, evaluate, gather
 from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
 from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
@@ -64,6 +65,9 @@ class PublicJournalEntry(BaseModel):
 class PublicJournal(BaseModel):
     hide_dates: bool
     entries: list[PublicJournalEntry]
+    # Earned milestones only, in journal order. Seasonal ones would hint at
+    # when, so they're left out while dates are hidden.
+    milestones: list[MilestoneBadgeOut] = []
 
 
 class PublicGearItem(BaseModel):
@@ -143,8 +147,14 @@ def _journal(db: Session, owner: UUID, hide_dates: bool) -> PublicJournal:
         logs = sorted(logs, key=lambda log: log.trail.name.lower())
     else:
         logs = sorted(logs, key=lambda log: (log.hiked_on, log.created_at), reverse=True)
+    earned = [
+        badge_out(milestone)
+        for milestone, result in evaluate(gather(db, owner))
+        if result.earned and not (hide_dates and milestone.category == "seasons")
+    ]
     return PublicJournal(
         hide_dates=hide_dates,
+        milestones=earned,
         entries=[
             PublicJournalEntry(
                 trail=TrailListItemOut.model_validate(log.trail),

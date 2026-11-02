@@ -1,7 +1,7 @@
 import { apiFetch } from "./api";
-import type { FeaturedBadge, FeaturedBadges, MilestoneId } from "./featuredBadges";
+import type { FeaturedBadge, FeaturedBadges } from "./featuredBadges";
 
-type BadgeIn = { trail_id: string } | { milestone: MilestoneId };
+type BadgeIn = { trail_id: string } | { milestone: string };
 
 export const getFeaturedBadges = (signal?: AbortSignal) => apiFetch<FeaturedBadges>("/api/me/featured-badges", { auth: true, signal });
 

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { thenRefreshMilestones } from "./useMilestones";
 import type { GearSetup } from "./setupsApi";
 
 /** campground: a site on the trail. undecided: not chosen yet. outside: somewhere Parks Canada doesn't book. */
@@ -89,8 +90,9 @@ const path = (id: string) => `/api/me/plans/${encodeURIComponent(id)}`;
 export const plansApi = {
   list: (signal?: AbortSignal) => apiFetch<TripPlanSummary[]>("/api/me/plans", { auth: true, signal }),
   get: (id: string, signal?: AbortSignal) => apiFetch<TripPlan>(path(id), { auth: true, signal }),
+  // The first plan earns Planner.
   create: (trailId: string, input: PlanInput) =>
-    apiFetch<TripPlan>("/api/me/plans", { method: "POST", body: { trail_id: trailId, ...input }, auth: true }),
+    thenRefreshMilestones(apiFetch<TripPlan>("/api/me/plans", { method: "POST", body: { trail_id: trailId, ...input }, auth: true })),
   update: (id: string, input: PlanInput) => apiFetch<TripPlan>(path(id), { method: "PUT", body: input, auth: true }),
   setBooked: (id: string, nightIndex: number, booked: boolean) =>
     apiFetch<TripPlan>(`${path(id)}/nights/${nightIndex}`, {

@@ -216,7 +216,9 @@ function StatLink({ stat }: { stat: StatRow }) {
 
 /** A featured badge's art: the trail's Trail Journal badge, or a milestone medal. */
 export function BadgeArt({ badge, className }: { badge: FeaturedBadge; className?: string }) {
-  if (badge.kind === "milestone") return <MilestoneBadge id={badge.milestone} title={badgeName(badge)} className={className} />;
+  if (badge.kind === "milestone") {
+    return <MilestoneBadge icon={badge.badge.icon} tier={badge.badge.tier} title={badgeName(badge)} className={className} />;
+  }
   const { trail } = badge;
   return <TrailBadge name={trail.name} terrain={trail.terrain} colour={groupColour(`region:${trail.region}`)} hiked className={className} />;
 }

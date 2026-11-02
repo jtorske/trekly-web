@@ -66,7 +66,10 @@ function RankRulesDialog({ mine, onClose }: { mine: MyRank; onClose: () => void 
               </li>
               <li>Overnight trips: +{rules.points_per_night} a night</li>
               <li>Your first trail in each new park or region: +{rules.new_region_points}</li>
-              <li>Each milestone badge: +{rules.milestone_points}</li>
+              <li>
+                Each milestone: bronze +{rules.tier_points.bronze}, silver +{rules.tier_points.silver}, gold +
+                {rules.tier_points.gold}
+              </li>
             </ul>
           </section>
           <section>

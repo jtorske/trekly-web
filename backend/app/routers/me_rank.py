@@ -14,7 +14,8 @@ from sqlalchemy.orm import Session
 from app.auth import get_current_user_id
 from app.database import get_db
 from app.points import next_rank, user_rank
-from app.points_config import MILESTONE_POINTS, NEW_REGION_POINTS, POINTS_PER_NIGHT, RANKS, TRAIL_POINTS
+from app.milestones_config import TIER_POINTS
+from app.points_config import NEW_REGION_POINTS, POINTS_PER_NIGHT, RANKS, TRAIL_POINTS
 
 router = APIRouter(tags=["ranks"])
 
@@ -46,7 +47,8 @@ class RankRulesOut(BaseModel):
     trail_points: dict[str, int]
     points_per_night: int
     new_region_points: int
-    milestone_points: int
+    # Per milestone, by tier.
+    tier_points: dict[str, int]
     ranks: list[RankOut]
 
 
@@ -73,6 +75,6 @@ def get_rank_rules():
         trail_points=dict(TRAIL_POINTS),
         points_per_night=POINTS_PER_NIGHT,
         new_region_points=NEW_REGION_POINTS,
-        milestone_points=MILESTONE_POINTS,
+        tier_points=dict(TIER_POINTS),
         ranks=[RankOut(level=i + 1, title=title, threshold=threshold) for i, (threshold, title) in enumerate(RANKS)],
     )

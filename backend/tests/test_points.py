@@ -5,6 +5,8 @@ import json
 
 import pytest
 
+from app.milestones import Facts, Hike
+from app.milestones_config import TIER_POINTS
 from app.models.trail import Trail
 from app.points import next_rank, rank_for, score
 from app.points_config import RANKS
@@ -16,45 +18,59 @@ def trail(terrain="easy", region="Banff National Park, AB", nights=0, km=None):
                  typical_duration_nights=nights, distance_km=km)
 
 
+def scored(*trails):
+    """Points for hiking these trails, undated, with nothing else done."""
+    return score(Facts(hikes=[Hike(t) for t in trails]))
+
+
 # ------------------------------------------------------------ formula
 
 
 def test_each_trail_scores_by_difficulty():
     for terrain, points in (("easy", 10), ("moderate", 20), ("difficult", 35), ("extreme", 50)):
-        assert score([trail(terrain)]).trails == points
+        assert scored(trail(terrain)).trails == points
 
 
 def test_overnights_add_ten_a_night():
-    assert score([trail(nights=3), trail(nights=0)]).nights == 30
+    assert scored(trail(nights=3), trail(nights=0)).nights == 30
 
 
 def test_first_trail_in_each_new_region_earns_the_bonus_once():
-    same = score([trail(region="Banff National Park, AB"), trail(region="Banff National Park, AB")])
+    same = scored(trail(region="Banff National Park, AB"), trail(region="Banff National Park, AB"))
     assert same.regions == 15
-    two = score([trail(region="Banff National Park, AB"), trail(region="Jasper National Park, AB")])
+    two = scored(trail(region="Banff National Park, AB"), trail(region="Jasper National Park, AB"))
     assert two.regions == 30
 
 
-def test_milestones_add_25_each():
-    # First steps only.
-    assert score([trail()]).milestones == 25
-    # First steps + Under the stars.
-    assert score([trail(nights=1)]).milestones == 50
-    # First steps + Park hopper (5 regions) + Century (100 km of known distances); none overnight.
+def test_tier_points_are_bronze_10_silver_25_gold_50():
+    assert TIER_POINTS == {"bronze": 10, "silver": 25, "gold": 50}
+
+
+def test_milestones_score_by_tier():
+    # First steps (bronze).
+    assert scored(trail()).milestones == 10
+    # + Under the stars (bronze).
+    assert scored(trail(nights=1)).milestones == 20
+    # + Long weekend (silver).
+    assert scored(trail(nights=3)).milestones == 10 + 10 + 25
+    # + Week in the wild (gold); 6 nights is short of Backcountry regular's 10.
+    assert scored(trail(nights=6)).milestones == 10 + 10 + 25 + 50
+    # First steps + Park hopper (bronze) + Century (bronze); none overnight.
     five = [trail(region=f"Park {i}", km=20) for i in range(5)]
-    assert score(five).milestones == 25 * 3
-    assert score([*five, trail(nights=1)]).milestones == 25 * 4
+    assert scored(*five).milestones == 10 * 3
+    # Planning milestones score too, with no hikes at all: Planner + Permit hunter (bronze), Lucky break (silver).
+    assert score(Facts(plans=1, alerts=1, alert_notified=True)).milestones == 10 + 10 + 25
 
 
 def test_nothing_hiked_is_zero():
-    assert score([]).total == 0
+    assert score(Facts()).total == 0
 
 
 def test_total_adds_the_parts():
-    points = score([trail("moderate", nights=2), trail("easy", region="Jasper National Park, AB")])
-    # 20 + 10 trails, 20 nights, 2 regions, First steps + Under the stars.
-    assert (points.trails, points.nights, points.regions, points.milestones) == (30, 20, 30, 50)
-    assert points.total == 130
+    points = scored(trail("moderate", nights=2), trail("easy", region="Jasper National Park, AB"))
+    # 20 + 10 trails, 20 nights, 2 regions, First steps + Under the stars (bronze each).
+    assert (points.trails, points.nights, points.regions, points.milestones) == (30, 20, 30, 20)
+    assert points.total == 100
 
 
 # ------------------------------------------------------------ thresholds
@@ -89,19 +105,21 @@ def test_next_rank_and_the_top():
 def test_my_rank_reports_points_progress_and_next_rank(client, alice):  # noqa: F811
     body = client.get("/api/me/rank", headers=alice).json()
     # Agnes easy 10, Skyline moderate 20 + 2 nights, Sentinel difficult 35, Garibaldi moderate 20;
-    # 3 regions; First steps + Under the stars.
-    assert body["breakdown"] == {"trails": 85, "nights": 20, "regions": 45, "milestones": 50}
-    assert body["points"] == 200
+    # 3 regions; First steps, Under the stars, Monthly regular (June to September: bronze 10 each)
+    # and the secret Skyline (silver 25).
+    assert body["breakdown"] == {"trails": 85, "nights": 20, "regions": 45, "milestones": 55}
+    assert body["points"] == 205
     assert body["rank"] == {"level": 2, "title": "Day Tripper", "threshold": 50}
     assert body["next"] == {"level": 3, "title": "Switchback Regular", "threshold": 250}
-    assert body["progress"] == 0.75
+    assert body["progress"] == 0.775
 
 
 def test_rank_is_recalculated_when_a_hike_is_deleted(client, alice, trails):  # noqa: F811
     assert client.delete(f"/api/me/hike-logs/{trails['skyline']}", headers=alice).status_code == 204
     body = client.get("/api/me/rank", headers=alice).json()
-    # Skyline's 20 for the trail and 20 for its nights go, with its region (15) and Under the stars (25).
-    assert body["points"] == 200 - 20 - 20 - 15 - 25
+    # Skyline's 20 for the trail and 20 for its nights go, with its region (15), Under the stars (10),
+    # Skyline (25), and Monthly regular (10): June, August, September is no longer three in a row.
+    assert body["points"] == 205 - 20 - 20 - 15 - 10 - 25 - 10
     for trail_id in (trails["sentinel"], trails["garibaldi"], trails["agnes"]):
         client.delete(f"/api/me/hike-logs/{trail_id}", headers=alice)
     body = client.get("/api/me/rank", headers=alice).json()
@@ -112,8 +130,8 @@ def test_new_hikes_count_at_once(client, people, trails):  # noqa: F811
     bob = people["bob"]
     assert client.get("/api/me/rank", headers=bob).json()["points"] == 0
     hike(client, bob, trails["wilcox"], "2026-08-01")
-    # Easy 10 + a new region 15 + First steps 25.
-    assert client.get("/api/me/rank", headers=bob).json()["points"] == 50
+    # Easy 10 + a new region 15 + First steps 10.
+    assert client.get("/api/me/rank", headers=bob).json()["points"] == 35
 
 
 def test_my_rank_needs_signing_in(client, trails):  # noqa: F811
@@ -123,7 +141,8 @@ def test_my_rank_needs_signing_in(client, trails):  # noqa: F811
 def test_rank_rules_are_public_and_match_the_config(client):
     body = client.get("/api/ranks").json()
     assert body["trail_points"] == {"easy": 10, "moderate": 20, "difficult": 35, "extreme": 50}
-    assert (body["points_per_night"], body["new_region_points"], body["milestone_points"]) == (10, 15, 25)
+    assert (body["points_per_night"], body["new_region_points"]) == (10, 15)
+    assert body["tier_points"] == {"bronze": 10, "silver": 25, "gold": 50}
     assert [(r["threshold"], r["title"]) for r in body["ranks"]] == list(RANKS)
 
 

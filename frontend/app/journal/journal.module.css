@@ -971,70 +971,129 @@
   stroke-dasharray: 4 3;
 }
 
+/* ------------------------------------------------------------- milestones */
+
+/* Running head, title and count: the same height on every milestone page. */
+.milestoneHeader {
+  height: 25cqw;
+}
+
+.milestoneHeader .runningHead {
+  font-size: max(0.7rem, 2.7cqw);
+}
+
+/*
+ * Like .slots: rows share the page's height, so medals shrink rather than
+ * overflow. Each medal spans three tracks (art, title, detail) of a shared
+ * subgrid, so every art track gets an equal share and every medal on the
+ * page is the same size, however long its words.
+ */
 .medals {
   display: grid;
   flex: 1 1 0;
   min-height: 0;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4cqw;
-  align-content: center;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr) auto auto);
+  column-gap: 5cqw;
 }
 
 .medal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1cqw;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  justify-items: center;
   text-align: center;
 }
 
-.medal svg {
-  width: 26cqw;
+/* The medal takes whatever square is left once the words are placed. */
+.medalBox {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 2.5rem;
+  place-items: center;
+  container-type: size;
 }
 
-.medalBase {
-  fill: none;
-  stroke: color-mix(in srgb, var(--journal-ink) 45%, transparent);
-  stroke-width: 2;
-  stroke-dasharray: 6 5;
-}
-
-.medalProgress {
-  fill: none;
-  stroke: var(--color-tan);
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
-.medalIcon {
-  fill: none;
-  stroke: color-mix(in srgb, var(--journal-ink) 50%, transparent);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.medalEarned .medalBase {
-  fill: #a8752c;
-  stroke: var(--foil);
-  stroke-width: 4;
-  stroke-dasharray: none;
-}
-
-.medalEarned .medalIcon {
-  stroke: var(--color-cream);
+/* Two classes, so it wins over the badge's own width: 100%. */
+.medalBox .medalArt {
+  width: min(100cqh, 72cqw, 7.5rem);
 }
 
 .medalTitle {
+  padding-top: 0.6cqw;
   font-family: var(--display);
-  font-size: max(0.9rem, 3.8cqw);
+  font-size: max(0.85rem, 3.4cqw);
   font-weight: 600;
+  line-height: 1.15;
 }
 
 .medalDetail {
+  display: -webkit-box;
+  align-self: start;
+  overflow: hidden;
+  padding-bottom: 2.5cqw;
   color: var(--journal-muted);
-  font-size: max(0.7rem, 2.7cqw);
-  line-height: 1.3;
+  font-size: max(0.68rem, 2.55cqw);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.medalProgress {
+  color: var(--journal-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The tier word in the tier's ring colour, darkened to read on paper. */
+.medalTier {
+  color: color-mix(in srgb, #b4693a 75%, black);
+  font-weight: 600;
+}
+
+.medalTier[data-tier="silver"] {
+  color: color-mix(in srgb, #a3adb6 45%, black);
+}
+
+.medalTier[data-tier="gold"] {
+  color: color-mix(in srgb, #d9a531 60%, black);
+}
+
+.tiers {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3cqw;
+  margin-bottom: 4cqw;
+  text-align: center;
+}
+
+.tiers li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6cqw;
+}
+
+.tierBadge {
+  width: max(2.25rem, 11cqw);
+}
+
+.tierName {
+  font-family: var(--display);
+  font-weight: 600;
+}
+
+.tierMeta {
+  color: var(--journal-muted);
+  font-size: max(0.68rem, 2.55cqw);
+}
+
+.categoryList {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .footnote {

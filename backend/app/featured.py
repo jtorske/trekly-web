@@ -4,8 +4,8 @@ Shared by the owner's endpoints (app/routers/me_featured_badges.py), the
 public profile (app/routers/public_profiles.py) and hike deletion, so the
 rules live in one place:
 
-- Only earned badges: a trail the user has logged, or a milestone their
-  logs earn (app/journal.py). No duplicates, at most MAX_FEATURED.
+- Only earned badges: a trail the user has logged, or a milestone they've
+  earned (app/milestones.py). No duplicates, at most MAX_FEATURED.
 - Nothing picked: the most recent trail badges stand in. For visitors who
   can't see hike dates they're chosen by trail name instead, since "most
   recent" would hint at when.
@@ -21,7 +21,8 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.journal import MILESTONES, earned_milestones
+from app.milestones import MilestoneBadgeOut, badge_out, earned_ids, gather
+from app.milestones_config import BY_ID
 from app.models.featured_badge import MAX_FEATURED, FeaturedBadge
 from app.models.hike_log import HikeLog
 from app.schemas.trail import TrailListItemOut
@@ -31,6 +32,8 @@ class FeaturedBadgeOut(BaseModel):
     kind: Literal["trail", "milestone"]
     trail: TrailListItemOut | None = None
     milestone: str | None = None
+    # The milestone's name, tier and icon, for milestone badges.
+    badge: MilestoneBadgeOut | None = None
 
 
 @dataclass(frozen=True)
@@ -56,7 +59,7 @@ def featured_badges(db: Session, user_id: UUID, *, hide_dates: bool = False) -> 
     """(picked, badges): the user's own picks in order, or the stand-ins."""
     logs = _logs(db, user_id)
     by_trail = {log.trail_id: log for log in logs}
-    earned = earned_milestones(log.trail for log in logs)
+    earned = earned_ids(gather(db, user_id))
     rows = db.scalars(
         select(FeaturedBadge).where(FeaturedBadge.user_id == user_id).order_by(FeaturedBadge.position)
     ).all()
@@ -66,7 +69,9 @@ def featured_badges(db: Session, user_id: UUID, *, hide_dates: bool = False) -> 
             if row.trail_id is not None and row.trail_id in by_trail:
                 shown.append(FeaturedBadgeOut(kind="trail", trail=TrailListItemOut.model_validate(by_trail[row.trail_id].trail)))
             elif row.milestone is not None and row.milestone in earned:
-                shown.append(FeaturedBadgeOut(kind="milestone", milestone=row.milestone))
+                shown.append(
+                    FeaturedBadgeOut(kind="milestone", milestone=row.milestone, badge=badge_out(BY_ID[row.milestone]))
+                )
         return True, shown
     if hide_dates:
         logs = sorted(logs, key=lambda log: log.trail.name.lower())
@@ -84,13 +89,13 @@ def set_featured(db: Session, user_id: UUID, picks: list[Pick]) -> None:
         raise BadgeChoiceError("Each badge can only be featured once.")
     logs = _logs(db, user_id)
     hiked = {log.trail_id for log in logs}
-    earned = earned_milestones(log.trail for log in logs)
+    earned = earned_ids(gather(db, user_id))
     for pick in picks:
         if (pick.trail_id is None) == (pick.milestone is None):
             raise BadgeChoiceError("Pick either a trail badge or a milestone badge.")
         if pick.trail_id is not None and pick.trail_id not in hiked:
             raise BadgeChoiceError("You can only feature badges you've earned: log the hike first.")
-        if pick.milestone is not None and pick.milestone not in MILESTONES:
+        if pick.milestone is not None and pick.milestone not in BY_ID:
             raise BadgeChoiceError("That isn't a Trekly badge.")
         if pick.milestone is not None and pick.milestone not in earned:
             raise BadgeChoiceError("You can only feature badges you've earned.")
@@ -104,9 +109,10 @@ def set_featured(db: Session, user_id: UUID, picks: list[Pick]) -> None:
 
 def prune_featured(db: Session, user_id: UUID) -> None:
     """After a hike is deleted: drop milestone picks it no longer earns. Trail
-    picks for that hike are already gone (the FK cascades)."""
+    picks for that hike are already gone (the FK cascades). Picks lost some
+    other way (a deleted plan, say) are simply never shown."""
     logs = _logs(db, user_id)
-    earned = earned_milestones(log.trail for log in logs)
+    earned = earned_ids(gather(db, user_id))
     # Belt and braces for trail picks, should the cascade ever be missing.
     hiked = {log.trail_id for log in logs}
     stale = [

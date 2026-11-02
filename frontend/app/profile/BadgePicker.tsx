@@ -17,6 +17,7 @@ import {
 import { saveFeaturedBadges } from "@/lib/featuredBadgesApi";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { BadgeArt } from "./ProfileShell";
+import { useMilestones } from "@/lib/useMilestones";
 import styles from "./BadgePicker.module.css";
 
 /**
@@ -42,7 +43,8 @@ export default function BadgePicker({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const groups = earnedBadgeGroups(logs, query);
+  const { milestones } = useMilestones();
+  const groups = earnedBadgeGroups(logs, milestones, query);
   const chosen = new Set(selected.map(badgeKey));
   const full = selected.length >= MAX_FEATURED;
 

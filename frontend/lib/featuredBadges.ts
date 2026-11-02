@@ -1,5 +1,6 @@
 import type { HikeLog } from "./hikeLogsApi";
-import { computeMilestones, regionTitle, type Milestone } from "./journal.ts";
+import { regionTitle } from "./journal.ts";
+import type { MilestoneBadgeInfo, Milestones } from "./milestones.ts";
 import type { TrailListItem } from "./trailsApi";
 
 /**
@@ -10,11 +11,10 @@ import type { TrailListItem } from "./trailsApi";
 
 export const MAX_FEATURED = 3;
 
-export type MilestoneId = Milestone["id"];
-
 export type FeaturedBadge =
-  | { kind: "trail"; trail: TrailListItem; milestone?: null }
-  | { kind: "milestone"; milestone: MilestoneId; trail?: null };
+  | { kind: "trail"; trail: TrailListItem; milestone?: null; badge?: null }
+  /** `badge` is the milestone's name, tier and icon. */
+  | { kind: "milestone"; milestone: string; badge: MilestoneBadgeInfo; trail?: null };
 
 export interface FeaturedBadges {
   /** false: nothing picked, so these are the most recent trail badges. */
@@ -29,7 +29,7 @@ export function badgeKey(badge: FeaturedBadge): string {
 
 export function badgeName(badge: FeaturedBadge): string {
   if (badge.kind === "trail") return badge.trail.name;
-  return computeMilestones([]).find((m) => m.id === badge.milestone)?.title ?? badge.milestone;
+  return badge.badge.title;
 }
 
 export interface BadgeGroup {
@@ -38,17 +38,19 @@ export interface BadgeGroup {
 }
 
 /**
- * Everything the user can feature: milestones they've earned first, then
- * their trail badges grouped by park or region (A–Z, trails A–Z within).
- * `query` filters by trail, region or milestone name.
+ * Everything the user can feature: milestones they've earned first (in
+ * journal order), then their trail badges grouped by park or region (A–Z,
+ * trails A–Z within). `query` filters by trail, region or milestone name.
  */
-export function earnedBadgeGroups(logs: HikeLog[], query = ""): BadgeGroup[] {
+export function earnedBadgeGroups(logs: HikeLog[], milestones: Milestones | null, query = ""): BadgeGroup[] {
   const needle = query.trim().toLowerCase();
   const matches = (...texts: string[]) => !needle || texts.some((text) => text.toLowerCase().includes(needle));
 
-  const milestones = computeMilestones(logs)
-    .filter((m) => m.earned && matches(m.title, "milestone"))
-    .map((m): FeaturedBadge => ({ kind: "milestone", milestone: m.id }));
+  const earned = (milestones?.milestones ?? []).flatMap((m): FeaturedBadge[] =>
+    m.earned && m.id && m.tier && matches(m.title, "milestone")
+      ? [{ kind: "milestone", milestone: m.id, badge: { id: m.id, category: m.category, title: m.title, tier: m.tier, icon: m.icon } }]
+      : [],
+  );
 
   const regions = new Map<string, FeaturedBadge[]>();
   for (const { trail } of logs) {
@@ -60,7 +62,7 @@ export function earnedBadgeGroups(logs: HikeLog[], query = ""): BadgeGroup[] {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([title, badges]) => ({ title, badges: badges.sort((a, b) => badgeName(a).localeCompare(badgeName(b))) }));
 
-  return milestones.length ? [{ title: "Milestones", badges: milestones }, ...groups] : groups;
+  return earned.length ? [{ title: "Milestones", badges: earned }, ...groups] : groups;
 }
 
 /** Add or remove a badge; adding past the limit does nothing (the picker says why). */

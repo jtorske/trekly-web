@@ -11,6 +11,7 @@ import ui from "@/components/ui.module.css";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { buildJournal, sectionIndex } from "@/lib/journal";
 import { useHikeLogs } from "@/lib/useHikeLogs";
+import { useMilestones } from "@/lib/useMilestones";
 import { useTrailCatalogue } from "@/lib/useTrailCatalogue";
 import { useProfile } from "@/lib/useProfile";
 import { useUnits } from "@/lib/useUnits";
@@ -127,9 +128,10 @@ function Journal() {
   const [fromContents, setFromContents] = useState(false);
 
   const [units] = useUnits();
+  const { milestones } = useMilestones();
   const journal = useMemo(
-    () => (catalogue ? buildJournal(catalogue, hikeLogs.logs, units) : null),
-    [catalogue, hikeLogs.logs, units],
+    () => (catalogue && milestones ? buildJournal(catalogue, hikeLogs.logs, milestones) : null),
+    [catalogue, hikeLogs.logs, milestones],
   );
   const ready = journal && signedIn && !hikeLogs.loading && stamped;
   const at = journal ? sectionIndex(journal, params.get("section")) : 0;
@@ -159,6 +161,7 @@ function Journal() {
         onStamped: mark,
         onOpenEntry: (log, colour) => setOpen({ log, colour, editing: false }),
         onOpen: openSection,
+        units,
       }
     : null;
 

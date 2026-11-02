@@ -25,7 +25,8 @@ export interface RankRules {
   trail_points: Record<"easy" | "moderate" | "difficult" | "extreme", number>;
   points_per_night: number;
   new_region_points: number;
-  milestone_points: number;
+  /** Per milestone earned, by tier. */
+  tier_points: Record<"bronze" | "silver" | "gold", number>;
   ranks: (Rank & { threshold: number })[];
 }
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { deleteHikeLog, listHikeLogs, putHikeLog, type HikeLog, type HikeLogInput } from "./hikeLogsApi";
 import { removeImages } from "./storage";
+import { refreshMilestones } from "./useMilestones";
 import { refreshRank } from "./useRank";
 import { toast } from "./toast";
 
@@ -39,6 +40,7 @@ export function useHikeLogs() {
       setState((s) => (s ? { ...s, logs: [saved, ...s.logs.filter((log) => log.trail.id !== trailId)] } : s));
       // Points come from hikes; a new one may be a rank-up to celebrate.
       void refreshRank(previous ? "hike-changed" : "hike-added");
+      void refreshMilestones();
       if (previous) toast.success("Hike log updated");
       else toast.success("Stamped in your Trail Journal", { link: { label: "Open journal", href: "/journal" } });
       if (previous?.photo_path && previous.photo_path !== saved.photo_path) {
@@ -55,6 +57,7 @@ export function useHikeLogs() {
       await deleteHikeLog(trailId);
       setState((s) => (s ? { ...s, logs: s.logs.filter((log) => log.trail.id !== trailId) } : s));
       void refreshRank("hike-changed");
+      void refreshMilestones();
       toast.success("Hike log removed");
       if (previous?.photo_path) await removeImages("hike-photos", [previous.photo_path]).catch(() => undefined);
     },

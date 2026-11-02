@@ -1,4 +1,5 @@
 import { API_BASE, ApiError, apiFetch } from "./api";
+import { thenRefreshMilestones } from "./useMilestones";
 
 export type NightStatus = "available" | "full" | "closed" | "not_released" | "unknown";
 export type StaySummary = NightStatus | "partial";
@@ -84,7 +85,9 @@ export interface NewAlert {
 
 export const alertsApi = {
   list: (signal?: AbortSignal) => apiFetch<CampgroundAlert[]>("/api/me/alerts", { auth: true, signal }),
-  create: (alert: NewAlert) => apiFetch<CampgroundAlert>("/api/me/alerts", { method: "POST", body: alert, auth: true }),
+  // The first alert earns Permit hunter.
+  create: (alert: NewAlert) =>
+    thenRefreshMilestones(apiFetch<CampgroundAlert>("/api/me/alerts", { method: "POST", body: alert, auth: true })),
   cancel: (id: string) => apiFetch<CampgroundAlert>(`/api/me/alerts/${id}/cancel`, { method: "POST", auth: true }),
   rearm: (id: string) => apiFetch<CampgroundAlert>(`/api/me/alerts/${id}/rearm`, { method: "POST", auth: true }),
   remove: (id: string) => apiFetch<void>(`/api/me/alerts/${id}`, { method: "DELETE", auth: true }),

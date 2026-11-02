@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database import Base
+from app.models.catalog import JsonType
 
 TERRAIN_DIFFICULTIES = ("easy", "moderate", "difficult", "extreme")
 PARK_TYPES = ("national", "provincial", "regional", "none")
@@ -61,6 +62,9 @@ class Trail(Base):
     terrain_difficulty = Column(Text, nullable=False)
     typical_duration_nights = Column(Integer)
     climate_zone = Column(Text)
+    # Free-form labels from the catalogue, e.g. "larch" for trails known for
+    # their autumn larches (the Larch madness milestone).
+    tags = Column(JsonType, nullable=False, default=list, server_default="[]")
     description = Column(Text)
     # Catalogue ordering. popularity_source says where the score came from
     # ('editorial' today; a blend with saved_trails counts later), so ranks can

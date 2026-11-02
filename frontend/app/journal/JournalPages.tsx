@@ -2,11 +2,24 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
+import MilestoneBadge from "@/components/MilestoneBadge";
 import RankEmblem from "@/components/RankEmblem";
 import TrailBadge from "@/components/TrailBadge";
-import { MILESTONE_ICONS } from "@/lib/badge";
 import type { HikeLog } from "@/lib/hikeLogsApi";
-import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type JournalGroup, type JournalSection, type Milestone } from "@/lib/journal";
+import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type JournalGroup, type JournalSection } from "@/lib/journal";
+import {
+  earnedCount,
+  milestoneDetail,
+  milestoneKey,
+  progressFraction,
+  progressLabel,
+  TIER_NAMES,
+  type Milestone,
+  type MilestonePage,
+  type Milestones,
+  type Tier,
+} from "@/lib/milestones";
+import type { UnitSystem } from "@/lib/units";
 import { useHikePhoto } from "@/lib/useHikePhoto";
 import { useRank } from "@/lib/useRank";
 import type { TrailListItem } from "@/lib/trailsApi";
@@ -25,6 +38,7 @@ export interface PageContext {
   onOpenEntry: (log: HikeLog, colour: string) => void;
   /** Open a section by its slug (null is the contents). */
   onOpen: (slug: string | null) => void;
+  units: UnitSystem;
 }
 
 /** The closed book a signed-out visitor sees. */
@@ -80,9 +94,10 @@ function contentsEntries(ctx: PageContext): ContentsEntry[] {
       const { group } = section;
       return [{ slug: section.slug, title: group.title, colour: group.colour, done: hikedIn(group, ctx.logs), total: group.trails.length, noun: "hiked" }];
     }
-    if (section.kind === "milestones") {
-      const earned = ctx.journal.milestones.filter((m) => m.earned).length;
-      return [{ slug: section.slug, title: section.title, colour: "var(--color-tan)", done: earned, total: ctx.journal.milestones.length, noun: "earned" }];
+    // One entry for all the milestone spreads: the overview, which links on to each category.
+    if (section.kind === "milestones" && section.first && ctx.journal.milestones) {
+      const all = ctx.journal.milestones;
+      return [{ slug: section.slug, title: "Milestones", colour: "var(--color-tan)", done: earnedCount(all), total: all.milestones.length, noun: "earned" }];
     }
     return [];
   });
@@ -334,52 +349,179 @@ function GroupPage({
   );
 }
 
-function Medal({ milestone }: { milestone: Milestone }) {
-  const r = 46;
-  const circumference = 2 * Math.PI * r;
+/** Small print under a category, where its rules need saying. */
+const CATEGORY_NOTES: Record<string, string> = {
+  nights: "A trip's nights are its trail's typical nights.",
+  distance: "Counts trails with a known length.",
+  elevation: "Counts trails with known elevation.",
+  seasons: "A trip counts on every day from its hike date through its nights.",
+};
+
+function Medal({ ctx, milestone, index, active }: { ctx: PageContext; milestone: Milestone; index: number; active: boolean }) {
+  const stampKey = `milestone:${milestone.id}`;
+  const stamp = active && milestone.earned && !ctx.stamped.has(stampKey);
+  const progress = progressLabel(milestone, ctx.units);
+  const detail = milestoneDetail(milestone, ctx.units);
+  const tier = milestone.tier ? TIER_NAMES[milestone.tier] : null;
   return (
-    <li className={`${styles.medal} ${milestone.earned ? styles.medalEarned : ""}`}>
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <circle cx="60" cy="60" r="54" className={styles.medalBase} />
-        {!milestone.earned && milestone.progress > 0 && (
-          <circle
-            cx="60"
-            cy="60"
-            r={r}
-            className={styles.medalProgress}
-            strokeDasharray={`${circumference * milestone.progress} ${circumference}`}
-            transform="rotate(-90 60 60)"
-          />
-        )}
-        <path d={MILESTONE_ICONS[milestone.id]} className={styles.medalIcon} />
-      </svg>
-      <p className={styles.medalTitle}>{milestone.title}</p>
+    <li className={styles.medal} data-key={milestoneKey(milestone, index)}>
+      <span className={styles.medalBox}>
+        <MilestoneBadge
+          icon={milestone.icon}
+          tier={milestone.tier}
+          earned={milestone.earned}
+          progress={progressFraction(milestone)}
+          stamp={stamp}
+          onStamped={() => ctx.onStamped(stampKey)}
+          className={styles.medalArt}
+        />
+      </span>
+      <p className={styles.medalTitle}>
+        {milestone.title}
+        {milestone.secret && !milestone.earned && <span className={styles.srOnly}> (secret milestone)</span>}
+      </p>
       <p className={styles.medalDetail}>
-        {milestone.earned ? "Earned" : milestone.detail}
-        <span className={styles.srOnly}>{milestone.earned ? `: ${milestone.detail}` : ", not earned yet"}</span>
+        {milestone.earned ? (
+          <>
+            <span className={styles.medalTier} data-tier={milestone.tier ?? undefined}>
+              {tier}
+            </span>
+            {" · "}Earned
+            <span className={styles.srOnly}>: {detail}</span>
+          </>
+        ) : (
+          <>
+            {detail}
+            {progress && <span className={styles.medalProgress}> ({progress})</span>}
+            <span className={styles.srOnly}>{tier ? `, ${tier.toLowerCase()} tier` : ""}, not earned yet</span>
+          </>
+        )}
       </p>
     </li>
   );
 }
 
-function Milestones({ ctx }: { ctx: PageContext }) {
+/** Columns and rows for a category's medals (at most two across, so names have room). */
+function medalGrid(count: number) {
+  const columns = count <= 1 ? 1 : 2;
+  return { "--columns": columns, "--rows": Math.max(1, Math.ceil(count / columns)) } as CSSProperties;
+}
+
+function CategoryPage({
+  ctx,
+  page,
+  back,
+  active,
+}: {
+  ctx: PageContext;
+  page: Extract<MilestonePage, { kind: "category" }>;
+  back: boolean;
+  active: boolean;
+}) {
+  const earned = page.milestones.filter((m) => m.earned).length;
+  const note = CATEGORY_NOTES[page.category.id];
+  return (
+    <div className={styles.paperInner}>
+      {back && <BackToContents ctx={ctx} />}
+      <header className={`${styles.groupHeader} ${styles.milestoneHeader}`}>
+        <p className={styles.runningHead}>Milestones</p>
+        <PageTitle>{page.category.title}</PageTitle>
+        <p className={styles.groupMeta}>
+          {earned} of {page.milestones.length} earned
+        </p>
+      </header>
+      <ul className={styles.medals} style={medalGrid(page.milestones.length)}>
+        {page.milestones.map((milestone, index) => (
+          <Medal key={milestoneKey(milestone, index)} ctx={ctx} milestone={milestone} index={index} active={active} />
+        ))}
+      </ul>
+      {note && <p className={styles.footnote}>{note}</p>}
+    </div>
+  );
+}
+
+/** "3 of 14" earned in a tier (hidden secrets have no tier, so they're not counted). */
+function tierCounts(data: Milestones, tier: Tier) {
+  const all = data.milestones.filter((m) => m.tier === tier);
+  return `${all.filter((m) => m.earned).length} of ${all.length}`;
+}
+
+/** The first milestones page: the overall count, the tiers, and a link to each category. */
+function Overview({ ctx, sections }: { ctx: PageContext; sections: Extract<JournalSection, { kind: "milestones" }>[] }) {
+  const data = ctx.journal.milestones;
+  if (!data) return null;
+  const slugOf = (categoryId: string) =>
+    sections.find((section) =>
+      [section.spread.left, section.spread.right].some((page) => page.kind === "category" && page.category.id === categoryId),
+    )?.slug;
   return (
     <div className={styles.paperInner}>
       <BackToContents ctx={ctx} />
-      <header className={styles.groupHeader}>
+      <header className={`${styles.groupHeader} ${styles.milestoneHeader}`}>
+        <span className={styles.tape} style={{ background: "var(--color-tan)" }} aria-hidden="true" />
         <PageTitle>Milestones</PageTitle>
         <p className={styles.groupMeta}>
-          {ctx.journal.milestones.filter((m) => m.earned).length} of {ctx.journal.milestones.length} earned
+          {earnedCount(data)} of {data.milestones.length} earned
         </p>
       </header>
-      <ul className={styles.medals}>
-        {ctx.journal.milestones.map((milestone) => (
-          <Medal key={milestone.id} milestone={milestone} />
+      <ul className={styles.tiers} aria-label="Tiers">
+        {(["bronze", "silver", "gold"] as const).map((tier) => (
+          <li key={tier}>
+            <MilestoneBadge icon="first-hike" tier={tier} className={styles.tierBadge} />
+            <span className={styles.tierName}>{TIER_NAMES[tier]}</span>
+            <span className={styles.tierMeta}>
+              +{data.tier_points[tier]} pts · {tierCounts(data, tier)}
+            </span>
+          </li>
         ))}
       </ul>
-      <p className={styles.footnote}>Distance counts trails with a known length.</p>
+      <ol className={`${styles.contents} ${styles.categoryList}`} style={{ "--rows": data.categories.length, "--count-ch": 5 } as CSSProperties}>
+        {data.categories.map((category) => {
+          const inCategory = data.milestones.filter((m) => m.category === category.id);
+          const slug = slugOf(category.id);
+          return (
+            <li key={category.id}>
+              <button type="button" className={styles.contentsRow} onClick={() => slug && ctx.onOpen(slug)}>
+                <span className={styles.contentsName}>{category.title}</span>
+                <span className={styles.contentsLeader} aria-hidden="true" />
+                <span className={styles.contentsCount}>
+                  {inCategory.filter((m) => m.earned).length}/{inCategory.length}
+                  <span className={styles.srOnly}> earned</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
+}
+
+function BlankPage() {
+  return (
+    <div className={styles.paperInner}>
+      <div className={styles.blankPage} aria-hidden="true">
+        <svg viewBox="0 0 120 60">
+          <path d="M6 54 38 18l14 16 20-24 42 44Z" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function MilestonePageView({ ctx, page, back, active }: { ctx: PageContext; page: MilestonePage; back: boolean; active: boolean }) {
+  switch (page.kind) {
+    case "overview": {
+      const sections = ctx.journal.sections.filter((s): s is Extract<JournalSection, { kind: "milestones" }> => s.kind === "milestones");
+      return <Overview ctx={ctx} sections={sections} />;
+    }
+    case "category":
+      return <CategoryPage ctx={ctx} page={page} back={back} active={active} />;
+    case "blank":
+      return <BlankPage />;
+    case "back":
+      return <Back />;
+  }
 }
 
 function Back() {
@@ -398,8 +540,10 @@ function Back() {
  * section's two desktop pages, one at a time, with a small link between
  * them. Fit is measured, so it holds at any screen height.
  */
-function SinglePage({ all, first, second }: { all: ReactNode; first: ReactNode; second: ReactNode }) {
-  const [part, setPart] = useState<"all" | 0 | 1>("all");
+function SinglePage({ all, first, second }: { all: ReactNode | null; first: ReactNode; second: ReactNode }) {
+  // Without an `all`, always one half at a time.
+  const whole = all === null ? 0 : "all";
+  const [part, setPart] = useState<"all" | 0 | 1>(whole);
   const box = useRef<HTMLDivElement>(null);
   const turned = useRef(false);
 
@@ -411,7 +555,9 @@ function SinglePage({ all, first, second }: { all: ReactNode; first: ReactNode; 
 
   // A new page size might fit the whole section after all (or no longer).
   useEffect(() => {
-    const el = box.current;
+    // The page's sheet, not the box: the box remounts on every turn, and a
+    // detached box shrinking to 0×0 would read as a resize and turn back.
+    const el = box.current?.parentElement;
     if (!el) return;
     let size = `${el.clientWidth}x${el.clientHeight}`;
     const observer = new ResizeObserver(() => {
@@ -419,11 +565,11 @@ function SinglePage({ all, first, second }: { all: ReactNode; first: ReactNode; 
       if (next === size) return;
       size = next;
       turned.current = false;
-      setPart("all");
+      setPart(whole);
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [whole]);
 
   // Keep focus on the link between the two pages as it moves.
   useEffect(() => {
@@ -490,8 +636,18 @@ function renderSection(ctx: PageContext, section: JournalSection, view: View, ac
         />
       );
     }
-    case "milestones":
-      return view === "right" ? <Back /> : <Milestones ctx={ctx} />;
+    case "milestones": {
+      const { left, right } = section.spread;
+      if (view === "left") return <MilestonePageView ctx={ctx} page={left} back active={active} />;
+      if (view === "right") return <MilestonePageView ctx={ctx} page={right} back={false} active={active} />;
+      return (
+        <SinglePage
+          all={null}
+          first={<MilestonePageView ctx={ctx} page={left} back active={active} />}
+          second={<MilestonePageView ctx={ctx} page={right} back active={active} />}
+        />
+      );
+    }
   }
 }
 

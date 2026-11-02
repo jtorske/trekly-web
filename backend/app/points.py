@@ -7,17 +7,13 @@ name and level alone, and only when the owner shows their rank
 (app/routers/public_profiles.py).
 """
 
-from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from app.journal import earned_milestones
-from app.models.hike_log import HikeLog
-from app.models.trail import Trail
-from app.points_config import MILESTONE_POINTS, NEW_REGION_POINTS, POINTS_PER_NIGHT, RANKS, TRAIL_POINTS
+from app.milestones import Facts, gather, milestone_points
+from app.points_config import NEW_REGION_POINTS, POINTS_PER_NIGHT, RANKS, TRAIL_POINTS
 
 
 @dataclass(frozen=True)
@@ -40,14 +36,14 @@ class Rank:
     threshold: int
 
 
-def score(trails: Iterable[Trail]) -> Breakdown:
-    """Points for having hiked these trails (one per hike log)."""
-    trails = list(trails)
+def score(facts: Facts) -> Breakdown:
+    """Points for a user's hikes, and the milestones (by tier) they've earned."""
+    trails = facts.trails
     return Breakdown(
         trails=sum(TRAIL_POINTS[trail.terrain_difficulty] for trail in trails),
         nights=sum(POINTS_PER_NIGHT * (trail.typical_duration_nights or 0) for trail in trails),
         regions=NEW_REGION_POINTS * len({trail.region for trail in trails}),
-        milestones=MILESTONE_POINTS * len(earned_milestones(trails)),
+        milestones=milestone_points(facts),
     )
 
 
@@ -64,11 +60,6 @@ def next_rank(rank: Rank) -> Rank | None:
     return Rank(level=rank.level + 1, title=title, threshold=threshold)
 
 
-def user_trails(db: Session, user_id: UUID) -> list[Trail]:
-    logs = db.scalars(select(HikeLog).where(HikeLog.user_id == user_id).options(joinedload(HikeLog.trail))).all()
-    return [log.trail for log in logs]
-
-
 def user_rank(db: Session, user_id: UUID) -> tuple[Breakdown, Rank]:
-    breakdown = score(user_trails(db, user_id))
+    breakdown = score(gather(db, user_id))
     return breakdown, rank_for(breakdown.total)

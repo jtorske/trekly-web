@@ -2,6 +2,7 @@ import { apiFetch } from "./api";
 import type { FeaturedBadge } from "./featuredBadges";
 import type { GearItem } from "./gearApi";
 import type { TrailListItem } from "./trailsApi";
+import type { MilestoneBadgeInfo } from "./milestones";
 
 /**
  * Public profiles (/u/[username]) and the owner's privacy settings.
@@ -73,7 +74,8 @@ export interface PublicProfile {
   /** Each of these is null when the profile is private or the section is hidden. */
   bio: string | null;
   rank: { level: number; title: string } | null;
-  journal: { hide_dates: boolean; entries: PublicJournalEntry[] } | null;
+  /** `milestones`: earned ones only (seasonal ones left out while dates are hidden). */
+  journal: { hide_dates: boolean; entries: PublicJournalEntry[]; milestones: MilestoneBadgeInfo[] } | null;
   /** Shown with the Trail Journal (same switch); the owner's picks or their latest badges. */
   featured_badges: FeaturedBadge[] | null;
   gear: { items: PublicGearItem[]; setups: PublicSetup[] } | null;

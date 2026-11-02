@@ -1,7 +1,7 @@
 """Up to three badges a user features on their profile, in order.
 
 A badge is either a trail badge (a trail they've logged in their Trail
-Journal) or a milestone badge (app/journal.py). A trail badge references
+Journal) or a milestone badge (app/milestones_config.py). A trail badge references
 the user's own hike log, so deleting the hike deletes the badge with it;
 milestone badges no longer earned are removed by the API when a hike is
 deleted (app/featured.py). Positions 0-2, one row each, make "at most
@@ -16,7 +16,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database import Base
-from app.journal import MILESTONES
 
 MAX_FEATURED = 3
 
@@ -29,9 +28,9 @@ class FeaturedBadge(Base):
         UniqueConstraint("user_id", "milestone", name="featured_badges_milestone_key"),
         CheckConstraint(f"position between 0 and {MAX_FEATURED - 1}", name="featured_badges_position_check"),
         CheckConstraint("(trail_id is null) <> (milestone is null)", name="featured_badges_one_kind_check"),
+        # Which ids exist is the config's business (migration a4c7e2b9d1f3).
         CheckConstraint(
-            "milestone is null or milestone in (" + ", ".join(f"'{m}'" for m in MILESTONES) + ")",
-            name="featured_badges_milestone_check",
+            "milestone is null or length(milestone) between 1 and 40", name="featured_badges_milestone_check"
         ),
         # A trail badge needs the hike behind it, and goes when the hike does.
         ForeignKeyConstraint(

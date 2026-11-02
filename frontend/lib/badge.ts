@@ -92,10 +92,53 @@ export function profileSilhouette(profile: number[] | null | undefined, box: [nu
   return `M${x} ${y + height}L${line.join("L")}L${x + width} ${y + height}Z`;
 }
 
-/** Line icons for the milestone medals (Trail Journal and profile), in a 120 square. */
-export const MILESTONE_ICONS = {
+/**
+ * Line icons for the milestone medals (Trail Journal and profile), in a 120
+ * square, keyed by the `icon` each milestone names in the backend's
+ * app/milestones_config.py (a backend test checks every one is here).
+ */
+export const MILESTONE_ICONS: Record<string, string> = {
   "first-hike": "M26 80 52 46l10 12 8-10 24 32M60 54V28l16 6-16 6",
   "first-overnight": "M30 76 60 34l30 42Zm30-42v42M74 30a8 8 0 1 1-8-10 6 6 0 0 0 8 10Z",
   "five-parks": "M26 76l16-26 10 14 12-22 20 34Z",
   "hundred-km": "M28 70c10-24 24-6 32-20s16-16 32-8",
-} as const;
+  boot: "M44 32h18v30l18 7a7 7 0 0 1 5 7v8H44ZM44 84h41M44 46h10",
+  boots: "M30 36h14v26l14 6v12H30ZM62 42h14v26l14 6v12H62Z",
+  blaze: "M48 92V26M72 92V26M54 46h12v14H54Z",
+  repeat: "M84 60a24 24 0 1 1-7-17M84 30v14H70",
+  "tent-moon": "M26 86 50 48l24 38ZM50 48v38M90 36a9 9 0 1 1-10-12 7 7 0 0 0 10 12Z",
+  campfire: "M36 88l48-12M36 76l48 12M60 72c-10-6-8-18 0-28 2 9 11 11 8 20-1 5-4 8-8 8Z",
+  moon: "M70 28a32 32 0 1 0 22 46 26 26 0 0 1-22-46Z",
+  path: "M38 92c4-14 42-14 42-28s-36-12-36-26 18-12 18-12",
+  compass: "M60 28a32 32 0 1 1 0 64 32 32 0 1 1 0-64ZM60 42l8 18-8 18-8-18Z",
+  switchbacks: "M34 90h44L42 76h40L46 62h36L54 48h20M74 48V30",
+  summit: "M22 86 50 44l10 12 14-24 24 54ZM68 38l6-6 6 6",
+  flag: "M44 92V28M44 30h34l-8 10 8 10H44",
+  peaks: "M16 84l12-20 9 11 11-25 10 17 11-27 12 24 8-10 15 30Z",
+  passport: "M38 26h44v68H38ZM60 48a10 10 0 1 1 0 20 10 10 0 1 1 0-20ZM50 82h20",
+  "north-star": "M60 24l7 29 29 7-29 7-7 29-7-29-29-7 29-7Z",
+  waves: "M24 52c8-8 16-8 24 0s16 8 24 0 16-8 24 0M24 70c8-8 16-8 24 0s16 8 24 0 16-8 24 0",
+  "check-map": "M26 36l22-8 24 8 22-8v56l-22 8-24-8-22 8ZM46 60l10 10 18-20",
+  spectrum: "M34 86V72M50 86V60M66 86V48M82 86V34",
+  pickaxe: "M38 86 74 50M54 34c16-6 30-2 38 10-12-4-24-2-34 6Z",
+  starburst: "M60 24l8 22 22-8-8 22 22 8-22 8 8 22-22-8-8 22-8-22-22 8 8-22-22-8 22-8-8-22 22 8Z",
+  larch: "M60 24v72M60 36l-12 9M60 36l12 9M60 50l-18 13M60 50l18 13M60 66l-24 16M60 66l24 16",
+  snowflake: "M60 26v68M31 43l58 34M31 77l58-34M52 32l8 8 8-8M52 88l8-8 8 8",
+  seasons: "M60 28a32 32 0 1 1 0 64 32 32 0 1 1 0-64ZM60 28v64M28 60h64",
+  calendar: "M32 36h56v52H32ZM32 50h56M46 28v14M74 28v14M44 64h8M58 64h8M72 64h8M44 76h8",
+  quill: "M86 26C60 34 46 58 42 90M86 26c-4 26-20 40-38 44M42 90h22",
+  camera: "M30 44h14l6-10h20l6 10h14v42H30ZM60 52a12 12 0 1 1 0 24 12 12 0 1 1 0-24Z",
+  map: "M26 36l22-8 24 8 22-8v56l-22 8-24-8-22 8ZM48 28v56M72 36v56",
+  bell: "M42 76V56a18 18 0 0 1 36 0v20l6 8H36ZM54 90h12M60 30v8",
+  clover:
+    "M48 37a11 11 0 1 1 0 22 11 11 0 1 1 0-22ZM72 37a11 11 0 1 1 0 22 11 11 0 1 1 0-22ZM48 61a11 11 0 1 1 0 22 11 11 0 1 1 0-22ZM72 61a11 11 0 1 1 0 22 11 11 0 1 1 0-22ZM66 72l16 22",
+  backpack: "M40 46a20 20 0 0 1 40 0v42H40ZM50 46v-8a10 10 0 0 1 20 0v8M48 64h24v14H48Z",
+  feather: "M82 28c-26 4-38 26-38 54l34-30M44 82l-8 10",
+  stairs: "M28 88h16V72h16V56h16V40h16V28",
+  lighthouse: "M52 90l4-48h8l4 48ZM50 42h20M56 42v-8h8v8M44 32l-10-4M76 32l10-4M40 90h40",
+  ridge: "M20 76l14-10 12 4 14-18 12 8 14-16 14 12M20 88h80",
+  secret: "M48 46a12 12 0 1 1 18 10c-4 3-6 6-6 10v4M60 82v2",
+};
+
+/** A milestone's icon; an unknown key (a newer backend) gets the trail mark. */
+export const milestoneIcon = (icon: string) => MILESTONE_ICONS[icon] ?? MILESTONE_ICONS["first-hike"];

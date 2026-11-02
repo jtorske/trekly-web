@@ -1,6 +1,6 @@
 import type { HikeLog } from "./hikeLogsApi";
 import type { TrailListItem } from "./trailsApi";
-import { distanceValue, formatWholeDistance, type UnitSystem } from "./units.ts";
+import { milestoneSpreads, type Milestones, type MilestoneSpread } from "./milestones.ts";
 
 /**
  * The Trail Journal's layout: which trails go on which spread, in which
@@ -63,24 +63,16 @@ export interface JournalGroup {
 export type JournalSection =
   | { kind: "contents"; slug: null; title: string }
   | { kind: "group"; slug: string; title: string; group: JournalGroup }
-  | { kind: "milestones"; slug: "milestones"; title: string };
-
-export interface Milestone {
-  id: "first-hike" | "first-overnight" | "five-parks" | "hundred-km";
-  title: string;
-  detail: string;
-  earned: boolean;
-  /** 0–1 towards earning it. */
-  progress: number;
-}
+  | { kind: "milestones"; slug: string; title: string; spread: MilestoneSpread; first: boolean };
 
 export interface Journal {
   groups: JournalGroup[];
-  /** Contents first, then each group, then milestones. */
+  /** Contents first, then each group, then the milestone spreads (the last ends on "Where to next?"). */
   sections: JournalSection[];
   hiked: number;
   total: number;
-  milestones: Milestone[];
+  /** From the server; null leaves the milestone spreads out (the profile's summary doesn't need them). */
+  milestones: Milestones | null;
 }
 
 /** "Banff National Park, AB" → "Banff National Park". */
@@ -163,32 +155,6 @@ export function groupTrails(trails: TrailListItem[]): JournalGroup[] {
   return all.map(({ key, title, subtitle, colour, trails: groupTrails }) => ({ key, title, subtitle, colour, trails: groupTrails }));
 }
 
-/**
- * Milestones are earned against canonical metric thresholds, so switching
- * units never changes what's earned; units only change the labels.
- */
-const CENTURY_KM = 100;
-
-/** Progress in whole display units, never showing the goal as reached before it is (99.9 km is 62.07 mi). */
-function wholeProgress(km: number, goalKm: number, units: UnitSystem): number {
-  const goal = Math.round(distanceValue(goalKm, units));
-  const done = Math.floor(distanceValue(Math.min(km, goalKm), units));
-  return km >= goalKm ? goal : Math.min(done, goal - 1);
-}
-
-export function computeMilestones(logs: HikeLog[], units: UnitSystem = "metric"): Milestone[] {
-  const overnight = logs.some((log) => (log.trail.typical_duration_nights ?? 0) >= 1);
-  const parks = new Set(logs.map((log) => log.trail.region)).size;
-  // Only trails with a known distance count towards the total.
-  const km = logs.reduce((sum, log) => sum + (log.trail.distance_km ?? 0), 0);
-  return [
-    { id: "first-hike", title: "First steps", detail: "Log your first hike", earned: logs.length > 0, progress: Math.min(logs.length, 1) },
-    { id: "first-overnight", title: "Under the stars", detail: "Log an overnight trip", earned: overnight, progress: overnight ? 1 : 0 },
-    { id: "five-parks", title: "Park hopper", detail: `Hike in 5 parks or regions (${Math.min(parks, 5)} / 5)`, earned: parks >= 5, progress: Math.min(parks / 5, 1) },
-    { id: "hundred-km", title: "Century", detail: `Hike ${formatWholeDistance(CENTURY_KM, units)} in total (${wholeProgress(km, CENTURY_KM, units)} / ${formatWholeDistance(CENTURY_KM, units)})`, earned: km >= CENTURY_KM, progress: Math.min(km / CENTURY_KM, 1) },
-  ];
-}
-
 /** "Banff National Park" → "banff-national-park", for ?section= in the URL. */
 export function slugify(title: string): string {
   return title
@@ -203,12 +169,13 @@ export function slugify(title: string): string {
  * Lay out the book. `catalogue` is the live catalogue; retired trails appear
  * only if the user logged them, so their badges are kept.
  */
-export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], units: UnitSystem = "metric"): Journal {
+export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], milestones: Milestones | null = null): Journal {
   const trails = new Map(catalogue.map((trail) => [trail.id, trail]));
   for (const log of logs) if (!trails.has(log.trail.id)) trails.set(log.trail.id, log.trail);
   const groups = groupTrails([...trails.values()]);
 
-  const taken = new Set(["milestones"]);
+  const spreads = milestones ? milestoneSpreads(milestones) : [];
+  const taken = new Set(spreads.map((spread) => spread.slug));
   const sections: JournalSection[] = [{ kind: "contents", slug: null, title: "Contents" }];
   for (const group of groups) {
     const base = slugify(group.title) || "section";
@@ -217,7 +184,7 @@ export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], units:
     taken.add(slug);
     sections.push({ kind: "group", slug, title: group.title, group });
   }
-  sections.push({ kind: "milestones", slug: "milestones", title: "Milestones" });
+  spreads.forEach((spread, index) => sections.push({ kind: "milestones", slug: spread.slug, title: spread.title, spread, first: index === 0 }));
 
   const hikedIds = new Set(logs.map((log) => log.trail.id));
   return {
@@ -225,7 +192,7 @@ export function buildJournal(catalogue: TrailListItem[], logs: HikeLog[], units:
     sections,
     hiked: [...trails.keys()].filter((id) => hikedIds.has(id)).length,
     total: trails.size,
-    milestones: computeMilestones(logs, units),
+    milestones,
   };
 }
 

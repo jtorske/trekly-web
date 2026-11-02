@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { badgeGrid, buildJournal, computeMilestones, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify, summarizeJournal } from "./journal.ts";
+import { badgeGrid, buildJournal, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify, summarizeJournal } from "./journal.ts";
 import { badgeOutline, nameFontSize, profileSilhouette } from "./badge.ts";
 import { photoInputProblem, photoSize } from "./journalPhoto.ts";
 import type { HikeLog } from "./hikeLogsApi.ts";
 import type { TrailListItem } from "./trailsApi.ts";
+import { sample } from "./milestones.fixtures.ts";
 
 let next = 0;
 function trail(overrides: Partial<TrailListItem> = {}): TrailListItem {
@@ -58,15 +59,19 @@ test("group colours are stable and from the palette", () => {
   assert.match(groupColour("place:CA-BC"), /^#[0-9a-f]{6}$/);
 });
 
-test("the book is contents, one section per group, then milestones", () => {
+test("the book is contents, one section per group, then the milestone spreads", () => {
   const trails = [...Array.from({ length: 13 }, () => trail()), trail({ region: "Whitehorse, YT", province_code: "YT" })];
-  const journal = buildJournal(trails, []);
+  const journal = buildJournal(trails, [], sample());
   assert.deepEqual(
-    journal.sections.map((s) => [s.kind, s.slug]),
+    journal.sections.slice(0, 4).map((s) => [s.kind, s.slug]),
     [["contents", null], ["group", "yukon"], ["group", "banff-national-park"], ["milestones", "milestones"]],
   );
+  assert.deepEqual(journal.sections.slice(3).map((s) => s.kind), Array(6).fill("milestones"));
+  assert.deepEqual(journal.sections.filter((s) => s.kind === "milestones" && s.first).length, 1);
   assert.equal(sectionIndex(journal, "banff-national-park"), 2);
   assert.equal(sectionIndex(journal, "milestones"), 3);
+  // Without milestones (the profile's summary) there are no milestone spreads.
+  assert.equal(buildJournal(trails, []).sections.at(-1)?.kind, "group");
   assert.equal(sectionIndex(journal, null), 0);
   assert.equal(sectionIndex(journal, "nowhere"), 0, "unknown sections fall back to the contents");
 });
@@ -74,8 +79,8 @@ test("the book is contents, one section per group, then milestones", () => {
 test("section slugs are URL-safe and unique", () => {
   assert.equal(slugify("Parc national de la Gaspésie"), "parc-national-de-la-gaspesie");
   assert.equal(slugify("More of Alberta"), "more-of-alberta");
-  const journal = buildJournal([trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" })], []);
-  assert.deepEqual(journal.sections.map((s) => s.slug), [null, "milestones-2", "milestones"]);
+  const journal = buildJournal([trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" }), trail({ region: "Milestones, AB" })], [], sample());
+  assert.deepEqual(journal.sections.slice(0, 3).map((s) => s.slug), [null, "milestones-2", "milestones"]);
 });
 
 test("a spread splits its trails with the extra one on the left", () => {
@@ -100,26 +105,6 @@ test("progress counts the live catalogue plus retired trails the user hiked", ()
   assert.ok(journal.groups.some((g) => g.title === "United States" && g.trails[0].id === retired.id));
   // A guest sees only the live catalogue.
   assert.equal(buildJournal(live, []).total, 3);
-});
-
-test("milestones: first hike, first overnight, 5 parks, 100 km", () => {
-  assert.deepEqual(computeMilestones([]).map((m) => m.earned), [false, false, false, false]);
-  const parks = ["A", "B", "C", "D", "E"].map((name) => trail({ region: `${name} Park, AB`, distance_km: 21 }));
-  const earned = computeMilestones(parks.map((t) => log(t)));
-  assert.deepEqual(earned.map((m) => m.earned), [true, false, true, true]);
-  const overnight = computeMilestones([log(trail({ typical_duration_nights: 2 }))]);
-  assert.equal(overnight[1].earned, true);
-  const partial = computeMilestones([log(trail({ distance_km: 42.5 })), log(trail({ distance_km: null }))]);
-  assert.equal(partial[3].earned, false);
-  assert.equal(partial[3].progress, 0.425);
-  assert.match(partial[3].detail, /42 \/ 100 km/);
-  // One canonical goal (100 km), labelled in whole units.
-  assert.equal(computeMilestones([log(trail({ distance_km: 42.5 }))], "imperial")[3].detail, "Hike 62 mi in total (26 / 62 mi)");
-  assert.equal(computeMilestones([log(trail({ distance_km: 97 }))])[3].detail, "Hike 100 km in total (97 / 100 km)");
-  // 99.9 km is 62.07 mi: not earned, so it must not read "62 / 62 mi".
-  assert.equal(computeMilestones([log(trail({ distance_km: 99.9 }))], "imperial")[3].detail, "Hike 62 mi in total (61 / 62 mi)");
-  assert.equal(computeMilestones([log(trail({ distance_km: 100 }))], "imperial")[3].detail, "Hike 62 mi in total (62 / 62 mi)");
-  assert.match(partial[2].detail, /1 \/ 5/);
 });
 
 test("each difficulty has its own badge outline", () => {
@@ -147,26 +132,6 @@ test("photos are scaled down, never up, and odd files are refused", () => {
   assert.equal(photoInputProblem({ type: "image/heic", size: 10 }), "Use a JPEG, PNG or WebP photo.");
   assert.match(photoInputProblem({ type: "image/jpeg", size: 30 * 1024 * 1024 }) ?? "", /25 MB/);
   assert.equal(photoInputProblem({ type: "image/png", size: 10 }), null);
-});
-
-test("switching units never changes which milestones are earned", () => {
-  const histories = [
-    [],
-    [log(trail({ distance_km: 96.6 }))], // 60 mi: not yet 100 km
-    [log(trail({ distance_km: 99.9 }))],
-    [log(trail({ distance_km: 100 }))],
-    [log(trail({ distance_km: 62.1 })), log(trail({ distance_km: 37.9, typical_duration_nights: 2 }))],
-    [log(trail({ distance_km: 150 })), log(trail({ distance_km: null }))],
-    ["A", "B", "C", "D", "E"].map((region) => log(trail({ region: `${region}, AB`, distance_km: 21 }))),
-  ];
-  for (const logs of histories) {
-    const metric = computeMilestones(logs, "metric");
-    const imperial = computeMilestones(logs, "imperial");
-    assert.deepEqual(
-      imperial.map((m) => [m.id, m.earned, m.progress]),
-      metric.map((m) => [m.id, m.earned, m.progress]),
-    );
-  }
 });
 
 test("journal summary: counts, nights and region progress, most complete first", () => {

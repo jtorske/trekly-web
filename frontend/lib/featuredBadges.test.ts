@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { badgeKey, badgeName, earnedBadgeGroups, moveBadge, toggleBadge, type FeaturedBadge } from "./featuredBadges.ts";
 import type { HikeLog } from "./hikeLogsApi.ts";
 import type { TrailListItem } from "./trailsApi.ts";
+import { milestone as made, sample } from "./milestones.fixtures.ts";
 
 function log(name: string, region: string, nights = 0): HikeLog {
   return {
@@ -22,25 +23,38 @@ const logs = [
   log("Lake Agnes", "Banff National Park, AB"),
 ];
 const trail = (i: number): FeaturedBadge => ({ kind: "trail", trail: logs[i].trail });
-const milestone = (id: "first-hike" | "first-overnight"): FeaturedBadge => ({ kind: "milestone", milestone: id });
+const milestone = (id: string, title = "First steps"): FeaturedBadge => ({
+  kind: "milestone",
+  milestone: id,
+  badge: { id, category: "getting-out", title, tier: "bronze", icon: id },
+});
+
+// The server's answer for these logs: what's earned, and what isn't.
+const milestones = sample([
+  made({ id: "first-hike", title: "First steps", earned: true }),
+  made({ id: "trail-regular", title: "Trail regular", earned: false }),
+  made({ id: "first-overnight", category: "nights", title: "Under the stars", earned: true }),
+  made({ id: null, category: "secret", title: "???", tier: null, secret: true, earned: false }),
+]);
 
 test("only earned badges: milestones first, then trails grouped by region", () => {
-  const groups = earnedBadgeGroups(logs);
+  const groups = earnedBadgeGroups(logs, milestones);
   assert.deepEqual(groups.map((g) => g.title), ["Milestones", "Banff National Park", "Jasper National Park"]);
-  // Park hopper (5 regions) and Century (no distances) aren't earned.
+  // Unearned ones, and hidden secrets, aren't offered.
   assert.deepEqual(groups[0].badges.map(badgeName), ["First steps", "Under the stars"]);
   assert.deepEqual(groups[1].badges.map(badgeName), ["Lake Agnes", "Sentinel Pass"]);
 });
 
 test("no hikes, no badges", () => {
-  assert.deepEqual(earnedBadgeGroups([]), []);
+  assert.deepEqual(earnedBadgeGroups([], sample([])), []);
+  assert.deepEqual(earnedBadgeGroups([], null), []);
 });
 
 test("search matches trail, region and milestone names", () => {
-  assert.deepEqual(earnedBadgeGroups(logs, "jasper").flatMap((g) => g.badges.map(badgeName)), ["Skyline Trail"]);
-  assert.deepEqual(earnedBadgeGroups(logs, "AGNES").flatMap((g) => g.badges.map(badgeName)), ["Lake Agnes"]);
-  assert.deepEqual(earnedBadgeGroups(logs, "stars").flatMap((g) => g.badges.map(badgeName)), ["Under the stars"]);
-  assert.deepEqual(earnedBadgeGroups(logs, "nowhere"), []);
+  assert.deepEqual(earnedBadgeGroups(logs, milestones, "jasper").flatMap((g) => g.badges.map(badgeName)), ["Skyline Trail"]);
+  assert.deepEqual(earnedBadgeGroups(logs, milestones, "AGNES").flatMap((g) => g.badges.map(badgeName)), ["Lake Agnes"]);
+  assert.deepEqual(earnedBadgeGroups(logs, milestones, "stars").flatMap((g) => g.badges.map(badgeName)), ["Under the stars"]);
+  assert.deepEqual(earnedBadgeGroups(logs, milestones, "nowhere"), []);
 });
 
 test("toggle adds and removes, and never a fourth", () => {
