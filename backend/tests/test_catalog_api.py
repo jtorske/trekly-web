@@ -1,3 +1,6 @@
+import uuid
+
+
 def names(response):
     return [item["display_name"] for item in response.json()["items"]]
 
@@ -146,3 +149,37 @@ def test_weight_and_capacity_filters_use_variants_and_skip_unknowns(client):
     assert names_of(lighter) == ["MSR PocketRocket Deluxe"]
     assert client.get("/api/gear/products", params={"min_capacity_ml": 1}).json()["items"] == []
     assert client.get("/api/gear/products", params={"max_weight_g": 0}).status_code == 422
+
+
+POPULAR_CATEGORIES = "tents,sleeping-pads,stoves,rainwear"
+
+
+def lightest(item):
+    return item["weight_g"] if item["weight_g"] is not None else item["weight_range_g"][0]
+
+
+def test_popular_products_lightest_first_then_most_owned(client, auth_headers):
+    body = client.get("/api/gear/products/popular", params={"category": POPULAR_CATEGORIES, "limit": 5}).json()
+    # Discontinued products are never suggested.
+    assert "Arc'teryx Beta AR Jacket" not in names_of({"items": body})
+    assert len(body) == 3
+    weights = [lightest(item) for item in body]
+    assert weights == sorted(weights)
+
+    heaviest, middle = body[-1], body[1]
+    for _ in range(3):
+        headers = auth_headers(uuid.uuid4())
+        client.post("/api/me/gear", json={"product_id": heaviest["id"]}, headers=headers)
+    # Below the owner threshold an item's owners don't count, so one person's
+    # gear can't be read off the ranking.
+    for _ in range(2):
+        headers = auth_headers(uuid.uuid4())
+        client.post("/api/me/gear", json={"product_id": middle["id"]}, headers=headers)
+
+    ranked = client.get("/api/gear/products/popular", params={"category": POPULAR_CATEGORIES, "limit": 3}).json()
+    assert [item["id"] for item in ranked] == [heaviest["id"], body[0]["id"], middle["id"]]
+
+
+def test_popular_products_validates_categories(client):
+    assert client.get("/api/gear/products/popular", params={"category": "tents,spaceships"}).status_code == 404
+    assert client.get("/api/gear/products/popular").status_code == 422

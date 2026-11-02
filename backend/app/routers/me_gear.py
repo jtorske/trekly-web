@@ -102,7 +102,7 @@ def _apply(db: Session, user_id: UUID, item: UserGearItem, data: dict) -> None:
             item.variant = variant
             item.category = product.category
 
-    for field in ("custom_name", "custom_brand", "custom_model", "notes", "condition"):
+    for field in ("custom_name", "custom_brand", "custom_model", "notes", "condition", "carry", "mat_slot"):
         if field in data:
             setattr(item, field, data[field])
 

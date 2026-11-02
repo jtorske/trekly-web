@@ -26,9 +26,39 @@
 .cell[data-slot="footwear"] { grid-column: 10 / 13; grid-row: 5 / 7; --tilt: -3deg; }
 
 .cell {
+  position: relative;
   display: flex;
   min-width: 0;
   gap: 0.6rem;
+  border-radius: 1rem;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+/* Drag and drop: every slot shows it can take the piece; the one under the
+   pointer lights up. */
+.wrap[data-dragging] .cell[data-drop] {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.wrap[data-dragging] .cell[data-over] {
+  background: color-mix(in srgb, var(--color-rust) 9%, transparent);
+  box-shadow: inset 0 0 0 2px var(--color-rust);
+}
+
+/* The piece's button plus its hover card (or an empty slot's suggestions). */
+.pieceWrap {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.miniWrap {
+  flex: 0 1 auto;
 }
 
 /* A slot: the whole silhouette plus caption is the button. */
@@ -70,6 +100,29 @@
 .piece:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.piece[data-state="filled"] {
+  user-select: none;
+}
+
+.piece[data-dragging] {
+  opacity: 0.3;
+  filter: none;
+  transform: none;
+}
+
+:global(html[data-gear-dragging]) .piece {
+  cursor: grabbing;
+}
+
+.foreignIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(60%, 5rem);
+  height: min(60%, 5rem);
+  transform: translate(-50%, -50%);
 }
 
 .art {
@@ -343,6 +396,205 @@
   transform: translate(-50%, -50%);
 }
 
+/* Hover card (filled pieces) and popular picks (empty slots). Item cards sit
+   just outside the piece (below it on the top rows, above it on the bottom
+   row) so the piece stays visible and draggable; they overlap it slightly
+   so the pointer never leaves the hover area on the way over. */
+.card {
+  position: absolute;
+  z-index: 6;
+  top: 0.25rem;
+  left: 50%;
+  display: flex;
+  width: 14rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--hair);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, white 82%, var(--paper));
+  padding: 0.65rem 0.7rem;
+  color: var(--ink);
+  text-align: left;
+  box-shadow: 0 18px 32px -18px rgba(40, 54, 24, 0.65);
+  transform: translateX(-50%);
+}
+
+.card[data-kind="item"] {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 120ms ease 80ms,
+    visibility 0s linear 200ms;
+}
+
+.pieceWrap:hover > .card[data-kind="item"],
+.pieceWrap:focus-within > .card[data-kind="item"] {
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity 120ms ease 120ms,
+    visibility 0s;
+}
+
+.wrap[data-dragging] .card[data-kind="item"] {
+  display: none;
+}
+
+.card[data-kind="suggest"] {
+  width: 16.5rem;
+}
+
+.card[data-kind="item"] {
+  top: calc(100% - 0.75rem);
+}
+
+.cell[data-slot="sleeping-bag"] .card[data-kind="item"],
+.cell[data-slot="stove"] .card[data-kind="item"],
+.cell[data-slot="footwear"] .card[data-kind="item"],
+.minis .card[data-kind="item"] {
+  top: auto;
+  bottom: calc(100% - 0.75rem);
+}
+
+/* The backpack runs the mat's full height: its card covers the caption. */
+.cell[data-slot="backpack"] .main .card[data-kind="item"] {
+  top: auto;
+  bottom: 0.25rem;
+}
+
+/* Popular picks stay over the empty slot; bottom-row slots open upward. */
+.cell[data-slot="backpack"] .card[data-kind="suggest"],
+.cell[data-slot="sleeping-bag"] .card[data-kind="suggest"],
+.cell[data-slot="stove"] .card[data-kind="suggest"],
+.cell[data-slot="footwear"] .card[data-kind="suggest"] {
+  top: auto;
+  bottom: 0.25rem;
+}
+
+/* Never past the mat's side edges. */
+.cell[data-slot="backpack"] .card { left: 0; transform: none; }
+.cell[data-slot="rain-jacket"] .card,
+.cell[data-slot="footwear"] .card,
+.cell[data-slot="sleeping-pad"] .minis .card { right: 0; left: auto; transform: none; }
+
+.card[data-kind="item"] {
+  cursor: grab;
+}
+
+.cardName {
+  font-family: var(--display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cardMeta {
+  color: var(--color-muted-text);
+  font-size: 0.76rem;
+}
+
+.cardMeta strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.15rem;
+}
+
+.cardActions button {
+  min-height: 2rem;
+  flex: 1 1 auto;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  padding: 0.25rem 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.cardActions button:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+.cardActions .cardDanger {
+  color: var(--color-rust-text);
+}
+
+.cardEyebrow {
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cardQuiet {
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+}
+
+.picks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pickBody {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.pickName {
+  overflow: hidden;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickMeta {
+  overflow: hidden;
+  color: var(--color-muted-text);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickAdd {
+  min-height: 2rem;
+  flex: none;
+  border-radius: 9999px;
+  background: var(--color-rust-fill);
+  padding: 0.2rem 0.75rem;
+  color: var(--color-cream);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.pickAdd:hover {
+  background: var(--color-rust-fill-hover);
+}
+
+.cardLink {
+  align-self: flex-start;
+  color: var(--color-rust-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* Snap into place when an item is added. */
 .piece[data-snap] {
   animation: snap 420ms cubic-bezier(0.3, 1.5, 0.5, 1);
@@ -361,6 +613,53 @@
 @keyframes settle {
   from { stroke: var(--color-rust); stroke-dasharray: 5 4; }
   to { stroke: currentColor; }
+}
+
+/* Desktop app shell: the page sizes the mat to fit the window, so rows share
+   its height instead of setting it, and type scales with the mat's width. */
+@media (min-width: 1100px) {
+  .wrap {
+    height: 100%;
+    container-type: inline-size;
+  }
+
+  .mat {
+    height: 100%;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 0.6rem 0.9rem;
+  }
+
+  .cell,
+  .main,
+  .piece {
+    min-height: 0;
+  }
+
+  .art {
+    min-height: 2.5rem;
+  }
+
+  .name {
+    font-size: clamp(0.8rem, 1.45cqw, 1rem);
+  }
+
+  .brand,
+  .weight {
+    font-size: clamp(0.66rem, 1.05cqw, 0.78rem);
+  }
+
+  .mini {
+    width: clamp(3.75rem, 8cqw, 5rem);
+  }
+
+  .mini .art {
+    min-height: 2.25rem;
+    flex-basis: 2.25rem;
+  }
+
+  .mini .brand {
+    display: none;
+  }
 }
 
 /* Tablet: 6 columns. */
@@ -418,7 +717,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .piece,
-  .another {
+  .another,
+  .cell,
+  .card[data-kind="item"],
+  .pieceWrap:hover > .card[data-kind="item"],
+  .pieceWrap:focus-within > .card[data-kind="item"] {
     transition: none;
   }
 

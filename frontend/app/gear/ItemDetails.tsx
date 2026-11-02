@@ -7,6 +7,7 @@ import ui from "@/components/ui.module.css";
 import { formProblem, toast } from "@/lib/toast";
 import {
   updateMyGear,
+  type Carry,
   type Condition,
   type GearItem,
   type GearItemInput,
@@ -24,8 +25,15 @@ import {
   weightInputUnit,
   type UnitSystem,
 } from "@/lib/units";
+import { carryOf } from "./baseWeight";
 import type { Slot } from "./slots";
 import styles from "./ItemDetails.module.css";
+
+const CARRY_LABELS: Record<Carry, string> = {
+  packed: "Packed (base weight)",
+  worn: "Worn",
+  consumable: "Consumable",
+};
 
 const CONDITIONS: { value: Condition; label: string }[] = [
   { value: "new", label: "New" },
@@ -44,6 +52,7 @@ export default function ItemDetails({
   onSaved,
   onDeleted,
   onReplace,
+  onMove,
   onClose,
 }: {
   item: GearItem;
@@ -54,6 +63,8 @@ export default function ItemDetails({
   onSaved: (item: GearItem) => void;
   onDeleted: (item: GearItem) => void;
   onReplace: (item: GearItem) => void;
+  /** "Move to…" on the mat; the touch and keyboard alternative to dragging. */
+  onMove?: (item: GearItem) => void;
   onClose: () => void;
 }) {
   const isCustom = item.kind === "custom";
@@ -70,6 +81,9 @@ export default function ItemDetails({
   );
   const [notes, setNotes] = useState(item.notes ?? "");
   const [condition, setCondition] = useState<Condition | "">(item.condition ?? "");
+  // "" keeps the slot's default (boots worn, the rest packed).
+  const [carry, setCarry] = useState<Carry | "">(item.carry ?? "");
+  const defaultCarry = CARRY_LABELS[carryOf({ ...item, carry: null })];
   const [photo, setPhoto] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -104,6 +118,7 @@ export default function ItemDetails({
         weight_override: weight.trim() ? { value: String(gramsFromInput(weight, weightUnit)), unit: "g" } : null,
         notes: notes.trim() || null,
         condition: condition || null,
+        carry: carry || null,
       };
       if (isCustom) {
         update.custom_name = name.trim();
@@ -162,6 +177,11 @@ export default function ItemDetails({
             <button type="button" className={ui.ghost} onClick={() => setConfirmingDelete(true)} disabled={busy}>
               Remove from my gear
             </button>
+            {onMove && (
+              <button type="button" className={ui.secondary} onClick={() => onMove(item)} disabled={busy}>
+                Move to…
+              </button>
+            )}
             <button type="button" className={ui.secondary} onClick={() => onReplace(item)} disabled={busy}>
               Replace…
             </button>
@@ -306,6 +326,19 @@ export default function ItemDetails({
           )}
           {errors.weight && <span className={ui.fieldError}>{errors.weight}</span>}
         </div>
+
+        <label className={ui.field}>
+          <span className={ui.label}>Counts as</span>
+          <select className={ui.input} value={carry} onChange={(e) => setCarry(e.target.value as Carry | "")}>
+            <option value="">Default: {defaultCarry}</option>
+            {(Object.keys(CARRY_LABELS) as Carry[]).map((value) => (
+              <option key={value} value={value}>
+                {CARRY_LABELS[value]}
+              </option>
+            ))}
+          </select>
+          <span className={ui.hint}>Base weight leaves out what you wear and what you use up, like food and fuel.</span>
+        </label>
 
         <label className={ui.field}>
           <span className={ui.label}>Notes</span>

@@ -151,6 +151,8 @@ export function asGearItem(item: PublicGearItem): GearItem {
     notes: null,
     condition: null,
     image_path: null,
+    carry: null,
+    mat_slot: null,
     created_at: "",
     updated_at: "",
   } as GearItem;

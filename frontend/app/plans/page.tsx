@@ -26,7 +26,7 @@ import { usePlans } from "@/lib/usePlans";
 import { useUnits } from "@/lib/useUnits";
 import FlatLay from "../gear/FlatLay";
 import GearList from "../gear/GearList";
-import { CORE_SLOTS, groupItemsBySlot, missingTripGear, slotForItem } from "../gear/slots";
+import { CORE_SLOTS, MORE_GEAR, groupItemsByPlacement, matPlacement, missingTripGear } from "../gear/slots";
 import { TripsSection } from "../profile/sections";
 import AlertDialog from "../trails/AlertDialog";
 import PlanDialog from "./PlanDialog";
@@ -168,7 +168,7 @@ function GearPanel({ plan, onEdit }: { plan: TripPlan; onEdit: () => void }) {
     );
   }
   const warnings = missingTripGear(setup.items);
-  const others = setup.items.filter((item) => !slotForItem(item).core);
+  const others = setup.items.filter((item) => matPlacement(item) === MORE_GEAR);
   return (
     <>
       <div className={styles.gearHead}>
@@ -194,15 +194,13 @@ function GearPanel({ plan, onEdit }: { plan: TripPlan; onEdit: () => void }) {
       <div className={styles.mat}>
         <FlatLay
           slots={CORE_SLOTS}
-          bySlot={groupItemsBySlot(setup.items)}
+          bySlot={groupItemsByPlacement(setup.items)}
           showEmptySlots={false}
           units={units}
           canEdit={false}
-          addDisabled
           snapId={null}
           emptyMessage={setup.items.length === 0 ? "This setup is empty." : null}
           onAdd={() => undefined}
-          onOpen={() => undefined}
         />
       </div>
       {others.length > 0 && (

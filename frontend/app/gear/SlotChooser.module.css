@@ -1,0 +1,59 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.option {
+  display: flex;
+  width: 100%;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, white 60%, var(--color-cream));
+  padding: 0.5rem 0.7rem;
+  color: var(--color-dark-olive);
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--color-rust);
+}
+
+.option:disabled {
+  cursor: default;
+  background: color-mix(in srgb, var(--color-dark-olive) 6%, var(--color-cream));
+}
+
+.icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+}
+
+.here {
+  margin-left: auto;
+  color: var(--color-muted-text);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.zones {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.zoneTitle {
+  margin-bottom: 0.4rem;
+  color: color-mix(in srgb, var(--color-dark-olive) 70%, transparent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

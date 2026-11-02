@@ -133,6 +133,40 @@ export function groupItemsBySlot(items: GearItem[]): Map<string, GearItem[]> {
   return grouped;
 }
 
+/** Where an item sits on the page: a core slot key on the mat, or MORE_GEAR. */
+export const MORE_GEAR = "more";
+const CORE_KEYS = new Set(CORE_ORDER);
+
+/**
+ * The owner can drag an item to any mat slot, or off the mat into More gear
+ * (mat_slot "more"); otherwise it goes where its category does. Only the
+ * mat placement follows mat_slot: icons, weights and trip checks keep using
+ * slotForItem, so a pillow dragged onto the backpack slot is still a pillow.
+ */
+export function matPlacement(item: GearItem): string {
+  const override = item.mat_slot;
+  if (override === MORE_GEAR) return MORE_GEAR;
+  if (override && CORE_KEYS.has(override)) return override;
+  const home = slotForItem(item);
+  return home.core ? home.key : MORE_GEAR;
+}
+
+/** The mat_slot to save for moving an item to `target` (null means "where it belongs"). */
+export function matSlotFor(item: GearItem, target: string): string | null {
+  const home = slotForItem(item);
+  if (target === MORE_GEAR) return home.core ? MORE_GEAR : null;
+  return target === home.key ? null : target;
+}
+
+export function groupItemsByPlacement(items: GearItem[]): Map<string, GearItem[]> {
+  const grouped = new Map<string, GearItem[]>();
+  for (const item of items) {
+    const key = matPlacement(item);
+    grouped.set(key, [...(grouped.get(key) ?? []), item]);
+  }
+  return grouped;
+}
+
 export function zoneCoverage(items: GearItem[]): { filled: number; total: number } {
   const zones = new Set(items.map((item) => slotForItem(item).zone));
   return { filled: zones.size, total: ZONES.length };

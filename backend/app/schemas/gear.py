@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 WeightUnit = Literal["g", "kg", "oz", "lb"]
 VolumeUnit = Literal["ml", "l", "fl_oz", "cu_in"]
 Condition = Literal["new", "good", "worn", "needs_repair", "retired"]
+Carry = Literal["packed", "worn", "consumable"]
 ValueSource = Literal["override", "variant", "product"]
 
 
@@ -149,6 +150,9 @@ class UserGearBase(BaseModel):
     notes: str | None = Field(default=None, max_length=2000)
     condition: Condition | None = None
     image_path: str | None = Field(default=None, max_length=200)
+    # Null: the slot's default. See app/models/user_gear.py.
+    carry: Carry | None = None
+    mat_slot: str | None = Field(default=None, pattern=r"^[a-z0-9-]{1,40}$")
 
     _clean = field_validator("custom_name", "custom_brand", "custom_model", mode="before")(
         lambda value: _clean_optional_text(value) if isinstance(value, str) else value
@@ -211,6 +215,8 @@ class UserGearItemOut(BaseModel):
     notes: str | None
     condition: Condition | None
     image_path: str | None
+    carry: Carry | None
+    mat_slot: str | None
     created_at: datetime
     updated_at: datetime
 

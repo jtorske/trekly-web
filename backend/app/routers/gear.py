@@ -3,7 +3,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.catalog.normalize import normalize_text
@@ -23,12 +23,15 @@ from app.models.catalog import (
     CatalogCategory,
     CatalogProduct,
     CatalogProductSource,
+    CatalogProductVariant,
 )
+from app.models.user_gear import UserGearItem
 from app.schemas.gear import (
     BrandOut,
     CategoryOut,
     ProductDetailOut,
     ProductPage,
+    ProductSummaryOut,
     SubcategoryOut,
 )
 
@@ -132,6 +135,53 @@ def list_products(
         total=result.total,
         next_cursor=encode_cursor(result.next_offset) if result.next_offset is not None else None,
     )
+
+
+# A product's owners only count once this many people own it, so the ranking
+# can't reveal that one particular user owns something.
+POPULAR_MIN_OWNERS = 3
+
+
+@router.get("/products/popular", response_model=list[ProductSummaryOut])
+def popular_products(
+    category: str = Query(..., max_length=400, description="Slug or comma-separated slugs"),
+    limit: int = Query(3, ge=1, le=12),
+    db: Session = Depends(get_db),
+):
+    """Suggestions for an empty gear mat slot: active products in the
+    categories, most owned first (distinct owners), then lightest."""
+    try:
+        ids = category_ids(db, category)
+    except UnknownFilter as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    owners = (
+        select(UserGearItem.product_id, func.count(func.distinct(UserGearItem.user_id)).label("n"))
+        .where(UserGearItem.product_id.is_not(None))
+        .group_by(UserGearItem.product_id)
+        .subquery()
+    )
+    lightest_variant = (
+        select(CatalogProductVariant.product_id, func.min(CatalogProductVariant.weight_g).label("g"))
+        .group_by(CatalogProductVariant.product_id)
+        .subquery()
+    )
+    owned = case((owners.c.n >= POPULAR_MIN_OWNERS, owners.c.n), else_=0)
+    weight = func.coalesce(CatalogProduct.weight_g, lightest_variant.c.g)
+    products = db.scalars(
+        select(CatalogProduct)
+        .outerjoin(owners, owners.c.product_id == CatalogProduct.id)
+        .outerjoin(lightest_variant, lightest_variant.c.product_id == CatalogProduct.id)
+        .where(CatalogProduct.category_id.in_(ids), CatalogProduct.status == "active")
+        .order_by(owned.desc(), weight.is_(None), weight, CatalogProduct.name)
+        .limit(limit)
+        .options(
+            joinedload(CatalogProduct.brand),
+            joinedload(CatalogProduct.category).joinedload(CatalogCategory.parent),
+            selectinload(CatalogProduct.variants),
+            selectinload(CatalogProduct.images),
+        )
+    ).unique().all()
+    return [product_summary(product) for product in products]
 
 
 def load_product(db: Session, product_id: UUID) -> CatalogProduct | None:

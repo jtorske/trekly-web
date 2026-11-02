@@ -1,0 +1,272 @@
+/* Weight summary: base weight, class badge, Big Three bar, main pieces ring.
+   Big Three colours were checked with the dataviz palette validator against
+   the panel surface (lightness, chroma, CVD and normal-vision separation). */
+
+.summary {
+  --zone-backpack: #5f7a1f;
+  --zone-shelter: #3a6ea5;
+  --zone-sleep: #bc6c25;
+  --zone-other: color-mix(in srgb, var(--color-tan) 45%, #b8b09a);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  padding: 0.9rem 1rem 0.85rem;
+  box-shadow: 0 8px 20px -16px rgba(40, 54, 24, 0.5);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.headline {
+  min-width: 0;
+}
+
+.eyebrow {
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scope {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.big {
+  font-family: var(--display);
+  font-size: 2.3rem;
+  font-weight: 600;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.missing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.15rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.missingHint {
+  color: var(--color-muted-text);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.extras {
+  margin-top: 0.15rem;
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+}
+
+.pieces {
+  display: flex;
+  width: 4.75rem;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.ring {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.ringTrack,
+.ringValue {
+  fill: none;
+  stroke-width: 3.5;
+}
+
+.ringTrack {
+  stroke: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.ringValue {
+  stroke: var(--color-olive);
+  stroke-linecap: round;
+  transition: stroke-dasharray 400ms ease;
+}
+
+.ringText {
+  fill: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.piecesLabel {
+  color: var(--color-muted-text);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.classRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+.classBadge {
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.classBadge[data-class="super-ultralight"] {
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.classBadge[data-class="ultralight"] {
+  background: var(--color-olive);
+  color: var(--color-cream);
+}
+
+.classBadge[data-class="lightweight"] {
+  background: color-mix(in srgb, var(--color-tan) 40%, var(--paper));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-tan) 80%, transparent);
+}
+
+.classBadge[data-class="traditional"] {
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+
+.classHint {
+  color: var(--color-muted-text);
+  font-size: 0.74rem;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.barWrap {
+  position: relative;
+}
+
+/* 2px surface gaps between segments; rounded ends on the outside only. */
+.bar {
+  display: flex;
+  height: 0.85rem;
+  gap: 2px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.segment {
+  min-width: 3px;
+  flex-basis: 0;
+  background: var(--zone-other);
+  transition: filter 120ms ease;
+}
+
+.segment[data-zone="backpack"] { background: var(--zone-backpack); }
+.segment[data-zone="shelter"] { background: var(--zone-shelter); }
+.segment[data-zone="sleep"] { background: var(--zone-sleep); }
+
+.segment[data-active] {
+  filter: brightness(1.12) saturate(1.1);
+}
+
+.tip {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 0.35rem);
+  left: 50%;
+  border-radius: 0.5rem;
+  background: var(--color-dark-olive);
+  padding: 0.25rem 0.55rem;
+  color: var(--color-cream);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.85rem;
+  font-size: 0.76rem;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  background: var(--zone-other);
+}
+
+.swatch[data-zone="backpack"] { background: var(--zone-backpack); }
+.swatch[data-zone="shelter"] { background: var(--zone-shelter); }
+.swatch[data-zone="sleep"] { background: var(--zone-sleep); }
+
+.legendLabel {
+  color: color-mix(in srgb, var(--ink) 85%, transparent);
+}
+
+.legendValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bigThree {
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
+  font-size: 0.78rem;
+}
+
+.bigThree strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Short desktop windows: tighten so More gear keeps room to show items. */
+@media (min-width: 1100px) and (max-height: 820px) {
+  .summary {
+    gap: 0.45rem;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .big {
+    font-size: 1.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringValue,
+  .segment {
+    transition: none;
+  }
+}

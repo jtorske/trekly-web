@@ -5,6 +5,8 @@ import type { WeightUnit } from "./units";
 export type { WeightUnit };
 export type VolumeUnit = "ml" | "l" | "fl_oz" | "cu_in";
 export type Condition = "new" | "good" | "worn" | "needs_repair" | "retired";
+/** How an item counts toward pack weight; null is the slot's default (app/gear/baseWeight.ts). */
+export type Carry = "packed" | "worn" | "consumable";
 
 export interface SpecRow {
   key: string;
@@ -124,6 +126,9 @@ export interface GearItem {
   notes: string | null;
   condition: Condition | null;
   image_path: string | null;
+  carry: Carry | null;
+  /** The mat slot the owner moved it to; null is the slot its category maps to (app/gear/slots.ts). */
+  mat_slot: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -154,6 +159,8 @@ export interface GearItemInput {
   notes?: string | null;
   condition?: Condition | null;
   image_path?: string | null;
+  carry?: Carry | null;
+  mat_slot?: string | null;
 }
 
 export const listCategories = (signal?: AbortSignal) =>
@@ -181,6 +188,13 @@ export function searchProducts(
   search.set("limit", String(params.limit ?? 12));
   return apiFetch<ProductPage>(`/api/gear/products?${search}`, { signal });
 }
+
+/** Up to `limit` active products in the categories, most owned first, then lightest. */
+export const popularProducts = (categories: string[], limit = 3, signal?: AbortSignal) =>
+  apiFetch<ProductSummary[]>(
+    `/api/gear/products/popular?category=${encodeURIComponent(categories.join(","))}&limit=${limit}`,
+    { signal },
+  );
 
 export const getProduct = (id: string, signal?: AbortSignal) =>
   apiFetch<ProductDetail>(`/api/gear/products/${encodeURIComponent(id)}`, { signal });

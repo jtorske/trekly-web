@@ -294,3 +294,34 @@ def test_failed_save_creates_nothing(client, auth_headers, alice):
     bad = client.post("/api/me/gear", json={"product_id": str(uuid.uuid4())}, headers=headers)
     assert bad.status_code == 422
     assert client.get("/api/me/gear", headers=headers).json()["items"] == []
+
+
+def test_carry_and_mat_slot(client, auth_headers, alice):
+    headers = auth_headers(alice)
+    boots = product(client, "copper spur")
+    item = client.post("/api/me/gear", json={"product_id": boots["id"]}, headers=headers).json()
+    assert item["carry"] is None and item["mat_slot"] is None
+
+    updated = client.patch(
+        f"/api/me/gear/{item['id']}", json={"carry": "worn", "mat_slot": "backpack"}, headers=headers
+    )
+    assert updated.status_code == 200
+    assert updated.json()["carry"] == "worn" and updated.json()["mat_slot"] == "backpack"
+
+    # Other fields leave them alone; null clears them back to the defaults.
+    kept = client.patch(f"/api/me/gear/{item['id']}", json={"notes": "x"}, headers=headers).json()
+    assert kept["carry"] == "worn" and kept["mat_slot"] == "backpack"
+    cleared = client.patch(
+        f"/api/me/gear/{item['id']}", json={"carry": None, "mat_slot": None}, headers=headers
+    ).json()
+    assert cleared["carry"] is None and cleared["mat_slot"] is None
+
+
+@pytest.mark.parametrize(
+    "payload", [{"carry": "carried"}, {"mat_slot": "Not A Slot"}, {"mat_slot": "x" * 41}, {"mat_slot": ""}]
+)
+def test_carry_and_mat_slot_validation(client, auth_headers, alice, payload):
+    headers = auth_headers(alice)
+    tent = product(client, "copper spur")
+    item = client.post("/api/me/gear", json={"product_id": tent["id"]}, headers=headers).json()
+    assert client.patch(f"/api/me/gear/{item['id']}", json=payload, headers=headers).status_code == 422

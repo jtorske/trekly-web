@@ -30,6 +30,9 @@ from app.database import Base
 from app.models.catalog import JsonType
 
 CONDITIONS = ("new", "good", "worn", "needs_repair", "retired")
+# How an item counts toward pack weight. Null means the slot's default
+# (footwear is worn, everything else packed); see frontend lib/baseWeight.ts.
+CARRY_MODES = ("packed", "worn", "consumable")
 WEIGHT_UNITS = ("g", "kg", "oz", "lb")
 MAX_QUANTITY = 99
 
@@ -64,6 +67,14 @@ class UserGearItem(Base):
             "condition is null or condition in ('new','good','worn','needs_repair','retired')",
             name="user_gear_items_condition_check",
         ),
+        CheckConstraint(
+            "carry is null or carry in ('packed','worn','consumable')",
+            name="user_gear_items_carry_check",
+        ),
+        CheckConstraint(
+            "mat_slot is null or (length(mat_slot) between 1 and 40)",
+            name="user_gear_items_mat_slot_check",
+        ),
         # Retried "add" requests carry the same client_request_id, so a
         # double-click or network retry can't create two rows.
         UniqueConstraint("user_id", "client_request_id", name="user_gear_items_client_request_key"),
@@ -89,6 +100,11 @@ class UserGearItem(Base):
     notes = Column(Text)
     condition = Column(Text)
     image_path = Column(Text)
+    carry = Column(Text)
+    # The gear mat slot the owner dragged this item to. Null means the slot
+    # its category maps to (frontend app/gear/slots.ts); unknown keys fall
+    # back the same way, so renaming a slot never hides an item.
+    mat_slot = Column(Text)
     client_request_id = Column(Uuid)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(

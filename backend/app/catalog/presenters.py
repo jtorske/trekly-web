@@ -183,6 +183,8 @@ def gear_item_out(item: UserGearItem) -> UserGearItemOut:
         notes=item.notes,
         condition=item.condition,
         image_path=item.image_path,
+        carry=item.carry,
+        mat_slot=item.mat_slot,
         created_at=item.created_at,
         updated_at=item.updated_at,
     )

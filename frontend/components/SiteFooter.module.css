@@ -29,3 +29,10 @@
     display: none;
   }
 }
+
+/* The gear page's shell starts at 1100px (app/gear/page.module.css). */
+@media (min-width: 1100px) {
+  .gearShell {
+    display: none;
+  }
+}

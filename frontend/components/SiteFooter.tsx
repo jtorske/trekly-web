@@ -31,6 +31,12 @@ export default function SiteFooter() {
   if (pathname === "/landing" || pathname === "/" || pathname === "/journal") return null;
   // Profiles are one screen on desktop too, with the tab content scrolling.
   const shell = pathname === "/profile" || pathname.startsWith("/u/");
+  // So is the gear page, from 1100px.
+  const gearShell = pathname === "/gear";
 
-  return <FooterNotice className={`${styles.footer} ${shell ? styles.shellPage : ""}`} />;
+  return (
+    <FooterNotice
+      className={`${styles.footer} ${shell ? styles.shellPage : ""} ${gearShell ? styles.gearShell : ""}`}
+    />
+  );
 }
