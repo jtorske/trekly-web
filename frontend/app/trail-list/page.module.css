@@ -5,6 +5,8 @@
   --slate-deep: #253947;
   --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
   --hair-soft: color-mix(in srgb, var(--color-dark-olive) 9%, transparent);
+  /* The fixed navbar's height, as on the profile and the Trail Journal. */
+  --nav-h: 5.25rem;
 
   position: relative;
   isolation: isolate;
@@ -27,8 +29,9 @@
 /* Search + filters */
 
 .controls {
-  max-width: 48rem;
-  margin: 0 auto 2rem;
+  position: relative;
+  max-width: 72rem;
+  margin: 0 auto 1.25rem;
   padding: 7rem 1.5rem 0;
 }
 
@@ -389,7 +392,7 @@
 /* Results */
 
 .results {
-  max-width: 48rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -435,10 +438,13 @@
   text-align: center;
 }
 
+/* Below the split layout the map is hidden, so the list is a grid of
+   cards with full-width photos. */
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
   transition: opacity 150ms ease;
 }
 
@@ -446,38 +452,48 @@
   opacity: 0.55;
 }
 
+/* Trail cards */
+
 .cardItem {
   position: relative;
-}
-
-.cardSave {
-  position: absolute;
-  top: 50%;
-  right: 1rem;
-  transform: translateY(-50%);
+  min-width: 0;
 }
 
 .card {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  height: 100%;
+  flex-direction: column;
+  gap: 0.75rem;
   border: 1px solid var(--hair);
   border-radius: 1rem;
   background: color-mix(in srgb, white 70%, var(--paper));
-  padding: 1rem 4.25rem 1rem 1.25rem;
+  padding: 0.75rem;
   transition:
-    border-color 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
-/* The title's link stretches over the card; the park link sits above it. */
+.card:hover {
+  border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: 0 14px 28px -18px rgba(37, 57, 71, 0.55);
+  transform: translateY(-2px);
+}
+
+/* Picked on the map. */
+.cardItem[data-selected] .card {
+  border-color: var(--color-rust);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-rust) 35%, transparent);
+}
+
+/* The title's link stretches over the card; the park link, the save button
+   and the photo credit sit above it. */
 .cardLink::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 1rem;
 }
 
@@ -490,69 +506,83 @@
   outline-offset: 2px;
 }
 
-.parkLink {
-  position: relative;
-  z-index: 1;
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
-  text-underline-offset: 2px;
-}
-
-.parkLink:hover {
-  color: var(--ink);
-  text-decoration-color: currentColor;
-}
-
-.card:hover {
-  border-color: color-mix(in srgb, var(--ink) 35%, transparent);
-  box-shadow: 0 10px 22px -16px rgba(37, 57, 71, 0.45);
-  transform: translateY(-1px);
-}
-
 .cardPhoto {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   flex-shrink: 0;
-  width: 7.5rem;
-  height: 5rem;
+  border-radius: 0.75rem;
+}
+
+.cardBody {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .cardMain {
+  display: flex;
+  min-width: 0;
   flex: 1;
-  /* Room for the title even when the meta row is long ("28 km away"). */
-  min-width: 11rem;
-}
-
-.cardCredit {
-  padding: 0.25rem 0 0 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .cardName {
   font-family: var(--display);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
 .cardRegion {
-  margin-top: 0.15rem;
   color: var(--color-muted-text);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
+/* Plain text that's still a link: underlined only on hover or focus. */
+.parkLink {
+  position: relative;
+  z-index: 2;
+  color: inherit;
+  text-decoration: none;
+}
+
+.parkLink:hover,
+.parkLink:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Difficulty chip · trip · distance · gain, skipping what's missing. */
 .cardMeta {
   display: flex;
-  flex-shrink: 1;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem 0.85rem;
+  gap: 0.3rem 0.45rem;
+  margin-top: 0.3rem;
 }
 
 .metaItem {
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
   font-size: 0.82rem;
   white-space: nowrap;
+}
+
+.metaItem::before {
+  content: "·";
+  margin-right: 0.45rem;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.cardSave {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
 .terrainTag {
@@ -583,6 +613,387 @@
   color: var(--color-cream);
 }
 
+/* The photo credit: an ⓘ in the photo's corner. The button and its tip are
+   placed against the photo itself, so the tip stays inside it however narrow
+   (the list's scroller would clip anything wider). */
+.photoInfoButton {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  z-index: 2;
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: rgba(20, 28, 22, 0.55);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  transition: background-color 120ms ease;
+}
+
+.photoInfoButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.photoInfoButton:hover,
+.photoInfo[data-open] .photoInfoButton {
+  background: rgba(20, 28, 22, 0.8);
+}
+
+.photoTip {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 2.35rem;
+  left: 0.4rem;
+  z-index: 3;
+  border-radius: 0.5rem;
+  background: var(--color-dark-olive);
+  padding: 0.35rem 0.6rem;
+  color: var(--color-cream);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.2rem);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+  visibility: hidden;
+}
+
+/* A bridge over the gap, so the pointer can reach the link. */
+.photoTip::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -0.4rem;
+  left: 0;
+  height: 0.4rem;
+}
+
+.photoInfo:hover .photoTip,
+.photoInfo:focus-within .photoTip,
+.photoInfo[data-open] .photoTip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  visibility: visible;
+}
+
+.photoTip a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Loading */
+
+.skeletonCard {
+  pointer-events: none;
+}
+
+.skeletonTitle {
+  width: 65%;
+  height: 1.25rem;
+}
+
+.skeletonLine {
+  width: 45%;
+  height: 0.9rem;
+}
+
+.skeletonMeta {
+  width: 80%;
+  height: 1.3rem;
+  margin-top: 0.3rem;
+}
+
+/* Quick filters */
+
+.quickChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.quickChips .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: color-mix(in srgb, white 55%, transparent);
+}
+
+.quickChips .chip[aria-pressed="true"] {
+  background: var(--ink);
+}
+
+.chipIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.quickChips + .geoMessage {
+  margin-top: 0.5rem;
+}
+
+/* Map */
+
+.mapPane {
+  min-width: 0;
+  min-height: 0;
+}
+
+.mapFrame {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: #f2efe6;
+}
+
+/* Two classes, so it beats MapLibre's own .maplibregl-map { position: relative }. */
+.mapFrame .mapCanvas {
+  position: absolute;
+  inset: 0;
+}
+
+.mapPlaceholder {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--color-olive) 8%, var(--paper));
+  padding: 1.5rem;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.mapFrame .mapPlaceholder {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.mapLoading span {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.searchArea {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 2;
+  border-radius: 9999px;
+  background: var(--ink);
+  padding: 0.55rem 1.1rem;
+  color: var(--paper);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 6px 18px -6px rgba(20, 28, 22, 0.5);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.searchArea:hover {
+  background: color-mix(in srgb, var(--ink) 85%, black);
+}
+
+.legend {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.35rem 0.6rem;
+  color: var(--ink);
+  font-size: 0.75rem;
+  box-shadow: 0 1px 4px rgba(20, 28, 22, 0.15);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legendDot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px rgba(20, 28, 22, 0.2);
+}
+
+/* MapLibre's popup frame, restyled to match the cards. */
+.mapPopup :global(.maplibregl-popup-content) {
+  overflow: hidden;
+  border-radius: 0.85rem;
+  padding: 0;
+  box-shadow: 0 10px 28px -10px rgba(20, 28, 22, 0.45);
+}
+
+.mapPopup :global(.maplibregl-popup-close-button) {
+  top: 0.3rem;
+  right: 0.3rem;
+  z-index: 1;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.popup {
+  width: 15rem;
+  color: var(--color-dark-olive);
+  font-family: var(--sans);
+}
+
+.popupPhoto {
+  display: block;
+  width: 100%;
+  height: 8.4rem;
+  object-fit: cover;
+}
+
+.popupBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.7rem 0.85rem 0.8rem;
+}
+
+.popupName {
+  padding-right: 1.25rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.popupGroup {
+  padding: 0.75rem 0.5rem 0.5rem;
+}
+
+.popupGroupHeading {
+  padding: 0 1.75rem 0.4rem 0.4rem;
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.popupGroupItem {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.4rem;
+  color: var(--color-dark-olive);
+  font-family: var(--display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.popupGroupItem:hover,
+.popupGroupItem:focus-visible {
+  background: color-mix(in srgb, var(--color-olive) 12%, transparent);
+}
+
+.popupLink {
+  color: var(--color-rust-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.popupLink:hover {
+  text-decoration: underline;
+}
+
+/* Map / List, below the split layout. */
+.viewToggle {
+  position: fixed;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--ink);
+  padding: 0.7rem 1.25rem;
+  color: var(--paper);
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px -8px rgba(20, 28, 22, 0.55);
+  transform: translateX(-50%);
+}
+
+.viewToggle:hover {
+  background: color-mix(in srgb, var(--ink) 85%, black);
+}
+
+.page[data-view="list"] .mapPane {
+  display: none;
+}
+
+/* Map view (phones and tablets): one screen, the controls above the map. */
+.page[data-view="map"] {
+  display: flex;
+  height: calc(100dvh - var(--nav-h));
+  min-height: 0;
+  flex: none;
+  flex-direction: column;
+  margin-top: var(--nav-h);
+  padding-bottom: 0;
+}
+
+.page[data-view="map"] .layout {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.page[data-view="map"] .controls {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.page[data-view="map"] .results {
+  display: none;
+}
+
+.page[data-view="map"] .mapPane {
+  min-height: 0;
+  flex: 1;
+  padding: 0 1.5rem 5rem;
+}
+
 @media (max-width: 640px) {
   .controls {
     padding: 6rem 1rem 0;
@@ -610,28 +1021,35 @@
     padding: 0.55rem 0.7rem;
   }
 
-  .card {
-    flex-direction: column;
-    align-items: flex-start;
+  /* One row that scrolls sideways, rather than three rows of chips. */
+  .quickChips {
+    flex-wrap: nowrap;
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: 0 1rem 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .cardPhoto {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
+  .quickChips::-webkit-scrollbar {
+    display: none;
   }
 
-  .cardMain {
-    min-width: 0;
+  .quickChips .chip {
+    flex-shrink: 0;
   }
 
-  .cardMeta {
-    justify-content: flex-start;
+  .page[data-view="map"] .mapPane {
+    padding: 0 0.5rem 4.75rem;
   }
 
-  .cardSave {
-    top: 1rem;
-    transform: none;
+  /* Above the map's attribution line, which must stay readable. */
+  .legend {
+    bottom: 1.9rem;
+  }
+
+  .page[data-view="map"] .controls {
+    padding-top: 0.75rem;
   }
 
   /* Filters open as a bottom sheet with a sticky "Show N trails". */
@@ -695,5 +1113,139 @@
   .pickerButton,
   .picker {
     max-width: none;
+  }
+}
+
+/*
+ * Split view: the list on the left, a fixed map on the right, one screen
+ * under the navbar like the profile page. Only the list scrolls.
+ */
+@media (min-width: 1100px) {
+  .page,
+  .page[data-view="map"] {
+    display: block;
+    height: calc(100dvh - var(--nav-h));
+    min-height: 0;
+    flex: none;
+    margin-top: var(--nav-h);
+    padding-bottom: 0;
+  }
+
+  .layout,
+  .page[data-view="map"] .layout {
+    display: grid;
+    height: 100%;
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+  }
+
+  .listPane {
+    position: relative;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .controls,
+  .page[data-view="map"] .controls {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0.75rem 1.25rem 0.75rem 1.5rem;
+  }
+
+  /* Over the list, not pushing it down. */
+  .filterPanel {
+    position: absolute;
+    right: 1.25rem;
+    left: 1.5rem;
+    z-index: 20;
+    max-height: calc(100dvh - var(--nav-h) - 9rem);
+    overflow-y: auto;
+    box-shadow: 0 18px 40px -16px rgba(20, 28, 22, 0.45);
+  }
+
+  .results,
+  .page[data-view="map"] .results {
+    display: block;
+    min-height: 0;
+    flex: 1;
+    max-width: none;
+    margin: 0;
+    padding: 0 1.25rem 1.5rem 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .results::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .results::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-dark-olive) 22%, transparent) padding-box;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    .results {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--color-dark-olive) 22%, transparent) transparent;
+    }
+  }
+
+  /* The count and sort stay at the top of the list. */
+  .resultsHead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    margin: 0 -0.25rem 0.25rem;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    padding: 0.5rem 0.25rem;
+    backdrop-filter: blur(6px);
+  }
+
+  .list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    margin-top: 0;
+  }
+
+  /* Side by side: a 160×120 photo, the text, the save button. */
+  .card {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .cardPhoto {
+    width: 160px;
+    height: 120px;
+    aspect-ratio: auto;
+  }
+
+  .mapPane,
+  .page[data-view="map"] .mapPane,
+  .page[data-view="list"] .mapPane {
+    display: block;
+    padding: 0.75rem 1rem 1rem 0.25rem;
+  }
+
+  .viewToggle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .list,
+  .photoTip,
+  .mapLoading span {
+    transition: none;
+    animation: none;
+  }
+
+  .card:hover {
+    transform: none;
   }
 }

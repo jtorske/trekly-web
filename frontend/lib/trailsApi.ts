@@ -97,12 +97,17 @@ export interface TrailSearchRequest {
   parks?: string[];
   /** Used for this request only; the API never stores or logs it. */
   near?: { lat: number; lng: number; radius_km?: number };
+  /** Explore's "Search this area": trailheads inside the map view. */
+  bounds?: { west: number; south: number; east: number; north: number };
   limit?: number;
 }
 
 export interface TrailSearchItem extends TrailListItem {
   /** Straight-line km from `near`; null without it. */
   distance_away_km: number | null;
+  /** The trailhead, for the map; null when the catalogue has none. */
+  latitude: number | null;
+  longitude: number | null;
 }
 
 /** Every option, counted under all the other active filters. */

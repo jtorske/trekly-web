@@ -11,7 +11,8 @@ function origin(url: string | undefined, fallback: string): string {
 /**
  * Where the browser may fetch, XHR or open sockets to. Everything the app
  * calls: its own origin (Next.js), the API, Supabase (auth, storage uploads
- * and realtime) and Open-Meteo for trail forecasts.
+ * and realtime), Open-Meteo for trail forecasts, and OpenFreeMap for
+ * Explore's map (style, tiles, fonts and sprites, all on one host).
  */
 function connectSources(): string {
   const supabase = origin(process.env.NEXT_PUBLIC_SUPABASE_URL, "http://127.0.0.1:44321");
@@ -21,6 +22,7 @@ function connectSources(): string {
     supabase,
     supabase.replace(/^http/, "ws"),
     "https://api.open-meteo.com",
+    "https://tiles.openfreemap.org",
   ];
   // Vercel's comments toolbar on preview deployments.
   if (process.env.VERCEL_ENV === "preview") sources.push("https://vercel.live", "wss://ws-us3.pusher.com");

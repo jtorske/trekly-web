@@ -377,6 +377,27 @@ def test_near_filters_by_radius_and_reports_distance(client, parks_catalogue):
         assert client.post("/api/trails/search", json={"near": bad}).status_code == 422
 
 
+def test_search_returns_coordinates_and_filters_to_map_bounds(client, parks_catalogue):
+    lake_agnes = next(t for t in search(client)["trails"] if t["name"] == "Lake Agnes")
+    assert lake_agnes["latitude"] is not None and lake_agnes["longitude"] is not None
+
+    rockies = {"west": -117.0, "south": 50.0, "east": -114.0, "north": 52.0}
+    inside = search(client, bounds=rockies)
+    assert result_names(inside) == ["Lake Agnes", "Rawson Lake"]
+    assert inside["total"] == 2
+    # The area narrows the counts too, like any other filter.
+    assert counts_by(inside["facets"]["provinces"], "code") == {"AB": 2, "BC": 0, "NL": 0}
+    # It combines with the rest.
+    assert result_names(search(client, bounds=rockies, park_types=["provincial"])) == ["Rawson Lake"]
+
+    # Across the antimeridian: west > east wraps round instead of matching nothing.
+    wrapped = search(client, bounds={"west": 170.0, "south": -90.0, "east": -114.0, "north": 90.0})
+    assert "Lake Agnes" in result_names(wrapped) and "Signal Hill" not in result_names(wrapped)
+
+    for bad in ({**rockies, "south": 53.0}, {**rockies, "west": -181.0}):
+        assert client.post("/api/trails/search", json={"bounds": bad}).status_code == 422
+
+
 def test_search_hides_retired_trails_from_results_and_facets(client, parks_catalogue, legacy_us_trail):
     result = search(client, q="Wonderland")
     assert result["total"] == 0

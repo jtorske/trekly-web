@@ -16,6 +16,7 @@ from app.models.trail import Trail
 from app.models.trail_campground import TrailBookingSystem, TrailCampground
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.schemas.trail import (
+    BoundsIn,
     CampgroundParkOut,
     NearIn,
     ParkFacetOut,
@@ -93,6 +94,7 @@ def filter_conditions(
     park_types: list[ParkTypeFilter] = (),
     parks: list[str] = (),
     within_ids: set[UUID] | None = None,
+    bounds: BoundsIn | None = None,
 ) -> dict[str, list]:
     """WHERE clauses keyed by filter, so a facet can leave out its own."""
     conditions: dict[str, list] = {}
@@ -121,6 +123,13 @@ def filter_conditions(
         conditions["park"] = [Trail.park_name.in_(parks)]
     if within_ids is not None:
         conditions["near"] = [Trail.id.in_(within_ids)]
+    if bounds:
+        longitude = (
+            Trail.longitude.between(bounds.west, bounds.east)
+            if bounds.west <= bounds.east
+            else or_(Trail.longitude >= bounds.west, Trail.longitude <= bounds.east)
+        )
+        conditions["area"] = [Trail.latitude.between(bounds.south, bounds.north), longitude]
     return conditions
 
 
@@ -200,7 +209,7 @@ def search_trails_with_facets(body: TrailSearchIn, db: Session = Depends(get_db)
     if body.near and body.near.radius_km is not None:
         within = {trail_id for trail_id, km in distances.items() if km <= body.near.radius_km}
     conditions = filter_conditions(
-        body.q.strip(), body.terrain, body.trip, body.provinces, body.park_types, body.parks, within
+        body.q.strip(), body.terrain, body.trip, body.provinces, body.park_types, body.parks, within, body.bounds
     )
 
     total = db.scalar(select(func.count()).select_from(Trail).where(*where(conditions)))

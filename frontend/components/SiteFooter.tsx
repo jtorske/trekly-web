@@ -33,10 +33,14 @@ export default function SiteFooter() {
   const shell = pathname === "/profile" || pathname.startsWith("/u/");
   // So is the gear page, from 1100px.
   const gearShell = pathname === "/gear";
+  // Explore is one screen beside its map too, and in its phone map view.
+  const explore = pathname === "/trail-list";
 
   return (
     <FooterNotice
-      className={`${styles.footer} ${shell ? styles.shellPage : ""} ${gearShell ? styles.gearShell : ""}`}
+      className={`${styles.footer} ${shell ? styles.shellPage : ""} ${gearShell ? styles.gearShell : ""} ${
+        explore ? styles.explorePage : ""
+      }`}
     />
   );
 }

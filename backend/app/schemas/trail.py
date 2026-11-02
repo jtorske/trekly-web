@@ -85,6 +85,22 @@ class NearIn(BaseModel):
     radius_km: float | None = Field(default=None, gt=0, le=1000)
 
 
+class BoundsIn(BaseModel):
+    """A map view (Explore's "Search this area"): trails whose trailhead is
+    inside it. West can exceed east for a view across the antimeridian."""
+
+    west: float = Field(ge=-180, le=180)
+    south: float = Field(ge=-90, le=90)
+    east: float = Field(ge=-180, le=180)
+    north: float = Field(ge=-90, le=90)
+
+    @model_validator(mode="after")
+    def _south_of_north(self):
+        if self.south > self.north:
+            raise ValueError("south must not be north of north")
+        return self
+
+
 class TrailSearchIn(BaseModel):
     q: str = ""
     terrain: Terrain | None = None
@@ -94,12 +110,16 @@ class TrailSearchIn(BaseModel):
     park_types: list[ParkTypeFilter] = Field(default=[], max_length=3)
     parks: list[str] = Field(default=[], max_length=50)
     near: NearIn | None = None
+    bounds: BoundsIn | None = None
     limit: int = Field(default=10, ge=1)
 
 
 class TrailSearchItemOut(TrailListItemOut):
     # Straight-line km from `near`; null without it or without coordinates.
     distance_away_km: float | None = None
+    # The trailhead, for Explore's map; null when the catalogue has none.
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class ProvinceFacetOut(BaseModel):

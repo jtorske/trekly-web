@@ -6,10 +6,16 @@ import {
   clearFilters,
   exploreHref,
   exploreSearch,
+  formatMapView,
+  keepViewParams,
   parseExploreParams,
+  parseExploreView,
+  parseMapView,
   provinceOrder,
   toggle,
+  toggleTrip,
   withProvinces,
+  withViewParam,
   withinKm,
   withoutNear,
   type ExploreFilters,
@@ -18,7 +24,7 @@ import {
 const parse = (search: string) => parseExploreParams(new URLSearchParams(search));
 
 test("an empty URL is no filters", () => {
-  assert.deepEqual(parse(""), { ...EMPTY_FILTERS, trip: undefined, terrain: undefined, within: undefined });
+  assert.deepEqual(parse(""), { ...EMPTY_FILTERS, trip: undefined, terrain: undefined, within: undefined, area: undefined });
   assert.equal(exploreSearch(EMPTY_FILTERS), "");
   assert.equal(exploreHref({}), "/trail-list");
 });
@@ -33,13 +39,15 @@ test("every filter round-trips through the URL", () => {
     parks: ["Banff National Park", "Parc national de la Gaspésie"],
     near: true,
     within: { value: 50, unit: "km" },
+    area: { west: -117.5, south: 50.5, east: -114, north: 52.25 },
     sort: "nearest",
   };
   const search = exploreSearch(filters);
   assert.equal(
     search,
     "q=lake&trip=day&terrain=easy&province=AB&province=BC&park_type=national&park_type=other" +
-      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km&sort=nearest",
+      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km" +
+      "&area=-117.5%2C50.5%2C-114%2C52.25&sort=nearest",
   );
   assert.deepEqual(parse(search), filters);
 });
@@ -125,4 +133,50 @@ test("provinces sort west to east, then the territories", () => {
 test("distances in miles become km for the API", () => {
   assert.equal(withinKm({ value: 50, unit: "km" }), 50);
   assert.ok(Math.abs(withinKm({ value: 25, unit: "mi" }) - 40.2336) < 1e-9);
+});
+
+test("a map area round-trips, rounded, and bad ones are dropped", () => {
+  assert.deepEqual(parse("area=-117.5,50.5,-114,52.25").area, { west: -117.5, south: 50.5, east: -114, north: 52.25 });
+  assert.equal(
+    exploreSearch({ ...EMPTY_FILTERS, area: { west: -117.123456, south: 50.5, east: -114, north: 52.25 } }),
+    "area=-117.1235%2C50.5%2C-114%2C52.25",
+  );
+  // West past east is a view across the antimeridian, and is kept.
+  assert.ok(parse("area=170,-10,-170,10").area);
+  for (const bad of ["area=1,2,3", "area=a,1,2,3", "area=-117,53,-114,52", "area=-200,1,2,3"]) {
+    assert.equal(parse(bad).area, undefined, bad);
+  }
+});
+
+test("the map area is a filter: Clear all drops it, the Filters count leaves it out", () => {
+  const filters = parse("q=lake&area=-117,50,-114,52");
+  assert.equal(activeFilterCount(filters), 0);
+  assert.equal(clearFilters(filters).area, undefined);
+  assert.equal(clearFilters(filters).q, "lake");
+});
+
+test("the map position and Map/List choice are view state that survives filter changes", () => {
+  assert.deepEqual(parseMapView(new URLSearchParams("map=51.1784,-115.5708,9.5")), {
+    lat: 51.1784,
+    lng: -115.5708,
+    zoom: 9.5,
+  });
+  assert.equal(formatMapView({ lat: 51.178412, lng: -115.570812, zoom: 9.4567 }), "51.1784,-115.5708,9.46");
+  for (const bad of ["", "map=1,2", "map=91,0,5", "map=0,0,30", "map=x,0,5"]) {
+    assert.equal(parseMapView(new URLSearchParams(bad)), null, bad);
+  }
+  assert.equal(parseExploreView(new URLSearchParams("view=map")), "map");
+  assert.equal(parseExploreView(new URLSearchParams("view=nope")), "list");
+
+  const current = new URLSearchParams("trip=day&map=51,-115,9&view=map");
+  assert.equal(keepViewParams("trip=overnight", current), "trip=overnight&map=51%2C-115%2C9&view=map");
+  assert.equal(keepViewParams("", new URLSearchParams("trip=day")), "");
+  assert.equal(withViewParam(current, "view", null), "trip=day&map=51%2C-115%2C9");
+  assert.equal(withViewParam(new URLSearchParams("trip=day"), "map", "1,2,3"), "trip=day&map=1%2C2%2C3");
+});
+
+test("the trip quick chips swap and clear the trip type", () => {
+  assert.equal(toggleTrip(EMPTY_FILTERS, "day").trip, "day");
+  assert.equal(toggleTrip({ ...EMPTY_FILTERS, trip: "day" }, "overnight").trip, "overnight");
+  assert.equal(toggleTrip({ ...EMPTY_FILTERS, trip: "day" }, "day").trip, undefined);
 });

@@ -30,9 +30,16 @@
   }
 }
 
-/* The gear page's shell starts at 1100px (app/gear/page.module.css). */
+/* The gear page's shell starts at 1100px (app/gear/page.module.css), and
+   so does Explore's split view (app/trail-list/page.module.css). */
 @media (min-width: 1100px) {
-  .gearShell {
+  .gearShell,
+  .explorePage {
     display: none;
   }
+}
+
+/* Explore's phone and tablet map view is one screen too. */
+:global(body):has(:global(main[data-view="map"])) .explorePage {
+  display: none;
 }

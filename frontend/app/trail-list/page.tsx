@@ -1,33 +1,49 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
-import Link from "next/link";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+} from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import SaveTrailButton from "@/components/SaveTrailButton";
-import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import {
   PARK_TYPE_LABELS,
   PROVINCE_NAMES,
+  QUICK_PARKS,
   TRIP_LABELS,
   WITHIN_OPTIONS,
   activeFilterCount,
   clearFilters,
-  exploreHref,
   exploreSearch,
+  formatMapView,
+  keepViewParams,
   parseExploreParams,
+  parseExploreView,
+  parseMapView,
   provinceOrder,
   toggle,
+  toggleTrip,
   withProvinces,
+  withViewParam,
   withinKm,
   withinLabel,
   withoutNear,
+  type Bounds,
   type ExploreFilters,
+  type ExploreView,
+  type MapView,
 } from "@/lib/exploreFilters";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
-import { tripLengthLabel } from "@/lib/tripLength";
 import { TRAIL_SORT_LABELS, sortTrails, trailTitles, type TrailSort } from "@/lib/trailOrder";
 import {
   searchExplore,
@@ -37,15 +53,36 @@ import {
   type TrailSearchRequest,
   type TripType,
 } from "@/lib/trailsApi";
-import { formatTrailDistance, formatTrailElevation, formatWholeDistance, type UnitSystem } from "@/lib/units";
+import type { UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
+import TrailCard, { TrailCardSkeleton } from "./TrailCard";
 import styles from "./page.module.css";
+
+// MapLibre is big and needs the browser: load it only when a map is on screen.
+const ExploreMap = dynamic(() => import("./ExploreMap"), {
+  ssr: false,
+  loading: () => (
+    <div className={`${styles.mapPlaceholder} ${styles.mapLoading}`} aria-hidden="true">
+      <span>Loading map…</span>
+    </div>
+  ),
+});
 
 const TERRAINS = Object.keys(TERRAIN_LABELS) as Terrain[];
 const RESULT_LIMIT = 100;
 const TRIPS = Object.keys(TRIP_LABELS) as TripType[];
 const PARK_TYPES = Object.keys(PARK_TYPE_LABELS) as ParkTypeFilter[];
 const MOBILE_QUERY = "(max-width: 640px)";
+/** The list and the map side by side; narrower screens toggle between them. */
+const SPLIT_QUERY = "(min-width: 1100px)";
+const SKELETON_CARDS = 6;
+
+function subscribeSplit(onChange: () => void) {
+  const query = window.matchMedia(SPLIT_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+const isSplit = () => window.matchMedia(SPLIT_QUERY).matches;
 
 function provinceName(code: string): string {
   return PROVINCE_NAMES[code] ?? code;
@@ -293,101 +330,6 @@ function NearMe({
   );
 }
 
-/** "Banff National Park, AB" with the park linked to Explore filtered to it. */
-function TrailPlace({ trail }: { trail: TrailSearchItem }) {
-  const park = trail.park_name;
-  if (!park) return <>{trail.region}</>;
-  const link = (
-    <Link href={exploreHref({ parks: [park] })} className={styles.parkLink}>
-      {park}
-    </Link>
-  );
-  const match = trail.region.match(/^(.*?)(,\s*[A-Z]{2})?$/);
-  if (match && match[1] === park) {
-    return (
-      <>
-        {link}
-        {match[2] ?? ""}
-      </>
-    );
-  }
-  return (
-    <>
-      {trail.region} · {link}
-    </>
-  );
-}
-
-function TrailCard({
-  trail,
-  title,
-  saved,
-  pending,
-  onToggleSave,
-  returnTo,
-  units,
-}: {
-  trail: TrailSearchItem;
-  title: string;
-  saved: boolean;
-  pending: boolean;
-  onToggleSave: (trailId: string, makeSaved: boolean) => Promise<void>;
-  returnTo: string;
-  units: UnitSystem;
-}) {
-  const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
-  const gain = formatTrailElevation(trail.elevation_gain_m, units);
-  return (
-    <li className={styles.cardItem}>
-      {/* The title's link covers the whole card; the park link sits above it. */}
-      <div className={styles.card}>
-        <div className={styles.cardPhoto}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
-        </div>
-        <div className={styles.cardMain}>
-          <h2 className={styles.cardName}>
-            <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.cardLink}>
-              {title}
-            </Link>
-          </h2>
-          <p className={styles.cardRegion}>
-            <TrailPlace trail={trail} />
-          </p>
-        </div>
-
-        <div className={styles.cardMeta}>
-          <span className={`${styles.terrainTag} ${styles[trail.terrain]}`}>
-            {TERRAIN_LABELS[trail.terrain]}
-          </span>
-          {trail.typical_duration_nights != null && (
-            <span className={styles.metaItem}>
-              {tripLengthLabel(trail.typical_duration_nights)}
-            </span>
-          )}
-          {distance && <span className={styles.metaItem}>{distance}</span>}
-          {gain && <span className={styles.metaItem}>{gain} gain</span>}
-          {trail.distance_away_km != null && (
-            <span className={styles.metaItem}>{formatWholeDistance(trail.distance_away_km, units)} away</span>
-          )}
-        </div>
-      </div>
-      <div className={styles.cardSave}>
-        <SaveTrailButton
-          trailId={trail.id}
-          trailName={trail.name}
-          saved={saved}
-          pending={pending}
-          onToggle={onToggleSave}
-          returnTo={returnTo}
-          compact
-        />
-      </div>
-      {/* Outside the card's link: the credit links to the photo's source. */}
-      <PhotoCredit photo={trail.photo} className={styles.cardCredit} />
-    </li>
-  );
-}
-
 function ExploreContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -425,15 +367,40 @@ function ExploreContent() {
   // storage. Rounded to ~1 km before it's sent.
   const [geo, setGeo] = useState<{ status: GeoStatus; position?: { lat: number; lng: number } }>({ status: "idle" });
 
-  const updateUrl = useCallback(
-    (next: ExploreFilters) => {
-      const search = exploreSearch(next);
-      router.replace(search ? `/trail-list?${search}` : "/trail-list", {
-        scroll: false,
-      });
-    },
-    [router],
+  // Every URL change here goes through history.replaceState, which Next keeps
+  // useSearchParams in step with. Mixing it with router.replace doesn't work:
+  // after the map writes its position, the router's next replace is undone
+  // by its own stale copy of the URL.
+  const updateUrl = useCallback((next: ExploreFilters) => {
+    const search = keepViewParams(exploreSearch(next), new URLSearchParams(window.location.search));
+    window.history.replaceState(null, "", search ? `/trail-list?${search}` : "/trail-list");
+  }, []);
+
+  const split = useSyncExternalStore(subscribeSplit, isSplit, () => false);
+  const view: ExploreView = parseExploreView(searchParams);
+  const mapVisible = split || view === "map";
+  // Read once: afterwards the map owns its position and writes it back.
+  const [initialMapView] = useState(() => parseMapView(new URLSearchParams(searchParams.toString())));
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const cardRefs = useRef(new Map<string, HTMLLIElement>());
+
+  // View state goes straight into history: no navigation, no refetch.
+  const setViewParam = useCallback((key: "map" | "view", value: string | null) => {
+    const search = withViewParam(new URLSearchParams(window.location.search), key, value);
+    window.history.replaceState(null, "", search ? `/trail-list?${search}` : "/trail-list");
+  }, []);
+  const onMapView = useCallback(
+    (next: MapView) => setViewParam("map", formatMapView(next)),
+    [setViewParam],
   );
+  const showView = (next: ExploreView) => setViewParam("view", next === "map" ? "map" : null);
+
+  // Picked on the map: bring its card into view, once the list is showing.
+  useEffect(() => {
+    if (!selectedId || !(split || view === "list")) return;
+    cardRefs.current.get(selectedId)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedId, split, view]);
 
   // Geolocation answers arrive later; they apply to the filters as they are then.
   const latest = useRef(filters);
@@ -509,9 +476,12 @@ function ExploreContent() {
       filters.near && geo.position
         ? { ...geo.position, ...(filters.within ? { radius_km: withinKm(filters.within) } : {}) }
         : undefined,
+    bounds: filters.area,
     limit: RESULT_LIMIT,
   };
   const requestJson = JSON.stringify(request);
+  // The map refits to each new search, but not to "Search this area".
+  const searchKey = JSON.stringify({ ...request, bounds: undefined });
   const requestKey = `${requestJson}|${attempt}`;
 
   useEffect(() => {
@@ -547,6 +517,7 @@ function ExploreContent() {
   }, [filtersOpen]);
 
   const isLoading = result?.key !== requestKey;
+  const fitKey = isLoading ? null : `${searchKey}|${attempt}`;
   const trails = result?.trails;
   const facets = result?.facets ?? null;
   const failed = !isLoading && trails === null;
@@ -583,7 +554,11 @@ function ExploreContent() {
     updateUrl({ ...filters, q: input.trim() });
   };
 
-  const setFilter = (next: ExploreFilters) => updateUrl({ ...next, q: input.trim() });
+  const setFilter = (next: ExploreFilters) => {
+    // A new search can drop the picked trail, so its popup goes too.
+    setSelectedId(null);
+    updateUrl({ ...next, q: input.trim() });
+  };
   const clearAll = () => {
     setGeo((current) => (filters.near ? { status: "stopped" } : current));
     setFilter(clearFilters(filters));
@@ -615,216 +590,331 @@ function ExploreContent() {
           onRemove: () => setGeo({ status: "stopped" }),
         }]
       : []),
+    ...(filters.area ? [{ key: "area", label: "In the map area", next: { ...filters, area: undefined } }] : []),
   ];
 
-  return (
-    <main className={styles.page}>
+  const searchArea = (bounds: Bounds) => setFilter({ ...filters, area: bounds });
+  const toggleNear = () => (filters.near ? stopNear() : locate());
+  const showMapLabel = view === "map" ? "Show list" : "Show map";
 
+  return (
+    <main className={styles.page} data-view={view}>
       <h1 className={ui.srOnly}>Explore trails</h1>
 
-      <div className={styles.controls}>
-        <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
-          <input
-            className={styles.searchInput}
-            type="search"
-            placeholder="Search trails, parks or regions…"
-            aria-label="Search trails, parks or regions"
-            autoComplete="off"
-            value={input}
-            onChange={(event) => {
-              setInput(event.target.value);
-              setTyping(true);
-            }}
-          />
-          <button
-            type="button"
-            className={styles.filterButton}
-            aria-expanded={filtersOpen}
-            aria-controls={filtersId}
-            onClick={() => setFiltersOpen((open) => !open)}
-          >
-            <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.filterIcon}>
-              <path d="M3 5h14M6 10h8M9 15h2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-            <span className={styles.filterLabel}>Filters</span>
-            {activeFilters > 0 && (
-              <span className={styles.filterCount}>
-                {activeFilters}
-                <span className={ui.srOnly}> active</span>
-              </span>
-            )}
-          </button>
-          <button className={styles.searchButton} type="submit">
-            Search
-          </button>
-        </form>
-
-        {filtersOpen && (
-          <>
-            <div className={styles.sheetBackdrop} aria-hidden="true" onClick={() => setFiltersOpen(false)} />
-            <div
-              id={filtersId}
-              className={styles.filterPanel}
-              role="region"
-              aria-label="Filters"
-              onKeyDown={(event) => {
-                if (event.key === "Escape") setFiltersOpen(false);
-              }}
-            >
-              <div className={styles.sheetHandle} aria-hidden="true" />
-              <div className={styles.filterBody}>
-                <FilterGroup
-                  label="Trip type"
-                  options={TRIPS}
-                  labels={TRIP_LABELS}
-                  value={trip}
-                  onChange={(value) => setFilter({ ...filters, trip: value })}
-                />
-                <FilterGroup
-                  label="Difficulty"
-                  options={TERRAINS}
-                  labels={TERRAIN_LABELS}
-                  value={terrain}
-                  onChange={(value) => setFilter({ ...filters, terrain: value })}
-                />
-                <CountChipGroup
-                  label="Province"
-                  options={provinceOptions}
-                  selected={filters.provinces}
-                  onToggle={(code) =>
-                    setFilter(withProvinces(filters, toggle(filters.provinces, code), parkProvinces))
-                  }
-                />
-                <CountChipGroup
-                  label="Park type"
-                  options={parkTypeOptions}
-                  selected={filters.parkTypes}
-                  onToggle={(type) =>
-                    setFilter({ ...filters, parkTypes: toggle(filters.parkTypes, type as ParkTypeFilter) })
-                  }
-                />
-                <ParkPicker
-                  parks={facets?.parks ?? []}
-                  selected={filters.parks}
-                  provinces={filters.provinces}
-                  onToggle={(park) => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
-                />
-                <NearMe
-                  filters={filters}
-                  status={geo.status}
-                  units={units}
-                  onLocate={locate}
-                  onStop={stopNear}
-                  onWithin={(value) =>
-                    setFilter({
-                      ...filters,
-                      within: value ? { value, unit: units === "imperial" ? "mi" : "km" } : undefined,
-                    })
-                  }
-                />
-              </div>
-              <div className={styles.filterFooter}>
+      <div className={styles.layout}>
+        <div className={styles.listPane}>
+          <div className={styles.controls}>
+            <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
+              <input
+                className={styles.searchInput}
+                type="search"
+                placeholder="Search trails, parks or regions…"
+                aria-label="Search trails, parks or regions"
+                autoComplete="off"
+                value={input}
+                onChange={(event) => {
+                  setInput(event.target.value);
+                  setTyping(true);
+                }}
+              />
+              <button
+                type="button"
+                className={styles.filterButton}
+                aria-expanded={filtersOpen}
+                aria-controls={filtersId}
+                onClick={() => setFiltersOpen((open) => !open)}
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.filterIcon}>
+                  <path d="M3 5h14M6 10h8M9 15h2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+                <span className={styles.filterLabel}>Filters</span>
                 {activeFilters > 0 && (
-                  <button type="button" className={ui.ghost} onClick={clearAll}>
-                    Clear all
-                  </button>
+                  <span className={styles.filterCount}>
+                    {activeFilters}
+                    <span className={ui.srOnly}> active</span>
+                  </span>
                 )}
-                <button type="button" className={`${ui.secondary} ${styles.doneButton}`} onClick={() => setFiltersOpen(false)}>
-                  Done
+              </button>
+              <button className={styles.searchButton} type="submit">
+                Search
+              </button>
+            </form>
+
+            {/* Shortcuts into the same filters as the panel. */}
+            <div className={styles.quickChips} role="group" aria-label="Quick filters">
+              {(["day", "overnight"] as TripType[]).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={trip === value}
+                  onClick={() => setFilter(toggleTrip(filters, value))}
+                >
+                  {TRIP_LABELS[value]}
                 </button>
-                <button type="button" className={`${ui.primary} ${styles.showButton}`} onClick={() => setFiltersOpen(false)}>
-                  {isLoading && !result ? "Show trails" : `Show ${total} ${total === 1 ? "trail" : "trails"}`}
+              ))}
+              {QUICK_PARKS.map(({ park, label }) => (
+                <button
+                  key={park}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={filters.parks.includes(park)}
+                  onClick={() => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                className={styles.chip}
+                aria-pressed={filters.near}
+                onClick={toggleNear}
+                disabled={geo.status === "locating"}
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.chipIcon}>
+                  <circle cx="10" cy="10" r="2.6" fill="currentColor" />
+                  <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                </svg>
+                {geo.status === "locating" ? "Finding you…" : "Near me"}
+              </button>
+            </div>
+            {(geo.status === "denied" || geo.status === "unavailable") && !filtersOpen && (
+              <p className={styles.geoMessage} role="status">
+                {geo.status === "denied"
+                  ? "Location access is blocked. Allow it for Trekly in your browser to search near you."
+                  : "We couldn't find your location. Try again in a moment."}
+              </p>
+            )}
+
+            {filtersOpen && (
+              <>
+                <div className={styles.sheetBackdrop} aria-hidden="true" onClick={() => setFiltersOpen(false)} />
+                <div
+                  id={filtersId}
+                  className={styles.filterPanel}
+                  role="region"
+                  aria-label="Filters"
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") setFiltersOpen(false);
+                  }}
+                >
+                  <div className={styles.sheetHandle} aria-hidden="true" />
+                  <div className={styles.filterBody}>
+                    <FilterGroup
+                      label="Trip type"
+                      options={TRIPS}
+                      labels={TRIP_LABELS}
+                      value={trip}
+                      onChange={(value) => setFilter({ ...filters, trip: value })}
+                    />
+                    <FilterGroup
+                      label="Difficulty"
+                      options={TERRAINS}
+                      labels={TERRAIN_LABELS}
+                      value={terrain}
+                      onChange={(value) => setFilter({ ...filters, terrain: value })}
+                    />
+                    <CountChipGroup
+                      label="Province"
+                      options={provinceOptions}
+                      selected={filters.provinces}
+                      onToggle={(code) =>
+                        setFilter(withProvinces(filters, toggle(filters.provinces, code), parkProvinces))
+                      }
+                    />
+                    <CountChipGroup
+                      label="Park type"
+                      options={parkTypeOptions}
+                      selected={filters.parkTypes}
+                      onToggle={(type) =>
+                        setFilter({ ...filters, parkTypes: toggle(filters.parkTypes, type as ParkTypeFilter) })
+                      }
+                    />
+                    <ParkPicker
+                      parks={facets?.parks ?? []}
+                      selected={filters.parks}
+                      provinces={filters.provinces}
+                      onToggle={(park) => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
+                    />
+                    <NearMe
+                      filters={filters}
+                      status={geo.status}
+                      units={units}
+                      onLocate={locate}
+                      onStop={stopNear}
+                      onWithin={(value) =>
+                        setFilter({
+                          ...filters,
+                          within: value ? { value, unit: units === "imperial" ? "mi" : "km" } : undefined,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className={styles.filterFooter}>
+                    {activeFilters > 0 && (
+                      <button type="button" className={ui.ghost} onClick={clearAll}>
+                        Clear all
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={`${ui.secondary} ${styles.doneButton}`}
+                      onClick={() => setFiltersOpen(false)}
+                    >
+                      Done
+                    </button>
+                    <button type="button" className={`${ui.primary} ${styles.showButton}`} onClick={() => setFiltersOpen(false)}>
+                      {isLoading && !result ? "Show trails" : `Show ${total} ${total === 1 ? "trail" : "trails"}`}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {removable.length > 0 && (
+              <div className={styles.activeRow}>
+                <ul className={styles.activeFilters} aria-label="Active filters">
+                  {removable.map((chip) => (
+                    <li key={chip.key}>
+                      <button
+                        type="button"
+                        className={styles.activeChip}
+                        onClick={() => {
+                          chip.onRemove?.();
+                          setFilter(chip.next);
+                        }}
+                        aria-label={`Remove filter: ${chip.label}`}
+                      >
+                        {chip.label} <span aria-hidden="true">×</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <button type="button" className={styles.clearAll} onClick={clearAll}>
+                  Clear all
                 </button>
               </div>
-            </div>
-          </>
-        )}
+            )}
+          </div>
 
-        {removable.length > 0 && (
-          <div className={styles.activeRow}>
-            <ul className={styles.activeFilters} aria-label="Active filters">
-              {removable.map((chip) => (
-                <li key={chip.key}>
-                  <button
-                    type="button"
-                    className={styles.activeChip}
-                    onClick={() => {
-                      chip.onRemove?.();
-                      setFilter(chip.next);
-                    }}
-                    aria-label={`Remove filter: ${chip.label}`}
-                  >
-                    {chip.label} <span aria-hidden="true">×</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button type="button" className={styles.clearAll} onClick={clearAll}>
-              Clear all
-            </button>
+          <section className={styles.results} aria-live="polite" aria-busy={isLoading}>
+            {failed ? (
+              <div className={styles.status} role="alert">
+                <p>We couldn&apos;t load trails. Check your connection and try again.</p>
+                <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={() => setAttempt((n) => n + 1)}>
+                  Try again
+                </button>
+              </div>
+            ) : !sorted ? (
+              <>
+                <p className={styles.count}>
+                  {waitingForPosition ? "Finding trails near you…" : "Loading trails…"}
+                </p>
+                <ul className={styles.list}>
+                  {Array.from({ length: SKELETON_CARDS }, (_, index) => (
+                    <TrailCardSkeleton key={index} />
+                  ))}
+                </ul>
+              </>
+            ) : sorted.length === 0 ? (
+              <p className={styles.status}>
+                No trails match
+                {q ? <> &ldquo;{q}&rdquo;</> : null}
+                {activeFilters > 0 ? <> with these filters</> : null}
+                {filters.area ? <> in this map area</> : null}. Try a broader search or remove a filter.
+              </p>
+            ) : (
+              <>
+                <div className={styles.resultsHead}>
+                  {/* The API caps the catalogue at RESULT_LIMIT, so this count is exact. */}
+                  <p className={styles.count}>
+                    {total}{" "}
+                    {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
+                    {total === 1 ? "trail" : "trails"}
+                    {q ? <> matching &ldquo;{q}&rdquo;</> : null}
+                  </p>
+                  <label className={styles.sort}>
+                    <span className={styles.sortLabel}>Sort</span>
+                    <select
+                      className={ui.input}
+                      value={sort}
+                      onChange={(event) => setFilter({ ...filters, sort: event.target.value as TrailSort })}
+                    >
+                      {sorts.map((option) => (
+                        <option key={option} value={option}>
+                          {TRAIL_SORT_LABELS[option]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
+                  {sorted.map((trail) => (
+                    <TrailCard
+                      key={trail.id}
+                      ref={(node) => {
+                        if (node) cardRefs.current.set(trail.id, node);
+                        else cardRefs.current.delete(trail.id);
+                      }}
+                      trail={trail}
+                      title={titles.get(trail.id) ?? trail.name}
+                      saved={savedTrails.savedIds.has(trail.id)}
+                      pending={savedTrails.pending.has(trail.id)}
+                      onToggleSave={savedTrails.toggle}
+                      returnTo={returnTo}
+                      units={units}
+                      selected={selectedId === trail.id}
+                      onHover={setHoveredId}
+                    />
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        </div>
+
+        {mapVisible && (
+          <div className={styles.mapPane}>
+            <ExploreMap
+              trails={sorted ?? []}
+              titles={titles}
+              hoveredId={hoveredId}
+              selectedId={selectedId}
+              initialView={initialMapView}
+              fitKey={fitKey}
+              areaActive={Boolean(filters.area)}
+              onSelect={setSelectedId}
+              onOpen={(id) => router.push(`/trails?id=${encodeURIComponent(id)}`)}
+              onViewChange={onMapView}
+              onSearchArea={searchArea}
+            />
           </div>
         )}
       </div>
 
-      <section className={styles.results} aria-live="polite" aria-busy={isLoading}>
-        {failed ? (
-          <div className={styles.status} role="alert">
-            <p>We couldn&apos;t load trails. Check your connection and try again.</p>
-            <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={() => setAttempt((n) => n + 1)}>
-              Try again
-            </button>
-          </div>
-        ) : !sorted ? (
-          <p className={styles.status}>{waitingForPosition ? "Finding trails near you…" : "Loading trails…"}</p>
-        ) : sorted.length === 0 ? (
-          <p className={styles.status}>
-            No trails match
-            {q ? <> &ldquo;{q}&rdquo;</> : null}
-            {activeFilters > 0 ? <> with these filters</> : null}
-            . Try a broader search or remove a filter.
-          </p>
+      {/* Below the split layout: one at a time. */}
+      <button
+        type="button"
+        className={styles.viewToggle}
+        onClick={() => showView(view === "map" ? "list" : "map")}
+      >
+        {view === "map" ? (
+          <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.filterIcon}>
+            <path d="M4 5h12M4 10h12M4 15h12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
         ) : (
-          <>
-            <div className={styles.resultsHead}>
-              {/* The API caps the catalogue at RESULT_LIMIT, so this count is exact. */}
-              <p className={styles.count}>
-                {total}{" "}
-                {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
-                {total === 1 ? "trail" : "trails"}
-                {q ? <> matching &ldquo;{q}&rdquo;</> : null}
-              </p>
-              <label className={styles.sort}>
-                <span className={styles.sortLabel}>Sort</span>
-                <select
-                  className={ui.input}
-                  value={sort}
-                  onChange={(event) => setFilter({ ...filters, sort: event.target.value as TrailSort })}
-                >
-                  {sorts.map((option) => (
-                    <option key={option} value={option}>
-                      {TRAIL_SORT_LABELS[option]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
-              {sorted.map((trail) => (
-                <TrailCard
-                  key={trail.id}
-                  trail={trail}
-                  title={titles.get(trail.id) ?? trail.name}
-                  saved={savedTrails.savedIds.has(trail.id)}
-                  pending={savedTrails.pending.has(trail.id)}
-                  onToggleSave={savedTrails.toggle}
-                  returnTo={returnTo}
-                  units={units}
-                />
-              ))}
-            </ul>
-          </>
+          <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.filterIcon}>
+            <path
+              d="M2.5 5l5-2 5 2 5-2v12l-5 2-5-2-5 2zM7.5 3v12M12.5 5v12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+          </svg>
         )}
-      </section>
+        {showMapLabel}
+      </button>
     </main>
   );
 }

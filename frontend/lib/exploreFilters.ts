@@ -7,6 +7,11 @@
  *
  * `near=1` only says "use my location": the position itself is never in the
  * URL. It is asked for again on load and kept in memory for the requests.
+ *
+ * `area=west,south,east,north` is the map's "Search this area". The map's
+ * own position (`map=lat,lng,zoom`) and the phone's Map/List choice
+ * (`view=map`) are view state, not filters: they ride along unchanged when a
+ * filter changes (keepViewParams).
  */
 
 import { TERRAIN_LABELS, type Terrain } from "./terrain.ts";
@@ -21,6 +26,14 @@ export interface Within {
   unit: DistanceUnit;
 }
 
+/** A map view's edges, in degrees. West > east crosses the antimeridian. */
+export interface Bounds {
+  west: number;
+  south: number;
+  east: number;
+  north: number;
+}
+
 export interface ExploreFilters {
   q: string;
   trip?: TripType;
@@ -31,6 +44,8 @@ export interface ExploreFilters {
   near: boolean;
   /** Only with `near`. */
   within?: Within;
+  /** "Search this area": trailheads inside these bounds. */
+  area?: Bounds;
   sort: TrailSort;
 }
 
@@ -95,6 +110,23 @@ function unique<T>(values: T[]): T[] {
 const pick = <T extends string>(options: readonly T[], value: string | null): T | undefined =>
   value !== null && (options as readonly string[]).includes(value) ? (value as T) : undefined;
 
+/** 4 places is about 10 m: plenty for a map view, and short URLs. */
+const round = (value: number, places: number) => Number(value.toFixed(places));
+
+function parseArea(value: string | null): Bounds | undefined {
+  const parts = value?.split(",").map(Number);
+  if (!parts || parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return undefined;
+  const [west, south, east, north] = parts;
+  const lngOk = (n: number) => n >= -180 && n <= 180;
+  const latOk = (n: number) => n >= -90 && n <= 90;
+  if (!lngOk(west) || !lngOk(east) || !latOk(south) || !latOk(north) || south > north) return undefined;
+  return { west, south, east, north };
+}
+
+export function formatArea(area: Bounds): string {
+  return [area.west, area.south, area.east, area.north].map((n) => round(n, 4)).join(",");
+}
+
 export function parseExploreParams(params: URLSearchParams): ExploreFilters {
   const near = params.get("near") === "1";
   const sort = params.get("sort");
@@ -109,6 +141,7 @@ export function parseExploreParams(params: URLSearchParams): ExploreFilters {
     parks: unique(params.getAll("park").map((p) => p.trim()).filter(Boolean)),
     near,
     within: near ? parseWithin(params.get("within")) : undefined,
+    area: parseArea(params.get("area")),
     // "Nearest" needs a location to sort by.
     sort: isTrailSort(sort) && (sort !== "nearest" || near) ? sort : "popular",
   };
@@ -127,6 +160,7 @@ export function exploreSearch(filters: ExploreFilters): string {
     params.set("near", "1");
     if (filters.within) params.set("within", `${filters.within.value}${filters.within.unit}`);
   }
+  if (filters.area) params.set("area", formatArea(filters.area));
   if (filters.sort !== "popular" && (filters.sort !== "nearest" || filters.near)) params.set("sort", filters.sort);
   return params.toString();
 }
@@ -136,7 +170,8 @@ export function exploreHref(filters: Partial<ExploreFilters>): string {
   return search ? `/trail-list?${search}` : "/trail-list";
 }
 
-/** Filters counted on the Filters button: everything except search and sort. */
+/** Filters counted on the Filters button: everything in the panel (not the
+ * search box, the sort, or the map area, which has its own chip). */
 export function activeFilterCount(filters: ExploreFilters): number {
   return (
     (filters.trip ? 1 : 0) +
@@ -179,4 +214,62 @@ export function withProvinces(
       })
     : filters.parks;
   return { ...filters, provinces, parks };
+}
+
+/** Where the map is looking. */
+export interface MapView {
+  lat: number;
+  lng: number;
+  zoom: number;
+}
+
+export function parseMapView(params: URLSearchParams): MapView | null {
+  const parts = params.get("map")?.split(",").map(Number);
+  if (!parts || parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return null;
+  const [lat, lng, zoom] = parts;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180 || zoom < 0 || zoom > 22) return null;
+  return { lat, lng, zoom };
+}
+
+export function formatMapView(view: MapView): string {
+  return `${round(view.lat, 4)},${round(view.lng, 4)},${round(view.zoom, 2)}`;
+}
+
+/** Below the split layout, Explore shows the list or the map; "list" by default. */
+export type ExploreView = "list" | "map";
+
+export function parseExploreView(params: URLSearchParams): ExploreView {
+  return params.get("view") === "map" ? "map" : "list";
+}
+
+const VIEW_PARAMS = ["map", "view"];
+
+/** `search` (filters only) with the map position and Map/List choice from `current` kept. */
+export function keepViewParams(search: string, current: URLSearchParams): string {
+  const params = new URLSearchParams(search);
+  for (const key of VIEW_PARAMS) {
+    const value = current.get(key);
+    if (value !== null) params.set(key, value);
+  }
+  return params.toString();
+}
+
+/** `current` with one view param set, or removed with null. */
+export function withViewParam(current: URLSearchParams, key: "map" | "view", value: string | null): string {
+  const params = new URLSearchParams(current);
+  if (value === null) params.delete(key);
+  else params.set(key, value);
+  return params.toString();
+}
+
+/** The parks among the quick chips under the search bar, with their chip labels. */
+export const QUICK_PARKS: { park: string; label: string }[] = [
+  { park: "Banff National Park", label: "Banff" },
+  { park: "Jasper National Park", label: "Jasper" },
+  { park: "Kananaskis Country", label: "Kananaskis" },
+];
+
+/** Day hikes and Backpacking chips: picking one replaces the other, picking it again clears it. */
+export function toggleTrip(filters: ExploreFilters, trip: TripType): ExploreFilters {
+  return { ...filters, trip: filters.trip === trip ? undefined : trip };
 }
