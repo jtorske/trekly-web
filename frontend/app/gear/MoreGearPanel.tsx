@@ -7,7 +7,8 @@ import type { GearItem } from "@/lib/gearApi";
 import { matImage } from "@/lib/gearImage";
 import { formatWeight, type UnitSystem } from "@/lib/units";
 import { carryOf } from "./baseWeight";
-import { MORE_GEAR, ZONES, slotForItem } from "./slots";
+import { GearIcon } from "./icons";
+import { MORE_GEAR, ZONES, slotByKey, slotForItem, type Slot } from "./slots";
 import type { useGearDrag } from "./useGearDrag";
 import styles from "./MoreGearPanel.module.css";
 
@@ -18,6 +19,39 @@ export interface ItemActions {
 }
 
 const CARRY_TAGS = { worn: "Worn", consumable: "Consumable" } as const;
+
+/** Quick-add chips for common extras, in this order. */
+export const QUICK_ADD: { slot: string; label: string }[] = [
+  { slot: "headlamp", label: "Headlamp" },
+  { slot: "water-filter", label: "Water filter" },
+  { slot: "pillow", label: "Pillow" },
+  { slot: "trekking-poles", label: "Trekking poles" },
+  { slot: "first-aid", label: "First-aid kit" },
+  { slot: "bear-safety", label: "Bear spray" },
+];
+
+/** The chips stay under a short list too, and go once it has more than this many items. */
+export const QUICK_ADD_UNTIL = 3;
+
+function QuickAddChips({ slots, onAdd }: { slots: string[]; onAdd: (slot: Slot) => void }) {
+  const chips = QUICK_ADD.filter((chip) => slots.includes(chip.slot));
+  if (chips.length === 0) return null;
+  return (
+    <ul className={styles.chips} aria-label="Quick add">
+      {chips.map((chip) => {
+        const slot = slotByKey(chip.slot)!;
+        return (
+          <li key={chip.slot}>
+            <button type="button" className={styles.chip} onClick={() => onAdd(slot)} aria-label={`Add a ${chip.label.toLowerCase()}`}>
+              <GearIcon icon={slot.icon} className={styles.chipIcon} />
+              {chip.label}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /** "⋯" disclosure with Edit, Move to… and Remove. Escape or a click outside closes it. */
 function ItemMenu({ item, actions }: { item: GearItem; actions: ItemActions }) {
@@ -96,6 +130,7 @@ export default function MoreGearPanel({
   drag,
   snapId,
   emptyMessage,
+  quickAdd,
   actions,
 }: {
   items: GearItem[];
@@ -104,6 +139,8 @@ export default function MoreGearPanel({
   drag: ReturnType<typeof useGearDrag>;
   snapId: string | null;
   emptyMessage: string;
+  /** All-gear view only: chips for common extras the owner doesn't have yet. */
+  quickAdd?: { slots: string[]; onAdd: (slot: Slot) => void } | null;
   actions: ItemActions;
 }) {
   const groups = ZONES.map((zone) => ({
@@ -119,7 +156,15 @@ export default function MoreGearPanel({
       data-over={isTarget && drag.drag?.over === MORE_GEAR ? true : undefined}
       data-receiving={isTarget ? true : undefined}
     >
-      {groups.length === 0 ? (
+      {groups.length === 0 && quickAdd ? (
+        <div className={styles.invite}>
+          <span className={styles.inviteIcon} aria-hidden="true">
+            <GearIcon icon="dryBag" />
+          </span>
+          <p className={styles.inviteText}>Add the extras you carry</p>
+          <QuickAddChips slots={quickAdd.slots} onAdd={quickAdd.onAdd} />
+        </div>
+      ) : groups.length === 0 ? (
         <p className={styles.empty}>{emptyMessage}</p>
       ) : (
         groups.map(({ zone, items: zoneItems }) => (
@@ -164,6 +209,12 @@ export default function MoreGearPanel({
             </ul>
           </section>
         ))
+      )}
+      {groups.length > 0 && quickAdd && items.length <= QUICK_ADD_UNTIL && (
+        <div className={styles.quickAdd}>
+          <p className={styles.groupTitle}>Quick add</p>
+          <QuickAddChips slots={quickAdd.slots} onAdd={quickAdd.onAdd} />
+        </div>
       )}
     </div>
   );

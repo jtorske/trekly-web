@@ -111,6 +111,7 @@ export default function WeightSummary({
   scopeLabel: string | null;
 }) {
   const summary = packSummary(items);
+  const { bigThree } = summary;
   const extras = [
     summary.wornGrams > 0 && `${formatWeight(summary.wornGrams, units)} worn`,
     summary.consumableGrams > 0 && `${formatWeight(summary.consumableGrams, units)} consumable`,
@@ -147,24 +148,41 @@ export default function WeightSummary({
         <PiecesRing filled={coreFilled} total={coreTotal} />
       </div>
 
-      {summary.packClass && (
+      {summary.packClass ? (
         <p className={styles.classRow}>
           <span className={styles.classBadge} data-class={summary.packClass.key} title={classHint ?? undefined}>
             {summary.packClass.label}
           </span>
           <span className={styles.classHint}>{classHint}</span>
         </p>
+      ) : (
+        items.length > 0 &&
+        bigThree.missing && (
+          <p className={styles.classRow}>
+            <span className={styles.classBadge} data-class="incomplete">
+              Incomplete setup
+            </span>
+            <span className={styles.classHint}>Add a {bigThree.missing} to see your class</span>
+          </p>
+        )
       )}
 
-      {summary.zones.length > 0 && (
-        <>
-          <ZoneBar zones={summary.zones} base={summary.baseGrams} units={units} />
-          <p className={styles.bigThree}>
-            Big Three: <strong>{formatWeight(summary.bigThreeGrams, units)}</strong>
-            {summary.missingBase === 0 && <> · {percent(summary.bigThreeGrams, summary.baseGrams)} of base weight</>}
-            {summary.missingBase > 0 && " · known weights only"}
-          </p>
-        </>
+      {summary.zones.length > 0 && <ZoneBar zones={summary.zones} base={summary.baseGrams} units={units} />}
+      {items.length > 0 && (
+        <p className={styles.bigThree}>
+          {bigThree.missing ? (
+            // A share of base weight means little until all three are there.
+            <>
+              Big Three: <strong>{bigThree.have} of {bigThree.total}</strong> · add a {bigThree.missing}
+            </>
+          ) : (
+            <>
+              Big Three: <strong>{formatWeight(summary.bigThreeGrams, units)}</strong>
+              {summary.missingBase === 0 && <> · {percent(summary.bigThreeGrams, summary.baseGrams)} of base weight</>}
+              {summary.missingBase > 0 && " · known weights only"}
+            </>
+          )}
+        </p>
       )}
     </section>
   );

@@ -24,5 +24,23 @@ export const PACK_CLASSES: PackClass[] = [
 /** Zones (top-level categories) that make up the "Big Three". */
 export const BIG_THREE_ZONES = ["backpack", "shelter", "sleep"] as const;
 
+/**
+ * What a complete Big Three needs, by mat slot. The class badge waits until
+ * all three are there: a base weight without a shelter or sleep system
+ * would read as lighter than any real kit.
+ */
+export const BIG_THREE_PIECES: { key: string; label: string; slots: { key: string; name: string }[] }[] = [
+  { key: "pack", label: "Pack", slots: [{ key: "backpack", name: "pack" }] },
+  { key: "shelter", label: "Shelter", slots: [{ key: "tent", name: "shelter" }] },
+  {
+    key: "sleep",
+    label: "Sleep system",
+    slots: [
+      { key: "sleeping-bag", name: "sleeping bag" },
+      { key: "sleeping-pad", name: "sleeping pad" },
+    ],
+  },
+];
+
 /** Slots whose items count as worn unless the owner says otherwise. */
 export const WORN_BY_DEFAULT_SLOTS = ["footwear"];

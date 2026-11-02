@@ -27,7 +27,7 @@ import { useUnits } from "@/lib/useUnits";
 import FlatLay from "./FlatLay";
 import GearList from "./GearList";
 import ItemDetails from "./ItemDetails";
-import MoreGearPanel, { type ItemActions } from "./MoreGearPanel";
+import MoreGearPanel, { QUICK_ADD, QUICK_ADD_UNTIL, type ItemActions } from "./MoreGearPanel";
 import ProductPicker, { PENDING_KEY, type PendingAdd } from "./ProductPicker";
 import SetupDialog from "./SetupDialog";
 import { AddItemDialog, MoveDialog } from "./SlotChooser";
@@ -147,6 +147,10 @@ function GearContent() {
   const moreItems = byPlacement.get(MORE_GEAR) ?? [];
   const scopePlacement = groupItemsByPlacement(scopeItems);
   const coreFilled = CORE_SLOTS.filter((slot) => (scopePlacement.get(slot.key) ?? []).length > 0).length;
+
+  // Quick-add chips: kinds of extras the owner has none of yet, anywhere.
+  const ownedSlots = new Set(allItems.map((item) => slotForItem(item).key));
+  const quickAddSlots = QUICK_ADD.map((chip) => chip.slot).filter((slot) => !ownedSlots.has(slot));
 
   const isSignedIn = authStatus === "signedIn";
   const canEdit = isSignedIn && gear.status === "ready";
@@ -417,6 +421,9 @@ function GearContent() {
                   drag={drag}
                   snapId={snapId}
                   actions={actions}
+                  quickAdd={
+                    showEmptySlots && moreItems.length <= QUICK_ADD_UNTIL ? { slots: quickAddSlots, onAdd: openAdd } : null
+                  }
                   emptyMessage={
                     needle
                       ? "Nothing else matches."

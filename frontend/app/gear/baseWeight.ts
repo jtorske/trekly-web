@@ -4,7 +4,7 @@
  */
 
 import type { Carry, GearItem } from "@/lib/gearApi";
-import { BIG_THREE_ZONES, PACK_CLASSES, WORN_BY_DEFAULT_SLOTS, type PackClass } from "./weightConfig.ts";
+import { BIG_THREE_PIECES, BIG_THREE_ZONES, PACK_CLASSES, WORN_BY_DEFAULT_SLOTS, type PackClass } from "./weightConfig.ts";
 import { ZONES, slotForItem } from "./slots.ts";
 
 /** The owner's choice, else the slot's default (boots are worn, the rest packed). */
@@ -18,6 +18,34 @@ export function isBigThree(zoneSlug: string): boolean {
 
 export function packClassFor(baseGrams: number): PackClass {
   return PACK_CLASSES.find((band) => band.underGrams == null || baseGrams < band.underGrams)!;
+}
+
+export interface BigThreeStatus {
+  /** Complete pieces, 0 to 3 (a sleep system needs both a bag and a pad). */
+  have: number;
+  total: number;
+  /** What's missing, for a sentence: "sleeping bag and pad", "shelter". */
+  missing: string | null;
+}
+
+/** "a, b and c" */
+function listOf(names: string[]): string {
+  return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+}
+
+/** Which Big Three pieces the items include, by category (not mat placement). */
+export function bigThreeStatus(items: GearItem[]): BigThreeStatus {
+  const owned = new Set(items.map((item) => slotForItem(item).key));
+  const names: string[] = [];
+  let have = 0;
+  for (const piece of BIG_THREE_PIECES) {
+    const absent = piece.slots.filter((slot) => !owned.has(slot.key));
+    if (absent.length === 0) have += 1;
+    // Bag and pad both missing read as "sleeping bag and pad".
+    else if (absent.length === 2 && piece.key === "sleep") names.push("sleeping bag", "pad");
+    else names.push(...absent.map((slot) => slot.name));
+  }
+  return { have, total: BIG_THREE_PIECES.length, missing: names.length ? listOf(names) : null };
 }
 
 export interface ZoneWeight {
@@ -37,7 +65,8 @@ export interface PackSummary {
   /** Packed weight by zone, in ZONES order, zones with weight only. */
   zones: ZoneWeight[];
   bigThreeGrams: number;
-  /** Null while some packed items have no weight. */
+  bigThree: BigThreeStatus;
+  /** Null until the Big Three are complete, and while packed items lack a weight. */
   packClass: PackClass | null;
 }
 
@@ -59,6 +88,7 @@ export function packSummary(items: GearItem[]): PackSummary {
       byZone.set(zone, (byZone.get(zone) ?? 0) + grams);
     }
   }
+  const bigThree = bigThreeStatus(items);
   const zones = ZONES.filter((zone) => (byZone.get(zone.slug) ?? 0) > 0).map((zone) => ({
     slug: zone.slug,
     label: zone.label,
@@ -72,6 +102,7 @@ export function packSummary(items: GearItem[]): PackSummary {
     missingBase,
     zones,
     bigThreeGrams: zones.filter((zone) => zone.bigThree).reduce((sum, zone) => sum + zone.grams, 0),
-    packClass: missingBase > 0 || items.length === 0 ? null : packClassFor(baseGrams),
+    bigThree,
+    packClass: missingBase > 0 || bigThree.have < bigThree.total ? null : packClassFor(baseGrams),
   };
 }

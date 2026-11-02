@@ -28,6 +28,80 @@
   text-align: center;
 }
 
+/* Empty More gear: an invitation with quick-add chips, not a dead end. */
+.invite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 0.5rem 1rem;
+  text-align: center;
+}
+
+.inviteIcon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-tan) 25%, var(--paper));
+  color: var(--ink);
+}
+
+.inviteIcon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.inviteText {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.chip {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  padding: 0.25rem 0.75rem 0.25rem 0.5rem;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.chip:hover {
+  border-color: var(--color-rust);
+  background: white;
+}
+
+.chipIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.quickAdd {
+  border-top: 1px solid var(--hair);
+  padding-top: 0.6rem;
+}
+
+.quickAdd .chips {
+  justify-content: flex-start;
+}
+
 .groupTitle {
   margin: 0 0 0.25rem 0.35rem;
   color: color-mix(in srgb, var(--ink) 70%, transparent);
@@ -186,6 +260,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .chip,
   .panel {
     transition: none;
   }
