@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import RequireAuth from "@/components/RequireAuth";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
@@ -16,7 +15,8 @@ import {
   type PhotoCandidate,
   type ReviewTrail,
 } from "@/lib/trailPhotosAdminApi";
-import profile from "@/app/profile/page.module.css";
+import AdminFrame from "../AdminFrame";
+import admin from "../admin.module.css";
 import styles from "./page.module.css";
 
 const TOPO = "topo";
@@ -245,9 +245,7 @@ function PhotoReview() {
     );
 
   return (
-    <main className={profile.page}>
-      <div className={profile.wrap}>
-        <h1 className={profile.name}>Trail photos</h1>
+    <>
         {state.status === "loading" && <p className={ui.hint}>Loading…</p>}
         {state.status === "forbidden" && <p className={ui.notice}>This page is only for photo admins.</p>}
         {state.status === "error" && (
@@ -264,7 +262,7 @@ function PhotoReview() {
         )}
         {state.status === "ready" && (
           <>
-            <p className={profile.bio}>
+            <p className={admin.muted}>
               Pick the best photo for each trail, or reject them all to keep the topo background. Trails whose best
               candidate is only a regional shot or a keyword match start on &ldquo;No photo&rdquo;.
             </p>
@@ -284,17 +282,14 @@ function PhotoReview() {
             {pager}
           </>
         )}
-      </div>
-    </main>
+    </>
   );
 }
 
 export default function PhotoReviewPage() {
   return (
-    <Suspense fallback={<main className={profile.page} />}>
-      <RequireAuth fallback={<main className={profile.page} aria-busy="true" />}>
-        <PhotoReview />
-      </RequireAuth>
-    </Suspense>
+    <AdminFrame title="Trail photos">
+      <PhotoReview />
+    </AdminFrame>
   );
 }

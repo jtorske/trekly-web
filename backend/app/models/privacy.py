@@ -11,7 +11,7 @@ A missing row is treated as private.
 
 import uuid
 
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Text, Uuid, false, true
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Text, Uuid, false, true
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -27,6 +27,7 @@ SECTION_COLUMNS = {
 }
 
 MAX_REPORT_DETAILS = 1000
+REPORT_STATUSES = ("open", "resolved")
 
 
 class ProfileSettings(Base):
@@ -67,7 +68,9 @@ class ProfileModeration(Base):
 
 
 class ProfileReport(Base):
-    """A "Report profile" submission, kept so reports can be rate-limited."""
+    """A "Report profile" submission: rate-limits reporters, and is the admin
+    area's report queue (open until an admin resolves it). A report with a
+    trail_id is about that user's trip note on the trail."""
 
     __tablename__ = "profile_reports"
     __table_args__ = (
@@ -76,6 +79,7 @@ class ProfileReport(Base):
             f"details is null or length(details) <= {MAX_REPORT_DETAILS}",
             name="profile_reports_details_length_check",
         ),
+        CheckConstraint("status in ('open', 'resolved')", name="profile_reports_status_check"),
     )
 
     id = Column(Uuid, primary_key=True, default=uuid.uuid4)
@@ -84,3 +88,7 @@ class ProfileReport(Base):
     reason = Column(Text, nullable=False)
     details = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="SET NULL"))
+    status = Column(Text, nullable=False, default="open", server_default="open")
+    resolved_at = Column(DateTime(timezone=True))
+    resolved_by = Column(Uuid)

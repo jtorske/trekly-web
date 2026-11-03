@@ -1,9 +1,10 @@
 """Profile moderation: admins hide (and unhide) public profiles.
 
-Admins are the user ids in ADMIN_USER_IDS or PHOTO_ADMIN_USER_IDS
-(app/config.py), checked here on every request, never only in the UI. A
-hidden profile is a 404 for everyone else, through the API and through
-row-level security (private.section_visible).
+Admins are checked by app/admin_access.py on every request, never only in
+the UI. A hidden profile is a 404 for everyone else, through the API and
+through row-level security (private.section_visible). Hiding and unhiding
+are written to the admin audit log, like the admin area's own actions
+(app/routers/admin.py), which also offers them per user.
 """
 
 from datetime import datetime
@@ -14,19 +15,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import CurrentUser, get_current_user
-from app.config import admin_user_ids
+from app.admin_access import audit, require_admin
+from app.auth import CurrentUser
 from app.database import get_db
 from app.models.account import Profile
 from app.models.privacy import ProfileModeration
 
-router = APIRouter(prefix="/api/admin/profiles", tags=["admin"])
-
-
-def require_admin(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
-    if str(user.id).lower() not in admin_user_ids():
-        raise HTTPException(status_code=403, detail="Only Trekly admins can do that.")
-    return user
+router = APIRouter(prefix="/api/admin/profiles", tags=["admin"], dependencies=[Depends(require_admin)])
 
 
 class HiddenProfileOut(BaseModel):
@@ -80,15 +75,17 @@ def hide_profile(
         row = ProfileModeration(user_id=profile.id, hidden_by=admin.id, hidden_at=datetime.now().astimezone())
         db.add(row)
     row.reason = (payload.reason or "").strip() or None
+    audit(db, admin, "hide_profile", user_id=profile.id, reason=row.reason, username=profile.username)
     db.commit()
     return _out(db, row)
 
 
 @router.delete("/{username}/hidden", status_code=status.HTTP_204_NO_CONTENT)
-def unhide_profile(username: str, _: CurrentUser = Depends(require_admin), db: Session = Depends(get_db)):
+def unhide_profile(username: str, admin: CurrentUser = Depends(require_admin), db: Session = Depends(get_db)):
     profile = _by_username(db, username)
     row = db.get(ProfileModeration, profile.id)
     if row is not None:
         db.delete(row)
+        audit(db, admin, "unhide_profile", user_id=profile.id, username=profile.username)
         db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -327,7 +327,7 @@ def report_email(
             # The reporter's account, not their email address (see the Privacy Policy).
             f"Reported by: @{reporter_name}, user id {reporter.id}",
             "",
-            "To hide the profile, use /admin/profiles on the site.",
+            f"Review it in the admin area: {app_url}/admin/reports",
         ]
     )
     kind = "Trip note report" if trip_note else "Profile report"
@@ -370,7 +370,8 @@ def report_profile(
         raise HTTPException(status_code=429, detail="You've sent several reports today. Try again tomorrow.")
 
     db.add(ProfileReport(reporter_id=user.id, profile_id=profile.id, reason=payload.reason,
-                         details=payload.details, created_at=_now()))
+                         details=payload.details, created_at=_now(),
+                         trail_id=trip_note.trail_id if trip_note else None))
     db.flush()
     try:
         sender.send(report_email(profile, user, db.get(Profile, user.id), payload, trip_note))

@@ -27,6 +27,7 @@ from app.auth import TokenVerifier, get_verifier_dependency  # noqa: E402
 from app.catalog.pipeline import run_import  # noqa: E402
 from app.catalog.providers.base import SourceInfo  # noqa: E402
 from app.database import Base, get_db  # noqa: E402
+from app.models.admin import auth_metadata  # noqa: E402
 from app.main import app  # noqa: E402
 
 SUPABASE_URL = "https://test-project.supabase.co"
@@ -38,7 +39,8 @@ GEAR_TABLES = [
                 "backcountry_parks", "backcountry_sites", "trail_campgrounds", "trail_booking_systems",
                 "availability_alerts", "availability_cache", "provider_request_budget", "job_locks",
                 "trip_plans", "trip_plan_nights", "hike_logs", "featured_badges", "trail_photos", "trail_photo_reviews",
-                "trail_photo_candidates", "profile_settings", "profile_moderation", "profile_reports")
+                "trail_photo_candidates", "profile_settings", "profile_moderation", "profile_reports",
+                "admin_audit_log")
 ]
 
 
@@ -53,12 +55,15 @@ def engine():
     def _connect(dbapi_connection, _record):
         dbapi_connection.isolation_level = None
         dbapi_connection.execute("PRAGMA foreign_keys=ON")
+        # Supabase's auth schema, so auth.users (app/models/admin.py) exists.
+        dbapi_connection.execute("ATTACH DATABASE ':memory:' AS auth")
 
     @event.listens_for(engine, "begin")
     def _begin(connection):
         connection.exec_driver_sql("BEGIN")
 
     Base.metadata.create_all(engine, tables=GEAR_TABLES)
+    auth_metadata.create_all(engine)
     yield engine
     engine.dispose()
 

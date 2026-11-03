@@ -18,19 +18,14 @@ TRAIL_CATALOG_COUNTRIES = _csv(os.getenv("TRAIL_CATALOG_COUNTRIES", "CA"))
 TRAIL_CATALOG_LIMIT = int(os.getenv("TRAIL_CATALOG_LIMIT", "100"))
 
 
-def photo_admin_user_ids() -> frozenset[str]:
-    """Supabase user ids allowed to review, approve and upload trail photos
-    (PHOTO_ADMIN_USER_IDS, comma-separated). Read on every call so a change
-    to the environment never needs a code path to be re-imported; empty
-    means nobody."""
-    return frozenset(
-        part.strip().lower() for part in os.getenv("PHOTO_ADMIN_USER_IDS", "").split(",") if part.strip()
-    )
+def _ids(name: str) -> frozenset[str]:
+    return frozenset(part.strip().lower() for part in os.getenv(name, "").split(",") if part.strip())
 
 
 def admin_user_ids() -> frozenset[str]:
-    """Supabase user ids allowed to moderate profiles (ADMIN_USER_IDS,
-    comma-separated). PHOTO_ADMIN_USER_IDS counts too, so the photo admins
-    don't need a second setting. Read on every call; empty means nobody."""
-    ids = os.getenv("ADMIN_USER_IDS", "").split(",")
-    return frozenset(part.strip().lower() for part in ids if part.strip()) | photo_admin_user_ids()
+    """Supabase user ids allowed into the admin area, every /api/admin route
+    including trail photos (ADMIN_USER_IDS, comma-separated).
+    PHOTO_ADMIN_USER_IDS, the photo review's original setting, still counts.
+    Read on every call, so a change to the environment never needs a
+    re-import; empty means nobody. Checked by app/admin_access.py."""
+    return _ids("ADMIN_USER_IDS") | _ids("PHOTO_ADMIN_USER_IDS")

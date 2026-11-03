@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.admin import AdminAuditLog
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
 from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.catalog import (
@@ -25,6 +26,7 @@ from app.models.trip_plan import TripPlan, TripPlanNight
 from app.models.user_gear import UserGearItem
 
 __all__ = [
+    "AdminAuditLog",
     "AvailabilityAlert",
     "AvailabilityCache",
     "BackcountryPark",

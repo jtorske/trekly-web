@@ -1,10 +1,11 @@
 """Trail photo review: pick a candidate, reject them all, or upload your own.
 
-Every route requires a signed-in user listed in PHOTO_ADMIN_USER_IDS; the
-check runs here on the backend for every request (the frontend only hides
-the page). Candidates come from the trail_photo_candidates table (loaded by
-scripts/load_photo_candidates.py) and are looked up by id on the server, so a
-client can't supply its own image URL, photographer or license.
+Every route requires a signed-in admin (app/admin_access.py: ADMIN_USER_IDS,
+or the older PHOTO_ADMIN_USER_IDS). The check runs here on the backend for
+every request; the frontend only hides the page. Candidates come from the
+trail_photo_candidates table (loaded by scripts/load_photo_candidates.py) and
+are looked up by id on the server, so a client can't supply its own image
+URL, photographer or license.
 
 Publishing resizes to WebP (app/trail_photos.py), uploads under new names,
 then swaps the trail's photo row; the old files are deleted only after the
@@ -19,8 +20,9 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from app.auth import CurrentUser, get_current_user
-from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT, photo_admin_user_ids
+from app.auth import CurrentUser
+from app.admin_access import require_admin
+from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.database import get_db
 from app.models.account import Profile
 from app.models.trail import Trail
@@ -48,10 +50,8 @@ UPLOAD_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 # ---------------------------------------------------------------- dependencies
 
-def require_photo_admin(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
-    if str(user.id).lower() not in photo_admin_user_ids():
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account can't manage trail photos.")
-    return user
+# The admin area's single check; kept under this name for the routes below.
+require_photo_admin = require_admin
 
 
 def get_photo_storage(_admin: CurrentUser = Depends(require_photo_admin)) -> PhotoStorage:

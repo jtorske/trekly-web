@@ -94,14 +94,6 @@ export const REPORT_REASONS = [
 
 export type ReportReason = (typeof REPORT_REASONS)[number]["value"];
 
-export interface HiddenProfile {
-  user_id: string;
-  username: string | null;
-  display_name: string | null;
-  hidden_at: string;
-  reason: string | null;
-}
-
 export const getPrivacy = (signal?: AbortSignal) =>
   apiFetch<PrivacySettings>("/api/me/privacy", { auth: true, signal });
 
@@ -130,19 +122,6 @@ export const reportProfile = (username: string, reason: ReportReason, details: s
     body: { reason, details: details.trim() || null, ...(trailId ? { trail_id: trailId } : {}) },
     auth: true,
   });
-
-export const listHiddenProfiles = (signal?: AbortSignal) =>
-  apiFetch<HiddenProfile[]>("/api/admin/profiles/hidden", { auth: true, signal });
-
-export const hideProfile = (username: string, reason: string) =>
-  apiFetch<HiddenProfile>(`/api/admin/profiles/${encodeURIComponent(username)}/hidden`, {
-    method: "PUT",
-    body: { reason: reason.trim() || null },
-    auth: true,
-  });
-
-export const unhideProfile = (username: string) =>
-  apiFetch<void>(`/api/admin/profiles/${encodeURIComponent(username)}/hidden`, { method: "DELETE", auth: true });
 
 /** The fields GearList and GearThumb need, filled in for a visitor's read-only view. */
 export function asGearItem(item: PublicGearItem): GearItem {

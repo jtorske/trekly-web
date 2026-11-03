@@ -1,0 +1,549 @@
+/*
+ * The admin area: a page header with tabs, then cards, tables and lists.
+ * Same paper/ink tokens as the profile shell and settings, so it reads as
+ * Trekly; denser, because it's a working tool. The page never scrolls
+ * sideways: wide tables scroll inside their own card.
+ */
+.page {
+  --ink: var(--color-dark-olive);
+  --paper: var(--color-cream);
+  --hair: color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  --hair-strong: color-mix(in srgb, var(--color-dark-olive) 26%, transparent);
+  --surface: color-mix(in srgb, white 72%, var(--paper));
+  --muted: var(--color-muted-text);
+  --pill: color-mix(in srgb, var(--color-olive) 15%, transparent);
+  --shadow: 0 1px 2px rgba(40, 54, 24, 0.06), 0 8px 24px -12px rgba(40, 54, 24, 0.18);
+
+  flex: 1 1 auto;
+  min-height: 100%;
+  padding-bottom: 4rem;
+  color: var(--ink);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.wrap {
+  display: flex;
+  max-width: 76rem;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0 auto;
+  padding: 6.5rem 1.5rem 0;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 5.5rem 1rem 0;
+  }
+}
+
+/* Header and tabs */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 1.4rem + 1.4vw, 2.3rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 0.6rem;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.tab:hover {
+  background: var(--pill);
+  color: var(--ink);
+}
+
+.tab[aria-current="page"] {
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.count {
+  border-radius: 999px;
+  background: var(--color-rust-fill);
+  padding: 0 0.45rem;
+  color: white;
+  font-size: 0.72rem;
+  line-height: 1.4rem;
+}
+
+/* Cards */
+
+.gateSkeleton {
+  height: 12rem;
+  border-radius: 1rem;
+}
+
+
+.card {
+  min-width: 0;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.25rem;
+}
+
+.cardTitle {
+  margin-bottom: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cardHead .cardTitle {
+  margin-bottom: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.spaced {
+  margin-top: 0.85rem;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Overview tiles */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.85rem;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border: 1px solid var(--hair);
+  border-radius: 0.9rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1rem;
+}
+
+a.tile:hover {
+  border-color: var(--hair-strong);
+}
+
+.tileLabel {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.tileValue {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.tileNote {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* Sign-ups chart: one series, columns anchored to the baseline. */
+
+.chart {
+  position: relative;
+  display: grid;
+  height: 9.5rem;
+  grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
+  align-items: end;
+  gap: 2px;
+  border-bottom: 1px solid var(--hair-strong);
+}
+
+.bar {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: default;
+}
+
+.barFill {
+  width: min(100%, 1.75rem);
+  min-height: 1px;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-olive);
+}
+
+.bar:hover .barFill,
+.bar:focus-visible .barFill {
+  background: color-mix(in srgb, var(--color-olive) 78%, white);
+}
+
+.barTip {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(var(--h) + 0.4rem);
+  left: 50%;
+  display: none;
+  transform: translateX(-50%);
+  border: 1px solid var(--hair-strong);
+  border-radius: 0.5rem;
+  background: white;
+  box-shadow: var(--shadow);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.barTip strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.bar:hover .barTip,
+.bar:focus-visible .barTip {
+  display: block;
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.details {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.details summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* Tables */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+/* A segmented filter that doesn't fit scrolls within the card, never the page. */
+.filters {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.filters button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.search {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.tableScroll {
+  overflow-x: auto;
+  margin: 0 -1.25rem;
+  padding: 0 1.25rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--hair);
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table td.num,
+.table th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-olive) 6%, transparent);
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.sortButton:hover {
+  color: var(--ink);
+}
+
+.sortArrow {
+  font-size: 0.7rem;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 12rem;
+}
+
+.personName {
+  display: block;
+  font-weight: 600;
+}
+
+.personName:hover {
+  text-decoration: underline;
+}
+
+.personSub {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pill {
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--pill);
+  padding: 0.05rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pillWarn {
+  composes: pill;
+  background: color-mix(in srgb, var(--color-rust) 18%, transparent);
+  color: var(--color-rust-text);
+}
+
+.pillDark {
+  composes: pill;
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+}
+
+.pagerButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.empty {
+  padding: 1.5rem 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* User detail */
+
+.back {
+  align-self: flex-start;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.identityName {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.fact dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.fact dd {
+  margin-top: 0.15rem;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border-bottom: 1px solid var(--hair);
+  padding: 0.65rem 0;
+}
+
+.listItem:last-child {
+  border-bottom: 0;
+}
+
+.listRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.quote {
+  border-left: 3px solid var(--hair-strong);
+  padding-left: 0.65rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.link {
+  color: var(--color-rust-text);
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.reportActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
+
+/* Confirmation dialog */
+
+.confirmBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}

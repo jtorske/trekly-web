@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
+    admin,
     admin_profiles,
     admin_trail_photos,
     availability,
@@ -75,6 +76,7 @@ app.include_router(me_rank.router)
 app.include_router(admin_trail_photos.router)
 app.include_router(me_privacy.router)
 app.include_router(public_profiles.router)
+app.include_router(admin.router)
 app.include_router(admin_profiles.router)
 app.include_router(usernames.router)
 
