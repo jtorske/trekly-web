@@ -46,6 +46,8 @@ class Hike:
     hiked_on: date | None = None
     note: bool = False
     photo: bool = False
+    # When it was logged, for dating a milestone when there's no hike date.
+    logged_on: date | None = None
 
     @property
     def nights(self) -> int:
@@ -71,6 +73,10 @@ class Facts:
     base_weights_kg: list[float] = field(default_factory=list)
     # The active catalogue: "every trail", parks' trails and popularity.
     catalogue: list[Trail] = field(default_factory=list)
+    # When each setup (and each base weight) last changed, parallel to
+    # setups and base_weights_kg; app/milestone_dates.py uses them.
+    setup_dates: list[date] = field(default_factory=list)
+    base_weight_dates: list[date] = field(default_factory=list)
 
     @property
     def trails(self) -> list[Trail]:
@@ -411,6 +417,8 @@ class MilestoneOut(BaseModel):
     earned: bool
     # Can't be earned until the catalogue has more distance, elevation or route data.
     needs_data: bool = False
+    # The first day it was earned (app/milestone_dates.py); None when unearned.
+    earned_on: date | None = None
     progress: ProgressOut | None = None
 
 
@@ -430,7 +438,9 @@ GOAL_UNITS = {
 }
 
 
-def milestone_out(milestone: Milestone, result: Result, needs_data: bool = False) -> MilestoneOut:
+def milestone_out(
+    milestone: Milestone, result: Result, needs_data: bool = False, earned_on: date | None = None
+) -> MilestoneOut:
     if milestone.secret and not result.earned:
         return MilestoneOut(
             id=None, category=milestone.category, title="???", detail=milestone.hint or "", tier=None,
@@ -444,7 +454,8 @@ def milestone_out(milestone: Milestone, result: Result, needs_data: bool = False
         id=milestone.id, category=milestone.category, title=milestone.title, detail=milestone.detail,
         goal=goal_of(milestone), unit=GOAL_UNITS.get(milestone.rule), note=milestone.note, tier=milestone.tier,
         icon=milestone.icon, secret=milestone.secret, earned=result.earned,
-        needs_data=needs_data and not result.earned, progress=progress,
+        needs_data=needs_data and not result.earned, earned_on=earned_on if result.earned else None,
+        progress=progress,
     )
 
 
@@ -473,7 +484,10 @@ def gather(db: Session, user_id: UUID) -> Facts:
     """Everything the rules read, for one user."""
     logs = db.scalars(select(HikeLog).where(HikeLog.user_id == user_id).options(joinedload(HikeLog.trail))).all()
     facts = Facts(
-        hikes=[Hike(log.trail, log.hiked_on, bool(log.note), bool(log.photo_path)) for log in logs],
+        hikes=[
+            Hike(log.trail, log.hiked_on, bool(log.note), bool(log.photo_path), log.created_at.date())
+            for log in logs
+        ],
         plans=db.scalar(select(func.count()).select_from(TripPlan).where(TripPlan.user_id == user_id)) or 0,
         alerts=db.scalar(
             select(func.count()).select_from(AvailabilityAlert).where(AvailabilityAlert.user_id == user_id)
@@ -501,7 +515,11 @@ def gather(db: Session, user_id: UUID) -> Facts:
         items = [entry.gear_item for entry in setup.entries]
         categories = {item.category.slug for item in items if item.category is not None}
         facts.setups.append(categories)
+        # Its current contents date from its latest change, or a change to one of its items.
+        changed = max([setup.updated_at, *(item.updated_at for item in items)]).date()
+        facts.setup_dates.append(changed)
         weight = setup_base_weight_kg(items)
         if weight is not None and big_three_complete(categories):
             facts.base_weights_kg.append(weight)
+            facts.base_weight_dates.append(changed)
     return facts

@@ -7,10 +7,18 @@
   --ring: #b4693a;
   --ink: var(--journal-ink, var(--color-dark-olive));
 
+  overflow: visible;
+}
+
+/*
+ * Defaults with no specificity, so a caller's sizing class always wins
+ * whichever stylesheet loads last. At equal specificity, width: 100% won on
+ * the live public profile and blew a chip's medal up to the card's width.
+ */
+:where(.badge) {
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
 }
 
 .badge[data-tier="silver"] {

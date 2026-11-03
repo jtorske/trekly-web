@@ -27,6 +27,8 @@ export interface Milestone {
   icon: string;
   secret: boolean;
   earned: boolean;
+  /** The day it was first earned (YYYY-MM-DD); null until earned. */
+  earned_on?: string | null;
   /** Only partway there (never at zero or once earned). */
   progress: { current: number; goal: number; unit: "km" | "m" | null; near: string | null } | null;
 }
@@ -69,6 +71,31 @@ function formatGoal(goal: number, unit: Milestone["unit"], units: UnitSystem): s
 export function milestoneDetail(milestone: Milestone, units: UnitSystem = "metric"): string {
   if (milestone.goal == null) return milestone.detail;
   return milestone.detail.replaceAll("{goal}", formatGoal(milestone.goal, milestone.unit, units));
+}
+
+const PAST_TENSE: Record<string, string> = {
+  Add: "Added",
+  Climb: "Climbed",
+  Complete: "Completed",
+  Create: "Created",
+  Fill: "Filled",
+  Get: "Got",
+  Go: "Went",
+  Have: "Had",
+  Hike: "Hiked",
+  Log: "Logged",
+  Make: "Made",
+  Set: "Set",
+  Spend: "Spent",
+  Write: "Wrote",
+};
+
+/** How an earned milestone was earned: "Hike {goal} trails" becomes "Hiked 10 trails". */
+export function earnedSummary(milestone: Milestone, units: UnitSystem = "metric"): string {
+  const detail = milestoneDetail(milestone, units);
+  const [verb, ...rest] = detail.split(" ");
+  const past = PAST_TENSE[verb];
+  return past ? [past, ...rest].join(" ") : detail;
 }
 
 /** Whole display units, never showing the goal reached before it is (99.9 km is 62.07 mi, shown 61). */

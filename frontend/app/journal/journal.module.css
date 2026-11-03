@@ -622,7 +622,15 @@
   background: color-mix(in srgb, var(--journal-paper) 70%, transparent);
   padding: 0.1em 0.7em 0.1em 0.15em;
   color: var(--journal-ink);
+  font: inherit;
   font-weight: 600;
+  cursor: pointer;
+  transition: border-color 120ms, background-color 120ms;
+}
+
+.rankChip:hover {
+  border-color: color-mix(in srgb, var(--journal-ink) 40%, transparent);
+  background: var(--journal-paper);
 }
 
 .rankChip .rankChipEmblem {

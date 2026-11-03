@@ -1,7 +1,11 @@
-.badge {
+/* No specificity, so a caller's sizing class wins whatever the stylesheet order (see MilestoneBadge). */
+:where(.badge) {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.badge {
   overflow: visible;
 }
 

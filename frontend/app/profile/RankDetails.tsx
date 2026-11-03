@@ -33,7 +33,8 @@ export function RankProgress({ mine }: { mine: MyRank }) {
   );
 }
 
-function RankRulesDialog({ mine, onClose }: { mine: MyRank; onClose: () => void }) {
+/** "How ranks work": the points, the owner's breakdown and every rank (profile and Trail Journal). */
+export function RankRulesDialog({ mine, onClose }: { mine: MyRank; onClose: () => void }) {
   const [rules, setRules] = useState<RankRules | null>(null);
   const [failed, setFailed] = useState(false);
 

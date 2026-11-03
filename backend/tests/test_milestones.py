@@ -539,7 +539,7 @@ def test_an_unearned_secret_sends_only_its_hint(milestone_id):
     out = milestone_out(secret, result, needs_data=True).model_dump()
     assert out == {"id": None, "category": secret.category, "title": "???", "detail": secret.hint, "goal": None,
                    "unit": None, "note": None, "tier": None, "icon": "secret", "secret": True, "earned": False,
-                   "needs_data": False, "progress": None}
+                   "needs_data": False, "earned_on": None, "progress": None}
 
 
 def test_an_earned_secret_is_revealed():

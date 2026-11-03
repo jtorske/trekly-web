@@ -125,6 +125,8 @@ def _set_items(db: Session, user_id: UUID, setup: GearSetup, item_ids: list[UUID
     setup.entries = [
         GearSetupItem(gear_item_id=item_id, position=index) for index, item_id in enumerate(unique_ids)
     ]
+    # Changing only the entries doesn't touch the setup's row; milestone dates read updated_at.
+    setup.updated_at = func.now()
 
 
 @router.get("", response_model=list[SetupOut])

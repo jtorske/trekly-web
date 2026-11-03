@@ -8,7 +8,6 @@ import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import GearThumb from "@/components/GearThumb";
 import HikePhoto from "@/components/HikePhoto";
-import MilestoneBadge from "@/components/MilestoneBadge";
 import ReportDialog from "@/components/ReportDialog";
 import { matImage } from "@/lib/gearImage";
 import TrailBadge from "@/components/TrailBadge";
@@ -31,7 +30,6 @@ import { slotForItem } from "@/app/gear/slots";
 import profileStyles from "@/app/profile/page.module.css";
 import { ApiError } from "@/lib/api";
 import { groupColour } from "@/lib/journal";
-import type { MilestoneBadgeInfo } from "@/lib/milestones";
 import {
   asGearItem,
   getPrivacy,
@@ -286,25 +284,9 @@ function OwnerBanner({
   );
 }
 
-function Milestones({ milestones }: { milestones: MilestoneBadgeInfo[] }) {
-  if (milestones.length === 0) return null;
-  return (
-    <ul className={styles.milestones} aria-label="Milestones earned">
-      {milestones.map((milestone) => (
-        <li key={milestone.id} className={`${ui.chip} ${styles.milestone}`}>
-          <MilestoneBadge icon={milestone.icon} tier={milestone.tier} className={styles.milestoneBadge} />
-          {milestone.title}
-          <span className={ui.srOnly}> ({milestone.tier})</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journal"]> }) {
   return (
     <SectionCard id="all-hikes" title="All hikes" count={journal.entries.length}>
-      <Milestones milestones={journal.milestones ?? []} />
       {journal.entries.length === 0 ? (
         <p className={styles.quiet}>No hikes logged yet.</p>
       ) : (
@@ -317,7 +299,9 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
                   {entry.trail.name}
                 </Link>
                 <span className={profileStyles.trailMeta}>
-                  {[entry.trail.region, entry.hiked_on ? `Hiked ${formatHikeDate(entry.hiked_on)}` : null].filter(Boolean).join(" · ")}
+                  {[entry.trail.park_name ?? entry.trail.region, entry.hiked_on ? `Hiked ${formatHikeDate(entry.hiked_on)}` : null]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </span>
                 {entry.note && <p className={styles.note}>{entry.note}</p>}
               </div>

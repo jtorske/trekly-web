@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import RankEmblem from "@/components/RankEmblem";
 import TrailBadge from "@/components/TrailBadge";
+import { RankRulesDialog } from "@/app/profile/RankDetails";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type JournalGroup, type JournalSection } from "@/lib/journal";
 import {
@@ -26,6 +28,7 @@ import { useRank } from "@/lib/useRank";
 import type { TrailListItem } from "@/lib/trailsApi";
 import type { View } from "./Book";
 import styles from "./journal.module.css";
+import MilestoneCard from "./MilestoneCard";
 
 export const formatHikeDate = (iso: string, month: "short" | "long" = "short") =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month, day: "numeric", year: "numeric" });
@@ -114,16 +117,25 @@ function DoneStamp({ className }: { className?: string }) {
   );
 }
 
-/** The owner's rank on the opening page (the journal is only ever its owner's). */
+/**
+ * The owner's rank on the opening page (the journal is only ever its
+ * owner's). It opens "How ranks work", the same dialog as on the profile,
+ * portalled out of the page so it inherits none of the journal's type.
+ */
 function JournalRank() {
   const { rank } = useRank();
+  const [explaining, setExplaining] = useState(false);
   if (!rank) return null;
   return (
-    <span className={styles.rankChip}>
-      <RankEmblem level={rank.rank.level} className={styles.rankChipEmblem} />
-      <span className={styles.srOnly}>Rank: </span>
-      <span className={styles.rankChipTitle}>{rank.rank.title}</span>
-    </span>
+    <>
+      <button type="button" className={styles.rankChip} onClick={() => setExplaining(true)} aria-haspopup="dialog">
+        <RankEmblem level={rank.rank.level} className={styles.rankChipEmblem} />
+        <span className={styles.srOnly}>Rank: </span>
+        <span className={styles.rankChipTitle}>{rank.rank.title}</span>
+        <span className={styles.srOnly}>. How ranks work</span>
+      </button>
+      {explaining && createPortal(<RankRulesDialog mine={rank} onClose={() => setExplaining(false)} />, document.body)}
+    </>
   );
 }
 
@@ -368,15 +380,21 @@ function Medal({ ctx, milestone, index, active }: { ctx: PageContext; milestone:
   return (
     <li className={styles.medal} data-key={milestoneKey(milestone, index)}>
       <span className={styles.medalBox}>
-        <MilestoneBadge
-          icon={milestone.icon}
-          tier={milestone.tier}
-          earned={milestone.earned}
-          progress={progressFraction(milestone)}
-          stamp={stamp}
-          onStamped={() => ctx.onStamped(stampKey)}
+        <MilestoneCard
+          milestone={milestone}
+          units={ctx.units}
+          tierPoints={ctx.journal.milestones?.tier_points}
           className={styles.medalArt}
-        />
+        >
+          <MilestoneBadge
+            icon={milestone.icon}
+            tier={milestone.tier}
+            earned={milestone.earned}
+            progress={progressFraction(milestone)}
+            stamp={stamp}
+            onStamped={() => ctx.onStamped(stampKey)}
+          />
+        </MilestoneCard>
       </span>
       <p className={styles.medalTitle}>
         {milestone.title}

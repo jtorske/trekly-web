@@ -1,0 +1,183 @@
+/*
+ * A medal's details card (MilestoneCard.tsx). It's portalled to the body,
+ * outside the journal's tokens, so its colours are spelled out: the journal
+ * paper and ink, which stay cream in dark mode too.
+ */
+
+.trigger {
+  display: block;
+  aspect-ratio: 1;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 3px;
+}
+
+.card {
+  --ink: var(--color-dark-olive);
+  --muted: color-mix(in srgb, var(--color-dark-olive) 74%, transparent);
+
+  position: fixed;
+  z-index: 60;
+  width: min(17rem, calc(100vw - 16px));
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 20%, transparent);
+  border-radius: 10px;
+  background: #fbf6e2;
+  box-shadow: 0 2px 4px rgb(40 54 24 / 0.12), 0 14px 32px -12px rgb(40 54 24 / 0.45);
+  padding: 0.75rem 0.9rem 0.8rem;
+  color: var(--ink);
+  color-scheme: light;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: auto;
+  animation: card-in 120ms ease-out;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.card[data-below] {
+  animation-name: card-in-below;
+}
+
+@keyframes card-in-below {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card[data-below] {
+    animation: none;
+  }
+}
+
+.card p {
+  margin: 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card[data-earned] .status {
+  color: #3f6b2a;
+}
+
+.check {
+  width: 1.1rem;
+  flex: none;
+  fill: #3f6b2a;
+  stroke: #fbf6e2;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.check circle {
+  stroke: none;
+}
+
+.open {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: none;
+  border: 1.5px dashed var(--muted);
+  border-radius: 50%;
+}
+
+.card .title {
+  margin-top: 0.3rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.card .how {
+  margin-top: 0.2rem;
+}
+
+.card .note {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.6rem;
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* The tier word in its ring colour, darkened to read on paper (as in the journal). */
+.tier {
+  color: color-mix(in srgb, #b4693a 75%, black);
+  font-weight: 600;
+}
+
+.tier[data-tier="silver"] {
+  color: color-mix(in srgb, #a3adb6 45%, black);
+}
+
+.tier[data-tier="gold"] {
+  color: color-mix(in srgb, #d9a531 60%, black);
+}
+
+.card .progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.bar {
+  height: 6px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: inherit;
+  background: var(--color-rust-text);
+}
+
+.progressText {
+  flex: none;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}

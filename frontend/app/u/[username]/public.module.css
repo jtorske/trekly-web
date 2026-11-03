@@ -53,24 +53,6 @@
   font-weight: 600;
 }
 
-.milestones {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.milestone {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding-left: 0.35rem;
-}
-
-.milestoneBadge {
-  width: 1.4rem;
-  flex: none;
-}
-
 .journal {
   display: flex;
   flex-direction: column;
