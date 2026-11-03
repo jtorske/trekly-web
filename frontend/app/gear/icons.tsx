@@ -174,6 +174,20 @@ const PATHS = {
       <path d="m25 16-5 9h7l-4 7" />
     </>
   ),
+  chair: (
+    <>
+      <path d="M14 10c3 2 17 2 20 0l-2 16H16Z" />
+      <path d="M12 26h24" />
+      <path d="M15 26 10 42M33 26l5 16M17 26l14 16M31 26 17 42" />
+    </>
+  ),
+  trowel: (
+    <>
+      <path d="M24 4c6 4 8 12 6 20l-6 6-6-6c-2-8 0-16 6-20Z" />
+      <path d="M24 30v12" />
+      <path d="M20 42h8" />
+    </>
+  ),
   generic: (
     <>
       <rect x="9" y="13" width="30" height="26" rx="5" />

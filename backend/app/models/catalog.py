@@ -128,6 +128,8 @@ class CatalogProduct(Base):
     capacity_ml = Column(Numeric(12, 1))
     specs = Column(JsonType, nullable=False, default=dict)
     official_url = Column(Text)
+    # One line written by Trekly (never copied from the brand); optional.
+    description = Column(Text)
     # Denormalized, normalized text of brand + aliases + name + model number,
     # rebuilt by the pipeline; indexed with pg_trgm for typo-tolerant search.
     search_text = Column(Text, nullable=False, default="")

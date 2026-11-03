@@ -191,3 +191,26 @@ def test_all_seed_files_together_have_no_duplicate_products(db):
         assert dict(run_import(db, CuratedJsonProvider(seed_file)).counts) == {
             "unchanged": len(json.loads(seed_file.read_text(encoding="utf-8"))["records"])
         }
+
+
+def test_description_is_validated_and_stored(db):
+    too_short = make_record(source_record_id="test:short-desc", name="Short Desc Tent", description="Tent.")
+    ok = make_record(source_record_id="test:good-desc", name="Good Desc Tent", description="A roomy two-door tent for two.")
+    report = run_import(db, StaticProvider([too_short, ok]))
+    assert report.counts["invalid"] == 1 and report.counts["created"] == 1
+    product = db.scalar(select(CatalogProduct).where(CatalogProduct.slug == "good-desc-tent"))
+    assert product.description == "A roomy two-door tent for two."
+
+
+def test_search_vocabulary_change_reindexes_unchanged_records(db, monkeypatch):
+    from app.catalog import pipeline
+
+    run_import(db, StaticProvider(SAMPLE_RECORDS))
+    monkeypatch.setitem(pipeline.SEARCH_SYNONYMS, "stoves", ("stove", "brewer"))
+    report = run_import(db, StaticProvider(SAMPLE_RECORDS))
+    assert report.counts["reindexed"] == 1
+    assert report.counts["unchanged"] == len(SAMPLE_RECORDS) - 1
+    stove = db.scalar(select(CatalogProduct).where(CatalogProduct.slug == "pocketrocket-deluxe"))
+    assert "brewer" in stove.search_text
+    # A second run with the same vocabulary is a no-op again.
+    assert dict(run_import(db, StaticProvider(SAMPLE_RECORDS)).counts) == {"unchanged": len(SAMPLE_RECORDS)}

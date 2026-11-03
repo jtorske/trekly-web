@@ -65,7 +65,7 @@ def _import_one(provider, dry_run: bool) -> int:
     label = "DRY RUN — nothing written" if report.dry_run else f"run {report.run_id}"
     print(f"Source: {report.source} ({label})")
     print(f"Status: {report.status}")
-    for key in ("created", "updated", "merged", "unchanged", "invalid", "duplicate_in_feed", "failed"):
+    for key in ("created", "updated", "merged", "reindexed", "unchanged", "invalid", "duplicate_in_feed", "failed"):
         if report.counts.get(key):
             print(f"  {key:>18}: {report.counts[key]}")
     for error in report.errors[:50]:

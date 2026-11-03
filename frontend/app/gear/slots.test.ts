@@ -14,7 +14,7 @@ const TAXONOMY: Record<string, string[]> = {
   footwear: ["hiking-boots", "trail-runners", "gaiters", "camp-shoes"],
   navigation: ["gps-satellite", "compasses", "watches"],
   safety: ["first-aid", "emergency", "bear-safety"],
-  accessories: ["lighting", "trekking-poles", "storage", "repair", "power", "misc"],
+  accessories: ["lighting", "trekking-poles", "storage", "repair", "power", "camp-furniture", "sanitation", "misc"],
 };
 
 test("every catalogue subcategory maps to exactly one slot in its own zone", () => {

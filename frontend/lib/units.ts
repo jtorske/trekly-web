@@ -364,9 +364,10 @@ export function formatSpecValue(
 }
 
 export const WEIGHT_BASIS_LABELS: Record<string, string> = {
-  minimum: "minimum weight",
-  trail: "trail weight",
-  packaged: "packaged weight",
-  average: "average weight",
-  claimed: "manufacturer-listed weight",
+  // Every catalogue weight is the brand's own claim; the basis says which one.
+  minimum: "claimed minimum weight",
+  trail: "claimed trail weight",
+  packaged: "claimed packaged weight",
+  average: "claimed average weight",
+  claimed: "claimed weight",
 };

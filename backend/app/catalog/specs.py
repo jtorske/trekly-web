@@ -6,7 +6,7 @@ sleeping pad can carry an R-value and a stove a boil time without forcing
 every product into one generic shape. Weight and capacity are first-class
 columns on products/variants and are not repeated here.
 
-Canonical units: cm, m², °C, minutes, litres/minute, lumens, metres, hours.
+Canonical units: cm, m², °C, minutes, seconds, litres/minute, lumens, metres, hours.
 """
 
 from dataclasses import dataclass
@@ -150,10 +150,15 @@ SPECS_BY_SUBCATEGORY: dict[str, tuple[SpecField, ...]] = {
     "watches": (_n("battery_life_hours", "Battery life (smartwatch mode)", "h"),),
     "first-aid": (_i("persons", "People"), _i("days", "Days")),
     "emergency": (),
-    "bear-safety": (_b("igbc_certified", "IGBC certified"),),
+    "bear-safety": (
+        _b("igbc_certified", "IGBC certified"),
+        _n("spray_range_m", "Spray range", "m"),
+        _n("spray_duration_s", "Spray duration", "s"),
+    ),
     "lighting": (
         _i("max_lumens", "Max output", "lm"),
         _n("max_beam_distance_m", "Max beam distance", "m"),
+        _n("max_runtime_hours", "Longest runtime (lowest mode)", "h"),
         _t("power_source", "Power"),
         _t("water_rating", "Water rating"),
     ),
@@ -166,6 +171,11 @@ SPECS_BY_SUBCATEGORY: dict[str, tuple[SpecField, ...]] = {
     "storage": (_b("waterproof", "Waterproof"),),
     "repair": (),
     "power": (_i("capacity_mah", "Capacity", "mAh"),),
+    "camp-furniture": (
+        _n("max_load_kg", "Max load", "kg"),
+        _n("seat_height_cm", "Seat height", "cm"),
+    ),
+    "sanitation": (),
     "misc": (),
 }
 
@@ -174,7 +184,10 @@ assert not missing, f"Spec registry missing subcategories: {missing}"
 
 
 def fields_for(subcategory: str) -> dict[str, SpecField]:
-    return {field.key: field for field in COMMON + SPECS_BY_SUBCATEGORY.get(subcategory, ())}
+    # Category-specific fields first, so key specs on product cards show what
+    # matters for that kind of gear (R-value, frame, lumens) before generic
+    # rows like materials or dimensions.
+    return {field.key: field for field in SPECS_BY_SUBCATEGORY.get(subcategory, ()) + COMMON}
 
 
 def validate_specs(subcategory: str, specs: dict) -> dict:

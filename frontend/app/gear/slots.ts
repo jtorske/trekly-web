@@ -86,7 +86,8 @@ export const ZONES: Zone[] = [
     { key: "trekking-poles", label: "Trekking poles", noun: "trekking poles", icon: "poles", categories: ["trekking-poles"] },
     { key: "storage", label: "Dry bags & stuff sacks", noun: "dry bag or stuff sack", icon: "dryBag", categories: ["storage"] },
     { key: "power", label: "Power bank", noun: "power bank", icon: "battery", categories: ["power"] },
-    { key: "other", label: "Other gear", noun: "piece of gear", icon: "generic", categories: ["repair", "misc"] },
+    { key: "camp-chair", label: "Camp chair", noun: "camp chair", icon: "chair", categories: ["camp-furniture"] },
+    { key: "other", label: "Other gear", noun: "piece of gear", icon: "generic", categories: ["repair", "sanitation", "misc"] },
   ]),
 ];
 

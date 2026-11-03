@@ -15,6 +15,10 @@ def test_categories_tree(client):
     ]
     shelter = next(c for c in tree if c["slug"] == "shelter")
     assert "tents" in [s["slug"] for s in shelter["subcategories"]]
+    accessories = next(c for c in tree if c["slug"] == "accessories")
+    subs = {s["slug"]: s for s in accessories["subcategories"]}
+    assert subs["camp-furniture"]["icon_key"] == "chair"
+    assert subs["sanitation"]["icon_key"] == "trowel"
 
 
 def test_search_by_name_brand_alias_and_category(client):
@@ -92,6 +96,13 @@ def test_product_summary_and_detail(client):
     assert body["variants"][0]["weight_basis"] == "minimum"
     assert body["sources"][0]["url"].startswith("https://www.nemoequipment.com")
     assert body["aliases"] == ["Tensor Insulated"]
+    assert body["description"] is None  # optional; unknown stays empty
+
+
+def test_product_detail_includes_our_description(client):
+    stove = client.get("/api/gear/products", params={"q": "pocketrocket"}).json()["items"][0]
+    body = client.get(f"/api/gear/products/{stove['id']}").json()
+    assert body["description"] == "Small canister stove with a push-button igniter."
 
 
 def test_product_not_found(client):
@@ -183,3 +194,14 @@ def test_popular_products_lightest_first_then_most_owned(client, auth_headers):
 def test_popular_products_validates_categories(client):
     assert client.get("/api/gear/products/popular", params={"category": "tents,spaceships"}).status_code == 404
     assert client.get("/api/gear/products/popular").status_code == 422
+
+
+def test_search_matches_category_names_and_synonyms(client):
+    # Neither product's name contains these words; their categories do.
+    assert names(client.get("/api/gear/products", params={"q": "sleeping mat"})) == ["NEMO Tensor All-Season"]
+    assert names(client.get("/api/gear/products", params={"q": "sleeping pads"})) == ["NEMO Tensor All-Season"]
+    assert names(client.get("/api/gear/products", params={"q": "rain jacket"})) == ["Arc'teryx Beta AR Jacket"]
+    assert names(client.get("/api/gear/products", params={"q": "msr burner"})) == ["MSR PocketRocket Deluxe"]
+    # Synonyms narrow like any other token: a brand plus a wrong category has
+    # no exact match (on Postgres the typo fallback may then offer near misses).
+    assert names(client.get("/api/gear/products", params={"q": "msr headlamp"})) == []

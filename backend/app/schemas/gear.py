@@ -97,6 +97,7 @@ class SourceRef(BaseModel):
 class ProductDetailOut(ProductSummaryOut):
     model_number: str | None
     model_year: str | None
+    description: str | None
     official_url: str | None
     verified_at: datetime | None
     aliases: list[str]

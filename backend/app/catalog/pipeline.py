@@ -6,7 +6,9 @@ Idempotency rules
   "msr" and "Mountain Safety Research" (once aliased) are one brand.
 - A product is matched first by its stable (source, source_record_id) link,
   then by (brand, slug). Re-importing an unchanged record is a no-op
-  ("unchanged"); a changed record updates the same rows ("updated").
+  ("unchanged"); a changed record updates the same rows ("updated"). If only
+  the search vocabulary in code changed, the search text is rebuilt
+  ("reindexed").
 - Variants match by (product, slug); images by (product, url).
 - Nothing is deleted. Products, variants and images missing from a feed are
   left alone; retiring a product is explicit (status "discontinued"), so user
@@ -27,7 +29,7 @@ from sqlalchemy.orm import Session
 from app.catalog.normalize import build_search_text, normalize_text, slugify
 from app.catalog.providers.base import CatalogProvider, SourceInfo
 from app.catalog.records import CatalogRecord, NormalizedRecord, normalize_record
-from app.catalog.taxonomy import TAXONOMY
+from app.catalog.taxonomy import SEARCH_SYNONYMS, TAXONOMY
 from app.models.catalog import (
     CatalogBrand,
     CatalogBrandAlias,
@@ -177,6 +179,7 @@ def _apply_product_fields(
     product.capacity_ml = normalized.capacity_ml
     product.specs = normalized.specs
     product.official_url = record.official_url
+    product.description = record.description
     product.verified_at = _verified_datetime(record)
 
     known_aliases = {alias.alias_normalized for alias in product.aliases}
@@ -215,14 +218,22 @@ def _apply_product_fields(
         image.source_url = incoming.source_url
         image.approved = incoming.approved
 
-    product.search_text = build_search_text(
-        brand.name,
-        *(alias.alias for alias in brand.aliases),
-        record.name,
+    product.search_text = product_search_text(product)
+
+
+def product_search_text(product: CatalogProduct) -> str:
+    """The normalized search document: names, aliases, category and the
+    everyday words people use for that category (SEARCH_SYNONYMS)."""
+    category = product.category
+    return build_search_text(
+        product.brand.name,
+        *(alias.alias for alias in product.brand.aliases),
+        product.name,
         *(alias.alias for alias in product.aliases),
-        record.model_number,
+        product.model_number,
         category.name,
         category.parent.name if category.parent else None,
+        *SEARCH_SYNONYMS.get(category.slug, ()),
         *(variant.name for variant in product.variants),
     )
 
@@ -233,9 +244,12 @@ def upsert_record(
     run: CatalogIngestionRun,
     normalized: NormalizedRecord,
     categories: dict[str, CatalogCategory],
+    touched_brands: set | None = None,
 ) -> str:
     record = normalized.record
     brand = resolve_brand(session, record.brand, record.brand_aliases, record.brand_website)
+    if touched_brands is not None:
+        touched_brands.add(brand.id)
     category = categories[record.category]
 
     link = session.scalar(
@@ -246,6 +260,12 @@ def upsert_record(
     )
     if link is not None and link.content_hash == normalized.content_hash:
         link.last_seen_run_id = run.id
+        # The record itself is unchanged, but the search vocabulary (category
+        # names, synonyms) lives in code and may have moved on.
+        search_text = product_search_text(link.product)
+        if link.product.search_text != search_text:
+            link.product.search_text = search_text
+            return "reindexed"
         return "unchanged"
 
     product = link.product if link is not None else None
@@ -290,6 +310,7 @@ def run_import(session: Session, provider: CatalogProvider, dry_run: bool = Fals
 
     categories = {c.slug: c for c in session.scalars(select(CatalogCategory))}
     seen: set[str] = set()
+    touched_brands: set = set()
 
     try:
         for raw in provider.records():
@@ -310,7 +331,7 @@ def run_import(session: Session, provider: CatalogProvider, dry_run: bool = Fals
 
             savepoint = session.begin_nested()
             try:
-                outcome = upsert_record(session, source, run, normalized, categories)
+                outcome = upsert_record(session, source, run, normalized, categories, touched_brands)
                 savepoint.commit()
                 report.counts[outcome] += 1
             except Exception as error:  # noqa: BLE001 — report and continue
@@ -322,6 +343,16 @@ def run_import(session: Session, provider: CatalogProvider, dry_run: bool = Fals
         report.error(None, f"provider failed: {error}")
 
     if report.status != "failed":
+        # A later record can add a brand alias ("NEMO Equipment") after that
+        # brand's earlier products were written; bring their search text up
+        # to date so one run leaves everything consistent.
+        if touched_brands:
+            for product in session.scalars(
+                select(CatalogProduct).where(CatalogProduct.brand_id.in_(touched_brands))
+            ):
+                search_text = product_search_text(product)
+                if product.search_text != search_text:
+                    product.search_text = search_text
         report.status = "partial" if report.errors else "succeeded"
     run.status = report.status
     run.finished_at = _now()

@@ -82,6 +82,8 @@ export interface ProductSummary {
 export interface ProductDetail extends ProductSummary {
   model_number: string | null;
   model_year: string | null;
+  /** One line written by Trekly; never copied from the brand. */
+  description: string | null;
   official_url: string | null;
   verified_at: string | null;
   aliases: string[];

@@ -362,6 +362,7 @@ export default function ProductPicker({
               </p>
             )}
             {detail.capacity_ml != null && <p className={styles.confirmMeta}>{formatCapacity(detail.capacity_ml, units)}</p>}
+            {detail.description && <p className={styles.confirmDescription}>{detail.description}</p>}
           </div>
         </div>
 

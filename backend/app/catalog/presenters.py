@@ -94,6 +94,7 @@ def product_detail(product: CatalogProduct) -> ProductDetailOut:
         **_summary_fields(product),
         model_number=product.model_number,
         model_year=product.model_year,
+        description=product.description,
         official_url=product.official_url,
         verified_at=product.verified_at,
         aliases=[alias.alias for alias in product.aliases],

@@ -1873,6 +1873,5463 @@
         "packaged_weight_g": 423,
         "fuel_type": "multi_fuel"
       }
+    },
+    {
+      "source_record_id": "durston:x-mid-1",
+      "brand": "Durston Gear",
+      "name": "X-Mid 1",
+      "category": "tents",
+      "official_url": "https://durstongear.com/products/x-mid-1-tent-ultralight-backpacking",
+      "source_url": "https://durstongear.com/products/x-mid-1-tent-ultralight-backpacking",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "745",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Solo double-wall trekking-pole tent with an offset ridgeline, two doors and two vestibules.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 2.0,
+        "vestibule_area_m2": 2.0,
+        "peak_height_cm": 119,
+        "packed_dimensions": "12 x 5\" / 30 x 13 cm",
+        "published_weight": "26.2 oz / 745 g (complete tent)",
+        "materials": "15D Sil/PE nylon floor"
+      }
+    },
+    {
+      "source_record_id": "durston:x-mid-pro-2",
+      "brand": "Durston Gear",
+      "name": "X-Mid Pro 2",
+      "category": "tents",
+      "official_url": "https://durstongear.com/products/x-mid-pro-2-tent-ultralight-thruhiking",
+      "source_url": "https://durstongear.com/products/x-mid-pro-2-tent-ultralight-thruhiking",
+      "verified_at": "2026-11-02",
+      "description": "Two-person Dyneema trekking-pole tent, the lightest of the X-Mid line.",
+      "specs": {
+        "capacity_persons": 2,
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 2.7,
+        "vestibule_area_m2": 2.0,
+        "packed_dimensions": "11 x 5 in / 27 x 12 cm"
+      },
+      "variants": [
+        {
+          "name": "Dyneema floor",
+          "weight": {
+            "value": "509",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "17.9 oz / 509 g"
+          }
+        },
+        {
+          "name": "Silnylon floor",
+          "weight": {
+            "value": "565",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "published_weight": "19.9 oz / 565 g"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "durston:x-dome-2",
+      "brand": "Durston Gear",
+      "name": "X-Dome 2",
+      "category": "tents",
+      "official_url": "https://durstongear.com/products/x-dome-2-ultralight-tent",
+      "source_url": "https://durstongear.com/products/x-dome-2-ultralight-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1260",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Freestanding two-person dome with a wide floor and two vestibules.",
+      "specs": {
+        "capacity_persons": 2,
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 3.0,
+        "vestibule_area_m2": 1.66,
+        "peak_height_cm": 110,
+        "packed_dimensions": "17.5\" x 5\" / 45 x 13 cm (carbon poles)",
+        "published_weight": "44 oz / 1.26 kg (regular interior + carbon poles)"
+      }
+    },
+    {
+      "source_record_id": "durston:kakwa-40",
+      "brand": "Durston Gear",
+      "name": "Kakwa 40",
+      "category": "backpacks",
+      "official_url": "https://durstongear.com/products/kakwa-40-backpack",
+      "source_url": "https://durstongear.com/products/kakwa-40-backpack",
+      "verified_at": "2026-11-02",
+      "description": "Smaller sibling of the Kakwa 55 with the same hollow aluminium U-frame, for lighter loads.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 20.4
+      },
+      "variants": [
+        {
+          "name": "Small (Ultra 200X)",
+          "weight": {
+            "value": "770",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "48",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Medium (Ultra 200X)",
+          "weight": {
+            "value": "795",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "51",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Large (Ultra 200X)",
+          "weight": {
+            "value": "820",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "54",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Small (UltraGrid)",
+          "weight": {
+            "value": "820",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "48",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Medium (UltraGrid)",
+          "weight": {
+            "value": "840",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "51",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Large (UltraGrid)",
+          "weight": {
+            "value": "860",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "54",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:nero-classic",
+      "brand": "Zpacks",
+      "name": "Nero Classic Backpack",
+      "category": "backpacks",
+      "official_url": "https://zpacks.com/products/nero-classic-ultra-backpack",
+      "source_url": "https://zpacks.com/products/nero-classic-ultra-backpack",
+      "verified_at": "2026-11-02",
+      "description": "Frameless 30 L Dyneema day-and-overnight pack with a choice of harnesses.",
+      "specs": {
+        "frame_type": "frameless"
+      },
+      "variants": [
+        {
+          "name": "Standard straps",
+          "weight": {
+            "value": "281",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "30",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Small/women's straps",
+          "weight": {
+            "value": "259",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "30",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Vest straps",
+          "weight": {
+            "value": "371",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "30",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:arc-air-50l",
+      "brand": "Zpacks",
+      "name": "Arc Air 50L Backpack",
+      "category": "backpacks",
+      "official_url": "https://zpacks.com/products/arc-air-50l-backpack",
+      "source_url": "https://zpacks.com/products/arc-air-50l-backpack",
+      "verified_at": "2026-11-02",
+      "status": "discontinued",
+      "weight": {
+        "value": "582",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "Carbon-stay framed 50 L Dyneema pack with an adjustable torso; now discontinued.",
+      "specs": {
+        "frame_type": "internal",
+        "dimensions": "6.5\" x 12.5\" x 29\" (15 x 31.8 x 74 cm)"
+      }
+    },
+    {
+      "source_record_id": "zpacks:triplex-pro",
+      "brand": "Zpacks",
+      "name": "Triplex Pro Tent",
+      "category": "tents",
+      "official_url": "https://zpacks.com/products/triplex-pro-tent",
+      "source_url": "https://zpacks.com/products/triplex-pro-tent",
+      "verified_at": "2026-11-02",
+      "description": "Three-person single-wall Dyneema tent pitched with two trekking poles.",
+      "specs": {
+        "capacity_persons": 3,
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 3.6,
+        "peak_height_cm": 122,
+        "packed_dimensions": "Rolled 6\" x 12\" (15.25 x 30.5 cm)"
+      },
+      "variants": [
+        {
+          "name": "Lite floor",
+          "weight": {
+            "value": "616",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Standard floor",
+          "weight": {
+            "value": "646",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:altaplex-classic",
+      "brand": "Zpacks",
+      "name": "Altaplex Classic Tent",
+      "category": "tents",
+      "official_url": "https://zpacks.com/products/altaplex-tent",
+      "source_url": "https://zpacks.com/products/altaplex-tent",
+      "verified_at": "2026-11-02",
+      "description": "Tall solo single-wall Dyneema tent with a long floor, pitched on one trekking pole.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 2.3,
+        "peak_height_cm": 147,
+        "packed_dimensions": "Rolled 4.5\" x 11\" (11.5 x 28 cm)"
+      },
+      "variants": [
+        {
+          "name": "Lite floor",
+          "weight": {
+            "value": "380",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Standard floor",
+          "weight": {
+            "value": "410",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:inflatable-pillow",
+      "brand": "Zpacks",
+      "name": "Inflatable Pillow",
+      "category": "pillows",
+      "official_url": "https://zpacks.com/products/zpacks-inflatable-pillow",
+      "source_url": "https://zpacks.com/products/zpacks-inflatable-pillow",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "40",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Minimal inflatable camp pillow.",
+      "specs": {
+        "pad_type": "air",
+        "dimensions": "Inflated 10\" x 14\" x 3.5\" (25.4 x 35.6 x 9 cm)"
+      }
+    },
+    {
+      "source_record_id": "zpacks:pack-liner",
+      "brand": "Zpacks",
+      "name": "Pack Liner",
+      "category": "pack-accessories",
+      "official_url": "https://zpacks.com/products/pack-liner",
+      "source_url": "https://zpacks.com/products/pack-liner",
+      "verified_at": "2026-11-02",
+      "description": "Dyneema roll-top liner that keeps a pack's main compartment dry.",
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "35",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "27",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Medium",
+          "weight": {
+            "value": "36",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "44",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:minimalist-trekking-pole",
+      "brand": "Zpacks",
+      "name": "Minimalist Trekking Pole",
+      "category": "trekking-poles",
+      "official_url": "https://zpacks.com/products/zpacks-minimalist-trekking-pole",
+      "source_url": "https://zpacks.com/products/zpacks-minimalist-trekking-pole",
+      "verified_at": "2026-11-02",
+      "description": "Carbon trekking pole with foam grip and clasp locks, sold singly or as a pair.",
+      "specs": {
+        "pole_material": "carbon",
+        "collapsed_length_cm": 60,
+        "adjustable_length": "to 52\" (132 cm)",
+        "locking": "clasp"
+      },
+      "variants": [
+        {
+          "name": "Single",
+          "weight": {
+            "value": "140",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Pair",
+          "weight": {
+            "value": "276",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "gossamer-gear:gorilla-50",
+      "brand": "Gossamer Gear",
+      "name": "Gorilla 50",
+      "category": "backpacks",
+      "official_url": "https://www.gossamergear.com/products/gorilla-50",
+      "source_url": "https://www.gossamergear.com/products/gorilla-50",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "885",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "Framed 50 L ultralight pack with a removable frame and belt.",
+      "specs": {
+        "frame_type": "internal",
+        "torso_range": "S 16-18\", M 18-20\""
+      }
+    },
+    {
+      "source_record_id": "gossamer-gear:kumo-36",
+      "brand": "Gossamer Gear",
+      "name": "Kumo 36",
+      "category": "backpacks",
+      "official_url": "https://www.gossamergear.com/products/kumo-36-superlight-backpack",
+      "source_url": "https://www.gossamergear.com/products/kumo-36-superlight-backpack",
+      "verified_at": "2026-11-02",
+      "description": "Frameless 36 L pack with a removable belt and sit pad.",
+      "specs": {
+        "frame_type": "frameless",
+        "torso_range": "S 17-19\", M 19.5-21.5\""
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "536",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "36",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "Medium",
+          "weight": {
+            "value": "567",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "36",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "gossamer-gear:the-one",
+      "brand": "Gossamer Gear",
+      "name": "The One",
+      "category": "tents",
+      "official_url": "https://www.gossamergear.com/products/the-one",
+      "source_url": "https://www.gossamergear.com/products/the-one",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "558",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Solo single-wall trekking-pole shelter with two vestibule doors.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 2,
+        "freestanding": false,
+        "published_weight": "19.68 oz / 558 g (shelter only)"
+      }
+    },
+    {
+      "source_record_id": "gossamer-gear:thinlight-1-8",
+      "brand": "Gossamer Gear",
+      "name": "Thinlight Foam Pad 1/8\"",
+      "category": "sleeping-pads",
+      "official_url": "https://www.gossamergear.com/products/thinlight-foam-pad",
+      "source_url": "https://www.gossamergear.com/products/thinlight-foam-pad",
+      "verified_at": "2026-11-02",
+      "description": "Thin closed-cell foam pad, used alone in summer or under an inflatable pad.",
+      "specs": {
+        "pad_type": "foam",
+        "thickness_cm": 0.32,
+        "length_cm": 149
+      },
+      "variants": [
+        {
+          "name": "Rolled",
+          "weight": {
+            "value": "76",
+            "unit": "g",
+            "basis": "average"
+          }
+        },
+        {
+          "name": "Folded",
+          "weight": {
+            "value": "94",
+            "unit": "g",
+            "basis": "average"
+          }
+        },
+        {
+          "name": "Rolled wide",
+          "weight": {
+            "value": "116",
+            "unit": "g",
+            "basis": "average"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "ula:photon",
+      "brand": "ULA Equipment",
+      "name": "Photon",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/photon/",
+      "source_url": "https://www.ula-equipment.com/product/photon/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "740",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "35",
+        "unit": "l"
+      },
+      "description": "Frameless 35 L roll-top pack for light loads.",
+      "specs": {
+        "frame_type": "frameless",
+        "max_load_kg": 11.34
+      }
+    },
+    {
+      "source_record_id": "ula:cdt",
+      "brand": "ULA Equipment",
+      "name": "CDT (UltraGrid)",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/cdt/",
+      "source_url": "https://www.ula-equipment.com/product/cdt/",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "CDT"
+      ],
+      "weight": {
+        "value": "768",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "Frameless 50 L pack, long a thru-hiker favourite.",
+      "specs": {
+        "frame_type": "frameless",
+        "max_load_kg": 11.34,
+        "torso_range": "S 15-18\", M 18-21\", L 21-24\", XL 24\"+"
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:swift-x",
+      "brand": "Six Moon Designs",
+      "name": "Swift X",
+      "category": "backpacks",
+      "official_url": "https://www.sixmoondesigns.com/products/swift-x-ultralight-backpack",
+      "source_url": "https://www.sixmoondesigns.com/products/swift-x-ultralight-backpack",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.sixmoondesigns.com",
+      "weight": {
+        "value": "1100",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "50 L pack with a removable hoop-stay frame and choice of vest or strap harness.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 15.8
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:flight-30",
+      "brand": "Six Moon Designs",
+      "name": "Flight 30",
+      "category": "backpacks",
+      "official_url": "https://www.sixmoondesigns.com/products/flight-30-ultralight-backpack",
+      "source_url": "https://www.sixmoondesigns.com/products/flight-30-ultralight-backpack",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "878",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "30",
+        "unit": "l"
+      },
+      "description": "30 L fastpacking pack built around a running-vest harness.",
+      "specs": {
+        "frame_type": "frameless",
+        "max_load_kg": 11
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:lunar-solo",
+      "brand": "Six Moon Designs",
+      "name": "Lunar Solo",
+      "category": "tents",
+      "official_url": "https://www.sixmoondesigns.com/products/lunar-solo-tent",
+      "source_url": "https://www.sixmoondesigns.com/products/lunar-solo-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "740",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Single-wall solo tent pitched on one trekking pole.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 1,
+        "freestanding": false,
+        "peak_height_cm": 124,
+        "packed_dimensions": "11\" x 4.5\"",
+        "published_weight": "26 oz / 740 g (no stakes or poles)"
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:deschutes-tarp",
+      "brand": "Six Moon Designs",
+      "name": "Deschutes Tarp",
+      "category": "tarps",
+      "official_url": "https://www.sixmoondesigns.com/products/deschutes-backpacking-tarp",
+      "source_url": "https://www.sixmoondesigns.com/products/deschutes-backpacking-tarp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "368",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Solo pyramid-style tarp on a single pole, pairs with an optional net tent.",
+      "specs": {
+        "capacity_persons": 1,
+        "packed_dimensions": "12\" x 4.5\" (30 x 11 cm)",
+        "published_weight": "13 oz / 368 g (no stakes or pole)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:notch-li",
+      "brand": "Tarptent",
+      "name": "Notch Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/notch-li/",
+      "source_url": "https://www.tarptent.com/product/notch-li/",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.tarptent.com",
+      "weight": {
+        "value": "573",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Solo double-wall Dyneema tent on two trekking poles, with PitchLoc strut ends.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3+",
+        "doors": 2,
+        "freestanding": false,
+        "peak_height_cm": 109,
+        "vestibule_area_m2": 1.48,
+        "packed_dimensions": "16 x 4 in / 41 x 10 cm",
+        "published_weight": "20.2 oz / 573 g minimum (DCF floor, mesh interior; no stakes or bags)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:stratospire-2-li",
+      "brand": "Tarptent",
+      "name": "StratoSpire 2 Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/stratospire-li/",
+      "source_url": "https://www.tarptent.com/product/stratospire-li/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "842",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Two-person double-wall Dyneema tent with deep vestibules, built for storms.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "4",
+        "doors": 2,
+        "freestanding": false,
+        "peak_height_cm": 111,
+        "vestibule_area_m2": 2.24,
+        "packed_dimensions": "16 x 5 x 5 in / 41 x 13 x 13 cm",
+        "published_weight": "29.7 oz / 842 g minimum (wide interior; no bags, stakes or apex guylines)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:aeon-li",
+      "brand": "Tarptent",
+      "name": "Aeon Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/aeon-li/",
+      "source_url": "https://www.tarptent.com/product/aeon-li/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "478",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Roomy solo single-wall Dyneema tent pitched on one trekking pole.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3+",
+        "doors": 1,
+        "freestanding": false,
+        "peak_height_cm": 119,
+        "vestibule_area_m2": 0.75,
+        "packed_dimensions": "14 x 4 in / 36 x 10 cm",
+        "published_weight": "16.85 oz / 478 g minimum (no stakes or bags)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:double-rainbow-li",
+      "brand": "Tarptent",
+      "name": "Double Rainbow Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/double-rainbow-li/",
+      "source_url": "https://www.tarptent.com/product/double-rainbow-li/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "743",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Two-person single-wall Dyneema arch tent; freestanding with long trekking poles.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3+",
+        "doors": 2,
+        "peak_height_cm": 107,
+        "published_weight": "26.2 oz / 743 g minimum (DCF floor, carbon poles; no stakes or bags)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:dipole-2-li",
+      "brand": "Tarptent",
+      "name": "Dipole 2+ Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/dipole-2-li/",
+      "source_url": "https://www.tarptent.com/product/dipole-2-li/",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Dipole 2 Li"
+      ],
+      "weight": {
+        "value": "724",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Spacious two-person single-wall Dyneema tent with vertical end walls.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": false,
+        "vestibule_area_m2": 1.76,
+        "published_weight": "25.55 oz / 724 g minimum (DCF floor, trekking poles in place of struts; no stakes or bags)"
+      }
+    },
+    {
+      "source_record_id": "toaks:pot-750",
+      "brand": "TOAKS",
+      "name": "Titanium 750ml Pot",
+      "category": "cookware",
+      "official_url": "https://www.toaksoutdoor.com/products/pot-750",
+      "source_url": "https://www.toaksoutdoor.com/products/pot-750",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.toaksoutdoor.com",
+      "brand_aliases": [
+        "Toaks"
+      ],
+      "model_number": "POT-750",
+      "weight": {
+        "value": "103",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "0.75",
+        "unit": "l"
+      },
+      "description": "Uncoated titanium solo pot with lid; a 110 g canister fits inside.",
+      "specs": {
+        "cookware_material": "titanium",
+        "dimensions": "94 mm dia x 110 mm (internal)",
+        "published_weight": "3.6 oz (103 g) with lid; 3 oz (86 g) pot only"
+      }
+    },
+    {
+      "source_record_id": "toaks:pot-1100",
+      "brand": "TOAKS",
+      "name": "Titanium 1100ml Pot",
+      "category": "cookware",
+      "official_url": "https://www.toaksoutdoor.com/products/pot-1100",
+      "source_url": "https://www.toaksoutdoor.com/products/pot-1100",
+      "verified_at": "2026-11-02",
+      "model_number": "POT-1100",
+      "weight": {
+        "value": "125",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1.1",
+        "unit": "l"
+      },
+      "description": "Larger titanium pot with lid that fits a 230 g canister and small stove.",
+      "specs": {
+        "cookware_material": "titanium",
+        "dimensions": "115 mm dia x 110 mm",
+        "published_weight": "4.4 oz (125g) with lid"
+      }
+    },
+    {
+      "source_record_id": "toaks:cup-450",
+      "brand": "TOAKS",
+      "name": "Titanium 450ml Cup",
+      "category": "utensils",
+      "official_url": "https://www.toaksoutdoor.com/products/cup-450",
+      "source_url": "https://www.toaksoutdoor.com/products/cup-450",
+      "verified_at": "2026-11-02",
+      "model_number": "CUP-450",
+      "weight": {
+        "value": "76",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "0.45",
+        "unit": "l"
+      },
+      "description": "Graduated single-wall titanium mug with folding handles.",
+      "specs": {
+        "dimensions": "79 mm dia x 90 mm"
+      }
+    },
+    {
+      "source_record_id": "toaks:wood-stove-stv-11",
+      "brand": "TOAKS",
+      "name": "Titanium Backpacking Wood Burning Stove",
+      "category": "stoves",
+      "official_url": "https://www.toaksoutdoor.com/products/stv-11",
+      "source_url": "https://www.toaksoutdoor.com/products/stv-11",
+      "verified_at": "2026-11-02",
+      "model_number": "STV-11",
+      "weight": {
+        "value": "225",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Nesting titanium wood-gas stove that burns twigs instead of carried fuel.",
+      "specs": {
+        "fuel_type": "wood",
+        "packed_dimensions": "105 mm dia x 105 mm"
+      }
+    },
+    {
+      "source_record_id": "toaks:cutlery-set-slv-02",
+      "brand": "TOAKS",
+      "name": "Titanium 3-Piece Cutlery Set",
+      "category": "utensils",
+      "official_url": "https://www.toaksoutdoor.com/products/slv-02",
+      "source_url": "https://www.toaksoutdoor.com/products/slv-02",
+      "verified_at": "2026-11-02",
+      "model_number": "SLV-02",
+      "weight": {
+        "value": "49",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Titanium spoon, fork and knife set."
+    },
+    {
+      "source_record_id": "toaks:v-peg-peg-01",
+      "brand": "TOAKS",
+      "name": "Titanium V-shaped Peg",
+      "category": "stakes-guylines",
+      "official_url": "https://www.toaksoutdoor.com/products/peg-01",
+      "source_url": "https://www.toaksoutdoor.com/products/peg-01",
+      "verified_at": "2026-11-02",
+      "model_number": "PEG-01",
+      "weight": {
+        "value": "0.4",
+        "unit": "oz",
+        "basis": "claimed"
+      },
+      "description": "16.5 cm titanium V-section stake.",
+      "specs": {
+        "pieces": 1,
+        "length_cm": 16.5,
+        "published_weight": "0.4 oz (each)"
+      }
+    },
+    {
+      "source_record_id": "big-agnes:copper-spur-ul1",
+      "brand": "Big Agnes",
+      "name": "Copper Spur UL1",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/copper-spur-ul-one",
+      "source_url": "https://www.bigagnes.com/products/copper-spur-ul-one",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "911",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Freestanding solo tent with a large side door and a vestibule that doubles as an awning.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": true,
+        "floor_area_m2": 1.9,
+        "vestibule_area_m2": 0.8,
+        "peak_height_cm": 97,
+        "packed_dimensions": "18\" x 4\" / 45 x 11 cm",
+        "packaged_weight_g": 1090
+      }
+    },
+    {
+      "source_record_id": "big-agnes:copper-spur-ul2",
+      "brand": "Big Agnes",
+      "name": "Copper Spur UL2",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/copper-spur-ul-two",
+      "source_url": "https://www.bigagnes.com/products/copper-spur-ul-two",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "1180",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Popular freestanding two-door tent for two, with awning-style vestibules.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 2.7,
+        "vestibule_area_m2": 1.6,
+        "peak_height_cm": 102,
+        "packed_dimensions": "19.5\" x 4\" / 50 x 11 cm",
+        "packaged_weight_g": 1370
+      }
+    },
+    {
+      "source_record_id": "big-agnes:tiger-wall-ul2",
+      "brand": "Big Agnes",
+      "name": "Tiger Wall UL2",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/tiger-wall-ul-two",
+      "source_url": "https://www.bigagnes.com/products/tiger-wall-ul-two",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "992",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Lighter semi-freestanding two-door tent for two.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 2.6,
+        "vestibule_area_m2": 1.4,
+        "peak_height_cm": 99,
+        "packed_dimensions": "18\" x 5\" / 46 x 13 cm",
+        "packaged_weight_g": 1130
+      }
+    },
+    {
+      "source_record_id": "big-agnes:fly-creek-ul2",
+      "brand": "Big Agnes",
+      "name": "Fly Creek UL2",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/fly-creek-ul-two",
+      "source_url": "https://www.bigagnes.com/products/fly-creek-ul-two",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "859",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Big Agnes' lightest two-person tent: semi-freestanding with a single front door.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 2.6,
+        "vestibule_area_m2": 0.7,
+        "peak_height_cm": 107,
+        "packed_dimensions": "19\" x 6\" / 49 x 16 cm",
+        "packaged_weight_g": 1010
+      }
+    },
+    {
+      "source_record_id": "big-agnes:blacktail-2",
+      "brand": "Big Agnes",
+      "name": "Blacktail 2",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/blacktail-two",
+      "source_url": "https://www.bigagnes.com/products/blacktail-two",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "2270",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Durable, budget-friendly freestanding tent for two.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 3.1,
+        "vestibule_area_m2": 1.6,
+        "peak_height_cm": 107,
+        "packed_dimensions": "21\" x 7\" / 53 x 18 cm",
+        "packaged_weight_g": 2490
+      }
+    },
+    {
+      "source_record_id": "big-agnes:sidewinder-20",
+      "brand": "Big Agnes",
+      "name": "Sidewinder 20°",
+      "category": "sleeping-bags",
+      "official_url": "https://www.bigagnes.com/products/sidewinder-20",
+      "source_url": "https://www.bigagnes.com/products/sidewinder-20",
+      "verified_at": "2026-11-02",
+      "description": "Side-sleeper mummy bag with down on top and synthetic fill underneath.",
+      "specs": {
+        "comfort_rating_c": -1,
+        "limit_rating_c": -7,
+        "temperature_rating_label": "20°F",
+        "insulation_type": "hybrid"
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "1020",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1100",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1230",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:lost-ranger-3n1-15",
+      "brand": "Big Agnes",
+      "name": "Lost Ranger 3N1 15°",
+      "category": "sleeping-bags",
+      "official_url": "https://www.bigagnes.com/products/lost-ranger-3n1-015",
+      "source_url": "https://www.bigagnes.com/products/lost-ranger-3n1-015",
+      "verified_at": "2026-11-02",
+      "description": "Two-bag down system: use the inner or outer bag alone, or both together for colder nights.",
+      "specs": {
+        "comfort_rating_c": -3,
+        "limit_rating_c": -9,
+        "temperature_rating_label": "15°F (combined)",
+        "insulation_type": "down",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "1120",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1260",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1390",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:rapide-sl-insulated",
+      "brand": "Big Agnes",
+      "name": "Rapide SL Insulated",
+      "category": "sleeping-pads",
+      "official_url": "https://www.bigagnes.com/products/rapide-sl-insulated",
+      "source_url": "https://www.bigagnes.com/products/rapide-sl-insulated",
+      "verified_at": "2026-11-02",
+      "description": "Thick quilted-top insulated air pad for three seasons.",
+      "specs": {
+        "r_value": 4.8,
+        "pad_type": "air",
+        "thickness_cm": 11
+      },
+      "variants": [
+        {
+          "name": "20\" x 66\" (petite)",
+          "weight": {
+            "value": "482",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "20\" x 72\" (regular)",
+          "weight": {
+            "value": "510",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "20\" x 78\" (long)",
+          "weight": {
+            "value": "539",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "25\" x 72\" (wide regular)",
+          "weight": {
+            "value": "652",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "25\" x 78\" (wide long)",
+          "weight": {
+            "value": "709",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "40\" x 72\" (double)",
+          "weight": {
+            "value": "1050",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:divide-insulated",
+      "brand": "Big Agnes",
+      "name": "Divide Insulated",
+      "category": "sleeping-pads",
+      "official_url": "https://www.bigagnes.com/products/divide-insulated",
+      "source_url": "https://www.bigagnes.com/products/divide-insulated",
+      "verified_at": "2026-11-02",
+      "description": "Value-priced insulated air pad for three-season trips.",
+      "specs": {
+        "r_value": 4.0,
+        "pad_type": "air",
+        "thickness_cm": 9
+      },
+      "variants": [
+        {
+          "name": "20\" x 72\" (regular)",
+          "weight": {
+            "value": "652",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "25\" x 72\" (wide regular)",
+          "weight": {
+            "value": "850",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "25\" x 78\" (wide long)",
+          "weight": {
+            "value": "936",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "50\" x 78\" (double)",
+          "weight": {
+            "value": "1700",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:skyline-ul-chair",
+      "brand": "Big Agnes",
+      "name": "Skyline UL Chair",
+      "category": "camp-furniture",
+      "official_url": "https://www.bigagnes.com/products/skyline-ul-chair",
+      "source_url": "https://www.bigagnes.com/products/skyline-ul-chair",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "765",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Packable camp chair with a self-levelling centre pole.",
+      "specs": {
+        "max_load_kg": 125,
+        "seat_height_cm": 38,
+        "packaged_weight_g": 794,
+        "packed_dimensions": "3.5\" x 3.5\" x 17\" / 9 x 9 x 43 cm"
+      }
+    },
+    {
+      "source_record_id": "big-agnes:copper-spur-ul3",
+      "brand": "Big Agnes",
+      "name": "Copper Spur UL3",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/copper-spur-ul-three",
+      "source_url": "https://www.bigagnes.com/products/copper-spur-ul-three",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "1520",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Three-person Copper Spur with two doors and awning vestibules.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 3.8,
+        "vestibule_area_m2": 1.6,
+        "peak_height_cm": 109,
+        "packed_dimensions": "21\" x 5\" / 53 x 13 cm",
+        "packaged_weight_g": 1720
+      }
+    },
+    {
+      "source_record_id": "big-agnes:tiger-wall-ul1",
+      "brand": "Big Agnes",
+      "name": "Tiger Wall UL1",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/tiger-wall-ul-one",
+      "source_url": "https://www.bigagnes.com/products/tiger-wall-ul-one",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "850",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Solo semi-freestanding side-entry tent.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 1.8,
+        "vestibule_area_m2": 0.7,
+        "packaged_weight_g": 964,
+        "packed_dimensions": "17\" x 5.5\" / 43 x 14 cm"
+      }
+    },
+    {
+      "source_record_id": "big-agnes:tiger-wall-ul3",
+      "brand": "Big Agnes",
+      "name": "Tiger Wall UL3",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/tiger-wall-ul-three",
+      "source_url": "https://www.bigagnes.com/products/tiger-wall-ul-three",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "1190",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Light semi-freestanding tent for three.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 3.5,
+        "vestibule_area_m2": 1.4,
+        "peak_height_cm": 107,
+        "packed_dimensions": "5.5\" x 19\" / 14 x 48 cm",
+        "packaged_weight_g": 1330
+      }
+    },
+    {
+      "source_record_id": "big-agnes:fly-creek-ul1",
+      "brand": "Big Agnes",
+      "name": "Fly Creek UL1",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/fly-creek-ul-one",
+      "source_url": "https://www.bigagnes.com/products/fly-creek-ul-one",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "754",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Big Agnes' lightest solo tent: semi-freestanding with a front door.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 1.9,
+        "vestibule_area_m2": 0.5,
+        "peak_height_cm": 102,
+        "packed_dimensions": "18\" x 5\" / 46 x 13 cm",
+        "packaged_weight_g": 900
+      }
+    },
+    {
+      "source_record_id": "big-agnes:blacktail-3",
+      "brand": "Big Agnes",
+      "name": "Blacktail 3",
+      "category": "tents",
+      "official_url": "https://www.bigagnes.com/products/blacktail-three",
+      "source_url": "https://www.bigagnes.com/products/blacktail-three",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.bigagnes.com",
+      "weight": {
+        "value": "2550",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Durable, budget-friendly freestanding tent for three.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 4.1,
+        "vestibule_area_m2": 1.6,
+        "peak_height_cm": 112,
+        "packed_dimensions": "22\" x 7\" / 56 x 18 cm",
+        "packaged_weight_g": 2780
+      }
+    },
+    {
+      "source_record_id": "big-agnes:torchlight-exp-20",
+      "brand": "Big Agnes",
+      "name": "Torchlight EXP 20°",
+      "category": "sleeping-bags",
+      "official_url": "https://www.bigagnes.com/products/torchlight-exp-20",
+      "source_url": "https://www.bigagnes.com/products/torchlight-exp-20",
+      "verified_at": "2026-11-02",
+      "description": "Down mummy with zip-in panels that widen the bag for roomier sleep.",
+      "specs": {
+        "comfort_rating_c": -1,
+        "limit_rating_c": -7,
+        "temperature_rating_label": "20°F",
+        "insulation_type": "down",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "1050",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 463
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1130",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 510
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1250",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 582
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:fly-creek-ul-25",
+      "brand": "Big Agnes",
+      "name": "Fly Creek UL 25°",
+      "category": "sleeping-bags",
+      "official_url": "https://www.bigagnes.com/products/fly-creek-ul-25",
+      "source_url": "https://www.bigagnes.com/products/fly-creek-ul-25",
+      "verified_at": "2026-11-02",
+      "description": "Light 850-fill down mummy for three-season backpacking.",
+      "specs": {
+        "comfort_rating_c": 2,
+        "limit_rating_c": -4,
+        "temperature_rating_label": "25°F",
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "722",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 482
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "799",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 539
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "big-agnes:rapide-sl-pillow",
+      "brand": "Big Agnes",
+      "name": "Rapide SL Pillow",
+      "category": "pillows",
+      "official_url": "https://www.bigagnes.com/products/rapide-sl-pillow",
+      "source_url": "https://www.bigagnes.com/products/rapide-sl-pillow",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "45",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Tiny inflatable pillow.",
+      "specs": {
+        "pad_type": "air",
+        "dimensions": "16\" x 10\" x 4\" / 41 x 25 x 10 cm"
+      }
+    },
+    {
+      "source_record_id": "big-agnes:mica-basin-chair",
+      "brand": "Big Agnes",
+      "name": "Mica Basin Camp Chair",
+      "category": "camp-furniture",
+      "official_url": "https://www.bigagnes.com/products/mica-basin-chair",
+      "source_url": "https://www.bigagnes.com/products/mica-basin-chair",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "992",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Roomier, higher-backed packable chair.",
+      "specs": {
+        "max_load_kg": 136,
+        "seat_height_cm": 41,
+        "packaged_weight_g": 1050
+      }
+    },
+    {
+      "source_record_id": "nemo:dagger-osmo-3p",
+      "brand": "NEMO",
+      "name": "Dagger OSMO 3P",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/dagger-osmo",
+      "source_url": "https://www.nemoequipment.com/products/dagger-osmo",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.nemoequipment.com",
+      "weight": {
+        "value": "1740",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Three-person version of the roomy two-door Dagger OSMO.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 4.0,
+        "vestibule_area_m2": 2.2,
+        "peak_height_cm": 111,
+        "packed_dimensions": "51 x 18 x 9 cm",
+        "packaged_weight_g": 2000
+      }
+    },
+    {
+      "source_record_id": "nemo:hornet-elite-osmo",
+      "brand": "NEMO",
+      "name": "Hornet Elite OSMO",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/hornet-elite-osmo",
+      "source_url": "https://www.nemoequipment.com/products/hornet-elite-osmo",
+      "verified_at": "2026-11-02",
+      "description": "NEMO's lightest semi-freestanding tent, for gram-counting trips.",
+      "specs": {
+        "seasons": "3",
+        "freestanding": false
+      },
+      "variants": [
+        {
+          "name": "1-Person",
+          "weight": {
+            "value": "657",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 1,
+            "doors": 1,
+            "floor_area_m2": 2.0,
+            "vestibule_area_m2": 0.6,
+            "peak_height_cm": 98,
+            "packaged_weight_g": 812
+          }
+        },
+        {
+          "name": "2-Person",
+          "weight": {
+            "value": "779",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 2,
+            "doors": 2,
+            "floor_area_m2": 2.5,
+            "vestibule_area_m2": 1.2,
+            "peak_height_cm": 94,
+            "packaged_weight_g": 935
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:aurora",
+      "brand": "NEMO",
+      "name": "Aurora Backpacking Tent & Footprint",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/aurora-backpacking-tent-and-footprint",
+      "source_url": "https://www.nemoequipment.com/products/aurora-backpacking-tent-and-footprint",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Aurora"
+      ],
+      "description": "Affordable freestanding tent that comes with its footprint.",
+      "specs": {
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true
+      },
+      "variants": [
+        {
+          "name": "2-Person",
+          "weight": {
+            "value": "2130",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 2,
+            "floor_area_m2": 3.0,
+            "vestibule_area_m2": 1.8,
+            "peak_height_cm": 112,
+            "packaged_weight_g": 2600
+          }
+        },
+        {
+          "name": "3-Person",
+          "weight": {
+            "value": "2600",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 3,
+            "floor_area_m2": 4.1,
+            "vestibule_area_m2": 1.8,
+            "peak_height_cm": 112,
+            "packaged_weight_g": 3100
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:disco-15-mens",
+      "brand": "NEMO",
+      "name": "Disco 15 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/disco-mens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/disco-mens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Disco 15"
+      ],
+      "description": "Spoon-shaped down bag with extra room at the elbows and knees for side sleepers.",
+      "specs": {
+        "temperature_rating_label": "15°F",
+        "insulation_type": "down",
+        "fill_power": 650,
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1230",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 642
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1280",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 680
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1330",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 700
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "1400",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 750
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:forte-20-mens",
+      "brand": "NEMO",
+      "name": "Forte 20 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/forte-endless-promise-mens-synthetic-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/forte-endless-promise-mens-synthetic-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Forte 20"
+      ],
+      "description": "Spoon-shaped synthetic bag, a lower-cost, damp-tolerant option.",
+      "specs": {
+        "temperature_rating_label": "20°F",
+        "insulation_type": "synthetic",
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1500",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1640",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1630",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "1800",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:tensor-all-season",
+      "brand": "NEMO",
+      "name": "Tensor All-Season",
+      "category": "sleeping-pads",
+      "official_url": "https://www.nemoequipment.com/products/tensor-all-season-insulated-sleeping-pad",
+      "source_url": "https://www.nemoequipment.com/products/tensor-all-season-insulated-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "description": "Quiet 3.5-inch insulated air pad warm enough for winter.",
+      "specs": {
+        "r_value": 5.4,
+        "pad_type": "air",
+        "thickness_cm": 8.9
+      },
+      "variants": [
+        {
+          "name": "Regular Mummy",
+          "weight": {
+            "value": "400",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "440",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "530",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "580",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:tensor-trail",
+      "brand": "NEMO",
+      "name": "Tensor Trail",
+      "category": "sleeping-pads",
+      "official_url": "https://www.nemoequipment.com/products/tensor-trail-insulated-ultralight-sleeping-pad",
+      "source_url": "https://www.nemoequipment.com/products/tensor-trail-insulated-ultralight-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "description": "Lighter three-season version of the Tensor air pad.",
+      "specs": {
+        "r_value": 2.8,
+        "pad_type": "air",
+        "thickness_cm": 8.9
+      },
+      "variants": [
+        {
+          "name": "Regular Mummy",
+          "weight": {
+            "value": "369",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "395",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "491",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "520",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:switchback",
+      "brand": "NEMO",
+      "name": "Switchback",
+      "category": "sleeping-pads",
+      "official_url": "https://www.nemoequipment.com/products/switchback-ultralight-sleeping-pad",
+      "source_url": "https://www.nemoequipment.com/products/switchback-ultralight-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "description": "Folding closed-cell foam pad that can't puncture.",
+      "specs": {
+        "r_value": 2,
+        "pad_type": "foam",
+        "thickness_cm": 2.3
+      },
+      "variants": [
+        {
+          "name": "Short",
+          "weight": {
+            "value": "300",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "packed_dimensions": "51 x 13 x 10.75 cm"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "415",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "packed_dimensions": "51 x 13 x 14 cm"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:fillo-elite",
+      "brand": "NEMO",
+      "name": "Fillo Elite",
+      "category": "pillows",
+      "official_url": "https://www.nemoequipment.com/products/fillo-elite-backpacking-pillow",
+      "source_url": "https://www.nemoequipment.com/products/fillo-elite-backpacking-pillow",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "80",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Ultralight inflatable pillow with a thin synthetic-fill layer and soft cover.",
+      "specs": {
+        "pad_type": "hybrid",
+        "packed_dimensions": "10 x 8 cm dia"
+      }
+    },
+    {
+      "source_record_id": "nemo:fillo",
+      "brand": "NEMO",
+      "name": "Fillo",
+      "category": "pillows",
+      "official_url": "https://www.nemoequipment.com/products/fillo-backpacking-pillow",
+      "source_url": "https://www.nemoequipment.com/products/fillo-backpacking-pillow",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "260",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Plusher air-and-foam camp pillow.",
+      "specs": {
+        "pad_type": "hybrid",
+        "packed_dimensions": "15 x 10 cm dia"
+      }
+    },
+    {
+      "source_record_id": "nemo:moonlite-elite",
+      "brand": "NEMO",
+      "name": "Moonlite Elite Reclining Chair",
+      "category": "camp-furniture",
+      "official_url": "https://www.nemoequipment.com/products/moonlite-elite-reclining-camp-chair",
+      "source_url": "https://www.nemoequipment.com/products/moonlite-elite-reclining-camp-chair",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Moonlite Elite"
+      ],
+      "weight": {
+        "value": "552",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light reclining backpacking chair with a mesh seat.",
+      "specs": {
+        "packed_dimensions": "32 x 12 x 9 cm"
+      }
+    },
+    {
+      "source_record_id": "nemo:hornet-osmo-1p",
+      "brand": "NEMO",
+      "name": "Hornet OSMO 1P",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/hornet-osmo",
+      "source_url": "https://www.nemoequipment.com/products/hornet-osmo",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "822",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light semi-freestanding solo tent.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 1.9,
+        "vestibule_area_m2": 0.7,
+        "peak_height_cm": 98,
+        "packaged_weight_g": 1000
+      }
+    },
+    {
+      "source_record_id": "nemo:hornet-osmo-3p",
+      "brand": "NEMO",
+      "name": "Hornet OSMO 3P",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/hornet-osmo",
+      "source_url": "https://www.nemoequipment.com/products/hornet-osmo",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1280",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light semi-freestanding tent for three.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 3.7,
+        "vestibule_area_m2": 1.6,
+        "peak_height_cm": 111,
+        "packaged_weight_g": 1500
+      }
+    },
+    {
+      "source_record_id": "nemo:kunai",
+      "brand": "NEMO",
+      "name": "Kunai",
+      "category": "tents",
+      "official_url": "https://www.nemoequipment.com/products/kunai-3-4-season-backpacking-tent",
+      "source_url": "https://www.nemoequipment.com/products/kunai-3-4-season-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "description": "Sturdy 3-4 season tent for shoulder-season and alpine trips.",
+      "specs": {
+        "seasons": "3+",
+        "doors": 1,
+        "freestanding": true
+      },
+      "variants": [
+        {
+          "name": "2-Person",
+          "weight": {
+            "value": "1760",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 2,
+            "floor_area_m2": 2.4,
+            "vestibule_area_m2": 0.7,
+            "peak_height_cm": 112,
+            "packaged_weight_g": 2000
+          }
+        },
+        {
+          "name": "3-Person",
+          "weight": {
+            "value": "2350",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 3,
+            "floor_area_m2": 3.5,
+            "vestibule_area_m2": 1.2,
+            "peak_height_cm": 114,
+            "packaged_weight_g": 2600
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:disco-30-mens",
+      "brand": "NEMO",
+      "name": "Disco 30 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/disco-mens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/disco-mens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Warmer-weather version of the spoon-shaped Disco.",
+      "specs": {
+        "temperature_rating_label": "30°F",
+        "insulation_type": "down",
+        "gender_fit": "mens",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "880",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 320
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "925",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 335
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "950",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 355
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "1000",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 380
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:disco-15-womens",
+      "brand": "NEMO",
+      "name": "Disco 15 (Women's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/disco-womens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/disco-womens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Women's-specific spoon-shaped down bag with extra fill.",
+      "specs": {
+        "temperature_rating_label": "15°F",
+        "insulation_type": "down",
+        "gender_fit": "womens",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1510",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 910
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1580",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 960
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1650",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 1000
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:disco-30-womens",
+      "brand": "NEMO",
+      "name": "Disco 30 (Women's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/disco-womens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/disco-womens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Women's three-season spoon-shaped down bag.",
+      "specs": {
+        "temperature_rating_label": "30°F",
+        "insulation_type": "down",
+        "gender_fit": "womens",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1030",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 465
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1080",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 490
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1110",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 515
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:forte-35-mens",
+      "brand": "NEMO",
+      "name": "Forte 35 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/forte-endless-promise-mens-synthetic-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/forte-endless-promise-mens-synthetic-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Summer weight synthetic spoon-shaped bag.",
+      "specs": {
+        "temperature_rating_label": "35°F",
+        "insulation_type": "synthetic",
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "920",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1000",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1000",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "1080",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:riff-15-mens",
+      "brand": "NEMO",
+      "name": "Riff 15 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/riff-mens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/riff-mens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Lighter spoon-shaped down bag with higher-fill down.",
+      "specs": {
+        "temperature_rating_label": "15°F",
+        "insulation_type": "down",
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1120",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 540
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1200",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 593
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:riff-30-mens",
+      "brand": "NEMO",
+      "name": "Riff 30 (Men's)",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/riff-mens-endless-promise-down-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/riff-mens-endless-promise-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Three-season version of the Riff.",
+      "specs": {
+        "temperature_rating_label": "30°F",
+        "insulation_type": "down",
+        "gender_fit": "mens"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "845",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 295
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "910",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 325
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:sonic-0",
+      "brand": "NEMO",
+      "name": "Sonic 0",
+      "category": "sleeping-bags",
+      "official_url": "https://www.nemoequipment.com/products/sonic-ultralight-mummy-sleeping-bag",
+      "source_url": "https://www.nemoequipment.com/products/sonic-ultralight-mummy-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "description": "Cold-weather down mummy with venting for warmer nights.",
+      "specs": {
+        "temperature_rating_label": "0°F",
+        "insulation_type": "down",
+        "gender_fit": null
+      },
+      "variants": [
+        {
+          "name": "Short",
+          "weight": {
+            "value": "1420",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 770
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1470",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 790
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "1620",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "fill_weight_g": 835
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:tensor-elite",
+      "brand": "NEMO",
+      "name": "Tensor Elite",
+      "category": "sleeping-pads",
+      "official_url": "https://www.nemoequipment.com/products/tensor-elite-ultralight-sleeping-pad",
+      "source_url": "https://www.nemoequipment.com/products/tensor-elite-ultralight-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "description": "Ultralight summer air pad.",
+      "specs": {
+        "r_value": 2.4,
+        "pad_type": "air",
+        "thickness_cm": 7.6
+      },
+      "variants": [
+        {
+          "name": "Short Mummy",
+          "weight": {
+            "value": "215",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Mummy",
+          "weight": {
+            "value": "240",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide Mummy",
+          "weight": {
+            "value": "295",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:tensor-extreme",
+      "brand": "NEMO",
+      "name": "Tensor Extreme Conditions",
+      "category": "sleeping-pads",
+      "official_url": "https://www.nemoequipment.com/products/tensor-extreme-ultralight-sleeping-pad",
+      "source_url": "https://www.nemoequipment.com/products/tensor-extreme-ultralight-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Tensor Extreme"
+      ],
+      "description": "Winter-warm insulated air pad.",
+      "specs": {
+        "r_value": 8.5,
+        "pad_type": "air",
+        "thickness_cm": 8.9
+      },
+      "variants": [
+        {
+          "name": "Regular Mummy",
+          "weight": {
+            "value": "472",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "505",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "625",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        },
+        {
+          "name": "Long Wide",
+          "weight": {
+            "value": "662",
+            "unit": "g",
+            "basis": "minimum"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "nemo:moonlite-reclining-chair",
+      "brand": "NEMO",
+      "name": "Moonlite Reclining Chair",
+      "category": "camp-furniture",
+      "official_url": "https://www.nemoequipment.com/products/moonlite-reclining-camp-chair",
+      "source_url": "https://www.nemoequipment.com/products/moonlite-reclining-camp-chair",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Moonlite"
+      ],
+      "weight": {
+        "value": "872",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Reclining camp chair, heavier and cheaper than the Elite.",
+      "specs": {
+        "packed_dimensions": "37 x 12 x 11 cm"
+      }
+    },
+    {
+      "source_record_id": "msr:elixir-2",
+      "brand": "MSR",
+      "name": "Elixir 2",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/elixir-2-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/elixir-2-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "2330",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Budget-friendly freestanding two-person tent that ships with a footprint.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "3",
+        "freestanding": true,
+        "floor_area_m2": 2.82,
+        "vestibule_area_m2": 1.41,
+        "peak_height_cm": 104,
+        "packaged_weight_g": 2820,
+        "packed_dimensions": "20 x 6.5 in (51 x 17 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:access-2",
+      "brand": "MSR",
+      "name": "Access 2",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/access-2-two-person-four-season-ski-touring-tent",
+      "source_url": "https://cascadedesigns.com/products/access-2-two-person-four-season-ski-touring-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1640",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light four-season tent for ski touring and winter trips.",
+      "specs": {
+        "capacity_persons": 2,
+        "seasons": "4",
+        "freestanding": true,
+        "floor_area_m2": 2.69,
+        "vestibule_area_m2": 1.62,
+        "peak_height_cm": 107,
+        "packaged_weight_g": 1860,
+        "packed_dimensions": "18 x 6 in (46 x 15 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:hubba-hubba-hd-3",
+      "brand": "MSR",
+      "name": "Hubba Hubba HD 3",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/hubba-hubba-hd-3-person-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/hubba-hubba-hd-3-person-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "2200",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Three-person version of the durable Hubba Hubba HD.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "freestanding": true,
+        "published_weight": "Minimum weight is 4 lb. 14 oz. (2.20 kg)"
+      }
+    },
+    {
+      "source_record_id": "msr:windpro-ii",
+      "brand": "MSR",
+      "name": "WindPro II",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/windpro-ii-stove",
+      "source_url": "https://cascadedesigns.com/products/windpro-ii-stove",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "190",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Remote-canister stove that can run the canister inverted for cold weather.",
+      "specs": {
+        "fuel_type": "canister",
+        "boil_time_min": 3.6,
+        "burn_time_min": 70,
+        "packaged_weight_g": 290,
+        "dimensions": "3 x 4 x 6 in (7.6 x 10.2 x 15.2 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:trail-mini-duo",
+      "brand": "MSR",
+      "name": "Trail Mini Duo Cook Set",
+      "category": "cookware",
+      "official_url": "https://cascadedesigns.com/products/trail-mini-duo-cook-set",
+      "source_url": "https://cascadedesigns.com/products/trail-mini-duo-cook-set",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "289",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1.2",
+        "unit": "l"
+      },
+      "description": "Aluminium 1.2 L pot with a bowl and strainer lid, sized for two.",
+      "specs": {
+        "cookware_material": "aluminum",
+        "packed_dimensions": "5 x 5.5 in (12.7 x 14 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:titan-cup-450",
+      "brand": "MSR",
+      "name": "Titan Cup 450mL",
+      "category": "utensils",
+      "official_url": "https://cascadedesigns.com/products/titan-cup-450ml",
+      "source_url": "https://cascadedesigns.com/products/titan-cup-450ml",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "70",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "0.45",
+        "unit": "l"
+      },
+      "description": "Titanium cup that also works as a tiny pot; nests inside the Titan Kettle.",
+      "specs": {
+        "packed_dimensions": "9.1 x 9.1 cm"
+      }
+    },
+    {
+      "source_record_id": "msr:isopro",
+      "brand": "MSR",
+      "name": "IsoPro Fuel",
+      "category": "fuel-accessories",
+      "official_url": "https://cascadedesigns.com/products/msr-isopro-fuel",
+      "source_url": "https://cascadedesigns.com/products/msr-isopro-fuel",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "IsoPro"
+      ],
+      "description": "Isobutane-propane canister fuel; weights are for full canisters.",
+      "variants": [
+        {
+          "name": "110 g canister",
+          "weight": {
+            "value": "210",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "227 g canister",
+          "weight": {
+            "value": "371",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "450 g canister",
+          "weight": {
+            "value": "652",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "msr:trailshot",
+      "brand": "MSR",
+      "name": "TrailShot",
+      "category": "water-treatment",
+      "official_url": "https://cascadedesigns.com/products/trailshot-pocket-sized-water-filter",
+      "source_url": "https://cascadedesigns.com/products/trailshot-pocket-sized-water-filter",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "142",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Pocket hollow-fibre filter you squeeze to drink straight from a stream.",
+      "specs": {
+        "treatment_type": "filter",
+        "pore_size_micron": 0.2,
+        "flow_rate_l_per_min": 1,
+        "lifespan_l": 2000
+      }
+    },
+    {
+      "source_record_id": "msr:mini-groundhog-stake",
+      "brand": "MSR",
+      "name": "Mini Groundhog Stake",
+      "category": "stakes-guylines",
+      "official_url": "https://cascadedesigns.com/products/mini-groundhog-stakes",
+      "source_url": "https://cascadedesigns.com/products/mini-groundhog-stakes",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Mini Groundhog"
+      ],
+      "weight": {
+        "value": "9.4",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Short Y-beam aluminium stake; weight is per stake (sold in kits of 6).",
+      "specs": {
+        "pieces": 1,
+        "published_weight": "Weight of single stake = 9.40g (sold as a kit of 6)"
+      }
+    },
+    {
+      "source_record_id": "therm-a-rest:trail-pro",
+      "brand": "Therm-a-Rest",
+      "name": "Trail Pro",
+      "category": "sleeping-pads",
+      "official_url": "https://cascadedesigns.com/products/trail-pro-sleeping-pad",
+      "source_url": "https://cascadedesigns.com/products/trail-pro-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "description": "Comfortable self-inflating foam-and-air pad.",
+      "specs": {
+        "r_value": 4.4,
+        "pad_type": "self_inflating",
+        "thickness_cm": 7.6,
+        "length_cm": 183
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "850",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "width_cm": 51,
+            "packed_dimensions": "11 x 8.8 in (28 x 22 cm)"
+          }
+        },
+        {
+          "name": "Regular Wide",
+          "weight": {
+            "value": "1080",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "width_cm": 64,
+            "packed_dimensions": "13 x 9.3 in (33 x 23 cm)"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "therm-a-rest:air-head-lite",
+      "brand": "Therm-a-Rest",
+      "name": "Air Head Lite Pillow",
+      "category": "pillows",
+      "official_url": "https://cascadedesigns.com/products/air-head-lite-pillow",
+      "source_url": "https://cascadedesigns.com/products/air-head-lite-pillow",
+      "verified_at": "2026-11-02",
+      "description": "Light inflatable pillow with a soft brushed top.",
+      "specs": {
+        "pad_type": "air"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "60",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "value": "80",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "therm-a-rest:corus-20f",
+      "brand": "Therm-a-Rest",
+      "name": "Corus 20F/-6C Quilt",
+      "category": "quilts",
+      "official_url": "https://cascadedesigns.com/products/corus-20f-6c-down-quilt",
+      "source_url": "https://cascadedesigns.com/products/corus-20f-6c-down-quilt",
+      "verified_at": "2026-11-02",
+      "description": "650-fill down quilt with a sewn footbox and pad straps.",
+      "specs": {
+        "comfort_rating_c": 0,
+        "limit_rating_c": -6,
+        "temperature_rating_label": "20°F/-6°C",
+        "insulation_type": "down",
+        "fill_power": 650,
+        "packed_dimensions": "7.5 x 11.5 in (19 x 29 cm)"
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "735",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 530
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "value": "815",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 560
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "platypus:gravityworks",
+      "brand": "Platypus",
+      "name": "GravityWorks Water Filter System",
+      "category": "water-treatment",
+      "official_url": "https://cascadedesigns.com/products/gravityworks-water-filter-system",
+      "source_url": "https://cascadedesigns.com/products/gravityworks-water-filter-system",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "GravityWorks"
+      ],
+      "weight": {
+        "value": "326",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Two-bag gravity filter for groups; fill, hang and wait.",
+      "specs": {
+        "treatment_type": "gravity",
+        "flow_rate_l_per_min": 1.75,
+        "published_weight": "System weighs 11.5 oz. (326 g)"
+      }
+    },
+    {
+      "source_record_id": "msr:hubba-hubba-lt-1",
+      "brand": "MSR",
+      "name": "Hubba Hubba LT 1",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/hubba-hubba-lt-1-person-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/hubba-hubba-lt-1-person-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1070",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Airy, mostly-mesh solo version of the Hubba Hubba.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": true,
+        "floor_area_m2": 1.82,
+        "vestibule_area_m2": 0.74,
+        "peak_height_cm": 99,
+        "packaged_weight_g": 1230,
+        "packed_dimensions": "18 x 5 in (46 x 13 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:hubba-hubba-lt-3",
+      "brand": "MSR",
+      "name": "Hubba Hubba LT 3",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/hubba-hubba-lt-3-person-tent",
+      "source_url": "https://cascadedesigns.com/products/hubba-hubba-lt-3-person-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1980",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Spacious three-person Hubba Hubba that can squeeze in four.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": true,
+        "floor_area_m2": 4.35,
+        "vestibule_area_m2": 1.51,
+        "peak_height_cm": 107,
+        "packaged_weight_g": 2170,
+        "packed_dimensions": "20 x 6.5 in (51 x 17 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:freelite-1",
+      "brand": "MSR",
+      "name": "FreeLite 1",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/freelite-1-person-ultralight-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/freelite-1-person-ultralight-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "740",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Ultralight semi-freestanding solo tent with a rectangular floor.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 1.85,
+        "vestibule_area_m2": 0.74,
+        "peak_height_cm": 100,
+        "packaged_weight_g": 890,
+        "packed_dimensions": "18 x 4 in"
+      }
+    },
+    {
+      "source_record_id": "msr:freelite-3",
+      "brand": "MSR",
+      "name": "FreeLite 3",
+      "category": "tents",
+      "official_url": "https://cascadedesigns.com/products/freelite-3-person-ultralight-backpacking-tent",
+      "source_url": "https://cascadedesigns.com/products/freelite-3-person-ultralight-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1070",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Ultralight semi-freestanding tent for three.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "3",
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 3.57,
+        "vestibule_area_m2": 1.4,
+        "peak_height_cm": 109,
+        "packaged_weight_g": 1230
+      }
+    },
+    {
+      "source_record_id": "msr:pocketrocket-stove-kit",
+      "brand": "MSR",
+      "name": "PocketRocket Stove Kit",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/pocketrocket-stove-kit",
+      "source_url": "https://cascadedesigns.com/products/pocketrocket-stove-kit",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "732",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "PocketRocket stove with a 2 L pot and two mug-and-bowl sets for two people.",
+      "specs": {
+        "fuel_type": "canister",
+        "boil_time_min": 3.5,
+        "burn_time_min": 60,
+        "packed_dimensions": "5.5 x 6.25 in (14 x 15.9 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:switch",
+      "brand": "MSR",
+      "name": "Switch Stove System",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/switch-stove-system",
+      "source_url": "https://cascadedesigns.com/products/switch-stove-system",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Switch"
+      ],
+      "weight": {
+        "value": "392",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Canister stove with a 1 L pot that also takes your own cookware.",
+      "specs": {
+        "fuel_type": "canister",
+        "burn_time_min": 84.5,
+        "integrated_system": true,
+        "published_weight": "13.8 oz (392 g); stove only 4.1 oz (117 g)"
+      }
+    },
+    {
+      "source_record_id": "msr:windburner-duo",
+      "brand": "MSR",
+      "name": "WindBurner Duo Stove System",
+      "category": "stoves",
+      "official_url": "https://cascadedesigns.com/products/windburner-duo-stove-system",
+      "source_url": "https://cascadedesigns.com/products/windburner-duo-stove-system",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "597",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "capacity": {
+        "value": "1.8",
+        "unit": "l"
+      },
+      "description": "Windproof radiant-burner system with a 1.8 L pot for two.",
+      "specs": {
+        "fuel_type": "canister",
+        "integrated_system": true,
+        "packaged_weight_g": 605
+      }
+    },
+    {
+      "source_record_id": "msr:titan-kettle-1400",
+      "brand": "MSR",
+      "name": "Titan Kettle 1400mL",
+      "category": "cookware",
+      "official_url": "https://cascadedesigns.com/products/titan-kettle-1400ml",
+      "source_url": "https://cascadedesigns.com/products/titan-kettle-1400ml",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "150",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1.4",
+        "unit": "l"
+      },
+      "description": "Titanium pot for two with a pour spout and graduations.",
+      "specs": {
+        "cookware_material": "titanium",
+        "packed_dimensions": "13.8 x 13 cm"
+      }
+    },
+    {
+      "source_record_id": "msr:ceramic-solo-pot",
+      "brand": "MSR",
+      "name": "Ceramic Solo Pot",
+      "category": "cookware",
+      "official_url": "https://cascadedesigns.com/products/ceramic-solo-pot",
+      "source_url": "https://cascadedesigns.com/products/ceramic-solo-pot",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "210",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1.3",
+        "unit": "l"
+      },
+      "description": "1.3 L aluminium pot with a ceramic nonstick coating.",
+      "specs": {
+        "cookware_material": "aluminum",
+        "packed_dimensions": "6.2 x 3.8 in (15.7 x 9.7 cm)"
+      }
+    },
+    {
+      "source_record_id": "msr:trail-lite-solo",
+      "brand": "MSR",
+      "name": "Trail Lite Solo Cook Set",
+      "category": "cookware",
+      "official_url": "https://cascadedesigns.com/products/trail-lite-solo-cook-set",
+      "source_url": "https://cascadedesigns.com/products/trail-lite-solo-cook-set",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "360",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1.3",
+        "unit": "l"
+      },
+      "description": "1.3 L aluminium pot with an insulated mug and bowl that nest inside.",
+      "specs": {
+        "cookware_material": "aluminum"
+      }
+    },
+    {
+      "source_record_id": "msr:guardian-gravity",
+      "brand": "MSR",
+      "name": "Guardian Gravity Purifier",
+      "category": "water-treatment",
+      "official_url": "https://cascadedesigns.com/products/guardian-gravity-purifier",
+      "source_url": "https://cascadedesigns.com/products/guardian-gravity-purifier",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "530",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Hands-free 10 L gravity purifier that also removes viruses.",
+      "specs": {
+        "treatment_type": "purifier"
+      }
+    },
+    {
+      "source_record_id": "platypus:quickdraw-3l-gravity",
+      "brand": "Platypus",
+      "name": "QuickDraw 3L Gravity Filter System",
+      "category": "water-treatment",
+      "official_url": "https://cascadedesigns.com/products/quickdraw-3l-gravity-filter-system",
+      "source_url": "https://cascadedesigns.com/products/quickdraw-3l-gravity-filter-system",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "136",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light gravity kit built around the QuickDraw filter; converts to squeeze use.",
+      "specs": {
+        "treatment_type": "gravity",
+        "pore_size_micron": 0.2,
+        "flow_rate_l_per_min": 3,
+        "lifespan_l": 1000
+      }
+    },
+    {
+      "source_record_id": "sea-to-summit:ascent-minus1c",
+      "brand": "Sea to Summit",
+      "name": "Ascent Down Sleeping Bag -1°C",
+      "category": "sleeping-bags",
+      "official_url": "https://seatosummit.com/products/the-ascent-down-sleeping-bag",
+      "source_url": "https://seatosummit.com/products/the-ascent-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Ascent 30F",
+        "Ascent"
+      ],
+      "description": "Lightweight 750-fill down bag with a full-length zip that opens flat.",
+      "specs": {
+        "limit_rating_c": -1,
+        "temperature_rating_label": "-1°C / 30°F (ISO lower limit)",
+        "insulation_type": "down",
+        "fill_power": 750
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "847",
+            "unit": "g",
+            "basis": "packaged"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:trek-30f",
+      "brand": "Sea to Summit",
+      "name": "Trek Down Sleeping Bag 30°F",
+      "category": "sleeping-bags",
+      "official_url": "https://seatosummit.com/products/trek-down-sleeping-bag",
+      "source_url": "https://seatosummit.com/products/trek-down-sleeping-bag",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Trek -1C",
+        "Trek"
+      ],
+      "description": "Versatile 650-fill down bag at a lower price than the Ascent.",
+      "specs": {
+        "limit_rating_c": -1,
+        "temperature_rating_label": "30°F / -1°C (ISO lower limit)",
+        "insulation_type": "down",
+        "fill_power": 650
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "1197",
+            "unit": "g",
+            "basis": "packaged"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:ember-45f",
+      "brand": "Sea to Summit",
+      "name": "Ember Down Quilt 45°F",
+      "category": "quilts",
+      "official_url": "https://seatosummit.com/products/the-ember-down-quilt",
+      "source_url": "https://seatosummit.com/products/the-ember-down-quilt",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Ember"
+      ],
+      "description": "850-fill down quilt for warm-weather trips.",
+      "specs": {
+        "limit_rating_c": 7,
+        "temperature_rating_label": "45°F / 7°C",
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "Regular",
+          "weight": {
+            "value": "464",
+            "unit": "g",
+            "basis": "packaged"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:ether-light-xr-insulated",
+      "brand": "Sea to Summit",
+      "name": "Ether Light XR Insulated",
+      "category": "sleeping-pads",
+      "official_url": "https://seatosummit.com/products/ether-light-xr-insulated-air-sleeping-pad",
+      "source_url": "https://seatosummit.com/products/ether-light-xr-insulated-air-sleeping-pad",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "500",
+        "unit": "g",
+        "basis": "packaged"
+      },
+      "description": "Thick, quilted insulated air pad for extended three-season use.",
+      "specs": {
+        "r_value": 4.1,
+        "pad_type": "air",
+        "thickness_cm": 10,
+        "packed_dimensions": "20.5 x 11 x 11 cm",
+        "published_weight": "Packed weight 500 g (default size shown on page)"
+      }
+    },
+    {
+      "source_record_id": "sea-to-summit:camp-si",
+      "brand": "Sea to Summit",
+      "name": "Camp Self Inflating Mat",
+      "category": "sleeping-pads",
+      "official_url": "https://seatosummit.com/products/camp-self-inflating-pad",
+      "source_url": "https://seatosummit.com/products/camp-self-inflating-pad",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Camp SI"
+      ],
+      "weight": {
+        "value": "881",
+        "unit": "g",
+        "basis": "packaged"
+      },
+      "description": "Durable recycled-fabric self-inflating mat for car camping and short hikes.",
+      "specs": {
+        "r_value": 4.2,
+        "pad_type": "self_inflating",
+        "thickness_cm": 4,
+        "packed_dimensions": "30 x 15 x 15 cm",
+        "published_weight": "Packed weight 881 g (default size shown on page)"
+      }
+    },
+    {
+      "source_record_id": "sea-to-summit:ultra-sil-dry-bag",
+      "brand": "Sea to Summit",
+      "name": "Ultra-Sil Dry Bag",
+      "category": "storage",
+      "official_url": "https://seatosummit.com/products/ultra-sil-dry-bag",
+      "source_url": "https://seatosummit.com/products/ultra-sil-dry-bag",
+      "verified_at": "2026-11-02",
+      "description": "Light siliconised roll-top dry bag for inside a pack.",
+      "specs": {
+        "waterproof": true
+      },
+      "variants": [
+        {
+          "name": "3 L",
+          "weight": {
+            "value": "30",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "3",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:ultra-sil-stuff-sack",
+      "brand": "Sea to Summit",
+      "name": "Ultra-Sil Stuff Sack",
+      "category": "storage",
+      "official_url": "https://seatosummit.com/products/the-ultra-sil-stuff-sack",
+      "source_url": "https://seatosummit.com/products/the-ultra-sil-stuff-sack",
+      "verified_at": "2026-11-02",
+      "description": "Ultralight drawcord stuff sack in six sizes.",
+      "variants": [
+        {
+          "name": "1.5 L",
+          "weight": {
+            "value": "16",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "1.5",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "3 L",
+          "weight": {
+            "value": "20",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "3",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "5 L",
+          "weight": {
+            "value": "25",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "5",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "8 L",
+          "weight": {
+            "value": "32",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "8",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "13 L",
+          "weight": {
+            "value": "44",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "13",
+            "unit": "l"
+          }
+        },
+        {
+          "name": "20 L",
+          "weight": {
+            "value": "49",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "capacity": {
+            "value": "20",
+            "unit": "l"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:telos-evo",
+      "brand": "Sea to Summit",
+      "name": "Telos Evo Tent",
+      "category": "tents",
+      "official_url": "https://seatosummit.com/products/telos-evo-tent",
+      "source_url": "https://seatosummit.com/products/telos-evo-tent",
+      "verified_at": "2026-11-02",
+      "description": "Freestanding tent with a raised-hub pole that adds headroom.",
+      "specs": {
+        "seasons": "3",
+        "freestanding": true
+      },
+      "variants": [
+        {
+          "name": "2 Person",
+          "weight": {
+            "value": "1577",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 2,
+            "floor_area_m2": 2.6,
+            "vestibule_area_m2": 1.8,
+            "packaged_weight_g": 1625
+          }
+        },
+        {
+          "name": "3 Person",
+          "weight": {
+            "value": "2018",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "capacity_persons": 3,
+            "floor_area_m2": 3.7,
+            "vestibule_area_m2": 2.0,
+            "packaged_weight_g": 2069
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "sea-to-summit:frontier-ul-collapsible-kettle",
+      "brand": "Sea to Summit",
+      "name": "Frontier UL Collapsible Kettle",
+      "category": "cookware",
+      "official_url": "https://seatosummit.com/products/frontier-collapsible-kettle",
+      "source_url": "https://seatosummit.com/products/frontier-collapsible-kettle",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "201",
+        "unit": "g",
+        "basis": "packaged"
+      },
+      "capacity": {
+        "value": "1.1",
+        "unit": "l"
+      },
+      "description": "Kettle with a silicone wall that folds flat for packing.",
+      "specs": {
+        "packed_dimensions": "15 x 15 x 4.3 cm"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:astro-300",
+      "brand": "Black Diamond",
+      "name": "Astro 300 Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/astro-300-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/astro-300-headlamp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "100",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Simple, inexpensive AAA headlamp.",
+      "specs": {
+        "max_lumens": 300,
+        "max_beam_distance_m": 55,
+        "max_runtime_hours": 140,
+        "power_source": "3x AAA or BD 1500 rechargeable",
+        "water_rating": "IPX4"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:cosmo-350",
+      "brand": "Black Diamond",
+      "name": "Cosmo 350 Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/cosmo-350-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/cosmo-350-headlamp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "79",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Compact waterproof headlamp with red light, lock mode and a battery meter.",
+      "specs": {
+        "max_lumens": 350,
+        "max_beam_distance_m": 64,
+        "max_runtime_hours": 225,
+        "power_source": "3x AAA or BD 1500 rechargeable",
+        "water_rating": "IPX8",
+        "published_weight": "[AAA] 79 g, [BD1500] 73.5 g"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:deploy-325",
+      "brand": "Black Diamond",
+      "name": "Deploy 325 Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/deploy-325-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/deploy-325-headlamp",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Deploy Run Light"
+      ],
+      "weight": {
+        "value": "48",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Tiny rechargeable light that fits under a hat brim.",
+      "specs": {
+        "max_lumens": 325,
+        "max_beam_distance_m": 52,
+        "max_runtime_hours": 30,
+        "power_source": "Built-in 680 mAh Li-ion",
+        "water_rating": "IPX4"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:alpine-carbon-cork",
+      "brand": "Black Diamond",
+      "name": "Alpine Carbon Cork Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://blackdiamondequipment.com/products/alpine-carbon-cork-trekking-poles",
+      "source_url": "https://blackdiamondequipment.com/products/alpine-carbon-cork-trekking-poles",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "486",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Adjustable carbon poles with cork grips.",
+      "specs": {
+        "pole_material": "carbon",
+        "adjustable_length": "100-130 cm",
+        "collapsed_length_cm": 61,
+        "published_weight": "Weight Per Pair: 486 g"
+      }
+    },
+    {
+      "source_record_id": "helinox:chair-zero",
+      "brand": "Helinox",
+      "name": "Chair Zero",
+      "category": "camp-furniture",
+      "official_url": "https://helinox.com/products/chair-zero",
+      "source_url": "https://helinox.com/products/chair-zero",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://helinox.com",
+      "weight": {
+        "value": "509",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Ultralight camp chair that packs to about the size of a water bottle.",
+      "specs": {
+        "max_load_kg": 120,
+        "seat_height_cm": 16.5,
+        "packaged_weight_g": 531,
+        "packed_dimensions": "35 x 10 x 10 cm"
+      }
+    },
+    {
+      "source_record_id": "helinox:chair-one",
+      "brand": "Helinox",
+      "name": "Chair One",
+      "category": "camp-furniture",
+      "official_url": "https://helinox.com/products/chair-one",
+      "source_url": "https://helinox.com/products/chair-one",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "893",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Sturdier, higher-seated version of the Helinox camp chair.",
+      "specs": {
+        "max_load_kg": 145,
+        "seat_height_cm": 22.5,
+        "packaged_weight_g": 965,
+        "packed_dimensions": "35.5 x 11 x 11 cm"
+      }
+    },
+    {
+      "source_record_id": "helinox:passport-tl115",
+      "brand": "Helinox",
+      "name": "Passport TL115 Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://helinox.com/products/passport-tl115-pair",
+      "source_url": "https://helinox.com/products/passport-tl115-pair",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "320",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Fixed-length 115 cm folding poles that pack to 35 cm.",
+      "specs": {
+        "collapsed_length_cm": 35,
+        "adjustable_length": "Fixed 115 cm",
+        "published_weight": "Weight Per Pair 11.5 oz / 320 g (160 g per pole)"
+      }
+    },
+    {
+      "source_record_id": "lifestraw:peak-solo",
+      "brand": "LifeStraw",
+      "name": "Peak Series Solo",
+      "category": "water-treatment",
+      "official_url": "https://lifestraw.com/products/lifestraw-peak-solo",
+      "source_url": "https://lifestraw.com/products/lifestraw-peak-solo",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://lifestraw.com",
+      "weight": {
+        "value": "48.2",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Straw-style microfilter that also screws onto standard bottles.",
+      "specs": {
+        "treatment_type": "filter",
+        "flow_rate_l_per_min": 3,
+        "lifespan_l": 2000,
+        "dimensions": "12.9 x 3.3 cm"
+      }
+    },
+    {
+      "source_record_id": "lifestraw:peak-squeeze-1l",
+      "brand": "LifeStraw",
+      "name": "Peak Series Collapsible Squeeze 1L",
+      "category": "water-treatment",
+      "official_url": "https://lifestraw.com/products/lifestraw-peak-series-collapsible-squeeze-1l-bottle-with-filter",
+      "source_url": "https://lifestraw.com/products/lifestraw-peak-series-collapsible-squeeze-1l-bottle-with-filter",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "102",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "1",
+        "unit": "l"
+      },
+      "description": "Collapsible 1 L squeeze bottle with a removable filter.",
+      "specs": {
+        "treatment_type": "filter",
+        "lifespan_l": 2000,
+        "dimensions": "10.4 x 25.4 cm"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:astro-300-r",
+      "brand": "Black Diamond",
+      "name": "Astro 300-R Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/astro-300-r-rechargeable-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/astro-300-r-rechargeable-headlamp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "100",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Rechargeable version of the budget Astro headlamp.",
+      "specs": {
+        "max_lumens": 300,
+        "max_beam_distance_m": 55,
+        "max_runtime_hours": 140,
+        "power_source": "Rechargeable 1500 mAh Li-ion",
+        "water_rating": "IPX4"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:cosmo-350-r",
+      "brand": "Black Diamond",
+      "name": "Cosmo 350-R Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/cosmo-350-r-rechargeable-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/cosmo-350-r-rechargeable-headlamp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "75",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Rechargeable waterproof compact headlamp.",
+      "specs": {
+        "max_lumens": 375,
+        "max_beam_distance_m": 64,
+        "max_runtime_hours": 225,
+        "power_source": "1500 mAh Li-ion",
+        "water_rating": "IP67",
+        "published_weight": "75 g; page lists 375 lm max despite the 350 name"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:spot-400-r",
+      "brand": "Black Diamond",
+      "name": "Spot 400-R Headlamp",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/spot-400-r-rechargeable-headlamp",
+      "source_url": "https://blackdiamondequipment.com/products/spot-400-r-rechargeable-headlamp",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "86",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Rechargeable version of the popular Spot headlamp.",
+      "specs": {
+        "max_lumens": 400,
+        "max_beam_distance_m": 100,
+        "max_runtime_hours": 225,
+        "power_source": "1500 mAh Li-ion",
+        "water_rating": "IP67"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:moji-r-plus",
+      "brand": "Black Diamond",
+      "name": "Moji R+ Lantern",
+      "category": "lighting",
+      "official_url": "https://blackdiamondequipment.com/products/moji-r-rechargeable-lantern",
+      "source_url": "https://blackdiamondequipment.com/products/moji-r-rechargeable-lantern",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "170",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Small rechargeable tent lantern.",
+      "specs": {
+        "max_lumens": 200,
+        "max_runtime_hours": 16,
+        "power_source": "1500 mAh Li-ion",
+        "water_rating": "IPX4"
+      }
+    },
+    {
+      "source_record_id": "black-diamond:distance-carbon-flz",
+      "brand": "Black Diamond",
+      "name": "Distance Carbon FLZ Poles",
+      "category": "trekking-poles",
+      "official_url": "https://blackdiamondequipment.com/products/distance-carbon-flz-poles",
+      "source_url": "https://blackdiamondequipment.com/products/distance-carbon-flz-poles",
+      "verified_at": "2026-11-02",
+      "description": "Folding carbon poles with a short adjustment range.",
+      "specs": {
+        "pole_material": "carbon",
+        "locking": "FlickLock+"
+      },
+      "variants": [
+        {
+          "name": "95-110 cm",
+          "weight": {
+            "value": "308",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "collapsed_length_cm": 34
+          }
+        },
+        {
+          "name": "110-125 cm",
+          "weight": {
+            "value": "336",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "collapsed_length_cm": 37
+          }
+        },
+        {
+          "name": "125-140 cm",
+          "weight": {
+            "value": "364",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "collapsed_length_cm": 40
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "black-diamond:pursuit",
+      "brand": "Black Diamond",
+      "name": "Pursuit Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://blackdiamondequipment.com/products/pursuit-trekking-poles",
+      "source_url": "https://blackdiamondequipment.com/products/pursuit-trekking-poles",
+      "verified_at": "2026-11-02",
+      "description": "Aluminium adjustable poles with a dual-density grip.",
+      "specs": {
+        "pole_material": "aluminum"
+      },
+      "variants": [
+        {
+          "name": "100-125 cm",
+          "weight": {
+            "value": "495",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "125-140 cm",
+          "weight": {
+            "value": "535",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "black-diamond:trail",
+      "brand": "Black Diamond",
+      "name": "Trail Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://blackdiamondequipment.com/products/trail-trekking-poles",
+      "source_url": "https://blackdiamondequipment.com/products/trail-trekking-poles",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "480",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Basic, durable aluminium trekking poles.",
+      "specs": {
+        "pole_material": "aluminum",
+        "adjustable_length": "100-140 cm",
+        "collapsed_length_cm": 64.6,
+        "published_weight": "Weight: 480 g (page doesn't say pair or single)"
+      }
+    },
+    {
+      "source_record_id": "lifestraw:peak-gravity-3l",
+      "brand": "LifeStraw",
+      "name": "Peak Series Gravity 3L",
+      "category": "water-treatment",
+      "official_url": "https://lifestraw.com/products/lifestraw-peak-series-gravity-3l",
+      "source_url": "https://lifestraw.com/products/lifestraw-peak-series-gravity-3l",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "228",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Compact 3 L gravity filter for small groups.",
+      "specs": {
+        "treatment_type": "gravity",
+        "flow_rate_l_per_min": 1.7
+      }
+    },
+    {
+      "source_record_id": "petzl:tikkina",
+      "brand": "Petzl",
+      "name": "TIKKINA",
+      "category": "lighting",
+      "official_url": "https://www.petzl.com/ca/en/sport/products/hiking-camping-headlamps/tikkina/TIKKINA_SPO_a2mTx000000oAXGIA2.html",
+      "source_url": "https://www.petzl.com/ca/en/sport/products/hiking-camping-headlamps/tikkina/TIKKINA_SPO_a2mTx000000oAXGIA2.html",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.petzl.com",
+      "weight": {
+        "value": "92",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Basic, wide-beam AAA headlamp for camp chores.",
+      "specs": {
+        "max_lumens": 300,
+        "power_source": "3x AAA or CORE rechargeable"
+      }
+    },
+    {
+      "source_record_id": "petzl:actik-core",
+      "brand": "Petzl",
+      "name": "ACTIK CORE",
+      "category": "lighting",
+      "official_url": "https://www.petzl.com/ca/en/sport/products/multisport-headlamps/actik-core/ACTIK-CORE_SPO_a2mTx000000o12YIAQ.html",
+      "source_url": "https://www.petzl.com/ca/en/sport/products/multisport-headlamps/actik-core/ACTIK-CORE_SPO_a2mTx000000o12YIAQ.html",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "88",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Rechargeable headlamp with red light and a lock mode.",
+      "specs": {
+        "max_lumens": 625,
+        "power_source": "CORE rechargeable (USB-C) or 3x AAA"
+      }
+    },
+    {
+      "source_record_id": "petzl:swift-rl",
+      "brand": "Petzl",
+      "name": "SWIFT RL",
+      "category": "lighting",
+      "official_url": "https://www.petzl.com/ca/en/sport/products/multisport-headlamps/swift-rl/SWIFT-RL_SPO_a2mTx0000033ql7IAA.html",
+      "source_url": "https://www.petzl.com/ca/en/sport/products/multisport-headlamps/swift-rl/SWIFT-RL_SPO_a2mTx0000033ql7IAA.html",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "92",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Bright rechargeable headlamp with reactive lighting that adjusts to what you're looking at.",
+      "specs": {
+        "max_lumens": 1200,
+        "max_beam_distance_m": 168,
+        "power_source": "Rechargeable"
+      }
+    },
+    {
+      "source_record_id": "nitecore:nu25-ul",
+      "brand": "Nitecore",
+      "name": "NU25 MCT UL",
+      "category": "lighting",
+      "official_url": "https://www.nitecore.com/product/nu25ul",
+      "source_url": "https://www.nitecore.com/product/nu25ul",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "NU25 UL",
+        "NU25 400 UL"
+      ],
+      "weight": {
+        "value": "47",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Featherweight rechargeable headlamp with adjustable colour temperature.",
+      "specs": {
+        "max_lumens": 400,
+        "max_beam_distance_m": 132,
+        "max_runtime_hours": 45,
+        "power_source": "Built-in 700 mAh Li-ion",
+        "published_weight": "47g (1.66 oz) (bracket and headband included)"
+      }
+    },
+    {
+      "source_record_id": "nitecore:nu20-classic",
+      "brand": "Nitecore",
+      "name": "NU20 Classic",
+      "category": "lighting",
+      "official_url": "https://www.nitecore.com/product/nu20Classic",
+      "source_url": "https://www.nitecore.com/product/nu20Classic",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "38",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Tiny rechargeable headlamp with red and high-CRI modes.",
+      "specs": {
+        "max_lumens": 360,
+        "max_beam_distance_m": 109,
+        "max_runtime_hours": 97,
+        "power_source": "Built-in 500 mAh Li-ion"
+      }
+    },
+    {
+      "source_record_id": "nitecore:nu43",
+      "brand": "Nitecore",
+      "name": "NU43",
+      "category": "lighting",
+      "official_url": "https://www.nitecore.com/product/nu43",
+      "source_url": "https://www.nitecore.com/product/nu43",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "116",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Long-runtime rechargeable headlamp built around a 3,400 mAh cell.",
+      "specs": {
+        "max_lumens": 1400,
+        "max_beam_distance_m": 130,
+        "max_runtime_hours": 165,
+        "power_source": "Built-in 3,400 mAh Li-ion"
+      }
+    },
+    {
+      "source_record_id": "nitecore:ut27",
+      "brand": "Nitecore",
+      "name": "UT27",
+      "category": "lighting",
+      "official_url": "https://www.nitecore.com/product/ut27",
+      "source_url": "https://www.nitecore.com/product/ut27",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "74",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Dual-beam running headlamp that also takes AAA batteries.",
+      "specs": {
+        "max_lumens": 800,
+        "max_beam_distance_m": 168,
+        "max_runtime_hours": 14.5,
+        "power_source": "HLB1500 rechargeable or 3x AAA",
+        "published_weight": "74g / 2.61 oz (bracket, headband and battery included)"
+      }
+    },
+    {
+      "source_record_id": "nitecore:nb20000-gen3",
+      "brand": "Nitecore",
+      "name": "NB20000 Gen3",
+      "category": "power",
+      "official_url": "https://www.nitecore.com/product/nb20000Gen3",
+      "source_url": "https://www.nitecore.com/product/nb20000Gen3",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "291",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "20,000 mAh carbon-fibre power bank.",
+      "specs": {
+        "capacity_mah": 20000,
+        "dimensions": "118 x 69 x 21.5 mm",
+        "published_weight": "291g±5g (accessory not included)"
+      }
+    },
+    {
+      "source_record_id": "sawyer:mini",
+      "brand": "Sawyer",
+      "name": "MINI Water Filtration System",
+      "category": "water-treatment",
+      "official_url": "https://www.sawyer.com/product/mini-water-filtration-system-blue",
+      "source_url": "https://www.sawyer.com/product/mini-water-filtration-system-blue",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Mini",
+        "Sawyer Mini"
+      ],
+      "weight": {
+        "value": "4.93",
+        "unit": "oz",
+        "basis": "packaged"
+      },
+      "description": "Small inline/squeeze hollow-fibre filter kit.",
+      "specs": {
+        "treatment_type": "filter",
+        "pore_size_micron": 0.1,
+        "published_weight": "4.93 ounces (kit: filter, 16 oz pouch, syringe, straw)"
+      }
+    },
+    {
+      "source_record_id": "katadyn:hiker-pro",
+      "brand": "Katadyn",
+      "name": "Hiker Pro",
+      "category": "water-treatment",
+      "official_url": "https://katadyn.com/products/8019670-katadyn-hiker-pro-transparent",
+      "source_url": "https://katadyn.com/products/8019670-katadyn-hiker-pro-transparent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "233",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Classic hand-pump microfilter for filling bottles from shallow sources.",
+      "specs": {
+        "treatment_type": "filter",
+        "flow_rate_l_per_min": 1
+      }
+    },
+    {
+      "source_record_id": "katadyn:steripen-ultralight",
+      "brand": "Katadyn",
+      "name": "SteriPEN Ultralight UV",
+      "category": "water-treatment",
+      "official_url": "https://katadyn.com/products/ull-mp-efg-katadyn-steripen-ultralight-uv-water-purifier",
+      "source_url": "https://katadyn.com/products/ull-mp-efg-katadyn-steripen-ultralight-uv-water-purifier",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "76",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Rechargeable UV purifier that treats a litre in 90 seconds.",
+      "specs": {
+        "treatment_type": "uv",
+        "dimensions": "13 x 3.5 x 2.2 cm"
+      }
+    },
+    {
+      "source_record_id": "simond:mt500-air-50-10-mens",
+      "brand": "Simond",
+      "name": "MT500 Air 50+10 L Backpack (Men's)",
+      "category": "backpacks",
+      "official_url": "https://www.decathlon.com/products/mens-backpacking-5010-l-backpack-mt500-air-324407",
+      "source_url": "https://www.decathlon.com/products/mens-backpacking-5010-l-backpack-mt500-air-324407",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.decathlon.com",
+      "brand_aliases": [
+        "Decathlon Simond"
+      ],
+      "aliases": [
+        "Forclaz MT500 Air 50+10",
+        "MT500 Air"
+      ],
+      "weight": {
+        "text": "3.7 lbs",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "60",
+        "unit": "l"
+      },
+      "description": "Ventilated-back trekking pack with a rain cover, at a budget price.",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "forclaz:mt900-ul-50-10-mens",
+      "brand": "Forclaz",
+      "name": "MT900 UL 50+10 L Backpack (Men's)",
+      "category": "backpacks",
+      "official_url": "https://www.decathlon.com/products/mens-ultralight-backpacking-backpack-5010-l-mt900-ul-332178",
+      "source_url": "https://www.decathlon.com/products/mens-ultralight-backpacking-backpack-5010-l-mt900-ul-332178",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.decathlon.com",
+      "brand_aliases": [
+        "Decathlon Forclaz"
+      ],
+      "aliases": [
+        "MT900 Ultralight 50+10"
+      ],
+      "weight": {
+        "text": "2.9 lb",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "60",
+        "unit": "l"
+      },
+      "description": "Decathlon's lighter backpacking pack, still with a rain cover and vented back.",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "simond:mt100-easyfit-50-mens",
+      "brand": "Simond",
+      "name": "MT100 Easyfit 50 L Backpack (Men's)",
+      "category": "backpacks",
+      "official_url": "https://www.decathlon.com/products/mens-mountain-backpacking-rucksack-50-l-trek-100-easyfit-309807",
+      "source_url": "https://www.decathlon.com/products/mens-mountain-backpacking-rucksack-50-l-trek-100-easyfit-309807",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Forclaz MT100 Easyfit 50",
+        "Trek 100 Easyfit 50"
+      ],
+      "weight": {
+        "text": "3.5 lbs",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "Entry-level backpacking pack with quick one-pull fit adjustment.",
+      "specs": {
+        "frame_type": "internal",
+        "gender_fit": "mens"
+      }
+    },
+    {
+      "source_record_id": "forclaz:mt900-stove",
+      "brand": "Forclaz",
+      "name": "MT900 Ultralight Stove",
+      "category": "stoves",
+      "official_url": "https://www.decathlon.com/products/forclaz-mt900-ultralight-backpacking-stove-342126",
+      "source_url": "https://www.decathlon.com/products/forclaz-mt900-ultralight-backpacking-stove-342126",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "50",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Tiny folding canister stove with a built-in wind guard.",
+      "specs": {
+        "fuel_type": "canister",
+        "boil_time_min": 3.5,
+        "burn_time_min": 81,
+        "packed_dimensions": "8 x 5.5 x 3.5 cm folded",
+        "published_weight": "1.8 oz (50 g)"
+      }
+    },
+    {
+      "source_record_id": "forclaz:mt500-inflatable-pillow",
+      "brand": "Forclaz",
+      "name": "MT500 Inflatable Pillow",
+      "category": "pillows",
+      "official_url": "https://www.decathlon.com/products/inflatable-backpacking-pillow-mt500-343604",
+      "source_url": "https://www.decathlon.com/products/inflatable-backpacking-pillow-mt500-343604",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "135",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Inflatable pillow with a soft foam-lined cover.",
+      "specs": {
+        "pad_type": "hybrid",
+        "dimensions": "34 x 23 x 9 cm"
+      }
+    },
+    {
+      "source_record_id": "quechua:mh500-compact-chair",
+      "brand": "Quechua",
+      "name": "MH500 Compact Camp Chair",
+      "category": "camp-furniture",
+      "official_url": "https://www.decathlon.com/products/camping-folding-chair-mh500-173601",
+      "source_url": "https://www.decathlon.com/products/camping-folding-chair-mh500-173601",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.decathlon.com",
+      "brand_aliases": [
+        "Decathlon Quechua"
+      ],
+      "weight": {
+        "text": "2.2 lbs",
+        "basis": "claimed"
+      },
+      "description": "Low, packable aluminium camp chair.",
+      "specs": {
+        "max_load_kg": 108.9,
+        "seat_height_cm": 24.9,
+        "packed_dimensions": "15\" x 4.7\" x 3.1\" / 3.6 L",
+        "published_weight": "Weight: 2.2 lbs; maximum load 240 lbs"
+      }
+    },
+    {
+      "source_record_id": "forclaz:mt500-air-pad",
+      "brand": "Forclaz",
+      "name": "MT500 Air Sleeping Pad",
+      "category": "sleeping-pads",
+      "official_url": "https://www.decathlon.com/products/forclaz-mt500-air-mattress-189392",
+      "source_url": "https://www.decathlon.com/products/forclaz-mt500-air-mattress-189392",
+      "verified_at": "2026-11-02",
+      "description": "Budget summer air pad.",
+      "specs": {
+        "r_value": 1.5,
+        "pad_type": "air",
+        "thickness_cm": 5
+      },
+      "variants": [
+        {
+          "name": "L",
+          "weight": {
+            "value": "510",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 180,
+            "width_cm": 51
+          }
+        },
+        {
+          "name": "XL",
+          "weight": {
+            "value": "600",
+            "unit": "g",
+            "basis": "claimed"
+          },
+          "specs": {
+            "length_cm": 196,
+            "width_cm": 61
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "forclaz:trek-100-foam-pad",
+      "brand": "Forclaz",
+      "name": "Trek 100 Folding Foam Mattress",
+      "category": "sleeping-pads",
+      "official_url": "https://www.decathlon.com/products/backpacking-foam-folding-mattress-trek-100-174619",
+      "source_url": "https://www.decathlon.com/products/backpacking-foam-folding-mattress-trek-100-174619",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "370",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Accordion-fold foam pad that doubles as a sit pad.",
+      "specs": {
+        "r_value": 2.1,
+        "pad_type": "foam",
+        "thickness_cm": 2,
+        "length_cm": 180,
+        "width_cm": 55
+      }
+    },
+    {
+      "source_record_id": "forclaz:mt100-down-jacket-womens",
+      "brand": "Forclaz",
+      "name": "MT100 Down Puffer Jacket (Women's)",
+      "category": "insulation",
+      "official_url": "https://www.decathlon.com/products/forclaz-mountain-backpacking-down-jacket-mt100-335256",
+      "source_url": "https://www.decathlon.com/products/forclaz-mountain-backpacking-down-jacket-mt100-335256",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "260",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Very packable entry-level down jacket that stuffs into its own pocket.",
+      "specs": {
+        "insulation_type": "down",
+        "hooded": false,
+        "gender_fit": "womens"
+      }
+    },
+    {
+      "source_record_id": "forclaz:trek-100-headlamp",
+      "brand": "Forclaz",
+      "name": "Trek 100 Rechargeable Headlamp",
+      "category": "lighting",
+      "official_url": "https://www.decathlon.com/products/forclaz-trek-100-rechargeable-usb-120-lumen-backpacking-head-lamp-302568",
+      "source_url": "https://www.decathlon.com/products/forclaz-trek-100-rechargeable-usb-120-lumen-backpacking-head-lamp-302568",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "70",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Simple one-button USB-rechargeable headlamp with red light.",
+      "specs": {
+        "water_rating": "IPX4",
+        "power_source": "USB rechargeable"
+      }
+    },
+    {
+      "source_record_id": "hyperlite-mountain-gear:southwest",
+      "brand": "Hyperlite Mountain Gear",
+      "name": "Southwest",
+      "category": "backpacks",
+      "official_url": "https://hyperlitemountaingear.com/products/southwest",
+      "source_url": "https://hyperlitemountaingear.com/products/southwest",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://hyperlitemountaingear.com",
+      "brand_aliases": [
+        "HMG",
+        "Hyperlite"
+      ],
+      "description": "Dyneema roll-top pack with solid outer pockets, built for rough terrain.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 18.1
+      },
+      "variants": [
+        {
+          "name": "40L",
+          "weight": {
+            "value": "841.7",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "40",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "29.7 oz | 841.7 g (white, avg. size medium)"
+          }
+        },
+        {
+          "name": "55L",
+          "weight": {
+            "value": "874",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "55",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "30.8 oz | 874 g (white, avg. size medium)"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "hyperlite-mountain-gear:junction",
+      "brand": "Hyperlite Mountain Gear",
+      "name": "Junction",
+      "category": "backpacks",
+      "official_url": "https://hyperlitemountaingear.com/products/junction",
+      "source_url": "https://hyperlitemountaingear.com/products/junction",
+      "verified_at": "2026-11-02",
+      "description": "Southwest's sibling with stretch-mesh outer pockets for drying gear.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 18.1
+      },
+      "variants": [
+        {
+          "name": "40L",
+          "weight": {
+            "value": "832.7",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "40",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "29.4 oz | 832.7 g (white, avg. size medium)"
+          }
+        },
+        {
+          "name": "55L",
+          "weight": {
+            "value": "866.4",
+            "unit": "g",
+            "basis": "average"
+          },
+          "capacity": {
+            "value": "55",
+            "unit": "l"
+          },
+          "specs": {
+            "published_weight": "30.6 oz | 866.4 g (white, avg. size medium)"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "hyperlite-mountain-gear:mid-1",
+      "brand": "Hyperlite Mountain Gear",
+      "name": "Mid 1",
+      "category": "tents",
+      "official_url": "https://hyperlitemountaingear.com/products/mid-1-tent",
+      "source_url": "https://hyperlitemountaingear.com/products/mid-1-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "454",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Solo Dyneema pyramid tent with a built-in floor and mesh.",
+      "specs": {
+        "capacity_persons": 1,
+        "freestanding": false,
+        "materials": "DCF 0.55 / 0.96, no-see-um mesh"
+      }
+    },
+    {
+      "source_record_id": "hyperlite-mountain-gear:ultamid-2",
+      "brand": "Hyperlite Mountain Gear",
+      "name": "UltaMid 2",
+      "category": "tarps",
+      "official_url": "https://hyperlitemountaingear.com/products/ultamid-2-ultralight-pyramid-tent",
+      "source_url": "https://hyperlitemountaingear.com/products/ultamid-2-ultralight-pyramid-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "541",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Floorless Dyneema pyramid shelter for two; inserts are sold separately.",
+      "specs": {
+        "capacity_persons": 2
+      }
+    },
+    {
+      "source_record_id": "western-mountaineering:summerlite",
+      "brand": "Western Mountaineering",
+      "name": "SummerLite",
+      "category": "sleeping-bags",
+      "official_url": "https://www.westernmountaineering.com/product/summerlite/",
+      "source_url": "https://www.westernmountaineering.com/product/summerlite/",
+      "verified_at": "2026-11-02",
+      "description": "Featherweight 850+ down mummy for summer and shoulder seasons.",
+      "specs": {
+        "temperature_rating_label": "32°F / 0°C",
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "text": "1 lb 2 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "text": "1 lb 3 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "text": "1 lb 5 oz",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "western-mountaineering:versalite",
+      "brand": "Western Mountaineering",
+      "name": "VersaLite",
+      "category": "sleeping-bags",
+      "official_url": "https://www.westernmountaineering.com/product/versalite/",
+      "source_url": "https://www.westernmountaineering.com/product/versalite/",
+      "verified_at": "2026-11-02",
+      "description": "Warm, light 850+ down mummy with a full draft collar.",
+      "specs": {
+        "temperature_rating_label": "10°F / -12°C",
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "text": "1 lb 14 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "text": "2 lb",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "text": "2 lb 2 oz",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "western-mountaineering:terralite",
+      "brand": "Western Mountaineering",
+      "name": "TerraLite",
+      "category": "sleeping-bags",
+      "official_url": "https://www.westernmountaineering.com/product/terralite/",
+      "source_url": "https://www.westernmountaineering.com/product/terralite/",
+      "verified_at": "2026-11-02",
+      "description": "Roomier semi-rectangular 850+ down bag for restless sleepers.",
+      "specs": {
+        "temperature_rating_label": "25°F / -4°C",
+        "insulation_type": "down",
+        "fill_power": 850
+      },
+      "variants": [
+        {
+          "name": "5 ft 6 in",
+          "weight": {
+            "text": "1 lb 11 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 0 in",
+          "weight": {
+            "text": "1 lb 13 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "6 ft 6 in",
+          "weight": {
+            "text": "1 lb 15 oz",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "7 ft 0 in",
+          "weight": {
+            "text": "2 lb 2 oz",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "western-mountaineering:hooded-flash-jacket",
+      "brand": "Western Mountaineering",
+      "name": "Hooded Flash Jacket",
+      "category": "insulation",
+      "official_url": "https://www.westernmountaineering.com/product/hooded-flash-jacket/",
+      "source_url": "https://www.westernmountaineering.com/product/hooded-flash-jacket/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "text": "10.25 oz",
+        "basis": "average"
+      },
+      "description": "Ultralight 850+ down hooded jacket.",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 850,
+        "hooded": true,
+        "fill_weight_g": 85,
+        "published_weight": "Avg. Total Weight 10.25 oz; avg. fill 3 oz"
+      }
+    },
+    {
+      "source_record_id": "kelty:cosmic-down-20",
+      "brand": "Kelty",
+      "name": "Cosmic Down 20",
+      "category": "sleeping-bags",
+      "official_url": "https://ca.kelty.com/products/cosmic-down-20",
+      "source_url": "https://ca.kelty.com/products/cosmic-down-20",
+      "verified_at": "2026-11-02",
+      "description": "Long-running budget down bag in a roomy semi-rectangular cut.",
+      "specs": {
+        "temperature_rating_label": "20°F / -7°C",
+        "insulation_type": "down",
+        "fill_power": 550
+      },
+      "variants": [
+        {
+          "name": "Short",
+          "weight": {
+            "text": "2 lb 3 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 415
+          }
+        },
+        {
+          "name": "Regular",
+          "weight": {
+            "text": "2 lb 7 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 464
+          }
+        },
+        {
+          "name": "Long",
+          "weight": {
+            "text": "2 lb 11 oz",
+            "basis": "claimed"
+          },
+          "specs": {
+            "fill_weight_g": 533
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "naturehike:cloud-up-1",
+      "brand": "Naturehike",
+      "name": "Cloud Up 1",
+      "category": "tents",
+      "official_url": "https://www.naturehike.com/products/cloud-up-1-person-ultralight-backpacking-tent",
+      "source_url": "https://www.naturehike.com/products/cloud-up-1-person-ultralight-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "description": "Budget freestanding solo tent that comes with a footprint.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "doors": 1,
+        "freestanding": true,
+        "packed_dimensions": "Φ13 x 41 cm"
+      },
+      "variants": [
+        {
+          "name": "20D",
+          "weight": {
+            "value": "1200",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "published_weight": "20D version minimum weight: approx. 1.20 kg"
+          }
+        },
+        {
+          "name": "210T",
+          "weight": {
+            "value": "1460",
+            "unit": "g",
+            "basis": "minimum"
+          },
+          "specs": {
+            "published_weight": "210T version minimum weight: approx. 1.46 kg"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "salomon:x-ultra-5-gtx-mens",
+      "brand": "Salomon",
+      "name": "X Ultra 5 GORE-TEX (Men's)",
+      "category": "hiking-boots",
+      "official_url": "https://www.salomon.com/en-us/product/x-ultra-5-gore-tex-li6285",
+      "source_url": "https://www.salomon.com/en-us/product/x-ultra-5-gore-tex-li6285",
+      "verified_at": "2026-11-02",
+      "brand_website": "https://www.salomon.com",
+      "aliases": [
+        "X Ultra 5 GTX"
+      ],
+      "weight": {
+        "value": "13",
+        "unit": "oz",
+        "basis": "claimed"
+      },
+      "description": "Waterproof low hiking shoe with a stable chassis.",
+      "specs": {
+        "waterproof": true,
+        "gender_fit": "mens",
+        "published_weight": "Weight per unit 13 oz (one shoe)"
+      }
+    },
+    {
+      "source_record_id": "salomon:x-ultra-5-mid-gtx-mens",
+      "brand": "Salomon",
+      "name": "X Ultra 5 Mid GORE-TEX (Men's)",
+      "category": "hiking-boots",
+      "official_url": "https://www.salomon.com/en-us/product/x-ultra-5-mid-gore-tex-li6287",
+      "source_url": "https://www.salomon.com/en-us/product/x-ultra-5-mid-gore-tex-li6287",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "X Ultra 5 Mid GTX"
+      ],
+      "weight": {
+        "value": "16",
+        "unit": "oz",
+        "basis": "claimed"
+      },
+      "description": "Mid-height waterproof version of the X Ultra 5.",
+      "specs": {
+        "waterproof": true,
+        "gender_fit": "mens",
+        "published_weight": "Weight per unit 16 oz (one shoe)"
+      }
+    },
+    {
+      "source_record_id": "salomon:quest-4-gtx-mens",
+      "brand": "Salomon",
+      "name": "Quest 4 GORE-TEX (Men's)",
+      "category": "hiking-boots",
+      "official_url": "https://www.salomon.com/en-us/product/quest-4-gore-tex-lg4311",
+      "source_url": "https://www.salomon.com/en-us/product/quest-4-gore-tex-lg4311",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Quest 4 GTX"
+      ],
+      "weight": {
+        "text": "1 lb 7 oz",
+        "basis": "claimed"
+      },
+      "description": "Supportive waterproof backpacking boot for heavy loads.",
+      "specs": {
+        "waterproof": true,
+        "gender_fit": "mens",
+        "published_weight": "Weight per unit 1 lb, 7 oz (one shoe)"
+      }
+    },
+    {
+      "source_record_id": "merrell:moab-3-waterproof-mens",
+      "brand": "Merrell",
+      "name": "Moab 3 Waterproof (Men's)",
+      "category": "hiking-boots",
+      "official_url": "https://www.merrell.com/US/en/moab-3-waterproof/52474M.html",
+      "source_url": "https://www.merrell.com/US/en/moab-3-waterproof/52474M.html",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Moab 3 WP"
+      ],
+      "weight": {
+        "value": "480",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Low-cut waterproof version of the best-selling Moab hiker.",
+      "specs": {
+        "waterproof": true,
+        "drop_mm": 11.5,
+        "gender_fit": "mens",
+        "published_weight": "Half pair weight: 1lbs-0.92oz, 480g"
+      }
+    },
+    {
+      "source_record_id": "altra:olympus-6-mens",
+      "brand": "Altra",
+      "name": "Olympus 6 (Men's)",
+      "category": "trail-runners",
+      "official_url": "https://www.altrarunning.com/en-us/products/mens-olympus-6-al0a85nj",
+      "source_url": "https://www.altrarunning.com/en-us/products/mens-olympus-6-al0a85nj",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "345",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Max-cushion zero-drop trail shoe with a Vibram Megagrip sole.",
+      "specs": {
+        "waterproof": false,
+        "drop_mm": 0,
+        "stack_height_mm": 33,
+        "gender_fit": "mens",
+        "published_weight": "12.2 oz / 345 g"
+      }
+    },
+    {
+      "source_record_id": "altra:timp-5-mens",
+      "brand": "Altra",
+      "name": "Timp 5 (Men's)",
+      "category": "trail-runners",
+      "official_url": "https://www.altrarunning.com/en-us/products/mens-timp-5-al0a85pe",
+      "source_url": "https://www.altrarunning.com/en-us/products/mens-timp-5-al0a85pe",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "277",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Cushioned zero-drop trail shoe with a wide toe box.",
+      "specs": {
+        "waterproof": false,
+        "drop_mm": 0,
+        "stack_height_mm": 29,
+        "gender_fit": "mens",
+        "published_weight": "9.8 oz / 277 g"
+      }
+    },
+    {
+      "source_record_id": "altra:lone-peak-hiker-3-mens",
+      "brand": "Altra",
+      "name": "Lone Peak Hiker 3 (Men's)",
+      "category": "hiking-boots",
+      "official_url": "https://www.altrarunning.com/en-us/products/mens-lone-peak-hiker-3-al0a85pj",
+      "source_url": "https://www.altrarunning.com/en-us/products/mens-lone-peak-hiker-3-al0a85pj",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "388.39",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Zero-drop mid hiker built on the Lone Peak fit.",
+      "specs": {
+        "drop_mm": 0,
+        "gender_fit": "mens",
+        "published_weight": "13.7 oz / 388.39 g"
+      }
+    },
+    {
+      "source_record_id": "deuter:aircontact-ultra-50-5",
+      "brand": "Deuter",
+      "name": "Aircontact Ultra 50+5",
+      "category": "backpacks",
+      "official_url": "https://www.deuter.com/uk-en/aircontact-ultra-50-5/4046051157245",
+      "source_url": "https://www.deuter.com/uk-en/aircontact-ultra-50-5/4046051157245",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1270",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "55",
+        "unit": "l"
+      },
+      "description": "Light trekking pack with a spring-steel frame and roll-top extension.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 15,
+        "torso_range": "42-62 cm",
+        "dimensions": "76 x 28 x 25 cm",
+        "published_weight": "1270 g; volume 50 liters (+5 L extension)"
+      }
+    },
+    {
+      "source_record_id": "deuter:aircontact-lite-50-10",
+      "brand": "Deuter",
+      "name": "Aircontact Lite 50+10",
+      "category": "backpacks",
+      "official_url": "https://www.deuter.com/uk-en/aircontact-lite-50-10/4046051148717",
+      "source_url": "https://www.deuter.com/uk-en/aircontact-lite-50-10/4046051148717",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1640",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "60",
+        "unit": "l"
+      },
+      "description": "Value trekking pack with an X-frame and adjustable back length.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 15,
+        "torso_range": "42-62 cm",
+        "dimensions": "76 x 30 x 27 cm",
+        "published_weight": "1640 g; volume 50 liters (+10 L extension)"
+      }
+    },
+    {
+      "source_record_id": "deuter:futura-pro-40",
+      "brand": "Deuter",
+      "name": "Futura Pro 40",
+      "category": "backpacks",
+      "official_url": "https://www.deuter.com/uk-en/futura-pro-40/4046051185484",
+      "source_url": "https://www.deuter.com/uk-en/futura-pro-40/4046051185484",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1620",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "40",
+        "unit": "l"
+      },
+      "description": "Ventilated mesh-back pack for long day hikes and hut trips.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 10,
+        "torso_range": "42-62 cm",
+        "dimensions": "70 x 32 x 24 cm",
+        "published_weight": "1620 g (size M)"
+      }
+    },
+    {
+      "source_record_id": "arcteryx:atom-hoody-mens",
+      "brand": "Arc'teryx",
+      "name": "Atom Hoody (Men's)",
+      "category": "insulation",
+      "official_url": "https://arcteryx.com/us/en/shop/mens/atom-hoody-9556",
+      "source_url": "https://arcteryx.com/us/en/shop/mens/atom-hoody-9556",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Atom Hoody"
+      ],
+      "weight": {
+        "value": "355",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Breathable synthetic-insulated hoody that stays warm when damp.",
+      "specs": {
+        "insulation_type": "synthetic",
+        "hooded": true,
+        "gender_fit": "mens",
+        "published_weight": "355g / 12.5 oz"
+      }
+    },
+    {
+      "source_record_id": "arcteryx:cerium-hoody-mens",
+      "brand": "Arc'teryx",
+      "name": "Cerium Hoody (Men's)",
+      "category": "insulation",
+      "official_url": "https://arcteryx.com/us/en/shop/mens/cerium-hoody-0521",
+      "source_url": "https://arcteryx.com/us/en/shop/mens/cerium-hoody-0521",
+      "verified_at": "2026-11-02",
+      "aliases": [
+        "Cerium Hoody"
+      ],
+      "weight": {
+        "value": "338",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Light 850-fill down hoody that packs into its own stuff sack.",
+      "specs": {
+        "insulation_type": "down",
+        "fill_power": 850,
+        "hooded": true,
+        "gender_fit": "mens",
+        "published_weight": "338g / 11.9 oz"
+      }
+    },
+    {
+      "source_record_id": "tarptent:arcdome-1",
+      "brand": "Tarptent",
+      "name": "ArcDome 1+",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/arcdome-1/",
+      "source_url": "https://www.tarptent.com/product/arcdome-1/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1288",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Freestanding-capable four-season solo tent with a solid interior.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "4",
+        "peak_height_cm": 103,
+        "floor_area_m2": 2.28,
+        "published_weight": "45.45 oz / 1288 g minimum (fly, solid interior, carbon poles)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:cloudburst-3",
+      "brand": "Tarptent",
+      "name": "Cloudburst 3",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/cloudburst-3/",
+      "source_url": "https://www.tarptent.com/product/cloudburst-3/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1298",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Light arch-pole tent for three in rough weather.",
+      "specs": {
+        "capacity_persons": 3,
+        "seasons": "4",
+        "peak_height_cm": 102,
+        "packed_dimensions": "44 x 11.5 cm (carbon poles)"
+      }
+    },
+    {
+      "source_record_id": "tarptent:dipole-1-li",
+      "brand": "Tarptent",
+      "name": "Dipole 1+ Li",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/dipole-1-li/",
+      "source_url": "https://www.tarptent.com/product/dipole-1-li/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "665",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Roomy solo Dyneema tent with vertical end walls.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3+",
+        "floor_area_m2": 1.73,
+        "vestibule_area_m2": 1.78,
+        "freestanding": false
+      }
+    },
+    {
+      "source_record_id": "tarptent:protrek",
+      "brand": "Tarptent",
+      "name": "ProTrek",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/protrek/",
+      "source_url": "https://www.tarptent.com/product/protrek/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "561",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Simple single-wall solo shelter on one trekking pole.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "peak_height_cm": 120,
+        "floor_area_m2": 1.52,
+        "freestanding": false,
+        "packed_dimensions": "28 x 10 cm"
+      }
+    },
+    {
+      "source_record_id": "tarptent:rainbow",
+      "brand": "Tarptent",
+      "name": "Rainbow",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/rainbow/",
+      "source_url": "https://www.tarptent.com/product/rainbow/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "816",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Solo arch tent that can stand freestanding with trekking poles.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "3",
+        "peak_height_cm": 107
+      }
+    },
+    {
+      "source_record_id": "tarptent:scarp-1",
+      "brand": "Tarptent",
+      "name": "Scarp 1",
+      "category": "tents",
+      "official_url": "https://www.tarptent.com/product/scarp-1/",
+      "source_url": "https://www.tarptent.com/product/scarp-1/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1171",
+        "unit": "g",
+        "basis": "minimum"
+      },
+      "description": "Four-season solo tent with crossing poles and two doors.",
+      "specs": {
+        "capacity_persons": 1,
+        "seasons": "4",
+        "peak_height_cm": 99,
+        "doors": 2,
+        "packed_dimensions": "46 x 13 cm"
+      }
+    },
+    {
+      "source_record_id": "ula:circuit-sv",
+      "brand": "ULA Equipment",
+      "name": "Circuit SV",
+      "category": "backpacks",
+      "official_url": "https://www.ula-equipment.com/product/circuit-sv/",
+      "source_url": "https://www.ula-equipment.com/product/circuit-sv/",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1063",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "48",
+        "unit": "l"
+      },
+      "description": "Updated Circuit with a revised frame and harness.",
+      "specs": {
+        "frame_type": "internal",
+        "max_load_kg": 15.9,
+        "torso_range": "S 15-18\", M 18-21\", L 21-24\""
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:swift-v",
+      "brand": "Six Moon Designs",
+      "name": "Swift V",
+      "category": "backpacks",
+      "official_url": "https://www.sixmoondesigns.com/products/swift-v-hiking-backpack",
+      "source_url": "https://www.sixmoondesigns.com/products/swift-v-hiking-backpack",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1019",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "capacity": {
+        "value": "50",
+        "unit": "l"
+      },
+      "description": "Lower-cost version of the Swift X in a different fabric.",
+      "specs": {
+        "frame_type": "internal"
+      }
+    },
+    {
+      "source_record_id": "six-moon-designs:skyscape-scout",
+      "brand": "Six Moon Designs",
+      "name": "Skyscape Scout",
+      "category": "tents",
+      "official_url": "https://www.sixmoondesigns.com/products/skyscape-scout-backpacking-tent",
+      "source_url": "https://www.sixmoondesigns.com/products/skyscape-scout-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "1134",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Budget hybrid double-wall solo tent on two trekking poles.",
+      "specs": {
+        "capacity_persons": 1,
+        "freestanding": false
+      }
+    },
+    {
+      "source_record_id": "helinox:chair-zero-l",
+      "brand": "Helinox",
+      "name": "Chair Zero L",
+      "category": "camp-furniture",
+      "official_url": "https://helinox.com/products/chair-zero-l",
+      "source_url": "https://helinox.com/products/chair-zero-l",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "text": "1 lb 7.5 oz",
+        "basis": "packaged"
+      },
+      "description": "Larger, higher-seated Chair Zero.",
+      "specs": {
+        "seat_height_cm": 22.5,
+        "packed_dimensions": "14\" x 4.5\" x 4.5\""
+      }
+    },
+    {
+      "source_record_id": "helinox:chair-zero-lt",
+      "brand": "Helinox",
+      "name": "Chair Zero LT",
+      "category": "camp-furniture",
+      "official_url": "https://helinox.com/products/chair-zero-lt",
+      "source_url": "https://helinox.com/products/chair-zero-lt",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "494",
+        "unit": "g",
+        "basis": "trail"
+      },
+      "description": "Lightest Chair Zero, with a translucent grid-ripstop seat.",
+      "specs": {
+        "max_load_kg": 120,
+        "packaged_weight_g": 534
+      }
+    },
+    {
+      "source_record_id": "zpacks:duplex-pro",
+      "brand": "Zpacks",
+      "name": "Duplex Pro Tent",
+      "category": "tents",
+      "official_url": "https://zpacks.com/products/duplex-pro-tent",
+      "source_url": "https://zpacks.com/products/duplex-pro-tent",
+      "verified_at": "2026-11-02",
+      "description": "Updated Duplex two-person Dyneema tent.",
+      "specs": {
+        "capacity_persons": 2,
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 2.7,
+        "peak_height_cm": 122
+      },
+      "variants": [
+        {
+          "name": "Lite floor",
+          "weight": {
+            "value": "544",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Standard floor",
+          "weight": {
+            "value": "574",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "zpacks:plex-solo-pro",
+      "brand": "Zpacks",
+      "name": "Plex Solo Pro Tent",
+      "category": "tents",
+      "official_url": "https://zpacks.com/products/plex-solo-pro-tent",
+      "source_url": "https://zpacks.com/products/plex-solo-pro-tent",
+      "verified_at": "2026-11-02",
+      "description": "Updated Plex Solo single-wall Dyneema tent.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 1,
+        "freestanding": false,
+        "floor_area_m2": 1.79,
+        "peak_height_cm": 132
+      },
+      "variants": [
+        {
+          "name": "Lite floor",
+          "weight": {
+            "value": "373",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Standard floor",
+          "weight": {
+            "value": "390",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "durston:wapta-30",
+      "brand": "Durston Gear",
+      "name": "Wapta 30",
+      "category": "backpacks",
+      "official_url": "https://durstongear.com/products/wapta-30-ultralight-backpack",
+      "source_url": "https://durstongear.com/products/wapta-30-ultralight-backpack",
+      "verified_at": "2026-11-02",
+      "description": "Frameless 30 L pack with a vest-style harness.",
+      "specs": {
+        "frame_type": "frameless",
+        "torso_range": "S 15-17.5\", M 17-19.5\", L 19-21.5\""
+      },
+      "variants": [
+        {
+          "name": "Small",
+          "weight": {
+            "value": "500",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Medium",
+          "weight": {
+            "value": "520",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Large",
+          "weight": {
+            "value": "540",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "durston:x-mid-pro-1",
+      "brand": "Durston Gear",
+      "name": "X-Mid Pro 1",
+      "category": "tents",
+      "official_url": "https://durstongear.com/products/x-mid-pro-1-tent-ultralight-thruhiking",
+      "source_url": "https://durstongear.com/products/x-mid-pro-1-tent-ultralight-thruhiking",
+      "verified_at": "2026-11-02",
+      "description": "Solo Dyneema version of the X-Mid.",
+      "specs": {
+        "capacity_persons": 1,
+        "doors": 2,
+        "freestanding": false,
+        "floor_area_m2": 1.9,
+        "vestibule_area_m2": 2.0,
+        "peak_height_cm": 114
+      },
+      "variants": [
+        {
+          "name": "Dyneema floor",
+          "weight": {
+            "value": "440",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        },
+        {
+          "name": "Silnylon floor",
+          "weight": {
+            "value": "485",
+            "unit": "g",
+            "basis": "claimed"
+          }
+        }
+      ]
+    },
+    {
+      "source_record_id": "durston:x-dome-1-plus",
+      "brand": "Durston Gear",
+      "name": "X-Dome 1+",
+      "category": "tents",
+      "official_url": "https://durstongear.com/products/x-dome-1-plus-ultralight-backpacking-tent",
+      "source_url": "https://durstongear.com/products/x-dome-1-plus-ultralight-backpacking-tent",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "985",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Freestanding roomy solo dome.",
+      "specs": {
+        "capacity_persons": 1,
+        "freestanding": true,
+        "published_weight": "34.7 oz / 985 g (regular interior + carbon poles)"
+      }
+    },
+    {
+      "source_record_id": "durston:iceline-rs",
+      "brand": "Durston Gear",
+      "name": "Iceline RS Trekking Poles",
+      "category": "trekking-poles",
+      "official_url": "https://durstongear.com/products/iceline-rs-trekking-poles",
+      "source_url": "https://durstongear.com/products/iceline-rs-trekking-poles",
+      "verified_at": "2026-11-02",
+      "weight": {
+        "value": "185",
+        "unit": "g",
+        "basis": "claimed"
+      },
+      "description": "Sturdier, cheaper version of the Iceline carbon poles.",
+      "specs": {
+        "collapsed_length_cm": 49,
+        "published_weight": "185 g (6.5 oz) per pole without basket"
+      }
     }
   ]
 }

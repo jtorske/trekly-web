@@ -144,6 +144,13 @@
   font-size: 0.9rem;
 }
 
+.confirmDescription {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .confirmWeight {
   font-size: 1.15rem;
   font-weight: 600;

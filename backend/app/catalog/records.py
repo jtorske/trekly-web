@@ -112,6 +112,8 @@ class CatalogRecord(BaseModel):
     model_year: str | None = Field(default=None, max_length=20)
     status: Status = "active"
     official_url: str | None = Field(default=None, pattern=r"^https://")
+    # Our own one-line summary, never text copied from a brand or review site.
+    description: str | None = Field(default=None, min_length=10, max_length=280)
     source_url: str = Field(pattern=r"^https://")
     verified_at: date
     weight: WeightIn | None = None

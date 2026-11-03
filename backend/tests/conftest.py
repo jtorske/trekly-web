@@ -132,6 +132,7 @@ SAMPLE_RECORDS = [
         official_url="https://cascadedesigns.com/products/pocketrocket-deluxe-stove",
         source_url="https://cascadedesigns.com/products/pocketrocket-deluxe-stove",
         weight={"value": "83", "unit": "g", "basis": "minimum"},
+        description="Small canister stove with a push-button igniter.",
         specs={"fuel_type": "canister", "boil_time_min": 3.3, "piezo_ignition": True},
     ),
     make_record(
