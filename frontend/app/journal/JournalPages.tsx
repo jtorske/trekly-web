@@ -10,6 +10,7 @@ import { BADGE_COLOURS, badgeGrid, halves, hikedInGroup, type Journal, type Jour
 import {
   earnedCount,
   milestoneDetail,
+  MEDALS_PER_PAGE,
   milestoneKey,
   progressFraction,
   progressLabel,
@@ -354,6 +355,7 @@ const CATEGORY_NOTES: Record<string, string> = {
   nights: "A trip's nights are its trail's typical nights.",
   distance: "Counts trails with a known length.",
   elevation: "Counts trails with known elevation.",
+  routes: "Counts trails with a known route type.",
   seasons: "A trip counts on every day from its hike date through its nights.",
 };
 
@@ -392,7 +394,14 @@ function Medal({ ctx, milestone, index, active }: { ctx: PageContext; milestone:
         ) : (
           <>
             {detail}
-            {progress && <span className={styles.medalProgress}> ({progress})</span>}
+            {milestone.needs_data ? (
+              <>
+                {" · "}
+                <span className={styles.medalWaiting}>Needs more trail data</span>
+              </>
+            ) : (
+              progress && <span className={styles.medalProgress}> ({progress})</span>
+            )}
             <span className={styles.srOnly}>{tier ? `, ${tier.toLowerCase()} tier` : ""}, not earned yet</span>
           </>
         )}
@@ -418,19 +427,22 @@ function CategoryPage({
   back: boolean;
   active: boolean;
 }) {
-  const earned = page.milestones.filter((m) => m.earned).length;
+  // The count is the whole category's, on a continued page too.
+  const all = ctx.journal.milestones?.milestones.filter((m) => m.category === page.category.id) ?? page.milestones;
+  const earned = all.filter((m) => m.earned).length;
   const note = CATEGORY_NOTES[page.category.id];
   return (
     <div className={styles.paperInner}>
       {back && <BackToContents ctx={ctx} />}
       <header className={`${styles.groupHeader} ${styles.milestoneHeader}`}>
-        <p className={styles.runningHead}>Milestones</p>
+        <p className={styles.runningHead}>{page.continued ? "Milestones, continued" : "Milestones"}</p>
         <PageTitle>{page.category.title}</PageTitle>
         <p className={styles.groupMeta}>
-          {earned} of {page.milestones.length} earned
+          {earned} of {all.length} earned
         </p>
       </header>
-      <ul className={styles.medals} style={medalGrid(page.milestones.length)}>
+      {/* A continued page keeps its first page's rows, so the medals stay one size. */}
+      <ul className={styles.medals} style={medalGrid(page.continued ? MEDALS_PER_PAGE : page.milestones.length)}>
         {page.milestones.map((milestone, index) => (
           <Medal key={milestoneKey(milestone, index)} ctx={ctx} milestone={milestone} index={index} active={active} />
         ))}

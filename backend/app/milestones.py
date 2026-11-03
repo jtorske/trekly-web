@@ -8,15 +8,17 @@ deleting a hike or a plan takes away what it earned.
 The facts come from gather(); tests build Facts directly.
 
 Data rules:
+- A journal has one entry per trail, so nothing needs a trail hiked twice.
 - A trip's nights are its trail's typical nights. Its days run from the hike
-  date through the nights after it, so a trip that crosses into a new month
-  or season counts for both.
-- Distance and elevation count only trails where they're known.
-- The catalogue's retired trails still count as hikes, but a park's "every
-  trail" is its active trails only.
+  date (the trip's first day) through the nights after it, so a trip that
+  crosses into a new month or season counts for both.
+- Hike dates are calendar dates with no time of day: the day the hiker
+  picked, wherever they were, never shifted by a time zone.
+- Distance, elevation and route type count only trails where they're known.
+- The catalogue's retired trails still count as hikes, but "every trail" (in
+  the catalogue or a park) and the popularity ranks are the active trails.
 """
 
-from collections import Counter
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -27,7 +29,9 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.catalog.presenters import effective_weight
-from app.milestones_config import ACTIVE, CATEGORIES, CORE_SLOT_CATEGORIES, TIER_POINTS, WORN_BY_DEFAULT, Milestone
+from app.milestones_config import (
+    ACTIVE, BIG_THREE_SLOTS, CATEGORIES, CORE_SLOT_CATEGORIES, TIER_POINTS, WORN_BY_DEFAULT, Milestone,
+)
 from app.models.availability import AvailabilityAlert
 from app.models.hike_log import HikeLog
 from app.models.setup import GearSetup, GearSetupItem
@@ -62,15 +66,22 @@ class Facts:
     alert_notified: bool = False
     # Per setup, the catalogue subcategory slugs of its items.
     setups: list[set[str]] = field(default_factory=list)
-    # Base weight in kg of each complete setup (all core slots filled, every
-    # packed item weighed); see setup_base_weight_kg.
+    # Base weight in kg of each setup with the Big Three complete and every
+    # packed item weighed; see setup_base_weight_kg.
     base_weights_kg: list[float] = field(default_factory=list)
-    # Active catalogue trails by region, for "every trail in a park".
-    region_trails: dict[str, set[UUID]] = field(default_factory=dict)
+    # The active catalogue: "every trail", parks' trails and popularity.
+    catalogue: list[Trail] = field(default_factory=list)
 
     @property
     def trails(self) -> list[Trail]:
         return [hike.trail for hike in self.hikes]
+
+    @property
+    def region_trails(self) -> dict[str, set[UUID]]:
+        regions: dict[str, set[UUID]] = {}
+        for trail in self.catalogue:
+            regions.setdefault(trail.region, set()).add(trail.id)
+        return regions
 
 
 @dataclass(frozen=True)
@@ -97,9 +108,11 @@ def hikes(facts: Facts, goal: int) -> Result:
     return _count(len(facts.hikes), goal)
 
 
-def repeat_trail(facts: Facts) -> Result:
-    counts = Counter(hike.trail.id for hike in facts.hikes)
-    return Result(earned=any(n >= 2 for n in counts.values()))
+def every_trail(facts: Facts) -> Result:
+    """Every active catalogue trail (retired ones aren't needed)."""
+    wanted = {trail.id for trail in facts.catalogue}
+    done = len(wanted & {trail.id for trail in facts.trails})
+    return Result(earned=bool(wanted) and done == len(wanted), current=done, goal=len(wanted))
 
 
 def trip_nights(facts: Facts, nights: int) -> Result:
@@ -113,6 +126,10 @@ def total_nights(facts: Facts, goal: int) -> Result:
 def distance(facts: Facts, goal: float) -> Result:
     km = sum(float(trail.distance_km) for trail in facts.trails if trail.distance_km is not None)
     return _count(round(km, 1), goal, "km")
+
+
+def longest(facts: Facts, goal: float) -> Result:
+    return Result(earned=any(float(trail.distance_km or 0) >= goal for trail in facts.trails))
 
 
 def climb_one(facts: Facts, goal: int) -> Result:
@@ -156,6 +173,8 @@ def every_group(facts: Facts, groups: Iterable[Iterable[str]]) -> Result:
 
 
 def park_complete(facts: Facts, min: int) -> Result:  # noqa: A002  (named for the config)
+    """Every active trail in one park or region of at least `min` trails;
+    progress is the region closest to done."""
     hiked = {trail.id for trail in facts.trails}
     best: tuple[float, int, int, str] | None = None
     for region, ids in facts.region_trails.items():
@@ -170,6 +189,17 @@ def park_complete(facts: Facts, min: int) -> Result:  # noqa: A002  (named for t
     return Result(earned=done == total, current=done, goal=total, near=region)
 
 
+def less_popular(facts: Facts, outside: int, goal: int) -> Result:
+    """Trails ranked below the `outside` most popular (unranked retired trails don't count)."""
+    return _count(sum(1 for t in facts.trails if t.popularity_rank is not None and t.popularity_rank > outside), goal)
+
+
+def most_popular(facts: Facts, top: int) -> Result:
+    wanted = {t.id for t in facts.catalogue if t.popularity_rank is not None and t.popularity_rank <= top}
+    done = len(wanted & {trail.id for trail in facts.trails})
+    return Result(earned=bool(wanted) and done == len(wanted), current=done, goal=len(wanted))
+
+
 def difficulties(facts: Facts, levels: Iterable[str]) -> Result:
     levels = set(levels)
     return _count(len(levels & {trail.terrain_difficulty for trail in facts.trails}), len(levels))
@@ -177,6 +207,10 @@ def difficulties(facts: Facts, levels: Iterable[str]) -> Result:
 
 def difficulty(facts: Facts, level: str, goal: int) -> Result:
     return _count(sum(1 for trail in facts.trails if trail.terrain_difficulty == level), goal)
+
+
+def route_type(facts: Facts, route: str, goal: int) -> Result:
+    return _count(sum(1 for trail in facts.trails if trail.route_type == route), goal)
 
 
 def tagged_in_window(facts: Facts, tag: str, start: tuple[int, int], end: tuple[int, int]) -> Result:
@@ -213,6 +247,39 @@ def consecutive_months(facts: Facts, goal: int) -> Result:
     return _count(best, goal)
 
 
+def calendar_months(facts: Facts, goal: int) -> Result:
+    """Different months of the year with a hike, in any years."""
+    return _count(len({month for _, month in _months(facts)}), goal)
+
+
+def _day_sets(facts: Facts) -> list[set[date]]:
+    return [set(hike.days()) for hike in facts.hikes if hike.hiked_on is not None]
+
+
+def consecutive_days(facts: Facts) -> Result:
+    """Two different hikes on days in a row (a trip's own days don't pair with themselves)."""
+    trips = _day_sets(facts)
+    return Result(
+        earned=any(
+            day + timedelta(days=1) in other
+            for i, days in enumerate(trips)
+            for j, other in enumerate(trips)
+            if i != j
+            for day in days
+        )
+    )
+
+
+def same_day(facts: Facts) -> Result:
+    """Two different trails out on the same day."""
+    trips = _day_sets(facts)
+    return Result(earned=any(trips[i] & trips[j] for i in range(len(trips)) for j in range(i + 1, len(trips))))
+
+
+def on_date(facts: Facts, month: int, day: int) -> Result:
+    return Result(earned=any((d.month, d.day) == (month, day) for hike in facts.hikes for d in hike.days()))
+
+
 def notes(facts: Facts, goal: int) -> Result:
     return _count(sum(1 for hike in facts.hikes if hike.note), goal)
 
@@ -233,31 +300,40 @@ def alert_notified(facts: Facts) -> Result:
     return Result(earned=facts.alert_notified)
 
 
+def _slots_filled(setup: set[str], slots: dict[str, Iterable[str]]) -> int:
+    return sum(1 for categories in slots.values() if setup & set(categories))
+
+
 def setup_core(facts: Facts, slots: dict[str, Iterable[str]]) -> Result:
     """The fullest setup: how many of the core slots its items fill."""
-    best = max(
-        (sum(1 for categories in slots.values() if setup & set(categories)) for setup in facts.setups), default=0
-    )
+    best = max((_slots_filled(setup, slots) for setup in facts.setups), default=0)
     return _count(best, len(slots))
+
+
+def big_three_complete(setup: set[str]) -> bool:
+    slots = {slot: CORE_SLOT_CATEGORIES[slot] for slot in BIG_THREE_SLOTS}
+    return _slots_filled(setup, slots) == len(slots)
 
 
 def base_weight(facts: Facts, goal_kg: float) -> Result:
     return Result(earned=any(weight < goal_kg for weight in facts.base_weights_kg))
 
 
-def trail(facts: Facts, name: str, province: str) -> Result:
-    return Result(earned=any(t.name == name and t.province_code == province for t in facts.trails))
-
-
 RULES: dict[str, Callable[..., Result]] = {
     rule.__name__: rule
     for rule in (
-        hikes, repeat_trail, trip_nights, total_nights, distance, climb_one, high_point, total_gain, regions,
-        parks_all, provinces, any_province, every_group, park_complete, difficulties, difficulty,
-        tagged_in_window, in_months, seasons, consecutive_months, notes, photos, plans, alerts, alert_notified,
-        setup_core, base_weight, trail,
+        hikes, every_trail, trip_nights, total_nights, distance, longest, climb_one, high_point, total_gain,
+        regions, parks_all, provinces, any_province, every_group, park_complete, less_popular, most_popular,
+        difficulties, difficulty, route_type, tagged_in_window, in_months, seasons, consecutive_months,
+        calendar_months, consecutive_days, same_day, on_date, notes, photos, plans, alerts, alert_notified,
+        setup_core, base_weight,
     )
 }
+
+# Rules that read trail measurements, which the catalogue is still missing
+# for many trails. One that hiking the whole catalogue wouldn't earn shows
+# "needs more trail data" instead of looking merely unearned.
+TRAIL_DATA_RULES = {"distance", "longest", "climb_one", "high_point", "total_gain", "route_type"}
 
 
 # ------------------------------------------------------------ evaluation
@@ -269,6 +345,16 @@ def check(milestone: Milestone, facts: Facts) -> Result:
 
 def evaluate(facts: Facts, milestones: Iterable[Milestone] = ACTIVE) -> list[tuple[Milestone, Result]]:
     return [(milestone, check(milestone, facts)) for milestone in milestones]
+
+
+def needs_trail_data(facts: Facts, milestones: Iterable[Milestone] = ACTIVE) -> set[str]:
+    """Ids of trail-data milestones nobody could earn with today's catalogue."""
+    everything = Facts(hikes=[Hike(trail) for trail in facts.catalogue], catalogue=facts.catalogue)
+    return {
+        milestone.id
+        for milestone in milestones
+        if milestone.rule in TRAIL_DATA_RULES and not check(milestone, everything).earned
+    }
 
 
 def earned_ids(facts: Facts) -> set[str]:
@@ -317,10 +403,14 @@ class MilestoneOut(BaseModel):
     # The number "{goal}" in detail stands for, and its unit ("km", "m", "kg").
     goal: float | None = None
     unit: str | None = None
+    # A short aside, e.g. "Counts trails with a known length."
+    note: str | None = None
     tier: str | None
     icon: str
     secret: bool
     earned: bool
+    # Can't be earned until the catalogue has more distance, elevation or route data.
+    needs_data: bool = False
     progress: ProgressOut | None = None
 
 
@@ -335,10 +425,12 @@ def badge_out(milestone: Milestone) -> MilestoneBadgeOut:
     )
 
 
-GOAL_UNITS = {"distance": "km", "climb_one": "m", "high_point": "m", "total_gain": "m", "base_weight": "kg"}
+GOAL_UNITS = {
+    "distance": "km", "longest": "km", "climb_one": "m", "high_point": "m", "total_gain": "m", "base_weight": "kg",
+}
 
 
-def milestone_out(milestone: Milestone, result: Result) -> MilestoneOut:
+def milestone_out(milestone: Milestone, result: Result, needs_data: bool = False) -> MilestoneOut:
     if milestone.secret and not result.earned:
         return MilestoneOut(
             id=None, category=milestone.category, title="???", detail=milestone.hint or "", tier=None,
@@ -350,8 +442,9 @@ def milestone_out(milestone: Milestone, result: Result) -> MilestoneOut:
         progress = ProgressOut(current=result.current, goal=result.goal, unit=result.unit, near=result.near)
     return MilestoneOut(
         id=milestone.id, category=milestone.category, title=milestone.title, detail=milestone.detail,
-        goal=goal_of(milestone), unit=GOAL_UNITS.get(milestone.rule), tier=milestone.tier, icon=milestone.icon,
-        secret=milestone.secret, earned=result.earned, progress=progress,
+        goal=goal_of(milestone), unit=GOAL_UNITS.get(milestone.rule), note=milestone.note, tier=milestone.tier,
+        icon=milestone.icon, secret=milestone.secret, earned=result.earned,
+        needs_data=needs_data and not result.earned, progress=progress,
     )
 
 
@@ -391,6 +484,7 @@ def gather(db: Session, user_id: UUID) -> Facts:
                 or_(AvailabilityAlert.notified_at.is_not(None), AvailabilityAlert.status == "notified"),
             )
         ) > 0,
+        catalogue=list(db.scalars(select(Trail).where(Trail.retired_at.is_(None)))),
     )
     setups = db.scalars(
         select(GearSetup)
@@ -408,9 +502,6 @@ def gather(db: Session, user_id: UUID) -> Facts:
         categories = {item.category.slug for item in items if item.category is not None}
         facts.setups.append(categories)
         weight = setup_base_weight_kg(items)
-        if weight is not None and setup_core(facts=Facts(setups=[categories]), slots=CORE_SLOT_CATEGORIES).earned:
+        if weight is not None and big_three_complete(categories):
             facts.base_weights_kg.append(weight)
-    if logs:
-        for trail_id, region in db.execute(select(Trail.id, Trail.region).where(Trail.retired_at.is_(None))):
-            facts.region_trails.setdefault(region, set()).add(trail_id)
     return facts

@@ -34,7 +34,7 @@ const milestones = sample([
   made({ id: "first-hike", title: "First steps", earned: true }),
   made({ id: "trail-regular", title: "Trail regular", earned: false }),
   made({ id: "first-overnight", category: "nights", title: "Under the stars", earned: true }),
-  made({ id: null, category: "secret", title: "???", tier: null, secret: true, earned: false }),
+  made({ id: null, category: "seasons", title: "???", tier: null, secret: true, earned: false }),
 ]);
 
 test("only earned badges: milestones first, then trails grouped by region", () => {

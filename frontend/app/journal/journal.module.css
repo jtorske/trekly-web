@@ -1047,6 +1047,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Can't be earned until the catalogue has more measurements. */
+.medalWaiting {
+  font-style: italic;
+}
+
 /* The tier word in the tier's ring colour, darkened to read on paper. */
 .medalTier {
   color: color-mix(in srgb, #b4693a 75%, black);

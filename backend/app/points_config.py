@@ -6,13 +6,14 @@ computed on the server (app/points.py). Distance and elevation don't score
 on their own: too many trails are missing them. Changing a value here
 re-ranks everyone on their next request; nothing is stored.
 
-Catalogue check (2026-11-02, the 100 active trails in 49 parks or regions,
-undated hikes, so no seasonal, journal, planning or gear milestones):
-every trail is 4,730 points (4,070 for trails, nights and regions, plus
-660 from 24 milestones); 15 random trails come to about 945 (most land
-between 705 and 1,160); Mountain Legend at 2,800 takes about 54
-trails (60 average 3,090). The milestones not tied to which trails were
-hiked add up to 250 more.
+Catalogue check (2026-11-02, the final 50 milestones; the 100 active trails
+in 49 parks or regions, undated hikes, so no calendar, journal, planning or
+gear milestones): every trail is 4,965 points (4,070 for trails, nights and
+regions, plus 895 from 30 milestones); 15 random trails come to about 985
+(most land between 740 and 1,205); Mountain Legend at 2,800 takes about 50
+trails. The calendar, journal, planning and gear milestones add up to 380
+more. Long hauler, Thousand-kilometre club and Loop de loop can't be earned
+until the catalogue has more lengths and route types.
 """
 
 # Each hiked trail, by its terrain difficulty.

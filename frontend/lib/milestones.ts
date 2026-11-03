@@ -18,6 +18,10 @@ export interface Milestone {
   detail: string;
   goal: number | null;
   unit: "km" | "m" | "kg" | null;
+  /** A short aside, e.g. "Counts trails with a known length." */
+  note?: string | null;
+  /** Can't be earned until the catalogue has more distance, elevation or route data. */
+  needs_data?: boolean;
   /** null for a secret milestone not earned yet. */
   tier: Tier | null;
   icon: string;
@@ -105,9 +109,23 @@ export const earnedCount = (data: Milestones) => data.milestones.filter((m) => m
 /** One page of the milestones part of the journal. */
 export type MilestonePage =
   | { kind: "overview" }
-  | { kind: "category"; category: MilestoneCategory; milestones: Milestone[] }
+  | {
+      kind: "category";
+      category: MilestoneCategory;
+      /** This page's medals: all of the category's, or MEDALS_PER_PAGE of them. */
+      milestones: Milestone[];
+      /** A later page of a category too long for one. */
+      continued: boolean;
+    }
   | { kind: "blank" }
   | { kind: "back" };
+
+/**
+ * The most medals on one page: three rows of two. More would shrink them to
+ * dots on a laptop screen, so a longer category (Exploration has ten)
+ * carries on over the page under the same heading.
+ */
+export const MEDALS_PER_PAGE = 6;
 
 /** A two-page spread: one section of the book. */
 export interface MilestoneSpread {
@@ -117,28 +135,37 @@ export interface MilestoneSpread {
   right: MilestonePage;
 }
 
+function categoryPages(data: Milestones, category: MilestoneCategory): MilestonePage[] {
+  const all = data.milestones.filter((m) => m.category === category.id);
+  const pages: MilestonePage[] = [];
+  for (let start = 0; start === 0 || start < all.length; start += MEDALS_PER_PAGE) {
+    pages.push({ kind: "category", category, milestones: all.slice(start, start + MEDALS_PER_PAGE), continued: start > 0 });
+  }
+  return pages;
+}
+
 /**
- * The overview, one page per category, and "Where to next?" as the very
- * last page, paired into spreads. An odd count gets a blank page before the
- * last so it still lands on the right.
+ * The overview, a page per category (two for a long one), and "Where to
+ * next?" as the very last page, paired into spreads. An odd count gets a
+ * blank page before the last so it still lands on the right.
  */
 export function milestoneSpreads(data: Milestones): MilestoneSpread[] {
-  const pages: MilestonePage[] = [
-    { kind: "overview" },
-    ...data.categories.map(
-      (category): MilestonePage => ({ kind: "category", category, milestones: data.milestones.filter((m) => m.category === category.id) }),
-    ),
-  ];
+  const pages: MilestonePage[] = [{ kind: "overview" }, ...data.categories.flatMap((category) => categoryPages(data, category))];
   if (pages.length % 2 === 0) pages.push({ kind: "blank" });
   pages.push({ kind: "back" });
 
   const spreads: MilestoneSpread[] = [];
   for (let i = 0; i < pages.length; i += 2) {
     const [left, right] = [pages[i], pages[i + 1]];
-    const named = [left, right].flatMap((page) => (page.kind === "category" ? [page.category] : []));
+    const shown = [left, right].flatMap((page) => (page.kind === "category" ? [page] : []));
+    // Named after the first category that starts here; a spread of only a
+    // continuation is that category's "-more".
+    const starts = shown.filter((page) => !page.continued).map((page) => page.category);
+    const slug = starts[0]?.id ?? (shown[0] ? `${shown[0].category.id}-more` : "end");
+    const titles = [...new Set(shown.map((page) => page.category.title))];
     spreads.push({
-      slug: i === 0 ? "milestones" : `milestones-${named[0]?.id ?? "end"}`,
-      title: i === 0 ? "Milestones" : `Milestones: ${named.map((c) => c.title).join(" and ") || "the end"}`,
+      slug: i === 0 ? "milestones" : `milestones-${slug}`,
+      title: i === 0 ? "Milestones" : `Milestones: ${titles.join(" and ") || "the end"}`,
       left,
       right,
     });
@@ -146,10 +173,10 @@ export function milestoneSpreads(data: Milestones): MilestoneSpread[] {
   return spreads;
 }
 
-/** The section (?section=) a category's page is in. */
+/** The section (?section=) where a category's first page is. */
 export function categorySlug(data: Milestones, categoryId: string): string {
   const spread = milestoneSpreads(data).find((s) =>
-    [s.left, s.right].some((page) => page.kind === "category" && page.category.id === categoryId),
+    [s.left, s.right].some((page) => page.kind === "category" && page.category.id === categoryId && !page.continued),
   );
   return spread?.slug ?? "milestones";
 }

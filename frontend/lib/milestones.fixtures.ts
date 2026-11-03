@@ -6,7 +6,7 @@ export function milestone(overrides: Partial<Milestone> = {}): Milestone {
     id: "first-hike",
     category: "getting-out",
     title: "First steps",
-    detail: "Log your first hike",
+    detail: "Hike your first trail",
     goal: 1,
     unit: null,
     tier: "bronze",
@@ -25,10 +25,11 @@ export const CATEGORIES = [
   ["elevation", "Elevation"],
   ["exploration", "Exploration"],
   ["difficulty", "Difficulty"],
-  ["seasons", "Seasons"],
+  ["routes", "Route types"],
+  ["seasons", "Seasons and calendar"],
   ["journal", "Journal"],
-  ["planning", "Planning and gear"],
-  ["secret", "Secret"],
+  ["planning", "Planning"],
+  ["gear", "Gear"],
 ] as const;
 
 export function sample(milestones: Milestone[] = [milestone()], categories = CATEGORIES.map(([id, title]) => ({ id, title }))): Milestones {

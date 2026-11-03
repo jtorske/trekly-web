@@ -66,7 +66,7 @@ test("the book is contents, one section per group, then the milestone spreads", 
     journal.sections.slice(0, 4).map((s) => [s.kind, s.slug]),
     [["contents", null], ["group", "yukon"], ["group", "banff-national-park"], ["milestones", "milestones"]],
   );
-  assert.deepEqual(journal.sections.slice(3).map((s) => s.kind), Array(6).fill("milestones"));
+  assert.deepEqual(journal.sections.slice(3).map((s) => s.kind), Array(7).fill("milestones"));
   assert.deepEqual(journal.sections.filter((s) => s.kind === "milestones" && s.first).length, 1);
   assert.equal(sectionIndex(journal, "banff-national-park"), 2);
   assert.equal(sectionIndex(journal, "milestones"), 3);

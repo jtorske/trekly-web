@@ -105,8 +105,8 @@ def test_next_rank_and_the_top():
 def test_my_rank_reports_points_progress_and_next_rank(client, alice):  # noqa: F811
     body = client.get("/api/me/rank", headers=alice).json()
     # Agnes easy 10, Skyline moderate 20 + 2 nights, Sentinel difficult 35, Garibaldi moderate 20;
-    # 3 regions; First steps, Under the stars, Monthly regular (June to September: bronze 10 each)
-    # and the secret Skyline (silver 25).
+    # 3 regions; First steps, Under the stars, Divide crosser (Alberta and BC; bronze 10 each) and
+    # Monthly regular (June to September, silver 25).
     assert body["breakdown"] == {"trails": 85, "nights": 20, "regions": 45, "milestones": 55}
     assert body["points"] == 205
     assert body["rank"] == {"level": 2, "title": "Day Tripper", "threshold": 50}
@@ -117,9 +117,10 @@ def test_my_rank_reports_points_progress_and_next_rank(client, alice):  # noqa: 
 def test_rank_is_recalculated_when_a_hike_is_deleted(client, alice, trails):  # noqa: F811
     assert client.delete(f"/api/me/hike-logs/{trails['skyline']}", headers=alice).status_code == 204
     body = client.get("/api/me/rank", headers=alice).json()
-    # Skyline's 20 for the trail and 20 for its nights go, with its region (15), Under the stars (10),
-    # Skyline (25), and Monthly regular (10): June, August, September is no longer three in a row.
-    assert body["points"] == 205 - 20 - 20 - 15 - 10 - 25 - 10
+    # Skyline's 20 for the trail and 20 for its nights go, with its region (15), Under the stars (10)
+    # and Monthly regular (25): June, August, September is no longer three in a row. Garibaldi keeps
+    # Divide crosser.
+    assert body["points"] == 205 - 20 - 20 - 15 - 10 - 25
     for trail_id in (trails["sentinel"], trails["garibaldi"], trails["agnes"]):
         client.delete(f"/api/me/hike-logs/{trail_id}", headers=alice)
     body = client.get("/api/me/rank", headers=alice).json()
