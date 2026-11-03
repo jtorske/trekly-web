@@ -578,6 +578,13 @@
   margin-top: 0.3rem;
 }
 
+.cardChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
 .metaItem {
   color: color-mix(in srgb, var(--ink) 72%, transparent);
   font-size: 0.82rem;

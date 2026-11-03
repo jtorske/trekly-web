@@ -62,7 +62,23 @@ export interface SeasonalCondition {
   notes: string | null;
 }
 
-export interface TrailDetail extends TrailListItem {
+/**
+ * Whether an availability alert can watch the trail, worked out on the
+ * server from its linked campgrounds, and how it's booked when it can't.
+ */
+export interface TrailAlerts {
+  /** At least one linked campground is on Parks Canada's online map. */
+  has_watchable_campgrounds: boolean;
+  /** Booked as one Parks Canada trail permit (West Coast Trail), which alerts don't watch. */
+  trail_permit: boolean;
+  /** The first confirmed booking system; "none" means first come, first served. */
+  booked_through: { system: string; name: string } | null;
+}
+
+/** GET /api/trails: list items with their alert facts. */
+export type TrailPickItem = TrailListItem & TrailAlerts;
+
+export interface TrailDetail extends TrailListItem, TrailAlerts {
   max_elevation_m: number | null;
   latitude: number | null;
   longitude: number | null;
@@ -76,12 +92,22 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export async function searchTrails(
   query: string,
   signal?: AbortSignal,
-  options: { terrain?: Terrain; trip?: TripType; limit?: number } = {},
-): Promise<TrailListItem[]> {
+  options: {
+    terrain?: Terrain;
+    trip?: TripType;
+    limit?: number;
+    /** Only trails an alert can (true) or can't (false) watch. */
+    watchable?: boolean;
+    /** "watchable" lists the trails alerts can watch first. */
+    sort?: "popular" | "watchable";
+  } = {},
+): Promise<TrailPickItem[]> {
   const params = new URLSearchParams({ q: query });
   if (options.terrain) params.set("terrain", options.terrain);
   if (options.trip) params.set("trip", options.trip);
   if (options.limit) params.set("limit", String(options.limit));
+  if (options.watchable !== undefined) params.set("watchable", String(options.watchable));
+  if (options.sort) params.set("sort", options.sort);
 
   const res = await fetch(`${API_BASE}/api/trails?${params}`, { signal });
   if (!res.ok) throw new Error("Failed to search trails");
@@ -102,7 +128,7 @@ export interface TrailSearchRequest {
   limit?: number;
 }
 
-export interface TrailSearchItem extends TrailListItem {
+export interface TrailSearchItem extends TrailListItem, TrailAlerts {
   /** Straight-line km from `near`; null without it. */
   distance_away_km: number | null;
   /** The trailhead, for the map; null when the catalogue has none. */
@@ -184,6 +210,8 @@ export interface TrailCampground {
   max_capacity: number | null;
   max_group_size: number | null;
   provider: string;
+  /** An alert can watch it (on Parks Canada's online map). */
+  watchable: boolean;
 }
 
 /**

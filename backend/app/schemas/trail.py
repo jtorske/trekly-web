@@ -76,6 +76,31 @@ class TrailListItemOut(TrailOut):
     photo: TrailPhotoOut | None = None
 
 
+class BookedThroughOut(BaseModel):
+    """How the trail's camping is booked ('bc_parks', or 'none' for first come,
+    first served): its first confirmed system that covers the whole route."""
+
+    system: str
+    name: str
+
+
+class TrailAlertsOut(BaseModel):
+    """Whether an availability alert can watch this trail, worked out on the
+    server from its linked campgrounds (see app/backcountry/watchable.py), and
+    enough about how it's booked to say why not."""
+
+    # At least one linked campground is on Parks Canada's online map.
+    has_watchable_campgrounds: bool = False
+    # The camping is a Parks Canada trail permit (West Coast Trail), which
+    # alerts don't watch.
+    trail_permit: bool = False
+    booked_through: BookedThroughOut | None = None
+
+
+class TrailPickItemOut(TrailListItemOut, TrailAlertsOut):
+    """GET /api/trails: a trail list item with its alert facts."""
+
+
 class NearIn(BaseModel):
     """The searcher's position, used for this request only and never stored."""
 
@@ -114,7 +139,7 @@ class TrailSearchIn(BaseModel):
     limit: int = Field(default=10, ge=1)
 
 
-class TrailSearchItemOut(TrailListItemOut):
+class TrailSearchItemOut(TrailListItemOut, TrailAlertsOut):
     # Straight-line km from `near`; null without it or without coordinates.
     distance_away_km: float | None = None
     # The trailhead, for Explore's map; null when the catalogue has none.
@@ -166,7 +191,7 @@ class SeasonalConditionOut(BaseModel):
     notes: str | None = None
 
 
-class TrailDetailOut(TrailListItemOut):
+class TrailDetailOut(TrailListItemOut, TrailAlertsOut):
     max_elevation_m: int | None = None
     latitude: float | None = None
     longitude: float | None = None
@@ -199,6 +224,8 @@ class TrailCampgroundOut(BaseModel):
     max_capacity: int | None = None
     max_group_size: int | None = None
     provider: str
+    # An alert can watch this campground (Parks Canada's online map).
+    watchable: bool = False
 
 
 class TrailBookingOut(BaseModel):

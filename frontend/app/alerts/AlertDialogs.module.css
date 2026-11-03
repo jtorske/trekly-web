@@ -39,6 +39,53 @@
   background: color-mix(in srgb, var(--color-olive) 12%, transparent);
 }
 
+/* A trail alerts can't watch: still focusable so its reason is read out,
+   but greyed and never selected (see TrailResult). */
+.result[aria-disabled="true"] {
+  cursor: default;
+}
+
+.result[aria-disabled="true"] .resultName,
+.result[aria-disabled="true"] .resultMeta {
+  color: color-mix(in srgb, var(--color-dark-olive) 55%, transparent);
+}
+
+.result[aria-disabled="true"]:hover {
+  background: color-mix(in srgb, var(--color-dark-olive) 5%, transparent);
+}
+
+.resultReason {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+/* Clicked: the reason is the answer, so it steps forward. */
+.result[data-explained] {
+  background: color-mix(in srgb, var(--color-dark-olive) 7%, transparent);
+}
+
+.result[data-explained] .resultReason {
+  color: var(--color-dark-olive);
+  font-weight: 600;
+}
+
+.showToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  color: var(--color-muted-text);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.showToggle input {
+  accent-color: var(--color-olive);
+}
+
 .resultName {
   display: block;
   font-weight: 600;

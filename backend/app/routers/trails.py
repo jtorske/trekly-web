@@ -1,4 +1,5 @@
 import math
+from typing import Literal
 from functools import lru_cache
 from urllib.parse import urlencode
 from uuid import UUID
@@ -8,6 +9,7 @@ from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.backcountry.parks_canada import PROVIDER as PARKS_CANADA
+from app.backcountry.watchable import TRAIL_IS_WATCHABLE, is_watchable, trail_alerts
 from app.catalog.search import escape_like
 from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.database import get_db
@@ -31,7 +33,8 @@ from app.schemas.trail import (
     TrailCampgroundsOut,
     TrailDetailOut,
     TrailFacetsOut,
-    TrailListItemOut,
+    TrailAlertsOut,
+    TrailPickItemOut,
     TrailSearchIn,
     TrailSearchItemOut,
     TrailSearchOut,
@@ -133,11 +136,18 @@ def filter_conditions(
     return conditions
 
 
+def with_alerts(item, alerts: TrailAlertsOut):
+    """Copy a trail's alert facts onto its response item."""
+    for field, value in alerts:
+        setattr(item, field, value)
+    return item
+
+
 def where(conditions: dict[str, list], leave_out: str | None = None) -> list:
     return [*live_trails(), *(c for key, cs in conditions.items() if key != leave_out for c in cs)]
 
 
-@router.get("", response_model=list[TrailListItemOut])
+@router.get("", response_model=list[TrailPickItemOut])
 def search_trails(
     q: str = "",
     terrain: Terrain | None = None,
@@ -145,6 +155,8 @@ def search_trails(
     province: list[str] = Query([]),
     park_type: list[ParkTypeFilter] = Query([]),
     park: list[str] = Query([]),
+    watchable: bool | None = None,
+    sort: Literal["popular", "watchable"] = "popular",
     limit: int = Query(10, ge=1, le=TRAIL_CATALOG_LIMIT),
     db: Session = Depends(get_db),
 ):
@@ -153,11 +165,18 @@ def search_trails(
     `trip=overnight` keeps backpacking trips (one or more typical nights);
     `trip=day` keeps day hikes. Trails with an unknown length match neither.
     `province`, `park_type` and `park` repeat to match any of their values.
+    `watchable` keeps only trails an alert can (true) or can't (false) watch;
+    `sort=watchable` puts the watchable ones first, then by popularity.
     """
     conditions = filter_conditions(q, terrain, trip, province, park_type, park)
-    return db.scalars(
-        select(Trail).where(*where(conditions)).order_by(Trail.popularity_rank, Trail.name).limit(limit)
-    ).all()
+    if watchable is not None:
+        conditions["watchable"] = [TRAIL_IS_WATCHABLE if watchable else ~TRAIL_IS_WATCHABLE]
+    order = [Trail.popularity_rank, Trail.name]
+    if sort == "watchable":
+        order.insert(0, TRAIL_IS_WATCHABLE.desc())
+    rows = db.scalars(select(Trail).where(*where(conditions)).order_by(*order).limit(limit)).all()
+    alerts = trail_alerts(db, (row.id for row in rows))
+    return [with_alerts(TrailPickItemOut.model_validate(row), alerts[row.id]) for row in rows]
 
 
 def trail_facets(db: Session, conditions: dict[str, list]) -> TrailFacetsOut:
@@ -216,12 +235,13 @@ def search_trails_with_facets(body: TrailSearchIn, db: Session = Depends(get_db)
     rows = db.scalars(
         select(Trail).where(*where(conditions)).order_by(Trail.popularity_rank, Trail.name).limit(limit)
     ).all()
+    alerts = trail_alerts(db, (row.id for row in rows))
     trails = []
     for row in rows:
         item = TrailSearchItemOut.model_validate(row)
         km = distances.get(row.id)
         item.distance_away_km = round(km, 1) if km is not None else None
-        trails.append(item)
+        trails.append(with_alerts(item, alerts[row.id]))
     return TrailSearchOut(trails=trails, total=total, facets=trail_facets(db, conditions))
 
 
@@ -236,7 +256,7 @@ def get_trail(trail_id: UUID, db: Session = Depends(get_db)):
         .filter(TrailSeasonalCondition.trail_id == trail_id)
         .all()
     )
-    detail = TrailDetailOut.model_validate(trail)
+    detail = with_alerts(TrailDetailOut.model_validate(trail), trail_alerts(db, [trail.id])[trail.id])
     detail.seasonal_conditions = [
         SeasonalConditionOut.model_validate(condition)
         for condition in sorted(conditions, key=lambda c: SEASON_ORDER.get(c.season, 99))
@@ -344,6 +364,7 @@ def get_trail_campgrounds(trail_id: UUID, db: Session = Depends(get_db)):
             max_capacity=link.site.max_capacity,
             max_group_size=link.site.max_group_size,
             provider=link.site.provider,
+            watchable=is_watchable(link.site),
         )
         for link in links
     ]

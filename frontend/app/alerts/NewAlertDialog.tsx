@@ -1,37 +1,75 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
+import { choosePickerTrail, pickerOrder, pickerSearch, unwatchableReason } from "@/lib/alertWatch";
 import type { CampgroundAlert, Stay } from "@/lib/availabilityApi";
 import { defaultStay } from "@/lib/stay";
-import {
-  getTrailCampgrounds,
-  searchTrails,
-  type TrailCampground,
-  type TrailListItem,
-} from "@/lib/trailsApi";
+import { getTrailCampgrounds, searchTrails, type TrailCampground, type TrailPickItem } from "@/lib/trailsApi";
 import AlertDialog from "../trails/AlertDialog";
 import StayFields from "./StayFields";
 import styles from "./AlertDialogs.module.css";
 
-/** Parks Canada campgrounds still listed: the ones an alert can watch. */
-function watchable(campgrounds: TrailCampground[]): TrailCampground[] {
-  return campgrounds.filter((c) => c.provider === "parks_canada" && !c.retired && c.kind !== "trail_permit");
+/**
+ * One search result. A trail alerts can't watch stays in the list (so a
+ * search for it explains why) but is greyed out and aria-disabled: click,
+ * Enter and Space only point at its reason, never select it.
+ */
+function TrailResult({
+  trail,
+  explained,
+  onChoose,
+}: {
+  trail: TrailPickItem;
+  explained: boolean;
+  onChoose: (trail: TrailPickItem) => void;
+}) {
+  const reasonId = useId();
+  const disabled = !trail.has_watchable_campgrounds;
+  return (
+    <li>
+      <button
+        type="button"
+        className={styles.result}
+        aria-disabled={disabled || undefined}
+        aria-describedby={disabled ? reasonId : undefined}
+        data-explained={explained || undefined}
+        onClick={() => onChoose(trail)}
+      >
+        <span className={styles.resultName}>{trail.name}</span>
+        <span className={styles.resultMeta}>{trail.park_name ?? trail.region}</span>
+        {disabled && (
+          <span id={reasonId} className={styles.resultReason}>
+            {unwatchableReason(trail)}
+          </span>
+        )}
+      </button>
+    </li>
+  );
 }
 
-function TrailSearch({ onPick }: { onPick: (trail: TrailListItem) => void }) {
+function TrailSearch({ onPick }: { onPick: (trail: TrailPickItem) => void }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<TrailListItem[] | null>(null);
+  const [showUnwatchable, setShowUnwatchable] = useState(false);
+  const [results, setResults] = useState<TrailPickItem[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [explained, setExplained] = useState<{ id: string; message: string } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      searchTrails(query.trim(), controller.signal, { trip: "overnight", limit: 8 })
+      searchTrails(query.trim(), controller.signal, {
+        trip: "overnight",
+        // Every match, so the greyed-out trails still fit below the watchable
+        // ones (the list scrolls); overnight trails are a small set.
+        limit: 60,
+        ...pickerSearch(query, showUnwatchable),
+      })
         .then((found) => {
-          setResults(found);
+          setResults(pickerOrder(found));
           setFailed(false);
+          setExplained(null);
         })
         .catch((error: unknown) => {
           if ((error as { name?: string }).name !== "AbortError") setFailed(true);
@@ -41,7 +79,13 @@ function TrailSearch({ onPick }: { onPick: (trail: TrailListItem) => void }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, showUnwatchable]);
+
+  const choose = (trail: TrailPickItem) => {
+    const choice = choosePickerTrail(trail);
+    if (choice.kind === "pick") onPick(choice.trail);
+    else setExplained({ id: trail.id, message: `${trail.name} can't have alerts. ${choice.reason}` });
+  };
 
   return (
     <>
@@ -56,6 +100,14 @@ function TrailSearch({ onPick }: { onPick: (trail: TrailListItem) => void }) {
           data-autofocus
         />
       </label>
+      <label className={styles.showToggle}>
+        <input
+          type="checkbox"
+          checked={showUnwatchable}
+          onChange={(event) => setShowUnwatchable(event.target.checked)}
+        />
+        Show trails without alerts
+      </label>
       {failed ? (
         <p className={ui.error} role="alert">
           We couldn&apos;t search trails right now. Try again shortly.
@@ -63,19 +115,21 @@ function TrailSearch({ onPick }: { onPick: (trail: TrailListItem) => void }) {
       ) : results === null ? (
         <div className={`${ui.skeleton} ${styles.resultsSkeleton}`} aria-label="Loading" />
       ) : results.length === 0 ? (
-        <p className={ui.hint}>No overnight trails match &ldquo;{query.trim()}&rdquo;.</p>
+        <p className={ui.hint}>
+          {query.trim()
+            ? <>No overnight trails match &ldquo;{query.trim()}&rdquo;.</>
+            : "No overnight trails can have alerts yet."}
+        </p>
       ) : (
         <ul className={styles.results} aria-label="Trails">
           {results.map((trail) => (
-            <li key={trail.id}>
-              <button type="button" className={styles.result} onClick={() => onPick(trail)}>
-                <span className={styles.resultName}>{trail.name}</span>
-                <span className={styles.resultMeta}>{trail.park_name ?? trail.region}</span>
-              </button>
-            </li>
+            <TrailResult key={trail.id} trail={trail} explained={explained?.id === trail.id} onChoose={choose} />
           ))}
         </ul>
       )}
+      <p className={ui.srOnly} role="status">
+        {explained?.message ?? ""}
+      </p>
     </>
   );
 }
@@ -93,7 +147,7 @@ export default function NewAlertDialog({
   onCreated: (alert: CampgroundAlert) => void;
   onClose: () => void;
 }) {
-  const [trail, setTrail] = useState<TrailListItem | null>(null);
+  const [trail, setTrail] = useState<TrailPickItem | null>(null);
   const [campgrounds, setCampgrounds] = useState<TrailCampground[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [siteId, setSiteId] = useState<string | null>(null);
@@ -105,7 +159,7 @@ export default function NewAlertDialog({
     const controller = new AbortController();
     getTrailCampgrounds(trail.id, controller.signal)
       .then((found) => {
-        const options = watchable(found.campgrounds);
+        const options = found.campgrounds.filter((c) => c.watchable);
         setCampgrounds(options);
         setSiteId(options.length === 1 ? options[0].site_id : null);
       })
@@ -115,7 +169,7 @@ export default function NewAlertDialog({
     return () => controller.abort();
   }, [trail]);
 
-  const pickTrail = (picked: TrailListItem) => {
+  const pickTrail = (picked: TrailPickItem) => {
     setCampgrounds(null);
     setLoadFailed(false);
     setSiteId(null);
@@ -166,10 +220,8 @@ export default function NewAlertDialog({
         ) : campgrounds === null ? (
           <div className={`${ui.skeleton} ${styles.resultsSkeleton}`} aria-label="Loading" />
         ) : campgrounds.length === 0 ? (
-          <p className={ui.hint}>
-            None of this trail&apos;s campgrounds can be watched online. Alerts work for Parks Canada
-            campgrounds.
-          </p>
+          // Only reachable if the trail's campgrounds changed since the search.
+          <p className={ui.hint}>{unwatchableReason(trail)}</p>
         ) : (
           <>
             <fieldset className={styles.campgrounds}>

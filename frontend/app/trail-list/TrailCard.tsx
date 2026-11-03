@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type Ref } from "react";
 import Link from "next/link";
+import AlertsChip from "@/components/AlertsChip";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
@@ -187,6 +188,11 @@ export default function TrailCard({
                 </span>
               ))}
             </p>
+            {trail.has_watchable_campgrounds && (
+              <p className={styles.cardChips}>
+                <AlertsChip />
+              </p>
+            )}
           </div>
           <div className={styles.cardSave}>
             <SaveTrailButton

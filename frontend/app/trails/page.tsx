@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import HikeLogButton from "@/components/HikeLogButton";
+import AlertsChip from "@/components/AlertsChip";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import { useHikeLogs } from "@/lib/useHikeLogs";
@@ -124,9 +125,10 @@ function TrailView({
       <header className={styles.header}>
         <p className={styles.region}>{trail.region}</p>
         <h1 className={styles.title}>{trail.name}</h1>
-        {campgrounds?.overnight_option && (
+        {(campgrounds?.overnight_option || trail.has_watchable_campgrounds) && (
           <div className={styles.tags}>
-            <span className={styles.overnightTag}>Also doable as an overnight</span>
+            {campgrounds?.overnight_option && <span className={styles.overnightTag}>Also doable as an overnight</span>}
+            {trail.has_watchable_campgrounds && <AlertsChip size="md" />}
           </div>
         )}
       </header>
