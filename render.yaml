@@ -28,8 +28,14 @@ services:
       # Site links in alert emails.
       - key: APP_URL
         sync: false
+      # Alert emails go through Resend: a Sending-access key, and a sender on
+      # the domain verified there, e.g. "Trekly <alerts@mail.example.com>".
       - key: EMAIL_BACKEND
-        value: console
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
       # No public Swagger UI or OpenAPI schema (also off by default on Render).
       - key: API_DOCS
         value: "false"
