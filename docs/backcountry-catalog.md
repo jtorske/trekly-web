@@ -156,9 +156,13 @@ python scripts/poll_alerts.py     # from any cron or worker, e.g. every 5-10 min
   frequency, whatever the schedule says.
 - Each run makes at most `ALERT_POLL_MAX_REQUESTS` (default 20) live
   requests. Least recently checked alerts go first.
-- Alerts whose first night has passed expire. A notified alert stays quiet
-  until the user turns it back on.
-- `EMAIL_BACKEND`: `sendgrid` in production, `mailpit` locally (the Supabase
+- Alerts whose first night has passed expire, with a "your alert has ended"
+  email. If that email fails it's retried for 3 days, then the alert expires
+  anyway. A notified alert stays quiet until the user turns it back on.
+- No alert is marked notified unless its "a site opened up" email was
+  accepted by the mail provider; a failed send leaves it active for the next
+  run. "Check now" on /alerts follows the same rule.
+- `EMAIL_BACKEND`: `resend` in production, `mailpit` locally (the Supabase
   stack's mail catcher at http://127.0.0.1:44324, over its HTTP send API, so
   no SMTP port needs exposing), or `console`.
 

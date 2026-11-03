@@ -1,0 +1,94 @@
+.stayFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .stayFields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .startField {
+    grid-column: 1 / -1;
+  }
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 18rem;
+  margin-top: 0.75rem;
+  overflow-y: auto;
+}
+
+.result {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+}
+
+.result:hover,
+.result:focus-visible {
+  background: color-mix(in srgb, var(--color-olive) 12%, transparent);
+}
+
+.resultName {
+  display: block;
+  font-weight: 600;
+}
+
+.resultMeta {
+  display: block;
+  color: color-mix(in srgb, var(--color-dark-olive) 78%, transparent);
+  font-size: 0.85rem;
+}
+
+.resultsSkeleton {
+  height: 8rem;
+  margin-top: 0.75rem;
+}
+
+.picked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+  padding: 0.6rem 0.8rem;
+}
+
+.campgrounds {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: 14rem;
+  margin-top: 1rem;
+  overflow-y: auto;
+  border: 0;
+  padding: 0;
+}
+
+.campground {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.4rem;
+  cursor: pointer;
+}
+
+.campground:hover {
+  background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+}
+
+.code {
+  color: color-mix(in srgb, var(--color-dark-olive) 70%, transparent);
+}

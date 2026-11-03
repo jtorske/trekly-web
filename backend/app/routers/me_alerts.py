@@ -1,22 +1,27 @@
 """The signed-in user's "alert me when this opens up" alerts.
 
 An alert watches one campground for one stay (start date + nights + party
-size). The poller (scripts/poll_alerts.py) emails once when every night of the
-stay is available, then marks the alert 'notified'; the user can re-arm it.
+size). Setting one sends a "we're watching" email. The poller
+(scripts/poll_alerts.py), or the user's own "check now", emails once when
+every night of the stay is available, then marks the alert 'notified'; the
+user can re-arm it or move it to new dates.
 """
 
+import logging
 from datetime import date, datetime, timedelta, timezone
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from app.alert_emails import booking_url_for, watching_email
+from app.alert_poller import send_opened
 from app.auth import CurrentUser, get_current_user, get_current_user_id
-from app.backcountry.availability import group_of, summarize
+from app.backcountry.availability import AvailabilityChecker, ProviderError, RateLimited, group_of, summarize
 from app.database import get_db
 from app.models.availability import (
     MAX_ACTIVE_ALERTS_PER_USER,
@@ -26,9 +31,11 @@ from app.models.availability import (
 )
 from app.models.backcountry import BackcountrySite
 from app.models.trail_campground import TrailCampground
-from app.routers.availability import get_today, validate_stay
+from app.notify import Email, EmailSender, get_email_sender
+from app.routers.availability import availability_error, get_availability_fetch, get_today, validate_stay
 
 router = APIRouter(prefix="/api/me/alerts", tags=["my alerts"])
+log = logging.getLogger(__name__)
 
 
 class AlertIn(BaseModel):
@@ -39,6 +46,14 @@ class AlertIn(BaseModel):
     start_date: date
     nights: int = Field(ge=1, le=MAX_ALERT_NIGHTS)
     party_size: int = Field(default=2, ge=1, le=MAX_PARTY_SIZE)
+
+
+class AlertStayIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    start_date: date
+    nights: int = Field(ge=1, le=MAX_ALERT_NIGHTS)
+    party_size: int = Field(ge=1, le=MAX_PARTY_SIZE)
 
 
 class AlertTrailOut(BaseModel):
@@ -63,6 +78,8 @@ class AlertOut(BaseModel):
     last_checked_at: datetime | None
     notified_at: datetime | None
     created_at: datetime
+    # Parks Canada's booking form on these dates; null if it can't be booked online.
+    booking_url: str | None
 
 
 def _out(alert: AvailabilityAlert) -> AlertOut:
@@ -82,6 +99,7 @@ def _out(alert: AvailabilityAlert) -> AlertOut:
         last_checked_at=alert.last_checked_at,
         notified_at=alert.notified_at,
         created_at=alert.created_at,
+        booking_url=booking_url_for(alert),
     )
 
 
@@ -122,6 +140,26 @@ def _commit_or_conflict(db: Session) -> None:
         raise HTTPException(status_code=409, detail=DUPLICATE_ALERT) from error
 
 
+def _send_quietly(sender: EmailSender, email: Email) -> None:
+    """For emails nothing depends on: a failure is logged, not raised."""
+    try:
+        sender.send(email)
+    except Exception:  # noqa: BLE001
+        log.exception("couldn't send %r", email.subject)
+
+
+def _check_active_cap(db: Session, user_id: UUID) -> None:
+    count = db.scalar(
+        select(func.count()).select_from(AvailabilityAlert)
+        .where(AvailabilityAlert.user_id == user_id, AvailabilityAlert.status == "active")
+    )
+    if (count or 0) >= MAX_ACTIVE_ALERTS_PER_USER:
+        raise HTTPException(
+            status_code=422,
+            detail=f"You can have up to {MAX_ACTIVE_ALERTS_PER_USER} active alerts. Cancel one to add another.",
+        )
+
+
 def _get(db: Session, user_id: UUID, alert_id: UUID) -> AvailabilityAlert:
     # Someone else's alert is indistinguishable from a missing one.
     alert = db.scalar(_query(user_id).where(AvailabilityAlert.id == alert_id))
@@ -143,9 +181,11 @@ def list_alerts(user_id: UUID = Depends(get_current_user_id), db: Session = Depe
 @router.post("", response_model=AlertOut, status_code=status.HTTP_201_CREATED)
 def create_alert(
     payload: AlertIn,
+    background: BackgroundTasks,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
     today: date = Depends(get_today),
+    sender: EmailSender = Depends(get_email_sender),
 ):
     if not user.email:
         raise HTTPException(status_code=422, detail="Your account needs an email address to get alerts.")
@@ -171,14 +211,7 @@ def create_alert(
     )
     if duplicate is not None:
         raise HTTPException(status_code=409, detail=DUPLICATE_ALERT)
-    count = db.scalar(
-        select(func.count()).select_from(AvailabilityAlert).where(AvailabilityAlert.user_id == user.id, active)
-    )
-    if (count or 0) >= MAX_ACTIVE_ALERTS_PER_USER:
-        raise HTTPException(
-            status_code=422,
-            detail=f"You can have up to {MAX_ACTIVE_ALERTS_PER_USER} active alerts. Cancel one to add another.",
-        )
+    _check_active_cap(db, user.id)
 
     alert = AvailabilityAlert(
         user_id=user.id,
@@ -192,7 +225,10 @@ def create_alert(
     )
     db.add(alert)
     _commit_or_conflict(db)
-    return _out(_get(db, user.id, alert.id))
+    created = _get(db, user.id, alert.id)
+    # After the response: the alert is set whether or not this email goes.
+    background.add_task(_send_quietly, sender, watching_email(created))
+    return _out(created)
 
 
 @router.post("/{alert_id}/cancel", response_model=AlertOut)
@@ -218,16 +254,82 @@ def rearm_alert(
         raise HTTPException(status_code=409, detail="Only alerts that have already notified you can be turned back on.")
     validate_stay(alert.start_date, alert.nights, today)
     _lock_user_alerts(db, user_id)
-    count = db.scalar(
-        select(func.count()).select_from(AvailabilityAlert)
-        .where(AvailabilityAlert.user_id == user_id, AvailabilityAlert.status == "active")
-    )
-    if (count or 0) >= MAX_ACTIVE_ALERTS_PER_USER:
-        raise HTTPException(status_code=422, detail=f"You can have up to {MAX_ACTIVE_ALERTS_PER_USER} active alerts.")
+    _check_active_cap(db, user_id)
     alert.status = "active"
     alert.notified_at = None
     # An identical alert may have been set again after this one notified.
     _commit_or_conflict(db)
+    return _out(_get(db, user_id, alert_id))
+
+
+@router.patch("/{alert_id}", response_model=AlertOut)
+def update_alert_stay(
+    alert_id: UUID,
+    payload: AlertStayIn,
+    user_id: UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    """New dates or party size. The alert watches again from scratch: active,
+    unchecked, and able to email once more, whatever state it was in."""
+    alert = _get(db, user_id, alert_id)
+    validate_stay(payload.start_date, payload.nights, today)
+    _lock_user_alerts(db, user_id)
+    duplicate = db.scalar(
+        select(AvailabilityAlert.id).where(
+            AvailabilityAlert.user_id == user_id, AvailabilityAlert.status == "active",
+            AvailabilityAlert.id != alert.id,
+            AvailabilityAlert.site_id == alert.site_id,
+            AvailabilityAlert.start_date == payload.start_date,
+            AvailabilityAlert.nights == payload.nights,
+        )
+    )
+    if duplicate is not None:
+        raise HTTPException(status_code=409, detail=DUPLICATE_ALERT)
+    if alert.status != "active":
+        _check_active_cap(db, user_id)
+    alert.start_date = payload.start_date
+    alert.nights = payload.nights
+    alert.party_size = payload.party_size
+    alert.status = "active"
+    alert.last_result = None
+    alert.last_checked_at = None
+    alert.notified_at = None
+    alert.cancelled_at = None
+    _commit_or_conflict(db)
+    return _out(_get(db, user_id, alert_id))
+
+
+@router.post("/{alert_id}/check", response_model=AlertOut)
+def check_alert(
+    alert_id: UUID,
+    user_id: UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+    fetch=Depends(get_availability_fetch),
+    today: date = Depends(get_today),
+    sender: EmailSender = Depends(get_email_sender),
+):
+    """Check an active alert now, through the same cache and request budget as
+    every other check. If the whole stay is open it notifies just as the
+    poller would: the email goes first, and the alert only counts as notified
+    once it has."""
+    alert = _get(db, user_id, alert_id)
+    if alert.status != "active":
+        raise HTTPException(status_code=409, detail="Only active alerts can be checked.")
+    if alert.start_date < today:
+        raise HTTPException(status_code=422, detail="These dates have passed, so there's nothing left to check.")
+    try:
+        result = AvailabilityChecker(db, fetch).check([alert.site], alert.start_date, alert.nights, alert.party_size)
+    except (RateLimited, ProviderError) as error:
+        raise availability_error(error) from error
+    found = result.sites[alert.site_id]
+    alert.last_result = found.statuses
+    alert.last_checked_at = datetime.now(timezone.utc)
+    if found.summary == "available":
+        problem = send_opened(alert, sender, alert.last_checked_at)
+        if problem:
+            log.error("opened-up email for alert %s failed: %s", alert.id, problem)
+    db.commit()
     return _out(_get(db, user_id, alert_id))
 
 

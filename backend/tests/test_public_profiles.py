@@ -20,7 +20,7 @@ from app.models.trail import Trail
 from app.models.trip_plan import TripPlan
 from app.notify import Email
 from app.routers.public_profiles import get_email_sender
-from tests.test_availability import TODAY, fetch, world  # noqa: F401  (fixtures)
+from tests.test_availability import TODAY, fetch, outbox, world  # noqa: F401  (fixtures)
 
 ALICE_EMAIL = "alice-canary@example.com"
 CANARIES = [

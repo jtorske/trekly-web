@@ -26,9 +26,9 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       APP_URL: ${{ secrets.APP_URL }}
-      EMAIL_BACKEND: sendgrid
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-      SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
+      EMAIL_BACKEND: resend
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
       # A little under the 30-minute schedule, so a run that GitHub starts a
       # few minutes early relative to the last one isn't skipped.
       ALERT_POLL_MIN_INTERVAL_MINUTES: "25"
@@ -40,7 +40,7 @@ jobs:
         working-directory: .
         run: |
           missing=""
-          for name in DATABASE_URL APP_URL SENDGRID_API_KEY SENDGRID_FROM_EMAIL; do
+          for name in DATABASE_URL APP_URL RESEND_API_KEY RESEND_FROM_EMAIL; do
             [ -n "${!name}" ] || missing="$missing $name"
           done
           if [ -n "$missing" ]; then

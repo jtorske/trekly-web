@@ -1,7 +1,7 @@
 """Outgoing email.
 
 EMAIL_BACKEND picks the transport:
-    sendgrid  production: SendGrid v3 API (SENDGRID_API_KEY, SENDGRID_FROM_EMAIL)
+    resend    production: Resend's email API (RESEND_API_KEY, RESEND_FROM_EMAIL)
     mailpit   local: the Supabase stack's mail catcher over its HTTP send API
               (MAILPIT_URL, default http://127.0.0.1:44324), so nothing leaves
               the machine and no SMTP port has to be exposed
@@ -10,6 +10,7 @@ EMAIL_BACKEND picks the transport:
 
 import json
 import os
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from typing import Protocol
@@ -36,30 +37,41 @@ def _post_json(url: str, payload: dict, headers: dict[str, str] | None = None, t
         headers={"Content-Type": "application/json", **(headers or {})},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        response.read()
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            response.read()
+    except urllib.error.HTTPError as error:
+        # The provider says why in the body ("domain is not verified", ...).
+        detail = error.read().decode(errors="replace")[:300]
+        raise RuntimeError(f"HTTP {error.code}: {detail}") from error
 
 
-class SendGridSender:
-    URL = "https://api.sendgrid.com/v3/mail/send"
+def _from_header(from_email: str) -> str:
+    """'Trekly <alerts@example.com>' unless the setting already names a sender."""
+    return from_email if "<" in from_email else f"{FROM_NAME} <{from_email}>"
+
+
+class ResendSender:
+    URL = "https://api.resend.com/emails"
 
     def __init__(self, api_key: str, from_email: str):
         self.api_key = api_key
         self.from_email = from_email
 
     def send(self, email: Email) -> None:
-        content = [{"type": "text/plain", "value": email.text}]
+        payload = {
+            "from": _from_header(self.from_email),
+            "to": [email.to],
+            "subject": email.subject,
+            "text": email.text,
+        }
         if email.html:
-            content.append({"type": "text/html", "value": email.html})
+            payload["html"] = email.html
         _post_json(
             self.URL,
-            {
-                "personalizations": [{"to": [{"email": email.to}]}],
-                "from": {"email": self.from_email, "name": FROM_NAME},
-                "subject": email.subject,
-                "content": content,
-            },
-            {"Authorization": f"Bearer {self.api_key}"},
+            payload,
+            # Resend's edge refuses urllib's default User-Agent.
+            {"Authorization": f"Bearer {self.api_key}", "User-Agent": "trekly-api/1.0"},
         )
 
 
@@ -87,14 +99,33 @@ class ConsoleSender:
 
 def email_sender_from_env() -> EmailSender:
     backend = (os.getenv("EMAIL_BACKEND") or "console").lower()
-    from_email = os.getenv("SENDGRID_FROM_EMAIL") or "alerts@trekly.local"
-    if backend == "sendgrid":
-        api_key = os.getenv("SENDGRID_API_KEY")
-        if not api_key:
-            raise RuntimeError("EMAIL_BACKEND=sendgrid needs SENDGRID_API_KEY")
-        return SendGridSender(api_key, from_email)
+    from_email = os.getenv("RESEND_FROM_EMAIL") or "alerts@trekly.local"
+    if backend == "resend":
+        api_key = os.getenv("RESEND_API_KEY")
+        if not api_key or not os.getenv("RESEND_FROM_EMAIL"):
+            raise RuntimeError("EMAIL_BACKEND=resend needs RESEND_API_KEY and RESEND_FROM_EMAIL")
+        return ResendSender(api_key, from_email)
     if backend == "mailpit":
         return MailpitSender(os.getenv("MAILPIT_URL", "http://127.0.0.1:44324"), from_email)
     if backend == "console":
         return ConsoleSender()
     raise RuntimeError(f"unknown EMAIL_BACKEND {backend!r}")
+
+
+class UnconfiguredSender:
+    """Stands in when the email settings are wrong, so every send fails
+    loudly (and nothing is marked as emailed) instead of the API crashing."""
+
+    def __init__(self, problem: str):
+        self.problem = problem
+
+    def send(self, email: Email) -> None:
+        raise RuntimeError(self.problem)
+
+
+def get_email_sender() -> EmailSender:
+    """FastAPI dependency for the API's own emails; overridden in tests."""
+    try:
+        return email_sender_from_env()
+    except RuntimeError as error:
+        return UnconfiguredSender(str(error))

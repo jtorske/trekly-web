@@ -15,7 +15,12 @@ Safe to call from any cron or worker, as often as you like:
 
 An alert fires once, when every night of its stay is available; it's then
 'notified' until the user re-arms it. Alerts whose first night has passed
-expire.
+expire, with a "your alert has ended" email.
+
+Nothing is marked as emailed unless the email actually went: a failed
+"opened up" email leaves the alert active for the next run, and a failed
+"ended" email is retried for ENDED_EMAIL_RETRY before the alert expires
+without one.
 """
 
 from __future__ import annotations
@@ -31,10 +36,8 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from urllib.parse import urlencode
-
+from app.alert_emails import ended_email, opened_email
 from app.backcountry.availability import (
-    RESULTS_URL,
     AvailabilityChecker,
     CheckResult,
     MapGroup,
@@ -45,7 +48,7 @@ from app.backcountry.availability import (
 )
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock
 from app.models.backcountry import BackcountrySite
-from app.notify import Email, EmailSender
+from app.notify import EmailSender
 
 JOB_NAME = "alert_poller"
 MIN_INTERVAL = timedelta(minutes=int(os.getenv("ALERT_POLL_MIN_INTERVAL_MINUTES", "10")))
@@ -54,7 +57,7 @@ LEASE = timedelta(minutes=15)
 # Longest date range merged into one request.
 MAX_WINDOW_NIGHTS = 31
 CACHE_RETENTION = timedelta(days=1)
-APP_URL = os.getenv("APP_URL", "http://localhost:3000").rstrip("/")
+ENDED_EMAIL_RETRY = timedelta(days=3)
 
 
 @dataclass
@@ -153,52 +156,16 @@ def build_windows(alerts: list[AvailabilityAlert]) -> list[Window]:
     return windows
 
 
-def alert_email(alert: AvailabilityAlert, booking_url: str | None) -> Email:
-    site = alert.site
-    leave = alert.start_date + timedelta(days=alert.nights)
-    dates = f"{alert.start_date:%a %b} {alert.start_date.day}"
-    leave_s = f"{leave:%a %b} {leave.day}"
-    name = site.name + (f" ({site.site_code})" if site.site_code and site.site_code != site.name else "")
-    nights = f"{alert.nights} night{'s' if alert.nights != 1 else ''}"
-    trail_link = (
-        f"{APP_URL}/trails?" + urlencode({
-            "id": str(alert.trail_id), "start": alert.start_date.isoformat(),
-            "nights": alert.nights, "party": alert.party_size,
-        })
-        if alert.trail_id else None
-    )
-    lines = [
-        f"Good news: {name} is showing as available for your whole stay.",
-        "",
-        f"  {dates} to {leave_s} ({nights}), party of {alert.party_size}",
-        "",
-        "Spots go quickly and Trekly doesn't book for you, so book on Parks Canada soon:",
-        f"  {booking_url}" if booking_url else "  https://reservation.pc.gc.ca",
-    ]
-    if trail_link:
-        lines += ["", f"Trail page: {trail_link}"]
-    lines += [
-        "",
-        "This alert won't email you again. If the spot is gone by the time you look, "
-        f"turn the alert back on from your alerts: {APP_URL}/alerts",
-    ]
-    return Email(to=alert.email, subject=f"{site.name} has opened up for {dates}", text="\n".join(lines))
-
-
-def booking_url_for(alert: AvailabilityAlert) -> str | None:
-    """Parks Canada's booking form for the campground's park and booking type,
-    opened on the alert's dates (startDate/endDate fill in the arrival and
-    nights; no parameter sets party size)."""
-    group = group_of(alert.site)
-    if group is None:
-        return None
-    return RESULTS_URL + "?" + urlencode({
-        "resourceLocationId": group.location_id,
-        "mapId": group.map_id,
-        "bookingCategoryId": group.booking_category_id,
-        "startDate": alert.start_date.isoformat(),
-        "endDate": (alert.start_date + timedelta(days=alert.nights)).isoformat(),
-    })
+def send_opened(alert: AvailabilityAlert, sender: EmailSender, at: datetime) -> str | None:
+    """Email that the stay is available and mark the alert notified, but only
+    once the email has gone. Returns why it couldn't be sent, if it wasn't."""
+    try:
+        sender.send(opened_email(alert))
+    except Exception as error:  # noqa: BLE001 - the alert stays active and tries again
+        return str(error)
+    alert.status = "notified"
+    alert.notified_at = at
+    return None
 
 
 def run_alert_poll(
@@ -227,18 +194,32 @@ def run_alert_poll(
 
 def _poll(db, checker, sender, now, max_requests, report: PollReport) -> None:
     today = now().date()
+    with_place = (
+        selectinload(AvailabilityAlert.site).selectinload(BackcountrySite.park),
+        selectinload(AvailabilityAlert.trail),
+    )
     for alert in db.scalars(
-        select(AvailabilityAlert).where(AvailabilityAlert.status == "active", AvailabilityAlert.start_date < today)
-    ):
+        select(AvailabilityAlert)
+        .where(AvailabilityAlert.status == "active", AvailabilityAlert.start_date < today)
+        .options(*with_place)
+    ).all():
+        try:
+            sender.send(ended_email(alert))
+        except Exception as error:  # noqa: BLE001 - try again next run, for a while
+            report.errors.append(f"ended email for alert {alert.id}: {error}")
+            if today - alert.start_date <= ENDED_EMAIL_RETRY:
+                continue
         alert.status = "expired"
         report.expired += 1
+        db.commit()
     db.execute(delete(AvailabilityCache).where(AvailabilityCache.fetched_at < now() - CACHE_RETENTION))
     db.commit()
 
+    # Past alerts still waiting on their "ended" email aren't checked.
     alerts = db.scalars(
         select(AvailabilityAlert)
-        .where(AvailabilityAlert.status == "active")
-        .options(selectinload(AvailabilityAlert.site).selectinload(BackcountrySite.park))
+        .where(AvailabilityAlert.status == "active", AvailabilityAlert.start_date >= today)
+        .options(*with_place)
     ).all()
     windows = sorted(build_windows(list(alerts)), key=lambda w: w.oldest_check)
 
@@ -266,13 +247,9 @@ def _poll(db, checker, sender, now, max_requests, report: PollReport) -> None:
             alert.last_checked_at = now()
             report.checked += 1
             if all(s == "available" for s in statuses):
-                try:
-                    sender.send(alert_email(alert, booking_url_for(alert)))
-                except Exception as error:  # noqa: BLE001 - try again next run
-                    report.errors.append(f"email for alert {alert.id}: {error}")
-                    db.commit()
-                    continue
-                alert.status = "notified"
-                alert.notified_at = now()
-                report.notified += 1
+                problem = send_opened(alert, sender, now())
+                if problem:
+                    report.errors.append(f"email for alert {alert.id}: {problem}")
+                else:
+                    report.notified += 1
             db.commit()

@@ -11,7 +11,7 @@ from app.models.availability import AvailabilityAlert
 from app.models.backcountry import BackcountrySite
 from app.models.trail_campground import TrailCampground
 from app.models.trip_plan import TripPlanNight
-from tests.test_availability import TODAY, add_site, fetch, world  # noqa: F401  (fixtures)
+from tests.test_availability import TODAY, add_site, fetch, outbox, world  # noqa: F401  (fixtures)
 
 
 @pytest.fixture

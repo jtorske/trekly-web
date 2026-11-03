@@ -12,7 +12,8 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from app.alert_poller import JOB_NAME, alert_email, booking_url_for, build_windows, run_alert_poll
+from app.alert_emails import ended_email, opened_email, watching_email
+from app.alert_poller import JOB_NAME, build_windows, run_alert_poll
 from app.backcountry import availability as av
 from app.backcountry.availability import (
     AvailabilityChecker,
@@ -30,7 +31,7 @@ from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLoc
 from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.trail import Trail
 from app.models.trail_campground import TrailCampground
-from app.notify import Email
+from app.notify import Email, ResendSender, email_sender_from_env, get_email_sender
 from app.routers import me_alerts
 from app.routers.availability import get_availability_fetch, get_today
 
@@ -141,7 +142,15 @@ def world(session_factory, client):
 
 
 @pytest.fixture
-def fetch():
+def outbox():
+    """Every email the API sends in a test lands here instead of Resend."""
+    box = Outbox()
+    app.dependency_overrides[get_email_sender] = lambda: box
+    return box
+
+
+@pytest.fixture
+def fetch(outbox):
     fake = FixtureFetch()
     app.dependency_overrides[get_availability_fetch] = lambda: fake
     app.dependency_overrides[get_today] = lambda: TODAY
@@ -469,9 +478,10 @@ def test_users_cannot_see_or_touch_each_others_alerts(client, world, fetch, user
 
 
 def make_alert(db, world, site="evelyn", start=START, nights=2, party=2, **overrides):
+    values = {"status": "active", **overrides}
     alert = AvailabilityAlert(user_id=uuid.uuid4(), email="hiker@example.com", site_id=world[site],
                               trail_id=world["trail"], start_date=start, nights=nights, party_size=party,
-                              status="active", **overrides)
+                              **values)
     db.add(alert)
     db.commit()
     return alert.id
@@ -610,9 +620,9 @@ def test_alert_email_content(session_factory, world):
     db = session_factory()
     alert_id = make_alert(db, world, nights=2, party=3)
     alert = db.get(AvailabilityAlert, alert_id)
-    email = alert_email(alert, booking_url_for(alert))
+    email = opened_email(alert)
     assert email.to == "hiker@example.com"
-    assert email.subject == "Evelyn Creek has opened up for Tue Oct 20"
+    assert email.subject == "A site opened up: Evelyn Creek, Tue Oct 20"
     assert "Tue Oct 20 to Thu Oct 22 (2 nights), party of 3" in email.text
     assert (
         "resourceLocationId=-2147483592&mapId=-2147483409&bookingCategoryId=7"
@@ -641,3 +651,186 @@ def test_poller_handles_a_one_night_alert(session_factory, world):
     outbox = Outbox()
     report = poll(session_factory, FixtureFetch(), outbox, Clock())
     assert report.errors == [] and report.notified == 1 and len(outbox.sent) == 1
+
+
+# ---------------------------------------------------------------- alert emails
+
+
+def test_setting_an_alert_sends_we_are_watching(client, world, fetch, outbox, user):
+    _, headers = user
+    created = client.post("/api/me/alerts", json=alert_body(world), headers=headers)
+    assert created.status_code == 201
+    [email] = outbox.sent
+    assert email.to == "hiker@example.com"
+    assert email.subject == "We're watching Evelyn Creek for Tue Oct 20"
+    assert "Tue Oct 20 to Thu Oct 22 (2 nights), party of 2" in email.text
+    assert email.html and "We&#x27;re watching" in email.html
+
+
+def test_a_failed_we_are_watching_email_still_sets_the_alert(client, world, fetch, outbox, user):
+    _, headers = user
+    outbox.fail = True
+    created = client.post("/api/me/alerts", json=alert_body(world), headers=headers)
+    assert created.status_code == 201 and created.json()["status"] == "active"
+    assert outbox.sent == []
+
+
+def test_check_now_notifies_when_the_whole_stay_is_open(client, world, fetch, outbox, user):
+    _, headers = user
+    alert = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    checked = client.post(f"/api/me/alerts/{alert['id']}/check", headers=headers)
+    assert checked.status_code == 200, checked.text
+    body = checked.json()
+    assert (body["status"], body["last_summary"]) == ("notified", "available")
+    assert body["last_checked_at"] and body["notified_at"]
+    assert [e.subject for e in outbox.sent] == [
+        "We're watching Evelyn Creek for Tue Oct 20",
+        "A site opened up: Evelyn Creek, Tue Oct 20",
+    ]
+    # Only active alerts are checked, so the email can't go twice.
+    assert client.post(f"/api/me/alerts/{alert['id']}/check", headers=headers).status_code == 409
+
+
+def test_check_now_without_an_opening_just_records_the_result(client, world, fetch, outbox, user):
+    _, headers = user
+    fetch.skyline = "synthetic_zone_partly_full"
+    alert = client.post("/api/me/alerts", json=alert_body(world, nights=3), headers=headers).json()
+    body = client.post(f"/api/me/alerts/{alert['id']}/check", headers=headers).json()
+    assert (body["status"], body["last_summary"]) == ("active", "partial")
+    assert len(outbox.sent) == 1  # only "we're watching"
+
+
+def test_check_now_stays_active_when_the_opened_email_fails(client, world, fetch, outbox, user):
+    _, headers = user
+    alert = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    outbox.fail = True
+    body = client.post(f"/api/me/alerts/{alert['id']}/check", headers=headers).json()
+    assert (body["status"], body["last_summary"], body["notified_at"]) == ("active", "available", None)
+
+
+def test_poller_sends_ended_when_the_dates_pass(session_factory, world):
+    db = session_factory()
+    past = make_alert(db, world, start=TODAY - timedelta(days=1))
+    notified = make_alert(db, world, "shovel", start=TODAY - timedelta(days=1), status="notified")
+    db.close()
+    outbox = Outbox()
+    report = poll(session_factory, FixtureFetch(), outbox, Clock())
+    assert report.expired == 1
+    [email] = outbox.sent  # the notified alert already had its email
+    assert email.subject == "Your alert has ended: Evelyn Creek, Wed Oct 14"
+    db = session_factory()
+    assert db.get(AvailabilityAlert, past).status == "expired"
+    assert db.get(AvailabilityAlert, notified).status == "notified"
+    db.close()
+
+
+def test_a_failed_ended_email_is_retried_then_given_up(session_factory, world):
+    db = session_factory()
+    past = make_alert(db, world, start=TODAY - timedelta(days=1))
+    db.close()
+    fake, outbox, clock = FixtureFetch(), Outbox(), Clock()
+    outbox.fail = True
+    report = poll(session_factory, fake, outbox, clock)
+    assert report.expired == 0 and report.errors and fake.calls == []  # past dates aren't checked
+    db = session_factory()
+    assert db.get(AvailabilityAlert, past).status == "active"
+    db.close()
+
+    outbox.fail = False
+    clock.advance(minutes=11)
+    assert poll(session_factory, fake, outbox, clock).expired == 1 and len(outbox.sent) == 1
+
+    db = session_factory()
+    stale = make_alert(db, world, "shovel", start=TODAY - timedelta(days=5))
+    db.close()
+    outbox.fail = True
+    clock.advance(minutes=11)
+    assert poll(session_factory, fake, outbox, clock).expired == 1  # too late to keep trying
+    db = session_factory()
+    assert db.get(AvailabilityAlert, stale).status == "expired"
+    db.close()
+
+
+def test_edit_dates_watches_again_from_scratch(client, world, fetch, outbox, user):
+    _, headers = user
+    alert = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    client.post(f"/api/me/alerts/{alert['id']}/check", headers=headers)  # notifies
+    moved = client.patch(f"/api/me/alerts/{alert['id']}", headers=headers,
+                         json={"start_date": "2026-10-21", "nights": 1, "party_size": 3})
+    assert moved.status_code == 200, moved.text
+    body = moved.json()
+    assert (body["status"], body["start_date"], body["nights"], body["party_size"]) == ("active", "2026-10-21", 1, 3)
+    assert (body["last_checked_at"], body["notified_at"], body["last_summary"]) == (None, None, None)
+    assert "startDate=2026-10-21&endDate=2026-10-22" in body["booking_url"]
+
+
+def test_edit_dates_refuses_duplicates_and_past_dates(client, world, fetch, user):
+    _, headers = user
+    first = client.post("/api/me/alerts", json=alert_body(world), headers=headers).json()
+    client.post("/api/me/alerts", json=alert_body(world, start_date="2026-10-21"), headers=headers)
+    stay = {"start_date": "2026-10-21", "nights": 2, "party_size": 2}
+    assert client.patch(f"/api/me/alerts/{first['id']}", json=stay, headers=headers).status_code == 409
+    past = {**stay, "start_date": "2026-10-01"}
+    assert client.patch(f"/api/me/alerts/{first['id']}", json=past, headers=headers).status_code == 422
+
+
+def test_alert_emails_link_to_manage_alerts_and_load_nothing(session_factory, world):
+    db = session_factory()
+    alert = db.get(AvailabilityAlert, make_alert(db, world))
+    for email in (watching_email(alert), opened_email(alert), ended_email(alert)):
+        assert email.html and email.text
+        assert "/alerts" in email.text and "/alerts" in email.html
+        lowered = email.html.lower()
+        assert "<img" not in lowered and "<link" not in lowered and "url(" not in lowered
+    assert "Book on Parks Canada" in opened_email(alert).html
+    assert "startDate=2026-10-20&amp;endDate=2026-10-22" in opened_email(alert).html
+    db.close()
+
+
+def test_alert_email_escapes_campground_names(session_factory, world):
+    db = session_factory()
+    alert = db.get(AvailabilityAlert, make_alert(db, world))
+    alert.site.name = "<b>Evelyn</b>"
+    assert "<b>Evelyn</b>" not in watching_email(alert).html
+    db.close()
+
+
+class FakeResponse:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return b'{"id": "email-1"}'
+
+
+def test_resend_sender_posts_both_versions(monkeypatch):
+    sent = []
+    monkeypatch.setattr("urllib.request.urlopen", lambda request, timeout: sent.append(request) or FakeResponse())
+    ResendSender("re_test", "alerts@trekly.example").send(
+        Email(to="hiker@example.com", subject="Hi", text="plain", html="<p>html</p>")
+    )
+    [request] = sent
+    assert request.full_url == "https://api.resend.com/emails"
+    assert request.get_header("Authorization") == "Bearer re_test"
+    assert json.loads(request.data) == {
+        "from": "Trekly <alerts@trekly.example>", "to": ["hiker@example.com"],
+        "subject": "Hi", "text": "plain", "html": "<p>html</p>",
+    }
+
+
+def test_resend_needs_its_settings(monkeypatch):
+    monkeypatch.setenv("EMAIL_BACKEND", "resend")
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+    monkeypatch.setenv("RESEND_FROM_EMAIL", "Trekly <alerts@trekly.example>")
+    with pytest.raises(RuntimeError, match="RESEND_API_KEY"):
+        email_sender_from_env()
+    monkeypatch.setenv("RESEND_API_KEY", "re_test")
+    sender = email_sender_from_env()
+    assert isinstance(sender, ResendSender) and sender.from_email == "Trekly <alerts@trekly.example>"
+    # A broken setup fails each send (so nothing counts as emailed) without breaking the API.
+    monkeypatch.delenv("RESEND_API_KEY")
+    with pytest.raises(RuntimeError):
+        get_email_sender().send(Email(to="a@b.c", subject="s", text="t"))

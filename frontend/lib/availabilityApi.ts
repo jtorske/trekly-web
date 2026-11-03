@@ -73,6 +73,14 @@ export interface CampgroundAlert {
   last_checked_at: string | null;
   notified_at: string | null;
   created_at: string;
+  /** Parks Canada's booking form on these dates; null if not bookable online. */
+  booking_url: string | null;
+}
+
+export interface AlertStay {
+  start_date: string;
+  nights: number;
+  party_size: number;
 }
 
 export interface NewAlert {
@@ -91,4 +99,9 @@ export const alertsApi = {
   cancel: (id: string) => apiFetch<CampgroundAlert>(`/api/me/alerts/${id}/cancel`, { method: "POST", auth: true }),
   rearm: (id: string) => apiFetch<CampgroundAlert>(`/api/me/alerts/${id}/rearm`, { method: "POST", auth: true }),
   remove: (id: string) => apiFetch<void>(`/api/me/alerts/${id}`, { method: "DELETE", auth: true }),
+  /** New dates or party size; the alert starts watching again. */
+  update: (id: string, stay: AlertStay) =>
+    apiFetch<CampgroundAlert>(`/api/me/alerts/${id}`, { method: "PATCH", body: stay, auth: true }),
+  /** Checks Parks Canada now; emails and marks it notified if the whole stay is open. */
+  check: (id: string) => apiFetch<CampgroundAlert>(`/api/me/alerts/${id}/check`, { method: "POST", auth: true }),
 };

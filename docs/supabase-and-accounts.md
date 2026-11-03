@@ -92,8 +92,13 @@ These can't be set from SQL or the repository. In **Authentication**:
 3. **URL Configuration**: *Site URL* = your production origin. Add redirect
    URLs: `https://<your-domain>/auth/callback` and
    `http://localhost:3000/auth/callback`.
-4. **Emails / SMTP**: Supabase's built-in mailer is heavily rate-limited;
-   configure custom SMTP before launch.
+4. **Emails → SMTP Settings**: send through Resend (Supabase's built-in
+   mailer only reaches team members and is heavily rate-limited). Turn on
+   *Enable custom SMTP* and enter: sender email = an address on the domain
+   verified in Resend (e.g. `no-reply@<your-domain>`), sender name =
+   `Trekly`, host = `smtp.resend.com`, port = `465`, username = `resend`,
+   password = a Resend API key. Then raise **Rate Limits → emails sent per
+   hour** from the custom-SMTP default of 30 if sign-ups need it.
 5. **OAuth**: none is configured, so no social sign-in buttons are shown. To
    add one, enable the provider in the dashboard and add a button that calls
    `signInWithOAuth` with the same `/auth/callback` redirect.

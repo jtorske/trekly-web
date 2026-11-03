@@ -5,7 +5,7 @@ import Link from "next/link";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { useAuth } from "@/components/AuthProvider";
-import { alertsApi, type Stay } from "@/lib/availabilityApi";
+import { alertsApi, type CampgroundAlert, type Stay } from "@/lib/availabilityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { formatStay } from "@/lib/stay";
 import { formProblem, toast } from "@/lib/toast";
@@ -22,6 +22,7 @@ export default function AlertDialog({
   campground,
   stay,
   returnTo,
+  onCreated,
   onClose,
 }: {
   trailId: string;
@@ -30,6 +31,8 @@ export default function AlertDialog({
   stay: Stay;
   /** Trail page URL including the stay and `alert=<siteId>`, for after sign-in. */
   returnTo: string;
+  /** After the alert is set (the alerts page adds it to its list). */
+  onCreated?: (alert: CampgroundAlert) => void;
   onClose: () => void;
 }) {
   const { status, user } = useAuth();
@@ -40,14 +43,16 @@ export default function AlertDialog({
     setBusy(true);
     setError(null);
     try {
-      await alertsApi.create({
+      const created = await alertsApi.create({
         site_id: siteId,
         trail_id: trailId,
         start_date: stay.start,
         nights: stay.nights,
         party_size: stay.party,
       });
-      toast.success("Alert set. We'll email you if a site opens up", { link: { label: "View alerts", href: "/alerts" } });
+      // Already on the alerts page, there's no need to link to it.
+      toast.success("Alert set. We'll email you if a site opens up", onCreated ? undefined : { link: { label: "View alerts", href: "/alerts" } });
+      onCreated?.(created);
       onClose();
     } catch (caught) {
       const problem = formProblem(caught);

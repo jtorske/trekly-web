@@ -34,7 +34,7 @@ an email when a sold-out Parks Canada campsite opens up.
 | Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, CSS Modules |
 | Backend | Python 3.11, FastAPI, SQLAlchemy 2, Alembic, Uvicorn |
 | Database & auth | Supabase: Postgres with row-level security, Auth, Storage |
-| Email | SendGrid (alerts); Mailpit for local development |
+| Email | Resend (alert emails, and Supabase Auth's emails over SMTP); Mailpit for local development |
 | Hosting | Vercel (web), Render (API, Docker), GitHub Actions (alert poller) |
 
 ## Architecture
@@ -57,7 +57,7 @@ flowchart LR
         poller[Alert poller<br/>every 30 min]
     end
     pc[Parks Canada<br/>reservation site]
-    mail[SendGrid]
+    mail[Resend]
 
     browser --> web
     browser -- sign-in --> auth
@@ -164,9 +164,9 @@ All three are public and end up in the browser bundle.
 | `CORS_ORIGINS` | Comma-separated origins allowed to call the API | No (default `http://localhost:3000`) |
 | `CORS_ORIGIN_REGEX` | Full-match regex for changing origins, such as Vercel previews | No |
 | `APP_URL` | Site base URL used in alert email links | No (default `http://localhost:3000`) |
-| `EMAIL_BACKEND` | `sendgrid`, `mailpit` or `console` | No (default `console`) |
-| `SENDGRID_API_KEY` | SendGrid API key | Only with `sendgrid` |
-| `SENDGRID_FROM_EMAIL` | Sender address for alert emails | Only with `sendgrid` |
+| `EMAIL_BACKEND` | `resend`, `mailpit` or `console` | No (default `console`) |
+| `RESEND_API_KEY` | Resend API key (sending access is enough) | Only with `resend` |
+| `RESEND_FROM_EMAIL` | Sender for alert emails, on a domain verified in Resend, e.g. `Trekly <alerts@example.com>` | Only with `resend` |
 | `MAILPIT_URL` | Local Mailpit address | Only with `mailpit` |
 | `AVAILABILITY_CACHE_MINUTES` | How long Parks Canada responses are cached | No (default 5) |
 | `AVAILABILITY_REQUESTS_PER_MINUTE` | Global cap on live Parks Canada requests | No (default 20) |
@@ -180,9 +180,9 @@ workflow sets these:
 | --- | --- | --- |
 | `DATABASE_URL` | Production Postgres connection (secret) | Yes |
 | `APP_URL` | Production site URL for email links (secret) | Yes |
-| `SENDGRID_API_KEY` | SendGrid API key (secret) | Yes |
-| `SENDGRID_FROM_EMAIL` | Sender address (secret) | Yes |
-| `EMAIL_BACKEND` | Set to `sendgrid` in the workflow | Set in workflow |
+| `RESEND_API_KEY` | Resend API key (secret) | Yes |
+| `RESEND_FROM_EMAIL` | Sender address (secret) | Yes |
+| `EMAIL_BACKEND` | Set to `resend` in the workflow | Set in workflow |
 | `ALERT_POLL_MIN_INTERVAL_MINUTES` | Skip runs closer together than this; set to 25 | Set in workflow |
 | `ALERT_POLL_MAX_REQUESTS` | Parks Canada requests per run | No (default 20) |
 
@@ -201,11 +201,12 @@ workflow sets these:
   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_API_URL`.
 - **Render** (entered in the dashboard, never in `render.yaml`):
   `DATABASE_URL`, `SUPABASE_URL`, `CORS_ORIGINS`, `CORS_ORIGIN_REGEX`,
-  `APP_URL`. Use Supabase's pooler connection string (session mode) for
+  `APP_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (the API sends the
+  "we're watching" and "check now" emails). Use Supabase's pooler connection string (session mode) for
   `DATABASE_URL`, because the direct database host is IPv6-only and Render
   can't reach it.
 - **GitHub Actions** repository secrets: `DATABASE_URL`, `APP_URL`,
-  `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`. Until all four are set, the
+  `RESEND_API_KEY`, `RESEND_FROM_EMAIL`. Until all four are set, the
   workflow skips the run with a warning instead of using up alerts without
   sending email.
 
