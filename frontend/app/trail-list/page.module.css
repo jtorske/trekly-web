@@ -411,6 +411,17 @@
   font-size: 0.88rem;
 }
 
+.countAction {
+  color: var(--color-rust);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.countAction:hover {
+  color: color-mix(in srgb, var(--color-rust) 80%, black);
+}
+
 .sort {
   display: flex;
   align-items: center;

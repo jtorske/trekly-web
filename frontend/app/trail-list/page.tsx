@@ -906,6 +906,15 @@ function ExploreContent() {
                     {total === 1 ? "trail" : "trails"}
                     {q ? <> matching &ldquo;{q}&rdquo;</> : null}
                     {request.bounds ? " in this area" : null}
+                    {/* The map (and its zoom) is hidden here: a way out of the area. */}
+                    {request.bounds && !mapVisible ? (
+                      <>
+                        {" · "}
+                        <button type="button" className={styles.countAction} onClick={showAllTrails}>
+                          Show all trails
+                        </button>
+                      </>
+                    ) : null}
                   </p>
                   <label className={styles.sort}>
                     <span className={styles.sortLabel}>Sort</span>
