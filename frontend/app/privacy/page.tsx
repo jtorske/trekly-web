@@ -113,7 +113,7 @@ export default function PrivacyPage() {
             and loadouts, and saved trails.
           </li>
           <li>
-            Private by default, and you can choose to show them: your trip plans. Public trip plans
+            Private by default, and you can choose to show them: your trip plans and your home province or territory. Public trip plans
             show where and when you&apos;ll be on a trail, so think carefully before sharing them.
           </li>
           <li>
