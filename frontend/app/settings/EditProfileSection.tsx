@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
 import ui from "@/components/ui.module.css";
@@ -8,13 +9,17 @@ import { ApiError } from "@/lib/api";
 import { updateProfile, type Profile } from "@/lib/accountApi";
 import { toast } from "@/lib/toast";
 import { announceProfile } from "@/lib/useProfile";
+import { province, provinceOptions, type ProvinceCode } from "@/lib/provinces";
+import ProvinceBadge from "@/components/ProvinceBadge";
 import { usernameReady } from "@/lib/usernames";
 import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
 import { useProfilePhoto } from "./ProfilePhoto";
+import { sectionHref } from "./settingsSections";
 import styles from "./settings.module.css";
 
 /**
- * Settings → Edit profile: display name, username, bio and home region,
+ * Settings → Edit profile: display name, username, bio, home province and
+ * home region,
  * saved together with one Save button. The photo saves on its own, straight
  * away, with the same control as the profile page's avatar (ProfilePhoto).
  */
@@ -30,6 +35,7 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
   const photo = useProfilePhoto(profile, { size: 64, alt: `${name}'s profile photo` });
 
   const dirty = isDirty(values, initial);
+  const home = province(values.home_province);
 
   // Leaving or reloading the page with unsaved changes asks first.
   useEffect(() => {
@@ -151,6 +157,34 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
           <textarea className={ui.input} rows={4} value={values.bio} onChange={set("bio")} aria-invalid={Boolean(errors.bio)} />
           {errors.bio && <span className={ui.fieldError}>{errors.bio}</span>}
         </label>
+
+        <div className={styles.provinceField}>
+          <label className={ui.field}>
+            <span className={ui.label}>Home province or territory</span>
+            <select
+              className={ui.input}
+              value={values.home_province}
+              onChange={(event) => setValues((current) => ({ ...current, home_province: event.target.value as ProvinceCode | "" }))}
+              aria-describedby="province-hint"
+            >
+              <option value="">Prefer not to say</option>
+              {provinceOptions().map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          {home && <ProvinceBadge province={home} decorative className={styles.provincePreview} />}
+          <span id="province-hint" className={`${ui.hint} ${styles.provinceHint}`}>
+            Shows on your profile with its own badge. Visitors see it only once you turn on{" "}
+            <Link href={sectionHref("privacy")}>Home province</Link> in Privacy.
+          </span>
+        </div>
 
         <label className={ui.field}>
           <span className={ui.label}>Home region (optional)</span>

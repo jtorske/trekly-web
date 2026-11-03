@@ -24,6 +24,7 @@ SECTION_COLUMNS = {
     "gear": "show_gear",
     "saved_trails": "show_saved_trails",
     "trip_plans": "show_trip_plans",
+    "home_province": "show_home_province",
 }
 
 MAX_REPORT_DETAILS = 1000
@@ -47,6 +48,9 @@ class ProfileSettings(Base):
     # everyone until they opt in, and only in effect while the journal is
     # public (migration 9d4f2a6c8e13).
     show_in_community = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Home province" on the public profile. Off until they turn it on
+    # (migration 4f8b2c6d9e13).
+    show_home_province = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

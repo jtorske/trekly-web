@@ -1,4 +1,5 @@
 import type { Profile, ProfileUpdate } from "@/lib/accountApi";
+import type { ProvinceCode } from "@/lib/provinces";
 import { formatProblem, normalizeUsername } from "../../lib/usernames.ts";
 
 export const BIO_LIMIT = 280;
@@ -8,6 +9,8 @@ export type ProfileFormValues = {
   username: string;
   bio: string;
   home_region: string;
+  /** "" is "Prefer not to say". */
+  home_province: ProvinceCode | "";
 };
 
 export function initialValues(profile: Profile): ProfileFormValues {
@@ -16,6 +19,7 @@ export function initialValues(profile: Profile): ProfileFormValues {
     username: profile.username ?? "",
     bio: profile.bio ?? "",
     home_region: profile.home_region ?? "",
+    home_province: profile.home_province ?? "",
   };
 }
 
@@ -41,5 +45,6 @@ export function profileUpdate(values: ProfileFormValues): ProfileUpdate {
     username: normalizeUsername(values.username),
     bio: values.bio.trim() || null,
     home_region: values.home_region.trim() || null,
+    home_province: values.home_province || null,
   };
 }

@@ -4,10 +4,12 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import Link from "next/link";
 import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
+import ProvinceBadge from "@/components/ProvinceBadge";
 import RankEmblem from "@/components/RankEmblem";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import { groupColour } from "@/lib/journal";
+import { homeLabel, province as findProvince } from "@/lib/provinces";
 import type { Rank } from "@/lib/rank";
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
 import styles from "./shell.module.css";
@@ -96,6 +98,7 @@ export function IdentityCard({
   joined,
   rank,
   rankDetail,
+  province,
   badges,
   action,
   stats,
@@ -114,11 +117,14 @@ export function IdentityCard({
   rank?: Rank | null;
   /** Under the rank name: the owner's progress (visitors get the name and emblem only). */
   rankDetail?: ReactNode;
+  /** Home province or territory code, beside the rank; null hides it. */
+  province?: string | null;
   badges?: ReactNode;
   action?: ReactNode;
   stats: StatRow[];
   footer?: ReactNode;
 }) {
+  const home = findProvince(province);
   return (
     <div className={styles.card}>
       <div className={styles.identity}>
@@ -151,16 +157,29 @@ export function IdentityCard({
         </ul>
       )}
 
-      {rank && (
-        <div className={styles.rank}>
-          <RankEmblem level={rank.level} className={styles.rankEmblem} />
-          <div className={styles.rankText}>
-            <p className={styles.rankTitle}>
-              <span className={ui.srOnly}>Rank: </span>
-              {rank.title}
-            </p>
-            {rankDetail}
-          </div>
+      {(rank || home) && (
+        <div className={styles.rankRow}>
+          {rank && (
+            <div className={styles.rank}>
+              <RankEmblem level={rank.level} className={styles.rankEmblem} />
+              <div className={styles.rankText}>
+                <p className={styles.rankTitle}>
+                  <span className={ui.srOnly}>Rank: </span>
+                  {rank.title}
+                </p>
+                {rankDetail}
+              </div>
+            </div>
+          )}
+          {home && (
+            <div className={`${styles.home} ${rank ? "" : styles.homeAlone}`}>
+              <ProvinceBadge province={home} decorative className={styles.homeBadge} />
+              <p className={styles.homeText}>
+                <span className={styles.homeLabel}>{homeLabel(home)}</span>
+                <span className={styles.homeName}>{home.name}</span>
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -214,8 +233,12 @@ function StatLink({ stat }: { stat: StatRow }) {
   );
 }
 
-/** A featured badge's art: the trail's Trail Journal badge, or a milestone medal. */
+/** A featured badge's art: the trail's Trail Journal badge, a milestone medal or the province badge. */
 export function BadgeArt({ badge, className }: { badge: FeaturedBadge; className?: string }) {
+  if (badge.kind === "province") {
+    const home = findProvince(badge.province);
+    return home ? <ProvinceBadge province={home} className={className} /> : null;
+  }
   if (badge.kind === "milestone") {
     return <MilestoneBadge icon={badge.badge.icon} tier={badge.badge.tier} title={badgeName(badge)} className={className} />;
   }

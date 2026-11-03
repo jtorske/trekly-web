@@ -40,6 +40,11 @@ class Profile(Base):
             name="profiles_home_region_length_check",
         ),
         CheckConstraint(
+            "home_province is null or home_province in "
+            "('AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT')",
+            name="profiles_home_province_check",
+        ),
+        CheckConstraint(
             "units is null or units in ('metric', 'imperial')", name="profiles_units_check"
         ),
         # Case-insensitive, though the format check already allows only lowercase.
@@ -54,6 +59,9 @@ class Profile(Base):
     username = Column(Text)
     bio = Column(Text)
     home_region = Column(Text)
+    # Two-letter province or territory code (app/provinces.py); null is
+    # "Prefer not to say". Visitors see it only with show_home_province on.
+    home_province = Column(Text)
     avatar_path = Column(Text)
     # Display units for the whole app. Null means never chosen, which reads as
     # metric; data itself is always stored in metric.

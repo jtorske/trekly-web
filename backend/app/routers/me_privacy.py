@@ -29,6 +29,7 @@ class PrivacyOut(BaseModel):
     hide_hike_dates: bool
     allow_search_indexing: bool
     show_in_community: bool
+    show_home_province: bool
     public_notice_pending: bool
     username: str | None
     hidden_by_moderators: bool
@@ -46,6 +47,7 @@ class PrivacyUpdate(BaseModel):
     hide_hike_dates: bool | None = None
     allow_search_indexing: bool | None = None
     show_in_community: bool | None = None
+    show_home_province: bool | None = None
     # The one-time notice can only be dismissed, never brought back.
     public_notice_pending: Literal[False] | None = None
 

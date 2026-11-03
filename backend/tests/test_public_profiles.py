@@ -148,9 +148,9 @@ def test_public_payload_has_only_declared_fields(client, alice_profile, people):
     _, alice = people["alice"]
     set_privacy(client, alice, show_trip_plans=True)
     body = public(client).json()
-    assert set(body) == {"username", "display_name", "avatar_path", "is_private", "allow_indexing", "bio", "rank",
+    assert set(body) == {"username", "display_name", "avatar_path", "is_private", "allow_indexing", "bio", "home_province", "rank",
                          "journal", "featured_badges", "gear", "saved_trails", "trip_plans"}
-    assert set(body["featured_badges"][0]) == {"kind", "trail", "milestone", "badge"}
+    assert set(body["featured_badges"][0]) == {"kind", "trail", "milestone", "badge", "province"}
     assert set(body["journal"]) == {"hide_dates", "entries", "milestones"}
     assert set(body["journal"]["milestones"][0]) == {"id", "category", "title", "tier", "icon"}
     assert set(body["gear"]["items"][0]) == {"id", "kind", "display_name", "brand_name", "category", "product", "variant",
@@ -211,7 +211,7 @@ def test_private_profile_shows_only_name_and_photo(client, alice_profile, people
     set_privacy(client, alice, is_private=True, allow_search_indexing=True)
     body = public(client).json()
     assert body == {"username": "alice", "display_name": "Alice A", "avatar_path": None, "is_private": True,
-                    "allow_indexing": False, "bio": None, "rank": None, "journal": None,
+                    "allow_indexing": False, "bio": None, "home_province": None, "rank": None, "journal": None,
                     "featured_badges": None, "gear": None, "saved_trails": None, "trip_plans": None}
     set_privacy(client, alice, is_private=False)
     assert public(client).json()["bio"] == "Hiker."

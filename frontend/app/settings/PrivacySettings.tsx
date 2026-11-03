@@ -175,6 +175,14 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
             onChange={(value) => change(key, value)}
           />
         ))}
+        <Switch
+          id="privacy-home-province"
+          label="Home province"
+          hint="Your home province or territory and its badge, from Edit profile. Off until you turn it on."
+          checked={settings.show_home_province}
+          disabled={settings.is_private}
+          onChange={(value) => change("show_home_province", value)}
+        />
       </fieldset>
 
       <fieldset className={styles.switchGroup}>

@@ -1,0 +1,63 @@
+/* Shares its look with TrailBadge (a hiked trail badge). Zero specificity,
+   so the caller's class sets the size whatever order the CSS loads in. */
+
+:where(.badge) {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.patch {
+  fill: var(--badge);
+  filter: drop-shadow(0 1.5px 1.5px rgb(0 0 0 / 0.25));
+}
+
+.innerRing {
+  fill: none;
+  stroke: var(--color-cream);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+  stroke-dasharray: 2.5 2;
+}
+
+.centre {
+  fill: color-mix(in srgb, var(--badge) 70%, black);
+}
+
+/* Motif layers (lib/provinces.ts). */
+
+.fill {
+  fill: var(--color-cream);
+}
+
+.stroke {
+  fill: none;
+  stroke: var(--color-cream);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.accent {
+  fill: var(--badge);
+}
+
+.faint {
+  fill: var(--color-cream);
+  opacity: 0.35;
+}
+
+.name {
+  fill: var(--color-cream);
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.code {
+  fill: var(--color-tan);
+  font-family: var(--sans);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}

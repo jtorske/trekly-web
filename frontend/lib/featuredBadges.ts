@@ -1,6 +1,7 @@
 import type { HikeLog } from "./hikeLogsApi";
 import { regionTitle } from "./journal.ts";
 import type { MilestoneBadgeInfo, Milestones } from "./milestones.ts";
+import { homeLabel, province as findProvince, type ProvinceCode } from "./provinces.ts";
 import type { TrailListItem } from "./trailsApi";
 
 /**
@@ -14,7 +15,9 @@ export const MAX_FEATURED = 3;
 export type FeaturedBadge =
   | { kind: "trail"; trail: TrailListItem; milestone?: null; badge?: null }
   /** `badge` is the milestone's name, tier and icon. */
-  | { kind: "milestone"; milestone: string; badge: MilestoneBadgeInfo; trail?: null };
+  | { kind: "milestone"; milestone: string; badge: MilestoneBadgeInfo; trail?: null }
+  /** The home province badge; only sent to viewers who may see the province. */
+  | { kind: "province"; province: ProvinceCode; trail?: null; milestone?: null; badge?: null };
 
 export interface FeaturedBadges {
   /** false: nothing picked, so these are the most recent trail badges. */
@@ -22,13 +25,15 @@ export interface FeaturedBadges {
   badges: FeaturedBadge[];
 }
 
-/** A stable key: "trail:<id>" or "milestone:<id>". */
+/** A stable key: "trail:<id>", "milestone:<id>" or "province". */
 export function badgeKey(badge: FeaturedBadge): string {
+  if (badge.kind === "province") return "province";
   return badge.kind === "trail" ? `trail:${badge.trail.id}` : `milestone:${badge.milestone}`;
 }
 
 export function badgeName(badge: FeaturedBadge): string {
   if (badge.kind === "trail") return badge.trail.name;
+  if (badge.kind === "province") return findProvince(badge.province)?.name ?? badge.province;
   return badge.badge.title;
 }
 
@@ -39,10 +44,16 @@ export interface BadgeGroup {
 
 /**
  * Everything the user can feature: milestones they've earned first (in
- * journal order), then their trail badges grouped by park or region (A–Z,
- * trails A–Z within). `query` filters by trail, region or milestone name.
+ * journal order), then their home province badge if they've chosen one,
+ * then their trail badges grouped by park or region (A–Z, trails A–Z
+ * within). `query` filters by trail, region, milestone or province name.
  */
-export function earnedBadgeGroups(logs: HikeLog[], milestones: Milestones | null, query = ""): BadgeGroup[] {
+export function earnedBadgeGroups(
+  logs: HikeLog[],
+  milestones: Milestones | null,
+  query = "",
+  homeProvince: ProvinceCode | null = null,
+): BadgeGroup[] {
   const needle = query.trim().toLowerCase();
   const matches = (...texts: string[]) => !needle || texts.some((text) => text.toLowerCase().includes(needle));
 
@@ -62,7 +73,11 @@ export function earnedBadgeGroups(logs: HikeLog[], milestones: Milestones | null
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([title, badges]) => ({ title, badges: badges.sort((a, b) => badgeName(a).localeCompare(badgeName(b))) }));
 
-  return earned.length ? [{ title: "Milestones", badges: earned }, ...groups] : groups;
+  const home = findProvince(homeProvince);
+  const homeGroup: BadgeGroup[] =
+    home && matches(home.name, homeLabel(home)) ? [{ title: homeLabel(home), badges: [{ kind: "province", province: home.code }] }] : [];
+
+  return [...(earned.length ? [{ title: "Milestones", badges: earned }] : []), ...homeGroup, ...groups];
 }
 
 /** Add or remove a badge; adding past the limit does nothing (the picker says why). */

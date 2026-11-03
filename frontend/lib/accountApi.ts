@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { ProvinceCode } from "./provinces";
 import type { TrailListItem } from "./trailsApi";
 import type { UnitSystem } from "./units";
 
@@ -9,6 +10,8 @@ export interface Profile {
   username: string | null;
   bio: string | null;
   home_region: string | null;
+  /** null is "Prefer not to say". Visitors see it only with Settings → Privacy → Home province on. */
+  home_province: ProvinceCode | null;
   avatar_path: string | null;
   /** Display units; null until the user picks, which reads as metric. */
   units: UnitSystem | null;
@@ -19,7 +22,7 @@ export interface Profile {
 }
 
 export type ProfileUpdate = Partial<
-  Pick<Profile, "display_name" | "username" | "bio" | "home_region" | "avatar_path" | "units">
+  Pick<Profile, "display_name" | "username" | "bio" | "home_region" | "home_province" | "avatar_path" | "units">
 >;
 
 export interface SavedTrail {

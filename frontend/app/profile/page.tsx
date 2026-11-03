@@ -141,6 +141,7 @@ function ProfileContent() {
       joined={joinedLabel(profile.member_since)}
       rank={myRank?.rank ?? null}
       rankDetail={myRank && <RankProgress mine={myRank} />}
+      province={profile.home_province}
       badges={
         <FeaturedBadgeSlots badges={featured?.badges ?? []} loading={!featured} onEdit={() => setPickingBadges(true)} />
       }
@@ -256,6 +257,7 @@ function ProfileContent() {
       {pickingBadges && featured && (
         <BadgePicker
           logs={hikes.logs}
+          homeProvince={profile.home_province}
           current={featured.badges}
           onClose={() => setPickingBadges(false)}
           onSaved={(saved) => {

@@ -3,6 +3,7 @@ import type { FeaturedBadge } from "./featuredBadges";
 import type { GearItem } from "./gearApi";
 import type { TrailListItem } from "./trailsApi";
 import type { MilestoneBadgeInfo } from "./milestones";
+import type { ProvinceCode } from "./provinces";
 
 /**
  * Public profiles (/u/[username]) and the owner's privacy settings.
@@ -24,6 +25,8 @@ export interface PrivacySettings {
   allow_search_indexing: boolean;
   /** "Show me in community features": "Hiked by" on trail pages. In effect only while the journal is public. */
   show_in_community: boolean;
+  /** "Home province": visitors see the home province (and its badge). Off until turned on. */
+  show_home_province: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;
@@ -73,6 +76,8 @@ export interface PublicProfile {
   allow_indexing: boolean;
   /** Each of these is null when the profile is private or the section is hidden. */
   bio: string | null;
+  /** Only while the owner has "Home province" switched on. */
+  home_province: ProvinceCode | null;
   rank: { level: number; title: string } | null;
   /** `milestones`: earned ones only (seasonal ones left out while dates are hidden). */
   journal: { hide_dates: boolean; entries: PublicJournalEntry[]; milestones: MilestoneBadgeInfo[] } | null;

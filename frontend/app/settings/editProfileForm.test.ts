@@ -10,14 +10,16 @@ const profile: Profile = {
   username: "trail_sam",
   bio: "Loves ridgelines",
   home_region: null,
+  home_province: null,
   avatar_path: null,
+  units: null,
   member_since: null,
   counts: { saved_trails: 0, gear_items: 0 },
   visibility: "private",
 };
 
 test("initialValues turns nulls into empty strings", () => {
-  assert.deepEqual(initialValues(profile), { display_name: "Sam", username: "trail_sam", bio: "Loves ridgelines", home_region: "" });
+  assert.deepEqual(initialValues(profile), { display_name: "Sam", username: "trail_sam", bio: "Loves ridgelines", home_region: "", home_province: "" });
 });
 
 test("isDirty tracks text edits (the photo saves on its own)", () => {
@@ -25,6 +27,7 @@ test("isDirty tracks text edits (the photo saves on its own)", () => {
   assert.equal(isDirty({ ...initial }, initial), false);
   assert.equal(isDirty({ ...initial, bio: "Loves valleys" }, initial), true);
   assert.equal(isDirty({ ...initial, home_region: "PNW" }, initial), true);
+  assert.equal(isDirty({ ...initial, home_province: "BC" }, initial), true);
 });
 
 test("validateProfile checks username format and bio length", () => {
@@ -40,10 +43,18 @@ test("validateProfile checks username format and bio length", () => {
 });
 
 test("profileUpdate trims, lowercases the username and clears blanks", () => {
-  assert.deepEqual(profileUpdate({ display_name: "  Sam ", username: " Trail_Sam ", bio: "   ", home_region: "PNW" }), {
+  assert.deepEqual(profileUpdate({ display_name: "  Sam ", username: " Trail_Sam ", bio: "   ", home_region: "PNW", home_province: "" }), {
     display_name: "Sam",
     username: "trail_sam",
     bio: null,
     home_region: "PNW",
+    home_province: null,
   });
+});
+
+test("home province: a code, or null for Prefer not to say", () => {
+  const values = initialValues({ ...profile, home_province: "NL" });
+  assert.equal(values.home_province, "NL");
+  assert.equal(profileUpdate(values).home_province, "NL");
+  assert.equal(profileUpdate({ ...values, home_province: "" }).home_province, null);
 });

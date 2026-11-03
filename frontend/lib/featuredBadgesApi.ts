@@ -1,7 +1,7 @@
 import { apiFetch } from "./api";
 import type { FeaturedBadge, FeaturedBadges } from "./featuredBadges";
 
-type BadgeIn = { trail_id: string } | { milestone: string };
+type BadgeIn = { trail_id: string } | { milestone: string } | { province: true };
 
 export const getFeaturedBadges = (signal?: AbortSignal) => apiFetch<FeaturedBadges>("/api/me/featured-badges", { auth: true, signal });
 
@@ -11,6 +11,10 @@ export const saveFeaturedBadges = (badges: FeaturedBadge[]) =>
     method: "PUT",
     auth: true,
     body: {
-      badges: badges.map((badge): BadgeIn => (badge.kind === "trail" ? { trail_id: badge.trail.id } : { milestone: badge.milestone })),
+      badges: badges.map((badge): BadgeIn => {
+        if (badge.kind === "trail") return { trail_id: badge.trail.id };
+        if (badge.kind === "province") return { province: true };
+        return { milestone: badge.milestone };
+      }),
     },
   });

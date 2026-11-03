@@ -2,6 +2,7 @@
 
 Every response is built from explicit *Public* models, so a field only
 leaves the API if it's declared here: never an email, home region, alert,
+home province (unless its switch is on),
 gear or plan note, gear photo, party size, booking, or anything from a hidden section.
 The answer is the same for every viewer, including the owner (whose page
 adds its own controls on the client), so there's nothing a signed-in
@@ -118,6 +119,8 @@ class PublicProfileOut(BaseModel):
     allow_indexing: bool
     # Everything below is None when private, or when that section is hidden.
     bio: str | None = None
+    # Two-letter code; only with "Home province" switched on (off by default).
+    home_province: str | None = None
     rank: PublicRank | None = None
     journal: PublicJournal | None = None
     # Shown with the Trail Journal: same switch, and no dates either way.
@@ -245,13 +248,15 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> Pub
     if not seen.public:
         return out
     out.bio = profile.bio
+    province = profile.home_province if seen.shows("home_province") else None
+    out.home_province = province
     if seen.shows("rank"):
         # The name and level only: points are the owner's business (app/routers/me_rank.py).
         _, rank = user_rank(db, profile.id)
         out.rank = PublicRank(level=rank.level, title=rank.title)
     if seen.shows("journal"):
         out.journal = _journal(db, profile.id, seen.hide_dates)
-        _, out.featured_badges = featured_badges(db, profile.id, hide_dates=seen.hide_dates)
+        _, out.featured_badges = featured_badges(db, profile.id, hide_dates=seen.hide_dates, province=province)
     if seen.shows("gear"):
         out.gear = _gear(db, profile.id)
     if seen.shows("saved_trails"):

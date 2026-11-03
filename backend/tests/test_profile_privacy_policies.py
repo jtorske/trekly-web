@@ -247,6 +247,7 @@ def test_columns_outside_a_public_profile_are_never_readable(conn, world, who):
     visitor(conn, world, who)
     for statement in (
         "SELECT home_region FROM public.profiles",
+        "SELECT home_province FROM public.profiles",
         "SELECT created_at FROM public.profiles",
         "SELECT hiked_on FROM public.hike_logs",
         "SELECT created_at FROM public.hike_logs",

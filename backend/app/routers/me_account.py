@@ -24,6 +24,7 @@ from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.privacy import visibility
+from app.provinces import ProvinceCode
 from app.usernames import RESERVED_MESSAGE, REQUIRED_MESSAGE, TAKEN_MESSAGE, is_taken, normalize, rule_problem
 from app.schemas.trail import TrailListItemOut
 
@@ -49,6 +50,7 @@ class ProfileOut(BaseModel):
     username: str | None
     bio: str | None
     home_region: str | None
+    home_province: ProvinceCode | None
     avatar_path: str | None
     units: UnitSystem | None
     member_since: datetime | None
@@ -71,6 +73,8 @@ class ProfileUpdate(BaseModel):
     username: str | None = Field(default=None, max_length=30)
     bio: str | None = Field(default=None, max_length=280)
     home_region: str | None = Field(default=None, max_length=80)
+    # None is "Prefer not to say".
+    home_province: ProvinceCode | None = None
     avatar_path: str | None = Field(default=None, max_length=200)
     units: UnitSystem | None = None
 
@@ -150,6 +154,7 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         username=profile.username,
         bio=profile.bio,
         home_region=profile.home_region,
+        home_province=profile.home_province,
         avatar_path=profile.avatar_path,
         units=profile.units,
         member_since=member_since or profile.created_at,

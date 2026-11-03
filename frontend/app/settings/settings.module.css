@@ -499,3 +499,20 @@
     transition: none;
   }
 }
+
+/* Edit profile: the province menu with a preview of its badge beside it. */
+
+.provinceField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.35rem 1rem;
+}
+
+.provincePreview {
+  width: 3.5rem;
+}
+
+.provinceHint {
+  grid-column: 1 / -1;
+}

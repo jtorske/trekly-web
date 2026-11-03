@@ -74,3 +74,15 @@ test("move reorders and clamps", () => {
   assert.equal(moveBadge(picked, 0, -1), picked);
   assert.equal(moveBadge(picked, 2, 9), picked);
 });
+
+test("the home province badge is offered once chosen, after milestones", () => {
+  const groups = earnedBadgeGroups(logs, milestones, "", "BC");
+  assert.deepEqual(groups.map((g) => g.title), ["Milestones", "Home province", "Banff National Park", "Jasper National Park"]);
+  const [badge] = groups[1].badges;
+  assert.equal(badgeKey(badge), "province");
+  assert.equal(badgeName(badge), "British Columbia");
+  // Territories say so; the search matches the name; none chosen, none offered.
+  assert.equal(earnedBadgeGroups([], null, "", "YT")[0].title, "Home territory");
+  assert.deepEqual(earnedBadgeGroups(logs, null, "columbia", "BC").map((g) => g.title), ["Home province"]);
+  assert.deepEqual(earnedBadgeGroups([], null, "", null), []);
+});
