@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: October 28, 2026</p>
+        <p className={styles.updated}>Last updated: November 3, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
