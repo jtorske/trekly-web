@@ -80,13 +80,16 @@ def test_ranks_start_at_zero_and_only_go_up():
     thresholds = [threshold for threshold, _ in RANKS]
     assert thresholds[0] == 0
     assert thresholds == sorted(set(thresholds))
+    # Retuned 2026-11-03 for the final 50 milestones.
+    assert thresholds == [0, 50, 250, 600, 1200, 2000, 3200]
 
 
 @pytest.mark.parametrize(
     "points, level, title",
     [(0, 1, "Trailhead Rookie"), (49, 1, "Trailhead Rookie"), (50, 2, "Day Tripper"), (249, 2, "Day Tripper"),
-     (250, 3, "Switchback Regular"), (600, 4, "Ridge Walker"), (1100, 5, "Backcountry Ranger"),
-     (1799, 5, "Backcountry Ranger"), (1800, 6, "Summit Seeker"), (2800, 7, "Mountain Legend"),
+     (250, 3, "Switchback Regular"), (599, 3, "Switchback Regular"), (600, 4, "Ridge Walker"),
+     (1199, 4, "Ridge Walker"), (1200, 5, "Backcountry Ranger"), (1999, 5, "Backcountry Ranger"),
+     (2000, 6, "Summit Seeker"), (3199, 6, "Summit Seeker"), (3200, 7, "Mountain Legend"),
      (99999, 7, "Mountain Legend")],
 )
 def test_rank_thresholds(points, level, title):
@@ -96,7 +99,8 @@ def test_rank_thresholds(points, level, title):
 
 def test_next_rank_and_the_top():
     assert next_rank(rank_for(120)).title == "Switchback Regular"
-    assert next_rank(rank_for(2800)) is None
+    assert next_rank(rank_for(2000)).title == "Mountain Legend"
+    assert next_rank(rank_for(3200)) is None
 
 
 # ------------------------------------------------------------ the API

@@ -10,10 +10,11 @@ Catalogue check (2026-11-02, the final 50 milestones; the 100 active trails
 in 49 parks or regions, undated hikes, so no calendar, journal, planning or
 gear milestones): every trail is 4,965 points (4,070 for trails, nights and
 regions, plus 895 from 30 milestones); 15 random trails come to about 985
-(most land between 740 and 1,205); Mountain Legend at 2,800 takes about 50
-trails. The calendar, journal, planning and gear milestones add up to 380
-more. Long hauler, Thousand-kilometre club and Loop de loop can't be earned
-until the catalogue has more lengths and route types.
+(most land between 740 and 1,205), so Ridge Walker; Mountain Legend at
+3,200 takes about 59 trails (thresholds retuned 2026-11-03). The calendar,
+journal, planning and gear milestones add up to 380 more. Long hauler,
+Thousand-kilometre club and Loop de loop can't be earned until the
+catalogue has more lengths and route types.
 """
 
 # Each hiked trail, by its terrain difficulty.
@@ -39,7 +40,7 @@ RANKS = (
     (50, "Day Tripper"),
     (250, "Switchback Regular"),
     (600, "Ridge Walker"),
-    (1100, "Backcountry Ranger"),
-    (1800, "Summit Seeker"),
-    (2800, "Mountain Legend"),
+    (1200, "Backcountry Ranger"),
+    (2000, "Summit Seeker"),
+    (3200, "Mountain Legend"),
 )
