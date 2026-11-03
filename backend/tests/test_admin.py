@@ -184,6 +184,11 @@ def test_photo_admins_are_admins_and_admins_can_review_photos(client, auth_heade
     assert client.get("/api/admin/trail-photos/me", headers=auth_headers(ADMIN)).status_code == 403
 
 
+def test_the_profile_says_whether_you_are_an_admin(client, admin, auth_headers, users):
+    assert client.get("/api/me/profile", headers=admin).json()["is_admin"] is True
+    assert client.get("/api/me/profile", headers=auth_headers(users["alice"])).json()["is_admin"] is False
+
+
 # ----------------------------------------------------------------- reads
 
 

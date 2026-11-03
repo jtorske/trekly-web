@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ACCOUNT_LINKS, PROFILE_HREF, currentAccountHref } from "./accountMenu.ts";
+import { ACCOUNT_LINKS, ADMIN_LINK, PROFILE_HREF, accountLinks, currentAccountHref } from "./accountMenu.ts";
 
 test("currentAccountHref tells profile tabs apart", () => {
   assert.equal(currentAccountHref("/profile", ""), "/profile");
@@ -33,4 +33,15 @@ test("every current href is a menu link", () => {
   for (const [path, search] of [["/profile", ""], ["/profile", "?tab=trips"], ["/settings/units", ""], ["/gear", ""], ["/alerts", ""]]) {
     assert.ok(hrefs.has(currentAccountHref(path, search) ?? ""), `${path}${search}`);
   }
+});
+
+test("only admins get the Admin row, after Settings", () => {
+  assert.deepEqual(accountLinks(false), ACCOUNT_LINKS);
+  assert.ok(!accountLinks(false).some((link) => link.href === "/admin"));
+  const admin = accountLinks(true);
+  assert.deepEqual(admin.at(-1), ADMIN_LINK);
+  assert.equal(admin.at(-2)?.href, "/settings");
+  assert.equal(currentAccountHref("/admin", ""), "/admin");
+  assert.equal(currentAccountHref("/admin/users/abc", ""), "/admin");
+  assert.equal(currentAccountHref("/administrator", ""), null);
 });

@@ -19,6 +19,14 @@ export const ACCOUNT_LINKS: AccountLink[] = [
   { href: "/settings", label: "Settings" },
 ];
 
+/** Admins only (the profile's is_admin), after Settings. */
+export const ADMIN_LINK: AccountLink = { href: "/admin", label: "Admin" };
+
+/** The rows for this account: everyone's, plus Admin for admins. */
+export function accountLinks(isAdmin: boolean): AccountLink[] {
+  return isAdmin ? [...ACCOUNT_LINKS, ADMIN_LINK] : ACCOUNT_LINKS;
+}
+
 const under = (pathname: string, prefix: string) =>
   pathname === prefix || pathname.startsWith(`${prefix}/`);
 
@@ -45,5 +53,6 @@ export function currentAccountHref(
   if (under(pathname, "/gear")) return "/gear";
   if (under(pathname, "/alerts")) return "/alerts";
   if (under(pathname, "/settings")) return "/settings";
+  if (under(pathname, "/admin")) return ADMIN_LINK.href;
   return null;
 }

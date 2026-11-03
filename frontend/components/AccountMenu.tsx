@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Backpack, Bell, LogOut, Settings, Tent, type LucideIcon } from "lucide-react";
+import { Backpack, Bell, LogOut, Settings, Shield, Tent, type LucideIcon } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
 import RankEmblem from "./RankEmblem";
 import { useRank } from "@/lib/useRank";
-import { ACCOUNT_LINKS, PROFILE_HREF, currentAccountHref } from "@/lib/accountMenu";
+import { ADMIN_LINK, PROFILE_HREF, accountLinks, currentAccountHref } from "@/lib/accountMenu";
 import styles from "./AccountMenu.module.css";
 
 /** Decorative icons for the account rows, keyed by href; the labels name them. */
@@ -17,6 +17,7 @@ const ROW_ICONS: Record<string, LucideIcon> = {
   "/gear": Backpack,
   "/alerts": Bell,
   "/settings": Settings,
+  [ADMIN_LINK.href]: Shield,
 };
 
 function RowIcon({ icon: Icon }: { icon: LucideIcon | undefined }) {
@@ -27,6 +28,8 @@ export interface AccountIdentity {
   displayName: string | null;
   email: string | null;
   avatarPath: string | null | undefined;
+  /** From the profile's is_admin; adds the Admin row. */
+  isAdmin?: boolean;
 }
 
 /**
@@ -73,7 +76,7 @@ export function AccountRows({
           ›
         </span>
       </Link>
-      {ACCOUNT_LINKS.map((link) =>
+      {accountLinks(identity.isAdmin === true).map((link) =>
         link.href.startsWith("mailto:") ? (
           <a key={link.href} href={link.href} className={styles.row} {...item} onClick={onChoose}>
             <RowIcon icon={ROW_ICONS[link.href]} />

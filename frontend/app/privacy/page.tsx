@@ -227,6 +227,11 @@ export default function PrivacyPage() {
           We use encryption in transit (HTTPS), hashed passwords, and access controls on our
           database. No system is perfectly secure, so please use a strong, unique password.
         </p>
+        <p>
+          Trekly&apos;s administrator can view account information, such as your email address,
+          sign-in history, and activity counts, only to provide support, review reports, and keep
+          Trekly secure. Every administrative action is recorded in an audit log.
+        </p>
 
         <h2>Children</h2>
         <p>

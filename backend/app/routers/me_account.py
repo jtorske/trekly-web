@@ -15,6 +15,7 @@ from sqlalchemy import delete, func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.admin_access import is_admin
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile, SavedTrail
@@ -57,6 +58,9 @@ class ProfileOut(BaseModel):
     counts: ProfileCounts
     # "public" once the profile has a username and isn't set to private.
     visibility: Literal["public", "private"]
+    # In ADMIN_USER_IDS: the app shows an Admin link. Only a hint for the UI;
+    # every admin route checks again (app/admin_access.py).
+    is_admin: bool
 
 
 def _clean(value):
@@ -160,6 +164,7 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         member_since=member_since or profile.created_at,
         counts=counts,
         visibility="public" if visibility(db, profile).public else "private",
+        is_admin=is_admin(user.id),
     )
 
 

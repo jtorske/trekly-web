@@ -152,12 +152,15 @@ def test_only_a_trail_you_have_logged_can_be_featured(conn, world):
         ([(0, None, "first-hike"), (1, None, "first-hike")], "featured_badges_milestone_key"),
         ([(0, None, "first-hike"), (0, None, "first-overnight")], "featured_badges_position_key"),
         ([(3, None, "first-hike")], "featured_badges_position_check"),
-        ([(0, None, "summit-everest")], "featured_badges_milestone_check"),
+        # Since a4c7e2b9d1f3 the database only bounds the id's length; which
+        # milestone ids exist is the API's call (app/milestones_config.py).
+        ([(0, None, "")], "featured_badges_milestone_check"),
+        ([(0, None, "m" * 41)], "featured_badges_milestone_check"),
         ([(0, "hiked", "first-hike")], "featured_badges_one_kind_check"),
         ([(0, None, None)], "featured_badges_one_kind_check"),
     ],
 )
-def test_duplicates_more_than_three_and_unknown_badges_are_refused(conn, world, rows, reason):
+def test_duplicates_more_than_three_and_malformed_badges_are_refused(conn, world, rows, reason):
     alice = world["alice"]
     act_as(conn, alice)
     *first, last = rows
@@ -166,6 +169,13 @@ def test_duplicates_more_than_three_and_unknown_badges_are_refused(conn, world, 
     position, trail, milestone = last
     params = {"user": alice, "position": position, "trail": world[trail] if trail else None, "milestone": milestone}
     assert refused(conn, INSERT, params, reason=reason)
+
+
+def test_any_well_formed_milestone_id_passes_the_database(conn, world):
+    """The API refuses ids that aren't configured; the database no longer lists them."""
+    alice = world["alice"]
+    act_as(conn, alice)
+    feature(conn, alice, 0, milestone="m" * 40)
 
 
 def test_deleting_the_hike_deletes_its_featured_badge(conn, world):

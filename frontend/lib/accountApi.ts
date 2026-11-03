@@ -19,6 +19,8 @@ export interface Profile {
   counts: { saved_trails: number; gear_items: number };
   /** "public" once there's a username and the profile isn't set to private. */
   visibility: "public" | "private";
+  /** In ADMIN_USER_IDS: shows the Admin menu link. The API checks again on every admin call. */
+  is_admin: boolean;
 }
 
 export type ProfileUpdate = Partial<

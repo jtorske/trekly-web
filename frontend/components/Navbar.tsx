@@ -55,7 +55,7 @@ export default function Navbar() {
 
   const displayName = profile?.display_name ?? null;
   const email = user?.email ?? null;
-  const identity = { displayName, email, avatarPath: profile?.avatar_path };
+  const identity = { displayName, email, avatarPath: profile?.avatar_path, isAdmin: profile?.is_admin === true };
   const currentAccount = isMenuOpen ? currentAccountHref(pathname, menuSearch) : null;
 
   const account =
