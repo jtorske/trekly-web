@@ -97,7 +97,7 @@ export interface TrailSearchRequest {
   parks?: string[];
   /** Used for this request only; the API never stores or logs it. */
   near?: { lat: number; lng: number; radius_km?: number };
-  /** Explore's "Search this area": trailheads inside the map view. */
+  /** Explore follows the map: trailheads inside its visible area. */
   bounds?: { west: number; south: number; east: number; north: number };
   limit?: number;
 }

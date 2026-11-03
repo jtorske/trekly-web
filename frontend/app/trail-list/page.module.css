@@ -791,24 +791,43 @@
   }
 }
 
-.searchArea {
+/* "Search as I move the map", over the top of the map. */
+.followToggle {
   position: absolute;
   top: 0.75rem;
   left: 50%;
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   border-radius: 9999px;
-  background: var(--ink);
-  padding: 0.55rem 1.1rem;
-  color: var(--paper);
-  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.45rem 0.9rem 0.45rem 0.7rem;
+  color: var(--ink);
+  font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 6px 18px -6px rgba(20, 28, 22, 0.5);
+  box-shadow: 0 4px 14px -4px rgba(20, 28, 22, 0.35);
+  cursor: pointer;
   transform: translateX(-50%);
   white-space: nowrap;
+  user-select: none;
 }
 
-.searchArea:hover {
-  background: color-mix(in srgb, var(--ink) 85%, black);
+.followToggle input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--color-dark-olive);
+  cursor: pointer;
+}
+
+.followToggle:has(input:focus-visible) {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.followToggle input:focus-visible {
+  outline: none;
 }
 
 .legend {
@@ -1164,45 +1183,66 @@
     box-shadow: 0 18px 40px -16px rgba(20, 28, 22, 0.45);
   }
 
+  /* The pane ends where the map does (the map pane's 1rem bottom
+     padding); the search, chips and the count + sort row stay put above
+     the one scroller. */
   .results,
   .page[data-view="map"] .results {
-    display: block;
+    display: flex;
     min-height: 0;
     flex: 1;
+    flex-direction: column;
     max-width: none;
     margin: 0;
-    padding: 0 1.25rem 1.5rem 1.5rem;
+    padding: 0 1.25rem 1rem 1.5rem;
+  }
+
+  .resultsHead {
+    flex: none;
+    margin-bottom: 0.5rem;
+  }
+
+  .scroller {
+    min-height: 0;
+    flex: 1;
+    /* Room for the cards' shadows and hover lift, which the scroller would
+       otherwise clip. */
+    margin: 0 -0.75rem;
+    padding: 0.25rem 0.75rem 1rem;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
   }
 
-  .results::-webkit-scrollbar {
+  .scroller::-webkit-scrollbar {
     width: 10px;
   }
 
-  .results::-webkit-scrollbar-thumb {
+  .scroller::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroller::-webkit-scrollbar-thumb {
     border: 3px solid transparent;
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-dark-olive) 22%, transparent) padding-box;
   }
 
+  .scroller::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--color-dark-olive) 40%, transparent);
+  }
+
   @supports not selector(::-webkit-scrollbar) {
-    .results {
+    .scroller {
       scrollbar-width: thin;
       scrollbar-color: color-mix(in srgb, var(--color-dark-olive) 22%, transparent) transparent;
     }
   }
 
-  /* The count and sort stay at the top of the list. */
-  .resultsHead {
-    position: sticky;
-    top: 0;
-    z-index: 3;
-    margin: 0 -0.25rem 0.25rem;
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
-    padding: 0.5rem 0.25rem;
-    backdrop-filter: blur(6px);
+  /* More below: the list fades out at the bottom edge, as on the profile. */
+  .scroller[data-more] {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
   }
 
   .list {

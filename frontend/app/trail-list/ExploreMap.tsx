@@ -25,6 +25,8 @@ const FIT_PADDING = 56;
 const CLUSTER_MAX_ZOOM = 11;
 /** Trails this close (about 300 m) share a trailhead: zooming won't part them. */
 const SAME_SPOT_DEGREES = 0.003;
+/** The list follows the map once it settles, not on every frame of a pan. */
+const AREA_DEBOUNCE_MS = 300;
 /**
  * MapLibre looks for its worker next to its own file at runtime, which the
  * bundler moves, so it ends up loading the page as the worker. This static
@@ -137,18 +139,33 @@ export interface ExploreMapProps {
   hoveredId: string | null;
   /** The trail picked on the map (its card is highlighted too). */
   selectedId: string | null;
-  /** From the URL on load; null fits the map to the results instead. */
-  initialView: MapView | null;
   /**
-   * Changes when the results are for a new search (not a new map area).
-   * The map fits itself to each new set; null while a search is loading.
+   * Where to start, read when the map mounts (the URL's map=, so a shared
+   * link or a trip to the list and back keeps its place); null fits the map
+   * to the first results instead.
+   */
+  getInitialView: () => MapView | null;
+  /**
+   * Changes when the results are for a new search (not a new map area);
+   * null while a search is loading. With `fitToResults` the map fits itself
+   * to each new set; without, it only notes the key, so the set isn't fitted
+   * later either.
    */
   fitKey: string | null;
-  areaActive: boolean;
+  fitToResults: boolean;
+  /** "Search as I move the map". */
+  follow: boolean;
+  onFollowChange: (follow: boolean) => void;
   onSelect: (id: string | null) => void;
   onOpen: (id: string) => void;
   onViewChange: (view: MapView) => void;
-  onSearchArea: (bounds: Bounds) => void;
+  /** The visible area: on load, then after each move settles. Null when there is no map. */
+  onBoundsChange: (bounds: Bounds | null) => void;
+}
+
+function visibleBounds(map: MapLibreMap): Bounds {
+  const b = map.getBounds();
+  return { west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() };
 }
 
 export default function ExploreMap(props: ExploreMapProps) {
@@ -164,12 +181,14 @@ export default function ExploreMap(props: ExploreMapProps) {
   const fittedKey = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [moved, setMoved] = useState(false);
+  // Read once, so the first fit knows whether a position was given.
+  const initialViewRef = useRef<MapView | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const initial = latest.current.initialView;
+    const initial = latest.current.getInitialView();
+    initialViewRef.current = initial;
     if (maplibregl.getWorkerUrl() !== WORKER_URL) maplibregl.setWorkerUrl(WORKER_URL);
     let map: MapLibreMap;
     try {
@@ -183,8 +202,11 @@ export default function ExploreMap(props: ExploreMapProps) {
         cooperativeGestures: false,
       });
     } catch {
-      // No WebGL: the list still works on its own.
-      queueMicrotask(() => setFailed(true));
+      // No WebGL: the list still works on its own, unfiltered by area.
+      queueMicrotask(() => {
+        setFailed(true);
+        latest.current.onBoundsChange(null);
+      });
       return;
     }
     mapRef.current = map;
@@ -295,11 +317,15 @@ export default function ExploreMap(props: ExploreMapProps) {
       setReady(true);
     });
 
-    map.on("moveend", (event) => {
+    // The size and position are known already, before any tiles: the list
+    // can search this area straight away.
+    latest.current.onBoundsChange(visibleBounds(map));
+    let areaTimer: number | undefined;
+    map.on("moveend", () => {
       const center = map.getCenter();
       latest.current.onViewChange({ lat: center.lat, lng: center.lng, zoom: map.getZoom() });
-      // Only a pan or zoom by the reader offers "Search this area", not a fit.
-      if ((event as { originalEvent?: unknown }).originalEvent) setMoved(true);
+      window.clearTimeout(areaTimer);
+      areaTimer = window.setTimeout(() => latest.current.onBoundsChange(visibleBounds(map)), AREA_DEBOUNCE_MS);
     });
     map.on("error", (event) => {
       // A missing tile now and then is fine; a style that never loads is not.
@@ -307,9 +333,15 @@ export default function ExploreMap(props: ExploreMapProps) {
     });
 
     // The pane resizes with the layout (Map/List toggle, sidebar width).
-    const observer = new ResizeObserver(() => map.resize());
+    // A resize changes the visible area without a moveend.
+    const observer = new ResizeObserver(() => {
+      map.resize();
+      window.clearTimeout(areaTimer);
+      areaTimer = window.setTimeout(() => latest.current.onBoundsChange(visibleBounds(map)), AREA_DEBOUNCE_MS);
+    });
     observer.observe(container);
     return () => {
+      window.clearTimeout(areaTimer);
       observer.disconnect();
       popupRef.current?.remove();
       groupRef.current?.remove();
@@ -319,7 +351,7 @@ export default function ExploreMap(props: ExploreMapProps) {
   }, []);
 
   // New results: update the markers, and fit to them when it's a new search.
-  const { trails, fitKey } = props;
+  const { trails, fitKey, fitToResults } = props;
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
@@ -327,15 +359,15 @@ export default function ExploreMap(props: ExploreMapProps) {
     if (fitKey === null || fitKey === fittedKey.current) return;
     const first = fittedKey.current === null;
     fittedKey.current = fitKey;
-    // A shared or reloaded link keeps its map position.
-    if (first && latest.current.initialView) return;
+    // A shared or reloaded link keeps its map position, and results from
+    // the map's own area are on screen already.
+    if ((first && initialViewRef.current) || !fitToResults) return;
     const located = trails.filter((t) => t.latitude != null && t.longitude != null);
     if (!located.length) return;
     const bounds = new maplibregl.LngLatBounds();
     for (const trail of located) bounds.extend([trail.longitude!, trail.latitude!]);
     map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: CLUSTER_MAX_ZOOM, duration: first ? 0 : 600 });
-    queueMicrotask(() => setMoved(false));
-  }, [trails, fitKey, ready]);
+  }, [trails, fitKey, fitToResults, ready]);
 
   // Hover and selection: the focus layer, and the selected trail's popup.
   const { hoveredId, selectedId } = props;
@@ -369,14 +401,6 @@ export default function ExploreMap(props: ExploreMapProps) {
     popupRef.current = popup;
   }, [selectedId, ready]);
 
-  const searchArea = () => {
-    const map = mapRef.current;
-    if (!map) return;
-    const b = map.getBounds();
-    props.onSearchArea({ west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() });
-    setMoved(false);
-  };
-
   if (failed) {
     return (
       <div className={styles.mapPlaceholder} role="status">
@@ -393,10 +417,15 @@ export default function ExploreMap(props: ExploreMapProps) {
           <span>Loading map…</span>
         </div>
       )}
-      {ready && moved && (
-        <button type="button" className={styles.searchArea} onClick={searchArea}>
-          {props.areaActive ? "Search this area again" : "Search this area"}
-        </button>
+      {ready && (
+        <label className={styles.followToggle}>
+          <input
+            type="checkbox"
+            checked={props.follow}
+            onChange={(event) => props.onFollowChange(event.target.checked)}
+          />
+          Search as I move the map
+        </label>
       )}
       <ul className={styles.legend} aria-label="Marker colours">
         {(Object.keys(TERRAIN_LABELS) as Terrain[]).map((terrain) => (

@@ -8,10 +8,11 @@
  * `near=1` only says "use my location": the position itself is never in the
  * URL. It is asked for again on load and kept in memory for the requests.
  *
- * `area=west,south,east,north` is the map's "Search this area". The map's
- * own position (`map=lat,lng,zoom`) and the phone's Map/List choice
- * (`view=map`) are view state, not filters: they ride along unchanged when a
- * filter changes (keepViewParams).
+ * The map's position (`map=lat,lng,zoom`), the phone's Map/List choice
+ * (`view=map`) and "Search as I move the map" turned off (`follow=0`) are
+ * view state, not filters: they ride along unchanged when a filter changes
+ * (keepViewParams). The list follows the map's visible area, which lives in
+ * memory: it comes from the map itself, never from the URL.
  */
 
 import { TERRAIN_LABELS, type Terrain } from "./terrain.ts";
@@ -44,8 +45,6 @@ export interface ExploreFilters {
   near: boolean;
   /** Only with `near`. */
   within?: Within;
-  /** "Search this area": trailheads inside these bounds. */
-  area?: Bounds;
   sort: TrailSort;
 }
 
@@ -113,20 +112,6 @@ const pick = <T extends string>(options: readonly T[], value: string | null): T 
 /** 4 places is about 10 m: plenty for a map view, and short URLs. */
 const round = (value: number, places: number) => Number(value.toFixed(places));
 
-function parseArea(value: string | null): Bounds | undefined {
-  const parts = value?.split(",").map(Number);
-  if (!parts || parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return undefined;
-  const [west, south, east, north] = parts;
-  const lngOk = (n: number) => n >= -180 && n <= 180;
-  const latOk = (n: number) => n >= -90 && n <= 90;
-  if (!lngOk(west) || !lngOk(east) || !latOk(south) || !latOk(north) || south > north) return undefined;
-  return { west, south, east, north };
-}
-
-export function formatArea(area: Bounds): string {
-  return [area.west, area.south, area.east, area.north].map((n) => round(n, 4)).join(",");
-}
-
 export function parseExploreParams(params: URLSearchParams): ExploreFilters {
   const near = params.get("near") === "1";
   const sort = params.get("sort");
@@ -141,7 +126,6 @@ export function parseExploreParams(params: URLSearchParams): ExploreFilters {
     parks: unique(params.getAll("park").map((p) => p.trim()).filter(Boolean)),
     near,
     within: near ? parseWithin(params.get("within")) : undefined,
-    area: parseArea(params.get("area")),
     // "Nearest" needs a location to sort by.
     sort: isTrailSort(sort) && (sort !== "nearest" || near) ? sort : "popular",
   };
@@ -160,7 +144,6 @@ export function exploreSearch(filters: ExploreFilters): string {
     params.set("near", "1");
     if (filters.within) params.set("within", `${filters.within.value}${filters.within.unit}`);
   }
-  if (filters.area) params.set("area", formatArea(filters.area));
   if (filters.sort !== "popular" && (filters.sort !== "nearest" || filters.near)) params.set("sort", filters.sort);
   return params.toString();
 }
@@ -171,7 +154,7 @@ export function exploreHref(filters: Partial<ExploreFilters>): string {
 }
 
 /** Filters counted on the Filters button: everything in the panel (not the
- * search box, the sort, or the map area, which has its own chip). */
+ * search box or the sort). */
 export function activeFilterCount(filters: ExploreFilters): number {
   return (
     (filters.trip ? 1 : 0) +
@@ -235,6 +218,45 @@ export function formatMapView(view: MapView): string {
   return `${round(view.lat, 4)},${round(view.lng, 4)},${round(view.zoom, 2)}`;
 }
 
+/**
+ * The part of Canada the trails sit in. A map view that takes all of it in
+ * is "all of Canada": the list shows every result, not just this area.
+ * A couple of degrees' slack, so a view fitted to Canada still counts.
+ */
+const CANADA_VIEW: Bounds = { west: -139, south: 43.5, east: -54.5, north: 60 };
+
+/** Into -180..180, keeping 180 itself (the east edge of a view that ends there). */
+function wrapLng(lng: number): number {
+  const wrapped = ((((lng + 180) % 360) + 360) % 360) - 180;
+  return wrapped === -180 && lng > 0 ? 180 : wrapped;
+}
+
+/**
+ * What the list searches for a map view's edges (as the map reports them:
+ * longitudes can run past ±180 when the world repeats). Undefined when the
+ * view takes in all of Canada or the whole world: then nothing is filtered
+ * by area. Rounded to about 10 m, so tiny nudges don't refetch.
+ */
+export function searchAreaFor(view: Bounds): Bounds | undefined {
+  if (view.east - view.west >= 360) return undefined;
+  const south = Math.max(-90, view.south);
+  const north = Math.min(90, view.north);
+  if (
+    view.west <= CANADA_VIEW.west &&
+    view.east >= CANADA_VIEW.east &&
+    south <= CANADA_VIEW.south &&
+    north >= CANADA_VIEW.north
+  ) {
+    return undefined;
+  }
+  return {
+    west: round(wrapLng(view.west), 4),
+    south: round(south, 4),
+    east: round(wrapLng(view.east), 4),
+    north: round(north, 4),
+  };
+}
+
 /** Below the split layout, Explore shows the list or the map; "list" by default. */
 export type ExploreView = "list" | "map";
 
@@ -242,9 +264,15 @@ export function parseExploreView(params: URLSearchParams): ExploreView {
   return params.get("view") === "map" ? "map" : "list";
 }
 
-const VIEW_PARAMS = ["map", "view"];
+/** "Search as I move the map": on unless the URL turned it off. */
+export function parseFollowMap(params: URLSearchParams): boolean {
+  return params.get("follow") !== "0";
+}
 
-/** `search` (filters only) with the map position and Map/List choice from `current` kept. */
+type ViewParam = "map" | "view" | "follow";
+const VIEW_PARAMS: ViewParam[] = ["map", "view", "follow"];
+
+/** `search` (filters only) with the view params from `current` kept. */
 export function keepViewParams(search: string, current: URLSearchParams): string {
   const params = new URLSearchParams(search);
   for (const key of VIEW_PARAMS) {
@@ -255,7 +283,7 @@ export function keepViewParams(search: string, current: URLSearchParams): string
 }
 
 /** `current` with one view param set, or removed with null. */
-export function withViewParam(current: URLSearchParams, key: "map" | "view", value: string | null): string {
+export function withViewParam(current: URLSearchParams, key: ViewParam, value: string | null): string {
   const params = new URLSearchParams(current);
   if (value === null) params.delete(key);
   else params.set(key, value);

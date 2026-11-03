@@ -10,8 +10,10 @@ import {
   keepViewParams,
   parseExploreParams,
   parseExploreView,
+  parseFollowMap,
   parseMapView,
   provinceOrder,
+  searchAreaFor,
   toggle,
   toggleTrip,
   withProvinces,
@@ -24,7 +26,7 @@ import {
 const parse = (search: string) => parseExploreParams(new URLSearchParams(search));
 
 test("an empty URL is no filters", () => {
-  assert.deepEqual(parse(""), { ...EMPTY_FILTERS, trip: undefined, terrain: undefined, within: undefined, area: undefined });
+  assert.deepEqual(parse(""), { ...EMPTY_FILTERS, trip: undefined, terrain: undefined, within: undefined });
   assert.equal(exploreSearch(EMPTY_FILTERS), "");
   assert.equal(exploreHref({}), "/trail-list");
 });
@@ -39,15 +41,13 @@ test("every filter round-trips through the URL", () => {
     parks: ["Banff National Park", "Parc national de la Gaspésie"],
     near: true,
     within: { value: 50, unit: "km" },
-    area: { west: -117.5, south: 50.5, east: -114, north: 52.25 },
     sort: "nearest",
   };
   const search = exploreSearch(filters);
   assert.equal(
     search,
     "q=lake&trip=day&terrain=easy&province=AB&province=BC&park_type=national&park_type=other" +
-      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km" +
-      "&area=-117.5%2C50.5%2C-114%2C52.25&sort=nearest",
+      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km&sort=nearest",
   );
   assert.deepEqual(parse(search), filters);
 });
@@ -135,24 +135,32 @@ test("distances in miles become km for the API", () => {
   assert.ok(Math.abs(withinKm({ value: 25, unit: "mi" }) - 40.2336) < 1e-9);
 });
 
-test("a map area round-trips, rounded, and bad ones are dropped", () => {
-  assert.deepEqual(parse("area=-117.5,50.5,-114,52.25").area, { west: -117.5, south: 50.5, east: -114, north: 52.25 });
-  assert.equal(
-    exploreSearch({ ...EMPTY_FILTERS, area: { west: -117.123456, south: 50.5, east: -114, north: 52.25 } }),
-    "area=-117.1235%2C50.5%2C-114%2C52.25",
-  );
-  // West past east is a view across the antimeridian, and is kept.
-  assert.ok(parse("area=170,-10,-170,10").area);
-  for (const bad of ["area=1,2,3", "area=a,1,2,3", "area=-117,53,-114,52", "area=-200,1,2,3"]) {
-    assert.equal(parse(bad).area, undefined, bad);
-  }
+test("the list searches the map's visible area, or everywhere once it takes in all of Canada", () => {
+  assert.deepEqual(searchAreaFor({ west: -117.123456, south: 50.5, east: -114, north: 52.25 }), {
+    west: -117.1235,
+    south: 50.5,
+    east: -114,
+    north: 52.25,
+  });
+  // All of Canada, or the whole world: no area at all.
+  assert.equal(searchAreaFor({ west: -142, south: 41, east: -52, north: 71 }), undefined);
+  assert.equal(searchAreaFor({ west: -400, south: -85, east: 400, north: 85 }), undefined);
+  // Most of Canada but not the east coast is still an area.
+  assert.ok(searchAreaFor({ west: -142, south: 41, east: -70, north: 71 }));
+  // A repeated world's longitudes come back into range; west past east crosses the antimeridian.
+  assert.deepEqual(searchAreaFor({ west: 170, south: -10, east: 190, north: 10 }), {
+    west: 170,
+    south: -10,
+    east: -170,
+    north: 10,
+  });
+  assert.equal(searchAreaFor({ west: 100, south: 0, east: 180, north: 10 })?.east, 180);
+  assert.equal(searchAreaFor({ west: -480, south: 50, east: -470, north: 52 })?.west, -120);
 });
 
-test("the map area is a filter: Clear all drops it, the Filters count leaves it out", () => {
-  const filters = parse("q=lake&area=-117,50,-114,52");
-  assert.equal(activeFilterCount(filters), 0);
-  assert.equal(clearFilters(filters).area, undefined);
-  assert.equal(clearFilters(filters).q, "lake");
+test("an old shared link's map area is ignored", () => {
+  assert.deepEqual(parse("q=lake&area=-117,50,-114,52"), { ...parse("q=lake") });
+  assert.equal(exploreSearch(parse("q=lake&area=-117,50,-114,52")), "q=lake");
 });
 
 test("the map position and Map/List choice are view state that survives filter changes", () => {
@@ -173,6 +181,13 @@ test("the map position and Map/List choice are view state that survives filter c
   assert.equal(keepViewParams("", new URLSearchParams("trip=day")), "");
   assert.equal(withViewParam(current, "view", null), "trip=day&map=51%2C-115%2C9");
   assert.equal(withViewParam(new URLSearchParams("trip=day"), "map", "1,2,3"), "trip=day&map=1%2C2%2C3");
+});
+
+test("Search as I move the map is on unless the URL turns it off, and survives filter changes", () => {
+  assert.equal(parseFollowMap(new URLSearchParams("")), true);
+  assert.equal(parseFollowMap(new URLSearchParams("follow=0")), false);
+  assert.equal(parseFollowMap(new URLSearchParams("follow=1")), true);
+  assert.equal(keepViewParams("trip=day", new URLSearchParams("q=x&follow=0")), "trip=day&follow=0");
 });
 
 test("the trip quick chips swap and clear the trip type", () => {

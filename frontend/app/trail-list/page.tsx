@@ -28,8 +28,10 @@ import {
   keepViewParams,
   parseExploreParams,
   parseExploreView,
+  parseFollowMap,
   parseMapView,
   provinceOrder,
+  searchAreaFor,
   toggle,
   toggleTrip,
   withProvinces,
@@ -86,6 +88,29 @@ const isSplit = () => window.matchMedia(SPLIT_QUERY).matches;
 
 function provinceName(code: string): string {
   return PROVINCE_NAMES[code] ?? code;
+}
+
+/**
+ * A scroller that marks itself data-more while there's more below, for the
+ * bottom fade (as on the profile). A callback ref: the list swaps elements
+ * between loading, results and empty states.
+ */
+function useMoreBelow(nodeRef: { current: HTMLElement | null }) {
+  return useCallback((node: HTMLElement | null) => {
+    nodeRef.current = node;
+    if (!node) return;
+    const update = () => node.toggleAttribute("data-more", node.scrollTop + node.clientHeight < node.scrollHeight - 1);
+    update();
+    node.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    const content = node.firstElementChild;
+    if (content) observer.observe(content);
+    return () => {
+      node.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [nodeRef]);
 }
 
 /** Lower-case, accents stripped: "gaspesie" finds "Gaspésie". */
@@ -359,6 +384,8 @@ function ExploreContent() {
     trails: TrailSearchItem[] | null;
     total: number;
     facets: TrailFacets | null;
+    /** Matches outside the map area, counted only when the area has none. */
+    elsewhere: number | null;
   } | null>(null);
   // Bumped by "Try again" so the same search is fetched afresh.
   const [attempt, setAttempt] = useState(0);
@@ -379,14 +406,22 @@ function ExploreContent() {
   const split = useSyncExternalStore(subscribeSplit, isSplit, () => false);
   const view: ExploreView = parseExploreView(searchParams);
   const mapVisible = split || view === "map";
-  // Read once: afterwards the map owns its position and writes it back.
-  const [initialMapView] = useState(() => parseMapView(new URLSearchParams(searchParams.toString())));
+  // Read when the map mounts: afterwards the map owns its position and writes it back.
+  const getInitialMapView = useCallback(() => parseMapView(new URLSearchParams(window.location.search)), []);
+  const follow = parseFollowMap(searchParams);
+  // The map's visible area, as it last reported it: undefined until it has
+  // (its first report comes as soon as it's created), null for no map.
+  const [mapBounds, setMapBounds] = useState<Bounds | null | undefined>(undefined);
+  // Bumped by "Show all trails": the map fits to the results again.
+  const [fitNonce, setFitNonce] = useState(0);
+  const scrollerNode = useRef<HTMLElement | null>(null);
+  const scrollerRef = useMoreBelow(scrollerNode);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
 
   // View state goes straight into history: no navigation, no refetch.
-  const setViewParam = useCallback((key: "map" | "view", value: string | null) => {
+  const setViewParam = useCallback((key: "map" | "view" | "follow", value: string | null) => {
     const search = withViewParam(new URLSearchParams(window.location.search), key, value);
     window.history.replaceState(null, "", search ? `/trail-list?${search}` : "/trail-list");
   }, []);
@@ -465,6 +500,10 @@ function ExploreContent() {
   // Waiting on the browser for a position: hold the search rather than
   // flash results that aren't near anything.
   const waitingForPosition = filters.near && (geo.status === "idle" || geo.status === "locating");
+  // A map on screen with "Search as I move the map" on: its area first,
+  // rather than flash every trail and then this area's.
+  const waitingForMap = follow && mapVisible && mapBounds === undefined;
+  const area = follow && mapBounds ? searchAreaFor(mapBounds) : undefined;
   const request: TrailSearchRequest = {
     q,
     terrain,
@@ -476,26 +515,39 @@ function ExploreContent() {
       filters.near && geo.position
         ? { ...geo.position, ...(filters.within ? { radius_km: withinKm(filters.within) } : {}) }
         : undefined,
-    bounds: filters.area,
+    bounds: area,
     limit: RESULT_LIMIT,
   };
   const requestJson = JSON.stringify(request);
-  // The map refits to each new search, but not to "Search this area".
+  // The map fits to each new search, never to a new area of its own.
   const searchKey = JSON.stringify({ ...request, bounds: undefined });
   const requestKey = `${requestJson}|${attempt}`;
 
   useEffect(() => {
-    if (waitingForPosition) return;
+    if (waitingForPosition || waitingForMap) return;
     const controller = new AbortController();
-    searchExplore(JSON.parse(requestJson) as TrailSearchRequest, controller.signal)
-      .then((found) => setResult({ key: requestKey, trails: found.trails, total: found.total, facets: found.facets }))
-      .catch((error: unknown) => {
-        if ((error as { name?: string }).name !== "AbortError") {
-          setResult((previous) => ({ key: requestKey, trails: null, total: 0, facets: previous?.facets ?? null }));
-        }
-      });
+    const sent = JSON.parse(requestJson) as TrailSearchRequest;
+    (async () => {
+      const found = await searchExplore(sent, controller.signal);
+      // Nothing in this area: is there anything elsewhere to send them to?
+      const elsewhere =
+        found.total === 0 && sent.bounds
+          ? (await searchExplore({ ...sent, bounds: undefined, limit: 1 }, controller.signal)).total
+          : null;
+      setResult({ key: requestKey, trails: found.trails, total: found.total, facets: found.facets, elsewhere });
+    })().catch((error: unknown) => {
+      if ((error as { name?: string }).name !== "AbortError") {
+        setResult((previous) => ({
+          key: requestKey,
+          trails: null,
+          total: 0,
+          facets: previous?.facets ?? null,
+          elsewhere: null,
+        }));
+      }
+    });
     return () => controller.abort();
-  }, [requestJson, requestKey, waitingForPosition]);
+  }, [requestJson, requestKey, waitingForPosition, waitingForMap]);
 
   // Back from sign-in after a guest clicked Save on a card: finish that save.
   useEffect(() => {
@@ -517,7 +569,12 @@ function ExploreContent() {
   }, [filtersOpen]);
 
   const isLoading = result?.key !== requestKey;
-  const fitKey = isLoading ? null : `${searchKey}|${attempt}`;
+  // A new set of results (a new area, a new search) starts at the top.
+  const resultKey = result?.key;
+  useEffect(() => {
+    scrollerNode.current?.scrollTo({ top: 0 });
+  }, [resultKey]);
+  const fitKey = isLoading ? null : `${searchKey}|${attempt}|${fitNonce}`;
   const trails = result?.trails;
   const facets = result?.facets ?? null;
   const failed = !isLoading && trails === null;
@@ -590,10 +647,16 @@ function ExploreContent() {
           onRemove: () => setGeo({ status: "stopped" }),
         }]
       : []),
-    ...(filters.area ? [{ key: "area", label: "In the map area", next: { ...filters, area: undefined } }] : []),
   ];
 
-  const searchArea = (bounds: Bounds) => setFilter({ ...filters, area: bounds });
+  const setFollow = (on: boolean) => setViewParam("follow", on ? null : "0");
+  // Every match, wherever it is: the map lets go of its area and fits to them.
+  const showAllTrails = () => {
+    setSelectedId(null);
+    setViewParam("map", null);
+    setMapBounds(null);
+    setFitNonce((n) => n + 1);
+  };
   const toggleNear = () => (filters.near ? stopNear() : locate());
   const showMapLabel = view === "map" ? "Show list" : "Show map";
 
@@ -807,21 +870,31 @@ function ExploreContent() {
               </div>
             ) : !sorted ? (
               <>
-                <p className={styles.count}>
-                  {waitingForPosition ? "Finding trails near you…" : "Loading trails…"}
-                </p>
-                <ul className={styles.list}>
-                  {Array.from({ length: SKELETON_CARDS }, (_, index) => (
-                    <TrailCardSkeleton key={index} />
-                  ))}
-                </ul>
+                <div className={styles.resultsHead}>
+                  <p className={styles.count}>
+                    {waitingForPosition ? "Finding trails near you…" : "Loading trails…"}
+                  </p>
+                </div>
+                <div className={styles.scroller}>
+                  <ul className={styles.list}>
+                    {Array.from({ length: SKELETON_CARDS }, (_, index) => (
+                      <TrailCardSkeleton key={index} />
+                    ))}
+                  </ul>
+                </div>
               </>
+            ) : sorted.length === 0 && request.bounds && result?.elsewhere ? (
+              <div className={`${styles.status} ${isLoading ? styles.stale : ""}`}>
+                <p>No trails here. Zoom out or move the map.</p>
+                <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={showAllTrails}>
+                  Show all trails
+                </button>
+              </div>
             ) : sorted.length === 0 ? (
-              <p className={styles.status}>
+              <p className={`${styles.status} ${isLoading ? styles.stale : ""}`}>
                 No trails match
                 {q ? <> &ldquo;{q}&rdquo;</> : null}
-                {activeFilters > 0 ? <> with these filters</> : null}
-                {filters.area ? <> in this map area</> : null}. Try a broader search or remove a filter.
+                {activeFilters > 0 ? <> with these filters</> : null}. Try a broader search or remove a filter.
               </p>
             ) : (
               <>
@@ -832,6 +905,7 @@ function ExploreContent() {
                     {trip === "overnight" ? "backpacking " : trip === "day" ? "day-hike " : ""}
                     {total === 1 ? "trail" : "trails"}
                     {q ? <> matching &ldquo;{q}&rdquo;</> : null}
+                    {request.bounds ? " in this area" : null}
                   </p>
                   <label className={styles.sort}>
                     <span className={styles.sortLabel}>Sort</span>
@@ -848,26 +922,29 @@ function ExploreContent() {
                     </select>
                   </label>
                 </div>
-                <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
-                  {sorted.map((trail) => (
-                    <TrailCard
-                      key={trail.id}
-                      ref={(node) => {
-                        if (node) cardRefs.current.set(trail.id, node);
-                        else cardRefs.current.delete(trail.id);
-                      }}
-                      trail={trail}
-                      title={titles.get(trail.id) ?? trail.name}
-                      saved={savedTrails.savedIds.has(trail.id)}
-                      pending={savedTrails.pending.has(trail.id)}
-                      onToggleSave={savedTrails.toggle}
-                      returnTo={returnTo}
-                      units={units}
-                      selected={selectedId === trail.id}
-                      onHover={setHoveredId}
-                    />
-                  ))}
-                </ul>
+                {/* Split view: the only scroller, ending level with the map. */}
+                <div ref={scrollerRef} className={styles.scroller}>
+                  <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
+                    {sorted.map((trail) => (
+                      <TrailCard
+                        key={trail.id}
+                        ref={(node) => {
+                          if (node) cardRefs.current.set(trail.id, node);
+                          else cardRefs.current.delete(trail.id);
+                        }}
+                        trail={trail}
+                        title={titles.get(trail.id) ?? trail.name}
+                        saved={savedTrails.savedIds.has(trail.id)}
+                        pending={savedTrails.pending.has(trail.id)}
+                        onToggleSave={savedTrails.toggle}
+                        returnTo={returnTo}
+                        units={units}
+                        selected={selectedId === trail.id}
+                        onHover={setHoveredId}
+                      />
+                    ))}
+                  </ul>
+                </div>
               </>
             )}
           </section>
@@ -880,13 +957,15 @@ function ExploreContent() {
               titles={titles}
               hoveredId={hoveredId}
               selectedId={selectedId}
-              initialView={initialMapView}
+              getInitialView={getInitialMapView}
               fitKey={fitKey}
-              areaActive={Boolean(filters.area)}
+              fitToResults={!request.bounds}
+              follow={follow}
+              onFollowChange={setFollow}
               onSelect={setSelectedId}
               onOpen={(id) => router.push(`/trails?id=${encodeURIComponent(id)}`)}
               onViewChange={onMapView}
-              onSearchArea={searchArea}
+              onBoundsChange={setMapBounds}
             />
           </div>
         )}
