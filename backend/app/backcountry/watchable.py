@@ -17,7 +17,7 @@ from collections.abc import Iterable
 from functools import lru_cache
 from uuid import UUID
 
-from sqlalchemy import and_, exists, not_, select
+from sqlalchemy import and_, exists, func, not_, select
 from sqlalchemy.orm import Session
 
 from app.backcountry.alertable import NOT_ONLINE, UNCONFIRMED_KINDS, UNLIMITED_QUOTA, alert_block
@@ -40,7 +40,8 @@ WATCHABLE_SITE = and_(
     BackcountrySite.kind != TRAIL_PERMIT,
     # The rest of app/backcountry/alertable.py's alert_block, in SQL.
     BackcountrySite.kind.not_in(["horse_camp", *UNCONFIRMED_KINDS]),
-    not_(and_(BackcountrySite.kind == "random_zone", BackcountrySite.reservable_capacity >= UNLIMITED_QUOTA)),
+    # coalesce: a random zone with no published quota is watchable, as in alert_block.
+    not_(and_(BackcountrySite.kind == "random_zone", func.coalesce(BackcountrySite.reservable_capacity, 0) >= UNLIMITED_QUOTA)),
     BackcountrySite.provider_resource_id.not_in(list(NOT_ONLINE)),
 )
 

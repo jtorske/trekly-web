@@ -208,3 +208,21 @@ def test_trails_with_only_unalertable_campgrounds_arent_watchable(client, sessio
         return [t["name"] for t in client.get("/api/trails", params={"watchable": watchable, "limit": 100}).json()]
 
     assert "Hut Approach" in listed("false") and "Hut Approach" not in listed("true")
+
+
+def test_a_random_zone_without_a_published_quota_is_watchable_in_sql_too(client, session_factory, world, fetch):
+    from app.models.trail import Trail
+
+    db = session_factory()
+    park = type("P", (), {"id": db.get(BackcountrySite, world["evelyn"]).park_id})
+    trail = Trail(name="Random Valley", region="Jasper, AB", country_code="CA", province_code="AB",
+                  terrain_difficulty="moderate", typical_duration_nights=1, popularity_rank=2)
+    db.add(trail)
+    db.flush()
+    zone = add_site(db, park, "-9201", "Valley Random", kind="random_zone", reservable_capacity=None)
+    db.add(TrailCampground(trail_id=trail.id, site_id=zone.id, route_order=1, confidence="exact", source="test"))
+    db.commit()
+    trail_id = trail.id
+    db.close()
+    assert client.get(f"/api/trails/{trail_id}").json()["has_watchable_campgrounds"] is True
+    assert client.get(f"/api/trails/{trail_id}/campgrounds").json()["campgrounds"][0]["watchable"] is True
