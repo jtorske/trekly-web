@@ -1,5 +1,6 @@
 /*
- * The account dropdown and the rows it shares with the mobile menu.
+ * The account dropdown and the rows it shares with the mobile menu
+ * (MobileMenu.module.css), which is only shown below 900px.
  *
  * Every colour is set here rather than inherited, with a dark version for
  * OS dark mode. Contrast (WCAG AA):
@@ -158,19 +159,6 @@
   color: var(--menu-muted);
   font-size: 1.35rem;
   line-height: 1;
-}
-
-@media (max-width: 767px) {
-  /* Anchor to the fixed navbar instead of the avatar, so the card lines up
-     with the screen edge like the mobile menu and can't run off-screen. */
-  .wrapper {
-    position: static;
-  }
-
-  .menu {
-    top: calc(100% + 0.5rem);
-    right: 0.75rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

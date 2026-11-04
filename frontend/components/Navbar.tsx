@@ -2,25 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "./AuthProvider";
-import AccountMenu, { AccountRows } from "./AccountMenu";
-import accountStyles from "./AccountMenu.module.css";
-import { currentAccountHref } from "@/lib/accountMenu";
+import AccountMenu from "./AccountMenu";
+import Avatar from "./Avatar";
+import MobileMenu from "./MobileMenu";
+import { NAV_LINKS, isNavCurrent } from "@/lib/accountMenu";
 import { nextQuery } from "@/lib/authLogic";
 import { useProfile } from "@/lib/useProfile";
 import styles from "./Navbar.module.css";
 
-// `match`: the path prefixes that mark the link as the current page. A trail
-// page is opened from Explore, so it highlights Explore too.
-const LINKS = [
-  { href: "/trail-list", label: "Explore", match: ["/trail-list", "/trails"] },
-  { href: "/gear", label: "Gear", match: ["/gear"] },
-  { href: "/journal", label: "Journal", match: ["/journal"] },
-];
-
-const isCurrent = (pathname: string, prefixes: string[]) =>
-  prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+/** Matches the stylesheet: below this the header shows one menu trigger. */
+const DESKTOP_QUERY = "(min-width: 900px)";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,6 +21,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Query string when the mobile menu opened, for highlighting profile tabs.
   const [menuSearch, setMenuSearch] = useState("");
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const { status, user } = useAuth();
   const { profile } = useProfile();
   const pathname = usePathname();
@@ -53,14 +47,31 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", updateNavbar);
   }, [pathname]);
 
+  // Close the mobile menu on navigation (e.g. browser back) and if the
+  // window widens to the desktop header.
+  useEffect(() => {
+    queueMicrotask(() => setIsMenuOpen(false));
+  }, [pathname]);
+  useEffect(() => {
+    const desktop = window.matchMedia(DESKTOP_QUERY);
+    const onChange = () => desktop.matches && setIsMenuOpen(false);
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
+  }, []);
+
+  const openMenu = () => {
+    setMenuSearch(window.location.search);
+    setIsMenuOpen(true);
+  };
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
   const displayName = profile?.display_name ?? null;
   const email = user?.email ?? null;
   const identity = { displayName, email, avatarPath: profile?.avatar_path, isAdmin: profile?.is_admin === true };
-  const currentAccount = isMenuOpen ? currentAccountHref(pathname, menuSearch) : null;
 
   const account =
     status === "signedIn" ? (
-      <AccountMenu identity={identity} triggerClassName={styles.avatarLink} onOpen={() => setIsMenuOpen(false)} />
+      <AccountMenu identity={identity} triggerClassName={styles.avatarLink} />
     ) : status === "loading" ? (
       // Reserve the space while the session restores so buttons don't flash.
       <span className={styles.avatarPlaceholder} aria-hidden="true" />
@@ -88,12 +99,12 @@ export default function Navbar() {
       </Link>
 
       <div className={styles.links}>
-        {LINKS.map((link) => (
+        {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
             className={styles.link}
-            aria-current={isCurrent(pathname, link.match) ? "page" : undefined}
+            aria-current={isNavCurrent(pathname, link) ? "page" : undefined}
           >
             {link.label}
           </Link>
@@ -101,52 +112,50 @@ export default function Navbar() {
         {account}
       </div>
 
+      {/* Below 900px: one trigger. Signed in it's the avatar; signed out, ☰. */}
       <div className={styles.mobileBar}>
-        {status === "signedIn" && account}
-        <button
-          type="button"
-          className={styles.menuToggle}
-          aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-navigation"
-          onClick={() => {
-            setMenuSearch(window.location.search);
-            setIsMenuOpen((open) => !open);
-          }}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        {status === "signedIn" ? (
+          <button
+            ref={menuTriggerRef}
+            type="button"
+            className={`${styles.menuAvatar} ${styles.avatarLink}`}
+            aria-label={`Open menu${displayName ? ` for ${displayName}` : ""}`}
+            aria-haspopup="dialog"
+            aria-expanded={isMenuOpen}
+            aria-controls={isMenuOpen ? "mobile-navigation" : undefined}
+            onClick={openMenu}
+          >
+            <Avatar path={identity.avatarPath} name={displayName} email={email} size={34} />
+          </button>
+        ) : status === "loading" ? (
+          <span className={styles.avatarPlaceholder} aria-hidden="true" />
+        ) : (
+          <button
+            ref={menuTriggerRef}
+            type="button"
+            className={styles.menuToggle}
+            aria-label="Open menu"
+            aria-haspopup="dialog"
+            aria-expanded={isMenuOpen}
+            aria-controls={isMenuOpen ? "mobile-navigation" : undefined}
+            onClick={openMenu}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        )}
       </div>
 
-      {isMenuOpen && (
-        <div id="mobile-navigation" className={`${accountStyles.card} ${styles.mobileMenu}`}>
-          {LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className={styles.mobileMenuLink} onClick={() => setIsMenuOpen(false)}>
-              {link.label}
-            </Link>
-          ))}
-          {status === "signedIn" ? (
-            <>
-              <div className={styles.mobileMenuDivider} />
-              <AccountRows identity={identity} current={currentAccount} asMenuItems={false} onChoose={() => setIsMenuOpen(false)} />
-            </>
-          ) : (
-            <>
-              <Link
-                href={`/signup${returnTo}`}
-                className={`${styles.mobileMenuLink} ${styles.mobileMenuSignup}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign up
-              </Link>
-              <Link href={`/login${returnTo}`} className={styles.mobileMenuLink} onClick={() => setIsMenuOpen(false)}>
-                Sign in
-              </Link>
-            </>
-          )}
-        </div>
+      {isMenuOpen && status !== "loading" && (
+        <MobileMenu
+          identity={status === "signedIn" ? identity : null}
+          pathname={pathname}
+          search={menuSearch}
+          returnTo={returnTo}
+          returnFocusTo={menuTriggerRef}
+          onClose={closeMenu}
+        />
       )}
     </nav>
   );

@@ -12,7 +12,7 @@ import { ADMIN_LINK, PROFILE_HREF, accountLinks, currentAccountHref } from "@/li
 import styles from "./AccountMenu.module.css";
 
 /** Decorative icons for the account rows, keyed by href; the labels name them. */
-const ROW_ICONS: Record<string, LucideIcon> = {
+export const ROW_ICONS: Record<string, LucideIcon> = {
   "/profile?tab=trips": Tent,
   "/gear": Backpack,
   "/alerts": Bell,
@@ -20,7 +20,7 @@ const ROW_ICONS: Record<string, LucideIcon> = {
   [ADMIN_LINK.href]: Shield,
 };
 
-function RowIcon({ icon: Icon }: { icon: LucideIcon | undefined }) {
+export function RowIcon({ icon: Icon }: { icon: LucideIcon | undefined }) {
   return Icon ? <Icon className={styles.icon} size={18} aria-hidden="true" /> : null;
 }
 
@@ -32,50 +32,86 @@ export interface AccountIdentity {
   isAdmin?: boolean;
 }
 
+type ItemProps = { role?: "menuitem"; tabIndex?: -1 };
+
+/** The header row: avatar, name, rank and "Show profile"; opens the profile. */
+export function ProfileRow({
+  identity,
+  current,
+  item = {},
+  onChoose,
+}: {
+  identity: AccountIdentity;
+  current: boolean;
+  item?: ItemProps;
+  onChoose: () => void;
+}) {
+  const { rank } = useRank();
+  const name = identity.displayName || identity.email || "Your account";
+  return (
+    <Link href={PROFILE_HREF} className={`${styles.row} ${styles.profileRow}`} {...item} aria-current={current ? "page" : undefined} onClick={onChoose}>
+      <Avatar path={identity.avatarPath} name={identity.displayName} email={identity.email} size={40} />
+      <span className={styles.profileText}>
+        <span className={styles.name} title={name}>
+          {name}
+        </span>
+        {rank && (
+          <span className={styles.rank}>
+            <RankEmblem level={rank.rank.level} className={styles.rankEmblem} />
+            {rank.rank.title}
+          </span>
+        )}
+        <span className={styles.showProfile}>Show profile</span>
+      </span>
+      <span className={styles.chevron} aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  );
+}
+
+/** Log out: signs out and goes to the landing page. */
+export function LogOutRow({ item = {}, className = "" }: { item?: ItemProps; className?: string }) {
+  const { signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  return (
+    <button
+      type="button"
+      className={`${styles.row} ${className}`}
+      {...item}
+      disabled={signingOut}
+      onClick={() => {
+        setSigningOut(true);
+        void signOut("/landing");
+      }}
+    >
+      <RowIcon icon={LogOut} />
+      {signingOut ? "Logging out…" : "Log out"}
+    </button>
+  );
+}
+
 /**
- * The account rows: a profile header row, the account pages, Contact support
- * and Log out. Shared by the avatar dropdown (as menu items) and the mobile
- * menu (as plain links), so both always list the same things.
+ * The avatar dropdown's rows: the profile header row, the account pages and
+ * Log out. The mobile menu (MobileMenu.tsx) builds its groups from the same
+ * pieces.
  */
 export function AccountRows({
   identity,
   current,
-  asMenuItems,
   onChoose,
 }: {
   identity: AccountIdentity;
   /** href of the row for the current page, from currentAccountHref. */
   current: string | null;
-  asMenuItems: boolean;
   onChoose: () => void;
 }) {
-  const { signOut } = useAuth();
-  const { rank } = useRank();
-  const [signingOut, setSigningOut] = useState(false);
-  const item = asMenuItems ? ({ role: "menuitem", tabIndex: -1 } as const) : {};
-  const name = identity.displayName || identity.email || "Your account";
+  const item = { role: "menuitem", tabIndex: -1 } as const;
   const currentProps = (href: string) => (current === href ? { "aria-current": "page" as const } : {});
 
   return (
     <>
-      <Link href={PROFILE_HREF} className={`${styles.row} ${styles.profileRow}`} {...item} {...currentProps(PROFILE_HREF)} onClick={onChoose}>
-        <Avatar path={identity.avatarPath} name={identity.displayName} email={identity.email} size={40} />
-        <span className={styles.profileText}>
-          <span className={styles.name} title={name}>
-            {name}
-          </span>
-          {rank && (
-            <span className={styles.rank}>
-              <RankEmblem level={rank.rank.level} className={styles.rankEmblem} />
-              {rank.rank.title}
-            </span>
-          )}
-          <span className={styles.showProfile}>Show profile</span>
-        </span>
-        <span className={styles.chevron} aria-hidden="true">
-          ›
-        </span>
-      </Link>
+      <ProfileRow identity={identity} current={current === PROFILE_HREF} item={item} onChoose={onChoose} />
       {accountLinks(identity.isAdmin === true).map((link) =>
         link.href.startsWith("mailto:") ? (
           <a key={link.href} href={link.href} className={styles.row} {...item} onClick={onChoose}>
@@ -89,19 +125,7 @@ export function AccountRows({
           </Link>
         ),
       )}
-      <button
-        type="button"
-        className={styles.row}
-        {...item}
-        disabled={signingOut}
-        onClick={() => {
-          setSigningOut(true);
-          void signOut("/landing");
-        }}
-      >
-        <RowIcon icon={LogOut} />
-        {signingOut ? "Logging out…" : "Log out"}
-      </button>
+      <LogOutRow item={item} />
     </>
   );
 }
@@ -115,12 +139,9 @@ export function AccountRows({
 export default function AccountMenu({
   identity,
   triggerClassName,
-  onOpen,
 }: {
   identity: AccountIdentity;
   triggerClassName: string;
-  /** Lets the navbar close its mobile menu when this one opens. */
-  onOpen?: () => void;
 }) {
   const pathname = usePathname();
   const menuId = useId();
@@ -137,7 +158,6 @@ export default function AccountMenu({
     setSearch(window.location.search);
     setFocusOnOpen(focus);
     setOpen(true);
-    onOpen?.();
   };
 
   const close = (returnFocus: boolean) => {
@@ -208,7 +228,7 @@ export default function AccountMenu({
 
       {open && (
         <div ref={menuRef} id={menuId} role="menu" aria-label={accountLabel} className={`${styles.card} ${styles.menu}`} onKeyDown={onMenuKeyDown}>
-          <AccountRows identity={identity} current={currentAccountHref(pathname, search)} asMenuItems onChoose={() => close(true)} />
+          <AccountRows identity={identity} current={currentAccountHref(pathname, search)} onChoose={() => close(true)} />
         </div>
       )}
     </div>

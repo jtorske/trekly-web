@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ACCOUNT_LINKS, ADMIN_LINK, PROFILE_HREF, accountLinks, currentAccountHref } from "./accountMenu.ts";
+import {
+  ACCOUNT_LINKS,
+  ADMIN_LINK,
+  NAV_LINKS,
+  PROFILE_HREF,
+  accountLinks,
+  currentAccountHref,
+  currentMobileHref,
+  isNavCurrent,
+  isSwipeClose,
+  mobileAccountLinks,
+} from "./accountMenu.ts";
 
 test("currentAccountHref tells profile tabs apart", () => {
   assert.equal(currentAccountHref("/profile", ""), "/profile");
@@ -44,4 +55,34 @@ test("only admins get the Admin row, after Settings", () => {
   assert.equal(currentAccountHref("/admin", ""), "/admin");
   assert.equal(currentAccountHref("/admin/users/abc", ""), "/admin");
   assert.equal(currentAccountHref("/administrator", ""), null);
+});
+
+test("the mobile menu lists Gear once, in Navigation", () => {
+  const account = mobileAccountLinks(false).map((link) => link.label);
+  assert.deepEqual(account, ["Trips", "Alerts", "Settings"]);
+  assert.deepEqual(mobileAccountLinks(true).map((link) => link.label), ["Trips", "Alerts", "Settings", "Admin"]);
+  assert.deepEqual(NAV_LINKS.map((link) => link.label), ["Explore", "Gear", "Journal"]);
+  // The desktop dropdown is unchanged.
+  assert.ok(accountLinks(false).some((link) => link.href === "/gear"));
+});
+
+test("the mobile menu highlights the current page", () => {
+  assert.equal(currentMobileHref("/trail-list", ""), "/trail-list");
+  assert.equal(currentMobileHref("/trails/lake-agnes", ""), "/trail-list");
+  assert.equal(currentMobileHref("/journal", ""), "/journal");
+  assert.equal(currentMobileHref("/gear", ""), "/gear");
+  assert.equal(currentMobileHref("/profile", "?tab=gear"), "/gear");
+  assert.equal(currentMobileHref("/profile", ""), "/profile");
+  assert.equal(currentMobileHref("/alerts", ""), "/alerts");
+  assert.equal(currentMobileHref("/landing", ""), null);
+  assert.equal(currentMobileHref("/journalist", ""), null);
+  assert.ok(isNavCurrent("/trails/x", NAV_LINKS[0]));
+});
+
+test("a swipe right closes the menu; vertical or leftward drags don't", () => {
+  assert.ok(isSwipeClose(100, 10, 400));
+  assert.ok(isSwipeClose(40, 5, 50), "fast flick");
+  assert.ok(!isSwipeClose(40, 5, 400), "slow short drag");
+  assert.ok(!isSwipeClose(80, 120, 300), "mostly vertical");
+  assert.ok(!isSwipeClose(-100, 0, 100), "leftward");
 });

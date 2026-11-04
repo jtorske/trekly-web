@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Flag, Image as ImageIcon, LayoutDashboard, Users, type LucideIcon } from "lucide-react";
@@ -17,20 +17,55 @@ const TABS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[]
   { href: "/admin/photos", label: "Trail photos", icon: ImageIcon },
 ];
 
+/**
+ * The admin tabs: one row that scrolls sideways on a phone, fading at an edge
+ * with more tabs past it (like the profile tabs).
+ */
 function AdminNav() {
   const pathname = usePathname();
+  const listRef = useRef<HTMLElement>(null);
+  const [fade, setFade] = useState({ start: false, end: false });
+
+  const measure = useCallback(() => {
+    const list = listRef.current;
+    if (!list) return;
+    setFade({
+      start: list.scrollLeft > 1,
+      end: list.scrollLeft + list.clientWidth < list.scrollWidth - 1,
+    });
+  }, []);
+
+  useLayoutEffect(measure, [measure, pathname]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    // Web fonts change the tab widths once they load.
+    document.fonts?.ready.then(measure).catch(() => undefined);
+    return () => observer.disconnect();
+  }, [measure]);
+
+  // Keep the current tab in view (e.g. Trail photos on a phone).
+  useEffect(() => {
+    listRef.current?.querySelector<HTMLElement>('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [pathname]);
+
   return (
-    <nav className={styles.tabs} aria-label="Admin">
-      {TABS.map(({ href, label, icon: Icon, exact }) => {
-        const current = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
-        return (
-          <Link key={href} href={href} className={styles.tab} aria-current={current ? "page" : undefined}>
-            <Icon size={16} aria-hidden="true" />
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
+    <div className={styles.tabBar} data-fade-start={fade.start || undefined} data-fade-end={fade.end || undefined}>
+      <nav ref={listRef} className={styles.tabs} aria-label="Admin" onScroll={measure}>
+        {TABS.map(({ href, label, icon: Icon, exact }) => {
+          const current = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+          return (
+            <Link key={href} href={href} className={styles.tab} aria-current={current ? "page" : undefined}>
+              <Icon size={16} aria-hidden="true" />
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
 

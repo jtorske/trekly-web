@@ -176,13 +176,12 @@
   background: var(--nav-hover-bg);
 }
 
-.menuToggle,
-.mobileMenu,
 .mobileBar {
   display: none;
 }
 
-@media (max-width: 767px) {
+/* Below 900px the header has one trigger (avatar or ☰) for MobileMenu. */
+@media (max-width: 899px) {
   .navbar {
     padding: 0.08rem 0.75rem;
   }
@@ -231,56 +230,20 @@
     background: currentColor;
   }
 
-  /* A paper card in both looks, so it reads the same over photo or page. */
-  .mobileMenu {
+  /* The 34px avatar keeps its ring; the hit area is 44px. */
+  .menuAvatar {
+    position: relative;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .menuAvatar::before {
     position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0.75rem;
-    display: flex;
-    width: 14.5rem;
-    max-width: calc(100vw - 1.5rem);
-    max-height: calc(100dvh - 5rem);
-    overflow-y: auto;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.5rem;
-    /* Card colours, light and dark, come from AccountMenu.module.css (.card). */
-  }
-
-  .mobileMenuLink {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    padding: 0 0.75rem;
+    inset: -5px;
     border-radius: 9999px;
-    color: var(--menu-text);
-    font-weight: 500;
-  }
-
-  .mobileMenuLink:hover,
-  .mobileMenuLink:focus-visible {
-    background: var(--menu-pill);
-    color: var(--menu-text);
-  }
-
-  /* Between the site links and the account rows. */
-  .mobileMenuDivider {
-    height: 1px;
-    margin: 0.25rem;
-    background: var(--menu-edge);
-  }
-
-  .mobileMenuSignup,
-  .mobileMenuSignup:hover {
-    color: var(--color-cream);
-  }
-
-  .mobileMenuSignup {
-    background: color-mix(in srgb, var(--color-rust) 78%, black);
-  }
-
-  .mobileMenuSignup:hover {
-    background: color-mix(in srgb, var(--color-rust) 68%, black);
+    content: "";
   }
 }
 

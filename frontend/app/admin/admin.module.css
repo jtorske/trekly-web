@@ -64,16 +64,41 @@
   line-height: 1.1;
 }
 
+/* One row; on a phone it scrolls sideways and fades at an edge with more
+   tabs past it, like the profile tabs. */
+.tabBar {
+  position: relative;
+  border-bottom: 1px solid var(--hair);
+}
+
+/* The row itself fades out (a mask, not an overlay), so the topo
+   background behind it shows through the fade. */
+.tabBar[data-fade-end] .tabs {
+  --fade-end: 2.5rem;
+}
+
+.tabBar[data-fade-start] .tabs {
+  --fade-start: 2.5rem;
+}
+
 .tabs {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.35rem;
-  border-bottom: 1px solid var(--hair);
+  overflow-x: auto;
   padding-bottom: 0.6rem;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-start, 0px), #000 calc(100% - var(--fade-end, 0px)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-start, 0px), #000 calc(100% - var(--fade-end, 0px)), transparent);
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
   display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
   align-items: center;
   gap: 0.45rem;
   border-radius: 999px;
