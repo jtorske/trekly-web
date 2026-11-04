@@ -17,6 +17,7 @@ const profile: Profile = {
   counts: { saved_trails: 0, gear_items: 0 },
   visibility: "private",
   is_admin: false,
+  onboarding_pending: false,
 };
 
 test("initialValues turns nulls into empty strings", () => {

@@ -33,44 +33,9 @@ export function usernameReady(status: UsernameStatus): boolean {
   return status.state === "available" || status.state === "unchecked" || status.state === "current";
 }
 
-/** Sign-up user metadata; the new-user trigger reads `username` and `display_name`. */
-export function signUpMetadata(displayName: string, username: string): Record<string, string> {
-  const name = displayName.trim().slice(0, 60);
-  return { username: normalizeUsername(username), ...(name ? { display_name: name } : {}) };
-}
-
 /** What to base a suggested username on: the display name, else the email. */
 export function suggestionHint(displayName: string | null | undefined, email: string | null | undefined): string {
   const name = (displayName ?? "").trim();
   if (name) return name;
   return (email ?? "").trim();
-}
-
-/** Pages a signed-in user without a username can still open: sign-in plumbing and the legal pages. */
-const OPEN_PATHS = ["/auth", "/login", "/signup", "/forgot-password", "/reset-password", "/privacy", "/terms"];
-
-export function pathIsOpen(pathname: string): boolean {
-  return OPEN_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-}
-
-export type GateState = "pass" | "wait" | "choose";
-
-/**
- * Whether the app can be shown, or the "Choose your username" step must come
- * first. While a signed-in user's profile loads, wait (unless this browser
- * already saw them with a username), so no app page flashes up first. If the
- * profile can't load at all, don't lock them out of a broken API.
- */
-export function usernameGate(input: {
-  authStatus: "loading" | "signedOut" | "signedIn" | "unconfigured";
-  pathname: string;
-  profileLoading: boolean;
-  profileError: string | null;
-  username: string | null | undefined;
-  knownToHaveUsername: boolean;
-}): GateState {
-  if (input.authStatus !== "signedIn" || pathIsOpen(input.pathname)) return "pass";
-  if (input.profileLoading) return input.knownToHaveUsername ? "pass" : "wait";
-  if (input.profileError) return "pass";
-  return input.username ? "pass" : "choose";
 }

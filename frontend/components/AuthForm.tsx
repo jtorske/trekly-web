@@ -5,24 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
-import {
-  emailLooksValid,
-  friendlyAuthError,
-  nextQuery,
-  passwordChecks,
-  passwordIsValid,
-  safeNextPath,
-} from "@/lib/authLogic";
+import { emailLooksValid, friendlyAuthError, nextQuery, safeNextPath } from "@/lib/authLogic";
 import { getSupabaseClient } from "@/lib/supabaseClient";
-import { signUpMetadata, suggestionHint, usernameReady } from "@/lib/usernames";
 import styles from "./AuthForm.module.css";
-
-type Mode = "login" | "signup";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
-function callbackUrl(next: string): string {
+export function callbackUrl(next: string): string {
   return `${window.location.origin}/auth/callback${nextQuery(next)}`;
 }
 
@@ -95,7 +84,17 @@ export function ResendConfirmation({ email, next }: { email: string; next: strin
  * person and signs in a returning one; a Google account with the same verified
  * email as an existing password account is linked to it by Supabase.
  */
-function GoogleButton({ next, disabled, onError }: { next: string; disabled: boolean; onError: (message: string) => void }) {
+export function GoogleButton({
+  next,
+  disabled,
+  onError,
+  className,
+}: {
+  next: string;
+  disabled: boolean;
+  onError: (message: string) => void;
+  className?: string;
+}) {
   const [redirecting, setRedirecting] = useState(false);
 
   const start = async () => {
@@ -114,7 +113,7 @@ function GoogleButton({ next, disabled, onError }: { next: string; disabled: boo
   };
 
   return (
-    <button type="button" className={styles.google} onClick={start} disabled={disabled || redirecting}>
+    <button type="button" className={className ?? styles.google} onClick={start} disabled={disabled || redirecting}>
       <svg aria-hidden="true" viewBox="0 0 18 18" width="18" height="18">
         <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z" />
         <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z" />
@@ -126,7 +125,8 @@ function GoogleButton({ next, disabled, onError }: { next: string; disabled: boo
   );
 }
 
-export default function AuthForm({ mode }: { mode: Mode }) {
+/** Sign in. Creating an account is its own full-page screen (app/signup). */
+export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useAuth();
@@ -135,30 +135,19 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState(false);
-  const [sentTo, setSentTo] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
-  const usernameStatus = useUsernameStatus(username);
 
   // Already signed in (e.g. opened /login in a second tab): go where they meant to.
   useEffect(() => {
-    if (status === "signedIn" && !sentTo) router.replace(nextPath);
-  }, [status, sentTo, nextPath, router]);
+    if (status === "signedIn") router.replace(nextPath);
+  }, [status, nextPath, router]);
 
   const fieldErrors = {
     email: touched && !emailLooksValid(email) ? "Enter a valid email address." : null,
-    password:
-      touched && mode === "signup" && !passwordIsValid(password)
-        ? "Your password doesn't meet the requirements below."
-        : touched && !password
-          ? "Enter your password."
-          : null,
-    confirm: touched && mode === "signup" && confirm !== password ? "Passwords don't match." : null,
+    password: touched && !password ? "Enter your password." : null,
   };
 
   const submit = async (event: FormEvent) => {
@@ -166,46 +155,18 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setTouched(true);
     setError(null);
     setUnconfirmed(false);
-    const valid =
-      emailLooksValid(email) &&
-      (mode === "login"
-        ? password.length > 0
-        : passwordIsValid(password) && confirm === password && usernameReady(usernameStatus));
-    if (!valid) return;
+    if (!emailLooksValid(email) || password.length === 0) return;
 
     setSubmitting(true);
     try {
-      const supabase = getSupabaseClient();
-      if (mode === "login") {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (authError) {
-          if (authError.code === "email_not_confirmed" || /not confirmed/i.test(authError.message)) {
-            setUnconfirmed(true);
-          }
-          throw authError;
+      const { error: authError } = await getSupabaseClient().auth.signInWithPassword({ email: email.trim(), password });
+      if (authError) {
+        if (authError.code === "email_not_confirmed" || /not confirmed/i.test(authError.message)) {
+          setUnconfirmed(true);
         }
-        router.replace(nextPath);
-        return;
+        throw authError;
       }
-
-      const { data, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: callbackUrl(nextPath),
-          // The new-user trigger saves the username if it's still free when the
-          // account is created; if not, the app asks for one after sign-in.
-          data: signUpMetadata(displayName, username),
-        },
-      });
-      if (authError) throw authError;
-      if (data.session) {
-        router.replace(nextPath);
-      } else {
-        // Email confirmation is on. Supabase answers the same way whether or
-        // not the address is already registered, and so do we.
-        setSentTo(email.trim());
-      }
+      router.replace(nextPath);
     } catch (caught) {
       setError(friendlyAuthError(caught));
     } finally {
@@ -213,60 +174,18 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     }
   };
 
-  if (sentTo) {
-    return (
-      <AuthShell title="Check your email" subtitle={`We sent a confirmation link to ${sentTo}.`}>
-        <ol className={styles.steps}>
-          <li>Open the email from Trekly and click the confirmation link.</li>
-          <li>Use this same browser — the link signs you in here and brings you back.</li>
-          <li>Not there after a few minutes? Check spam, or resend below.</li>
-        </ol>
-        <ResendConfirmation email={sentTo} next={nextPath} />
-        <p className={styles.switch}>
-          Wrong address?{" "}
-          <button type="button" className={styles.linkButton} onClick={() => setSentTo(null)}>
-            Start over
-          </button>
-        </p>
-      </AuthShell>
-    );
-  }
-
-  const checks = passwordChecks(password);
-
   return (
-    <AuthShell
-      title={mode === "login" ? "Welcome back" : "Create your account"}
-      subtitle={
-        mode === "login"
-          ? "Sign in to see your gear, saved trails and profile."
-          : "Save your gear and trails once, and find them on every device."
-      }
-    >
-      {searchParams.get("expired") === "1" && mode === "login" && (
+    <AuthShell title="Welcome back" subtitle="Sign in to see your gear, saved trails and profile.">
+      {searchParams.get("expired") === "1" && (
         <p className={ui.notice} role="status">
           Your session ended. Sign in again to pick up where you left off.
         </p>
       )}
       <GoogleButton next={nextPath} disabled={submitting || status === "unconfigured"} onError={setError} />
       <p className={styles.divider}>
-        <span>or {mode === "login" ? "sign in" : "sign up"} with email</span>
+        <span>or sign in with email</span>
       </p>
       <form className={styles.form} onSubmit={submit} noValidate>
-        {mode === "signup" && (
-          <label className={ui.field}>
-            <span className={ui.label}>Name (optional)</span>
-            <input
-              className={ui.input}
-              autoComplete="name"
-              maxLength={60}
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-            />
-            <span className={ui.hint}>Shown on your profile. You can change it later.</span>
-          </label>
-        )}
-
         <label className={ui.field}>
           <span className={ui.label}>Email</span>
           <input
@@ -286,35 +205,22 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           )}
         </label>
 
-        {mode === "signup" && (
-          <UsernameField
-            id="signup-username"
-            value={username}
-            onChange={setUsername}
-            status={usernameStatus}
-            suggestFrom={suggestionHint(displayName, email.includes("@") ? email : "")}
-            showError={touched}
-          />
-        )}
-
         <label className={ui.field}>
           <span className={styles.labelRow}>
             <span className={ui.label}>Password</span>
-            {mode === "login" && (
-              <Link href={`/forgot-password${carryNext}`} className={styles.inlineLink}>
-                Forgot password?
-              </Link>
-            )}
+            <Link href={`/forgot-password${carryNext}`} className={styles.inlineLink}>
+              Forgot password?
+            </Link>
           </span>
           <input
             className={ui.input}
             type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            autoComplete="current-password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             aria-invalid={Boolean(fieldErrors.password)}
-            aria-describedby={mode === "signup" ? "password-rules" : fieldErrors.password ? "password-error" : undefined}
+            aria-describedby={fieldErrors.password ? "password-error" : undefined}
           />
           {fieldErrors.password && (
             <span id="password-error" className={ui.fieldError}>
@@ -322,32 +228,6 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             </span>
           )}
         </label>
-
-        {mode === "signup" && (
-          <>
-            <ul id="password-rules" className={styles.rules} aria-label="Password requirements">
-              {checks.map((check) => (
-                <li key={check.label} className={check.met ? styles.ruleMet : undefined}>
-                  <span aria-hidden="true">{check.met ? "✓" : "•"}</span> {check.label}
-                  <span className={ui.srOnly}>{check.met ? " (met)" : " (not met)"}</span>
-                </li>
-              ))}
-            </ul>
-            <label className={ui.field}>
-              <span className={ui.label}>Confirm password</span>
-              <input
-                className={ui.input}
-                type="password"
-                autoComplete="new-password"
-                required
-                value={confirm}
-                onChange={(event) => setConfirm(event.target.value)}
-                aria-invalid={Boolean(fieldErrors.confirm)}
-              />
-              {fieldErrors.confirm && <span className={ui.fieldError}>{fieldErrors.confirm}</span>}
-            </label>
-          </>
-        )}
 
         {error && (
           <p className={ui.error} role="alert">
@@ -357,23 +237,13 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         {unconfirmed && <ResendConfirmation email={email.trim()} next={nextPath} />}
 
         <button className={`${ui.primary} ${styles.submit}`} type="submit" disabled={submitting || status === "unconfigured"}>
-          {submitting ? "One moment…" : mode === "login" ? "Sign in" : "Create account"}
+          {submitting ? "One moment…" : "Sign in"}
         </button>
-        {status === "unconfigured" && (
-          <p className={ui.error}>Sign-in isn&apos;t configured for this site yet.</p>
-        )}
+        {status === "unconfigured" && <p className={ui.error}>Sign-in isn&apos;t configured for this site yet.</p>}
       </form>
 
       <p className={styles.switch}>
-        {mode === "login" ? (
-          <>
-            New to Trekly? <Link href={`/signup${carryNext}`}>Create an account</Link>
-          </>
-        ) : (
-          <>
-            Already have an account? <Link href={`/login${carryNext}`}>Sign in</Link>
-          </>
-        )}
+        New to Trekly? <Link href={`/signup${carryNext}`}>Create an account</Link>
       </p>
     </AuthShell>
   );

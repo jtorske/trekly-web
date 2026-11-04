@@ -21,6 +21,8 @@ export interface Profile {
   visibility: "public" | "private";
   /** In ADMIN_USER_IDS: shows the Admin menu link. The API checks again on every admin call. */
   is_admin: boolean;
+  /** /welcome still has to run: no username yet, or never finished or skipped. */
+  onboarding_pending: boolean;
 }
 
 export type ProfileUpdate = Partial<

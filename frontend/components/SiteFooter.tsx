@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isFullPage } from "@/lib/onboarding";
 import styles from "./SiteFooter.module.css";
 
 /** Footer copy shared by the landing hero and every other page. */
@@ -28,7 +29,7 @@ export default function SiteFooter() {
   const pathname = usePathname();
   // The landing hero carries its own footer, overlaid on the photo; the
   // Trail Journal is a single screen that never scrolls.
-  if (pathname === "/landing" || pathname === "/" || pathname === "/journal") return null;
+  if (pathname === "/landing" || pathname === "/" || pathname === "/journal" || isFullPage(pathname)) return null;
   // Profiles are one screen on desktop too, with the tab content scrolling.
   const shell = pathname === "/profile" || pathname.startsWith("/u/");
   // So is the gear page, from 1100px.

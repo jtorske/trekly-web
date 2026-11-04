@@ -22,7 +22,7 @@ export function safeNextPath(next: string | null | undefined, fallback = DEFAULT
     decoded.startsWith("//") ||
     decoded.startsWith("/\\") ||
     /[\u0000-\u001f]/.test(decoded) ||
-    /^\/(login|signup|auth\/callback)(\/|\?|$)/.test(decoded)
+    /^\/(login|signup|auth\/callback|welcome)(\/|\?|$)/.test(decoded)
   ) {
     return fallback;
   }

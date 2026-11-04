@@ -20,6 +20,9 @@ import {
   withViewParam,
   withinKm,
   withoutNear,
+  QUICK_PARKS,
+  quickParks,
+  shouldPreselectFavourites,
   type ExploreFilters,
 } from "./exploreFilters.ts";
 
@@ -194,4 +197,23 @@ test("the trip quick chips swap and clear the trip type", () => {
   assert.equal(toggleTrip(EMPTY_FILTERS, "day").trip, "day");
   assert.equal(toggleTrip({ ...EMPTY_FILTERS, trip: "day" }, "overnight").trip, "overnight");
   assert.equal(toggleTrip({ ...EMPTY_FILTERS, trip: "day" }, "day").trip, undefined);
+});
+
+test("favourite regions lead the quick park chips, without repeating the usual ones", () => {
+  assert.deepEqual(
+    quickParks([
+      { park: "Yoho National Park", label: "Yoho" },
+      { park: "Banff National Park", label: "Banff" },
+    ]).map((chip) => chip.label),
+    ["Yoho", "Banff", "Jasper", "Kananaskis"],
+  );
+  assert.deepEqual(quickParks([]), QUICK_PARKS);
+});
+
+test("favourite parks are pre-picked only on a bare Explore URL", () => {
+  assert.equal(shouldPreselectFavourites("", 2), true);
+  assert.equal(shouldPreselectFavourites("?", 2), true);
+  assert.equal(shouldPreselectFavourites("", 0), false);
+  assert.equal(shouldPreselectFavourites("?q=lake", 2), false);
+  assert.equal(shouldPreselectFavourites("?map=51.1,-115.5,9", 2), false);
 });

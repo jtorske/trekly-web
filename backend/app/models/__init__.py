@@ -16,6 +16,7 @@ from app.models.catalog import (
 )
 from app.models.featured_badge import FeaturedBadge
 from app.models.hike_log import HikeLog
+from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.trail import Trail
@@ -49,6 +50,7 @@ __all__ = [
     "JobLock",
     "Profile",
     "ProfileModeration",
+    "ProfilePreferences",
     "ProfileReport",
     "ProfileSettings",
     "ProviderRequestBudget",

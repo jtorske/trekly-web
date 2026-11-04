@@ -10,7 +10,7 @@ import MilestoneWatcher from "@/components/MilestoneWatcher";
 import VisitStreakWatcher from "@/components/VisitStreakWatcher";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
-import UsernameGate from "@/components/UsernameGate";
+import OnboardingGate from "@/components/OnboardingGate";
 
 // Display/heading font: organic, editorial character that complements the
 // hand-drawn Trekly logo. UI/body font: clean and highly readable so the
@@ -51,7 +51,7 @@ export default function RootLayout({
           {/* At least one (small) viewport tall, so the footer credit always
               starts below the first screen and full-height heroes stay full. */}
           <div className="flex min-h-svh flex-1 flex-col">
-            <UsernameGate>{children}</UsernameGate>
+            <OnboardingGate>{children}</OnboardingGate>
           </div>
           <SiteFooter />
           <PublicProfileNotice />

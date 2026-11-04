@@ -2,7 +2,7 @@
 
 import { createContext, Suspense, useContext, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
-import { LogOut, Mail, Ruler, ShieldCheck, Trash2, UserRound, type LucideIcon } from "lucide-react";
+import { LogOut, Mail, Mountain, Ruler, ShieldCheck, Trash2, UserRound, type LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
@@ -31,6 +31,7 @@ const ICONS: Record<SettingsIconName, LucideIcon> = {
   profile: UserRound,
   privacy: ShieldCheck,
   units: Ruler,
+  trails: Mountain,
   email: Mail,
   signOut: LogOut,
   delete: Trash2,

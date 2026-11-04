@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChangeEmail, ChangePassword, DeleteAccount, SignOut, UnitsSetting } from "./AccountSettings";
 import EditProfileSection from "./EditProfileSection";
 import PrivacySettingsForm from "./PrivacySettings";
+import TrailPreferences from "./TrailPreferences";
 import { useSettingsProfile } from "./SettingsShell";
 import { findSection, sectionHref } from "./settingsSections";
 import styles from "./settings.module.css";
@@ -22,6 +23,8 @@ function Card({ title, description, children }: { title?: string; description?: 
 const DESCRIPTIONS: Record<string, string> = {
   "edit-profile": "How you appear in Trekly.",
   privacy: "Your profile can be seen by anyone at its public address. Choose what's on it.",
+  "trail-preferences":
+    "Private to you: Trekly uses these only to pick trails for you, and never shows them on your profile.",
   units: "Distances, elevations, gear weights and weather across Trekly.",
   "sign-out": "Ends your session in this browser. Your data stays saved to your account.",
 };
@@ -42,6 +45,13 @@ export default function SettingsSection({ slug }: { slug: string }) {
       body = (
         <Card>
           <PrivacySettingsForm onEditProfile={() => router.push(sectionHref("edit-profile"))} />
+        </Card>
+      );
+      break;
+    case "trail-preferences":
+      body = (
+        <Card>
+          <TrailPreferences />
         </Card>
       );
       break;

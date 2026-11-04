@@ -20,6 +20,7 @@ from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
+from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
 from app.models.trail import Trail
@@ -62,6 +63,9 @@ class ProfileOut(BaseModel):
     # In ADMIN_USER_IDS: the app shows an Admin link. Only a hint for the UI;
     # every admin route checks again (app/admin_access.py).
     is_admin: bool
+    # The /welcome setup flow still has to run: no username yet, or never
+    # finished or skipped. Owner-only, like everything on this route.
+    onboarding_pending: bool
 
 
 def _clean(value):
@@ -166,7 +170,15 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         counts=counts,
         visibility="public" if visibility(db, profile).public else "private",
         is_admin=is_admin(user.id),
+        onboarding_pending=_onboarding_pending(db, profile),
     )
+
+
+def _onboarding_pending(db: Session, profile: Profile) -> bool:
+    if not profile.username:
+        return True
+    row = db.get(ProfilePreferences, profile.id)
+    return row is None or row.onboarding_status is None
 
 
 @router.get("/profile", response_model=ProfileOut)
@@ -284,6 +296,7 @@ def delete_account(
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))
+    db.execute(delete(ProfilePreferences).where(ProfilePreferences.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))
     if _is_postgres(db):
         db.execute(text("delete from auth.users where id = :id"), {"id": user.id})

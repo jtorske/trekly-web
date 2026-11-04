@@ -14,11 +14,11 @@ import {
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { useFavouriteParks } from "@/lib/useFavouriteParks";
 import ui from "@/components/ui.module.css";
 import {
   PARK_TYPE_LABELS,
   PROVINCE_NAMES,
-  QUICK_PARKS,
   TRIP_LABELS,
   WITHIN_OPTIONS,
   activeFilterCount,
@@ -31,7 +31,9 @@ import {
   parseFollowMap,
   parseMapView,
   provinceOrder,
+  quickParks,
   searchAreaFor,
+  shouldPreselectFavourites,
   toggle,
   toggleTrip,
   withProvinces,
@@ -616,6 +618,18 @@ function ExploreContent() {
     setSelectedId(null);
     updateUrl({ ...next, q: input.trim() });
   };
+  // Favourite regions (from /welcome or Settings) lead the quick chips, and
+  // start picked when Explore opens bare. Once per visit to the page.
+  const favourites = useFavouriteParks();
+  const preselected = useRef(false);
+  useEffect(() => {
+    if (preselected.current || favourites === null) return;
+    preselected.current = true;
+    if (shouldPreselectFavourites(window.location.search, favourites.length)) {
+      updateUrl({ ...filters, parks: favourites.map((f) => f.park) });
+    }
+  }, [favourites, filters, updateUrl]);
+
   const clearAll = () => {
     setGeo((current) => (filters.near ? { status: "stopped" } : current));
     setFilter(clearFilters(filters));
@@ -716,7 +730,7 @@ function ExploreContent() {
                   {TRIP_LABELS[value]}
                 </button>
               ))}
-              {QUICK_PARKS.map(({ park, label }) => (
+              {quickParks(favourites ?? []).map(({ park, label }) => (
                 <button
                   key={park}
                   type="button"

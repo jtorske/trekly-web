@@ -297,6 +297,24 @@ export const QUICK_PARKS: { park: string; label: string }[] = [
   { park: "Kananaskis Country", label: "Kananaskis" },
 ];
 
+/**
+ * The quick park chips: the signed-in person's favourite regions first (from
+ * /welcome or Settings → Trail preferences), then the usual ones not already
+ * there.
+ */
+export function quickParks(favourites: { park: string; label: string }[]): { park: string; label: string }[] {
+  const seen = new Set(favourites.map((f) => f.park));
+  return [...favourites, ...QUICK_PARKS.filter((q) => !seen.has(q.park))];
+}
+
+/**
+ * Favourite parks start picked only on a bare /trail-list (no filters, no map
+ * position in the URL): a shared link or the back button keeps what it says.
+ */
+export function shouldPreselectFavourites(search: string, favouriteCount: number): boolean {
+  return favouriteCount > 0 && new URLSearchParams(search).toString() === "";
+}
+
 /** Day hikes and Backpacking chips: picking one replaces the other, picking it again clears it. */
 export function toggleTrip(filters: ExploreFilters, trip: TripType): ExploreFilters {
   return { ...filters, trip: filters.trip === trip ? undefined : trip };

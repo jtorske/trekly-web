@@ -516,3 +516,21 @@
 .provinceHint {
   grid-column: 1 / -1;
 }
+
+/* Trail preferences: one group per question. */
+.preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.preferenceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preferenceActions {
+  display: flex;
+  justify-content: flex-end;
+}

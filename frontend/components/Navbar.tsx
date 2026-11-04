@@ -9,6 +9,7 @@ import Avatar from "./Avatar";
 import MobileMenu from "./MobileMenu";
 import { NAV_LINKS, isNavCurrent } from "@/lib/accountMenu";
 import { nextQuery } from "@/lib/authLogic";
+import { isFullPage } from "@/lib/onboarding";
 import { useProfile } from "@/lib/useProfile";
 import styles from "./Navbar.module.css";
 
@@ -85,6 +86,9 @@ export default function Navbar() {
         </Link>
       </>
     );
+
+  // Sign-up and the /welcome setup flow are full-page screens with their own header.
+  if (isFullPage(pathname)) return null;
 
   return (
     <nav

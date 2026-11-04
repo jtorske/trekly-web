@@ -67,19 +67,7 @@
   text-decoration: underline;
 }
 
-.rules {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  margin-top: -0.5rem;
-  color: var(--color-muted-text);
-  font-size: 0.82rem;
-}
 
-.ruleMet {
-  color: var(--color-olive);
-  font-weight: 600;
-}
 
 .submit {
   width: 100%;
@@ -131,14 +119,6 @@
   content: "";
 }
 
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding-left: 1.2rem;
-  list-style: decimal;
-  line-height: 1.5;
-}
 
 .resend {
   display: flex;

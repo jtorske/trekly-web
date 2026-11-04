@@ -1,0 +1,276 @@
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.legend {
+  margin-bottom: 0.6rem;
+  color: var(--color-dark-olive);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The real control sits under the card, invisible but focusable. */
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------------- cards */
+
+.cards {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .cards[data-columns="2"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cards[data-columns="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  min-height: 4.5rem;
+  align-items: flex-start;
+  gap: 0.85rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 18%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 70%, var(--color-cream));
+  padding: 1rem 2.6rem 1rem 1rem;
+  color: var(--color-dark-olive);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+@media (min-width: 640px) {
+  .cards[data-columns="3"] .card {
+    flex-direction: column;
+    min-height: 10rem;
+    padding: 1.25rem;
+  }
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+.card[data-checked] {
+  border-color: var(--color-rust);
+  background: color-mix(in srgb, var(--color-tan) 16%, white);
+  box-shadow: 0 10px 24px -18px rgb(188 108 37 / 0.9);
+}
+
+.card:has(.input:focus-visible),
+.chip:has(.input:focus-visible) {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.cardIcon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  place-items: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+  color: var(--color-dark-olive);
+}
+
+.card[data-checked] .cardIcon {
+  background: var(--color-rust-fill);
+  color: var(--color-cream);
+}
+
+.cardText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cardLabel {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cardHint {
+  color: var(--color-muted-text);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.tick,
+.chipTick {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--color-cream);
+}
+
+.tick {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 30%, transparent);
+}
+
+.tick svg,
+.chipTick svg {
+  opacity: 0;
+}
+
+.card[data-checked] .tick {
+  border-color: var(--color-rust-fill);
+  background: var(--color-rust-fill);
+}
+
+.card[data-checked] .tick svg,
+.chip[data-checked] .chipTick svg {
+  opacity: 1;
+}
+
+/* ----------------------------------------------------------------- chips */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 20%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in srgb, white 70%, var(--color-cream));
+  padding: 0.55rem 1.1rem 0.55rem 0.7rem;
+  color: var(--color-dark-olive);
+  font-size: 1rem;
+  font-weight: 500;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.chip:hover {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+}
+
+.chip[data-checked] {
+  border-color: var(--color-rust-fill);
+  background: var(--color-rust-fill);
+  color: var(--color-cream);
+}
+
+.chipTick {
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 30%, transparent);
+}
+
+.chip[data-checked] .chipTick {
+  border-color: var(--color-cream);
+}
+
+.chipSub {
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.chip[data-checked] .chipSub {
+  color: color-mix(in srgb, var(--color-cream) 80%, transparent);
+}
+
+/* --------------------------------------------------------------- regions */
+
+.regions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search {
+  position: relative;
+  display: block;
+}
+
+.search input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 22%, transparent);
+  border-radius: 9999px;
+  background: white;
+  padding: 0.6rem 1rem 0.6rem 2.75rem;
+  color: var(--color-dark-olive);
+  font-size: 1rem;
+}
+
+.search input:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 1px;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  color: var(--color-muted-text);
+  transform: translateY(-50%);
+}
+
+.count {
+  color: var(--color-muted-text);
+  font-size: 0.88rem;
+}
+
+.empty {
+  color: var(--color-muted-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .chip {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}

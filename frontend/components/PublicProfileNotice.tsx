@@ -11,7 +11,7 @@ import styles from "./PublicProfileNotice.module.css";
  * A one-off corner card for accounts from before public profiles: they stay
  * private, and this explains that profiles can now be public, once, until
  * dismissed. (Choosing a username is a required step of its own; see
- * UsernameGate.)
+ * OnboardingGate.)
  */
 /** Toasts stack above the card instead of covering it (see Toaster.module.css). */
 function reserveToastSpace(card: HTMLElement | null) {
@@ -45,7 +45,7 @@ export default function PublicProfileNotice() {
   // A change in Settings → Privacy clears the notice on the server; drop it here too.
   useEffect(() => onPrivacyUpdated((settings) => setNoticePending(settings.public_notice_pending)), []);
 
-  if (!profile?.username || !noticePending || pathname.startsWith("/auth")) return null;
+  if (!profile?.username || !noticePending || /^\/(auth|welcome|signup)/.test(pathname)) return null;
   const dismiss = () => {
     setNoticePending(false);
     updatePrivacy({ public_notice_pending: false }).catch(() => undefined);
