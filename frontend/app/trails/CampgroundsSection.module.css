@@ -356,6 +356,13 @@
   color: var(--color-cream);
 }
 
+/* Instead of "Alert me" where an alert can't help (app/backcountry/alertable.py). */
+.alertNote {
+  flex-basis: 100%;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+}
+
 @media (max-width: 640px) {
   .stayForm {
     grid-template-columns: 1fr 1fr;

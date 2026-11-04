@@ -7,6 +7,7 @@ import ui from "@/components/ui.module.css";
 import { useAuth } from "@/components/AuthProvider";
 import { alertsApi, type CampgroundAlert, type Stay } from "@/lib/availabilityApi";
 import { nextQuery } from "@/lib/authLogic";
+import { partyLimitProblem } from "@/lib/alertRules";
 import { formatStay } from "@/lib/stay";
 import { formProblem, toast } from "@/lib/toast";
 import styles from "./AlertDialog.module.css";
@@ -20,6 +21,7 @@ export default function AlertDialog({
   trailId,
   siteId,
   campground,
+  maxGroupSize = null,
   stay,
   returnTo,
   onCreated,
@@ -28,6 +30,8 @@ export default function AlertDialog({
   trailId: string;
   siteId: string;
   campground: string;
+  /** Parks Canada's maximum group size for the site, if it publishes one. */
+  maxGroupSize?: number | null;
   stay: Stay;
   /** Trail page URL including the stay and `alert=<siteId>`, for after sign-in. */
   returnTo: string;
@@ -63,6 +67,7 @@ export default function AlertDialog({
   };
 
   const party = `party of ${stay.party}`;
+  const tooMany = partyLimitProblem({ name: campground, max_group_size: maxGroupSize }, stay.party);
   let body;
   let footer;
   if (status === "signedIn") {
@@ -73,6 +78,11 @@ export default function AlertDialog({
           <strong>{user?.email ?? "you"}</strong> once, as soon as every night is available.
         </p>
         <p className={ui.hint}>Trekly doesn&apos;t book for you, so act quickly when the email arrives.</p>
+        {tooMany && (
+          <p className={ui.error} role="alert">
+            {tooMany} Change the party size to set an alert.
+          </p>
+        )}
         {error && (
           <p className={ui.error} role="alert">
             {error}
@@ -85,7 +95,7 @@ export default function AlertDialog({
         <button type="button" className={ui.ghost} onClick={onClose} disabled={busy}>
           Cancel
         </button>
-        <button type="button" className={ui.primary} onClick={create} disabled={busy} data-autofocus>
+        <button type="button" className={ui.primary} onClick={create} disabled={busy || Boolean(tooMany)} data-autofocus>
           {busy ? "Setting alert…" : "Set alert"}
         </button>
       </>

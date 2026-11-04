@@ -11,7 +11,7 @@
       "max_elevation_m": "OSM ele tag of the high point / destination; else the pre-existing row value (verification source legacy) or a reviewer override (manual); null otherwise.",
       "elevation_gain_m": "Net gain between OSM ele of start and high point; else the pre-existing row value (verification source legacy); null otherwise.",
       "route_type": "out_and_back, loop or point_to_point, a reviewer judgement from the mapped geometry and the hike; null when distance_km is null.",
-      "distance_km": "What a hiker covers, from the OSM hiking route relation or named trail ways in verification.distance_km (great-circle sum of way segments): twice the mapped length for an out_and_back (the round trip), the loop length for a loop, the full one-way length for a point_to_point route. Only where the mapped feature is one clean line or loop covering the hike; null otherwise.",
+      "distance_km": "What a hiker covers, from the OSM hiking route relation or named trail ways in verification.distance_km (great-circle sum of way segments): twice the mapped length for an out_and_back (the round trip), the loop length for a loop, the full one-way length for a point_to_point route. Only where the mapped feature is one clean line or loop covering the hike; null otherwise. Trails added 2026-11-03 for Parks Canada backcountry coverage (ranks 101-131) use the park's or a guide's published figure instead (verification.distance_km.source = published, with its sources).",
       "park_name_park_type": "The park a trail is in and its kind: national (Parks Canada national parks and reserves), provincial (provincial and territorial parks, Quebec's parcs nationaux, and Kananaskis Country), regional (regional or municipal parks) or none. park_name may be set with park_type none for a named place that isn't a park (Signal Hill National Historic Site)."
     }
   },
@@ -3722,6 +3722,1282 @@
           "max_elevation_m: no OSM ele tag on the high point",
           "elevation_gain_m: not derivable from OSM (needs ele at both start and high point)",
           "distance_km: not sourced (no OSM route or named trail measured that cleanly covers this hike)"
+        ]
+      }
+    },
+    {
+      "rank": 101,
+      "name": "Brazeau Loop",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.24082,
+      "longitude": -117.092684,
+      "route_type": "loop",
+      "distance_km": 81,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 4,
+      "climate_zone": "alpine",
+      "description": "Three high passes and a big glacial lake on Jasper's classic multi-day loop.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3613985018",
+          "feature": "Nigel Pass",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/brazeau"
+          ],
+          "note": "Parks Canada: 81 km, 5 days, 'demanding'. Seasonal caribou closure north of Four Point Nov 1 - May 15."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 102,
+      "name": "Chilkoot Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Chilkoot Trail National Historic Site, BC",
+      "park_name": "Chilkoot Trail National Historic Site",
+      "park_type": "none",
+      "latitude": 59.696653,
+      "longitude": -135.238231,
+      "route_type": "point_to_point",
+      "distance_km": 53,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 4,
+      "climate_zone": "alpine",
+      "description": "The Klondike Gold Rush route from Dyea, Alaska, over Chilkoot Pass to Bennett.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/944866430",
+          "feature": "Chilkoot Pass",
+          "role": "high_point"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/lhn-nhs/yt/chilkoot/activ/randonnee-cdn-hiking"
+          ],
+          "note": "Dyea, Alaska over Chilkoot Pass to Bennett, BC: 'a hike for experienced backcountry hikers'. Campground distances from Parks Canada's descriptions. Bennett has no road (train, boat or plane out)."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 103,
+      "name": "Fundy Circuit",
+      "country_code": "CA",
+      "province_code": "NB",
+      "region": "Fundy National Park, NB",
+      "park_name": "Fundy National Park",
+      "park_type": "national",
+      "latitude": 45.571948,
+      "longitude": -65.093746,
+      "route_type": "loop",
+      "distance_km": 48,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "coastal_temperate",
+      "description": "Seven linked trails through Fundy's forests, rivers and inland lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/148120186",
+          "feature": "Marven Lake",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/nb/fundy/visit/sentiers-trails/circuit"
+          ],
+          "note": "Parks Canada: a 48 km network of seven linked trails, 3-5 days. Point Wolfe PW162/164 are frontcountry sites Parks Canada sets aside as an extra stop on the Circuit."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 104,
+      "name": "Mount Assiniboine via Bryant Creek",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 50.850299,
+      "longitude": -115.4276,
+      "route_type": "out_and_back",
+      "distance_km": 54,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "The Bryant Creek approach to the Matterhorn of the Rockies.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/303566828",
+          "feature": "Watridge Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry",
+            "https://bcparks.ca/mount-assiniboine-park/hiking/"
+          ],
+          "note": "From the Mount Shark trailhead up Bryant Creek and over Assiniboine Pass to Lake Magog (BC Parks: 21 km to the pass). Lake Magog is booked through Assiniboine Lodge."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 105,
+      "name": "Lake Minnewanka Shoreline Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.256217,
+      "longitude": -115.460925,
+      "route_type": "out_and_back",
+      "distance_km": 22.2,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Lakeside campgrounds along Banff's largest lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/2048785",
+          "feature": "Lake Minnewanka",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+          ],
+          "note": "Parks Canada itinerary: 7.8, 9 or 11.1 km one way to Lm8/Lm9/Lm11. Lm20-Lm31 are further along the shore. Seasonal restriction Jul 10 - Sep 15 (groups of 4)."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 106,
+      "name": "Tamarack Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "park_name": "Waterton Lakes National Park",
+      "park_type": "national",
+      "latitude": 49.052372,
+      "longitude": -114.054632,
+      "route_type": "point_to_point",
+      "distance_km": 36.4,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Waterton's longest trail, along the Continental Divide.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/317015098",
+          "feature": "Rowe Lakes",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/waterton/culture/histoire-history/faits-facts",
+            "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/etat-sentiers-trail-conditions"
+          ],
+          "note": "Parks Canada: 36.4 km, the park's longest trail, 2-3 days, rated difficult. Rowe Lakes trailhead to Red Rock Canyon."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 107,
+      "name": "North Molar Pass to Fish Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.665116,
+      "longitude": -116.293565,
+      "route_type": "out_and_back",
+      "distance_km": 30,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Over a high pass to a pair of alpine lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/430279014",
+          "feature": "Mosquito Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://hikebiketravel.com/fish-lakes-hike-banff/",
+            "https://www.10adventures.com/hikes/icefields-parkway/north-molar-pass/"
+          ],
+          "note": "About 15 km one way from the Mosquito Creek trailhead over North Molar Pass (about 795 m of gain). Parks Canada's Mo5 description mentions North Molar Pass."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 108,
+      "name": "Fryatt Valley",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.50774,
+      "longitude": -117.877859,
+      "route_type": "out_and_back",
+      "distance_km": 44,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "A quiet valley that climbs a steep headwall to an alpine basin.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1489786101",
+          "feature": "Fryatt Creek",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fryatt"
+          ],
+          "note": "Parks Canada: 22 km one way, 2-3 days, very steep headwall."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 109,
+      "name": "Sawback Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.209631,
+      "longitude": -115.593632,
+      "route_type": "point_to_point",
+      "distance_km": 74,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 6,
+      "climate_zone": "alpine",
+      "description": "Three passes linking Banff and Lake Louise through the Sawback Range.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/37018323",
+          "feature": "Forty Mile Creek",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+          ],
+          "note": "Parks Canada itinerary: 74 km over six nights, Banff to Lake Louise; Johnston Creek or Luellen Lake for one night."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 110,
+      "name": "North Boundary Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 53.459747,
+      "longitude": -118.265741,
+      "route_type": "point_to_point",
+      "distance_km": 159,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 8,
+      "climate_zone": "alpine",
+      "description": "Jasper's longest trail, a remote week-plus walk to Mount Robson.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/366697071",
+          "feature": "Rock Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/north-boundary"
+          ],
+          "note": "Parks Canada: 159 km one way, 7-10 days, for experienced backpackers. Ends on BC Parks' Berg Lake trail."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 111,
+      "name": "Eva Lake",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Mount Revelstoke National Park, BC",
+      "park_name": "Mount Revelstoke National Park",
+      "park_type": "national",
+      "latitude": 51.081485,
+      "longitude": -118.108775,
+      "route_type": "out_and_back",
+      "distance_km": 14.2,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Subalpine meadows to a lake on Mount Revelstoke's summit plateau.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/162008934",
+          "feature": "Eva Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+          ],
+          "note": "Parks Canada: 14.2 km return, 465 m, from the summit shuttle stop. Mid-July to September."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 112,
+      "name": "Taylor Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.295793,
+      "longitude": -116.098614,
+      "route_type": "out_and_back",
+      "distance_km": 12.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "Larch forest to a lake below the cliffs of Mount Bell.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/356877453",
+          "feature": "Taylor Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/meleze-larch"
+          ],
+          "note": "Parks Canada: 6.3 km one way, 585 m gain. A day hike with an overnight option."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 113,
+      "name": "Jonas Pass - Poboktan Creek",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.46535,
+      "longitude": -117.349201,
+      "route_type": "point_to_point",
+      "distance_km": 54,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 3,
+      "climate_zone": "alpine",
+      "description": "Over Nigel and Jonas passes, with more than 13 km above treeline.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/366507014",
+          "feature": "Poboktan Creek",
+          "role": "end"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/poboktan"
+          ],
+          "note": "Parks Canada: 54 km one way, 3-4 days; needs a shuttle (44 km between trailheads)."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 114,
+      "name": "Outport Trail",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Terra Nova National Park, NL",
+      "park_name": "Terra Nova National Park",
+      "park_type": "national",
+      "latitude": 48.60236,
+      "longitude": -53.789383,
+      "route_type": "out_and_back",
+      "distance_km": 35,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 2,
+      "climate_zone": "coastal_temperate",
+      "description": "Along Newman Sound to coves where outport communities once stood.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/13605327",
+          "feature": "Newman Sound",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/nl/terranova/activ/ran-hik/outport",
+            "https://parks.canada.ca/pn-np/nl/terranova/activ/camping/bc"
+          ],
+          "note": "Parks Canada: 35 km return from Newman Sound campground; Minchins Cove (14 km) and South Broad Cove (16 km), also reachable by boat."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 115,
+      "name": "Fishing Cove Trail",
+      "country_code": "CA",
+      "province_code": "NS",
+      "region": "Cape Breton Highlands National Park, NS",
+      "park_name": "Cape Breton Highlands National Park",
+      "park_type": "national",
+      "latitude": 46.79718,
+      "longitude": -60.878193,
+      "route_type": "out_and_back",
+      "distance_km": 12,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "coastal_temperate",
+      "description": "A steep descent to Cape Breton Highlands' only wilderness campground.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/13471300",
+          "feature": "Fishing Cove",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "Parks Canada site description (reservation system)"
+          ],
+          "note": "Parks Canada: the park's only designated wilderness campground, a 6 km hike down to the coast."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 116,
+      "name": "Maligne Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.509611,
+      "longitude": -117.455189,
+      "route_type": "point_to_point",
+      "distance_km": 48,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "Wide alpine meadows over a high pass between two valleys.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/10178669340",
+          "feature": "Maligne Pass",
+          "role": "high_point"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/maligne-pass"
+          ],
+          "note": "Parks Canada: 48 km one way, 2-3 days, fords and route finding."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 117,
+      "name": "Les Crêtes",
+      "country_code": "CA",
+      "province_code": "QC",
+      "region": "Forillon National Park, QC",
+      "park_name": "Forillon National Park",
+      "park_type": "national",
+      "latitude": 48.849095,
+      "longitude": -64.30474,
+      "route_type": "out_and_back",
+      "distance_km": 33.2,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "temperate",
+      "description": "A ridge walk across Forillon with views of the Gulf of St. Lawrence.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/129551817",
+          "feature": "Les Cretes",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/qc/forillon/activ/randonnee-hiking",
+            "https://parks.canada.ca/pn-np/qc/forillon/activ/camping/arriere-backcountry"
+          ],
+          "note": "Parks Canada: 33.2 km return including access, 1437 m of gain. The lean-to takes no alerts (shelters aren't confirmed)."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 118,
+      "name": "Snug Harbour",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "park_name": "Gros Morne National Park",
+      "park_type": "national",
+      "latitude": 49.773815,
+      "longitude": -57.800469,
+      "route_type": "out_and_back",
+      "distance_km": 15,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "coastal_temperate",
+      "description": "An unmarked route along Western Brook Pond to a secluded beach camp.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4746393046",
+          "feature": "Snug Harbour",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/snug"
+          ],
+          "note": "Parks Canada: 15 km return on an unmarked route along Western Brook Pond; fording Western Brook."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 119,
+      "name": "Northern Traverse",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "park_name": "Gros Morne National Park",
+      "park_type": "national",
+      "latitude": 49.751048,
+      "longitude": -57.791539,
+      "route_type": "loop",
+      "distance_km": 30,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 3,
+      "climate_zone": "coastal_temperate",
+      "description": "An unmarked, demanding route over the Long Range plateau.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/1919183",
+          "feature": "Western Brook Pond",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/northtrav"
+          ],
+          "note": "Parks Canada: about 27 km (33 km in the hiker guide), 3-4 days, unmarked, harder than the Long Range Traverse. Starts with the Western Brook Pond boat."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 120,
+      "name": "Jade Lakes",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Mount Revelstoke National Park, BC",
+      "park_name": "Mount Revelstoke National Park",
+      "park_type": "national",
+      "latitude": 51.071551,
+      "longitude": -118.071716,
+      "route_type": "out_and_back",
+      "distance_km": 18.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Past Eva Lake's trail to a pair of milky-green alpine lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/733429703",
+          "feature": "Jade Lakes Campground",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+          ],
+          "note": "Parks Canada: 18.8 km return, 714 m, branching off the Eva Lake trail at 5.4 km."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 121,
+      "name": "Athabasca Pass",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.661059,
+      "longitude": -117.955289,
+      "route_type": "out_and_back",
+      "distance_km": 97,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 4,
+      "climate_zone": "alpine",
+      "description": "Up the historic fur-trade route to the Continental Divide.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/20584491",
+          "feature": "Moab Lake",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/athabasca-pass"
+          ],
+          "note": "Parks Canada: 48.5 km one way, 4-5 days, dangerous fords."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 122,
+      "name": "Geraldine Lakes",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.592688,
+      "longitude": -117.942926,
+      "route_type": "out_and_back",
+      "distance_km": 12.4,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A rugged climb past waterfalls and boulder fields to a chain of lakes.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/20418444",
+          "feature": "Second Geraldine Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/geraldine"
+          ],
+          "note": "Parks Canada: 6.2 km one way, 1-2 days, boulder fields and a steep headwall."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 123,
+      "name": "Jacques Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.929071,
+      "longitude": -117.749983,
+      "route_type": "out_and_back",
+      "distance_km": 24.4,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "An easy valley walk to a lake between limestone ranges.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/366158156",
+          "feature": "Jacques Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Jacques"
+          ],
+          "note": "Parks Canada: 12.2 km one way, 1-2 days, valley-bottom hiking."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 124,
+      "name": "Goat Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "park_name": "Waterton Lakes National Park",
+      "park_type": "national",
+      "latitude": 49.163284,
+      "longitude": -114.091048,
+      "route_type": "out_and_back",
+      "distance_km": 13.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A short, steep climb to a lake beneath Avion Ridge.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/589336620",
+          "feature": "Goat Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "Parks Canada site description (reservation system)"
+          ],
+          "note": "Parks Canada: from Red Rock Canyon, 4.6 km on the Snowshoe trail (hike or bike), then up to the lake."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 125,
+      "name": "Waterton Lakeshore Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "park_name": "Waterton Lakes National Park",
+      "park_type": "national",
+      "latitude": 49.041398,
+      "longitude": -113.915354,
+      "route_type": "out_and_back",
+      "distance_km": 13,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "Along Upper Waterton Lake to the international boundary.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/570150128",
+          "feature": "Bertha Lake Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "Parks Canada site descriptions (reservation system)"
+          ],
+          "note": "Parks Canada: Bertha Bay is reached 'via the Bertha/Lakeshore trail'; Boundary Bay sits at the international boundary on Upper Waterton Lake."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 126,
+      "name": "Crandell Lake",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Waterton Lakes National Park, AB",
+      "park_name": "Waterton Lakes National Park",
+      "park_type": "national",
+      "latitude": 49.086731,
+      "longitude": -113.967187,
+      "route_type": "out_and_back",
+      "distance_km": 5,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A short walk to a lake, ideal for a first night in the backcountry.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/111771907",
+          "feature": "Crandell Lake",
+          "role": "destination"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "Parks Canada site description (reservation system)"
+          ],
+          "note": "Parks Canada: 'perfect for first-time backcountry campers', a short hike or bike."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 127,
+      "name": "South Boundary Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.24082,
+      "longitude": -117.092684,
+      "route_type": "point_to_point",
+      "distance_km": 121,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "extreme",
+      "typical_duration_nights": 8,
+      "climate_zone": "alpine",
+      "description": "A remote, little-travelled route across Jasper's southern wilds.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/3613985018",
+          "feature": "Nigel Pass",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/south-boundary"
+          ],
+          "note": "Parks Canada: 121 km one way, 7-10 days, route finding needed. Ends outside the park at Rocky Pass."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 128,
+      "name": "Saturday Night Lake Loop",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.893509,
+      "longitude": -118.177855,
+      "route_type": "loop",
+      "distance_km": 24.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "A forested loop of small lakes in the hills above Jasper town.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/155370663",
+          "feature": "Saturday Night Lake",
+          "role": "on_route"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/SaturdayNight"
+          ],
+          "note": "Parks Canada: 24.6 km loop from Jasper town, 2-3 days."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 129,
+      "name": "Hermit Trail",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Glacier National Park, BC",
+      "park_name": "Glacier National Park",
+      "park_type": "national",
+      "latitude": 51.314222,
+      "longitude": -117.512461,
+      "route_type": "out_and_back",
+      "distance_km": 6.4,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "One of the steepest trails in Glacier, up to meadows below the Hermit Range.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1097129539",
+          "feature": "Hermit Trailhead Parking",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/glacier/activ/randonee-hiking/journee-day"
+          ],
+          "note": "Parks Canada: 3.2 km one way, 820 m gain, one of the steepest trails in the park. Mostly a base for climbing in the Hermit Range."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 130,
+      "name": "Fiddle River",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 53.124553,
+      "longitude": -117.775269,
+      "route_type": "point_to_point",
+      "distance_km": 37.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "difficult",
+      "typical_duration_nights": 2,
+      "climate_zone": "alpine",
+      "description": "From Miette Hot Springs over Fiddle Pass into the Whitehorse Wildland.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/2410378360",
+          "feature": "Miette Hot Springs",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fiddle"
+          ],
+          "note": "Parks Canada: 37.8 km one way, 2-3 days, unbridged crossings. Ends in Whitehorse Wildland (Alberta Parks campgrounds)."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
+        ]
+      }
+    },
+    {
+      "rank": 131,
+      "name": "Chaba Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.532337,
+      "longitude": -117.644634,
+      "route_type": "out_and_back",
+      "distance_km": 29.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 1,
+      "climate_zone": "alpine",
+      "description": "An easy old fire road to the Athabasca River, good for a first trip.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/13383749352",
+          "feature": "Sunwapta Falls",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/chaba"
+          ],
+          "note": "Parks Canada: 14.8 km to Athabasca Crossing on an old fire road, suited to first-time backpackers."
+        },
+        "added": "2026-11-03, Parks Canada backcountry coverage (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "elevation_gain_m: not sourced yet"
         ]
       }
     }

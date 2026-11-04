@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.backcountry.alertable import alert_block
 from app.backcountry.parks_canada import PROVIDER as PARKS_CANADA
 from app.backcountry.watchable import TRAIL_IS_WATCHABLE, is_watchable, trail_alerts
 from app.catalog.search import escape_like
@@ -365,6 +366,7 @@ def get_trail_campgrounds(trail_id: UUID, db: Session = Depends(get_db)):
             max_group_size=link.site.max_group_size,
             provider=link.site.provider,
             watchable=is_watchable(link.site),
+            alert_note=alert_block(link.site),
         )
         for link in links
     ]

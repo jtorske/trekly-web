@@ -20,6 +20,7 @@ function site(overrides: Partial<TrailCampground> = {}): TrailCampground {
     max_capacity: 6,
     max_group_size: null,
     provider: "parks_canada",
+    alert_note: null,
     ...overrides,
   };
 }

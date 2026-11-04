@@ -224,8 +224,10 @@ class TrailCampgroundOut(BaseModel):
     max_capacity: int | None = None
     max_group_size: int | None = None
     provider: str
-    # An alert can watch this campground (Parks Canada's online map).
+    # An alert can watch this campground (app/backcountry/watchable.py), and
+    # why not when it can't (app/backcountry/alertable.py).
     watchable: bool = False
+    alert_note: str | None = None
 
 
 class TrailBookingOut(BaseModel):

@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.alert_emails import booking_url_for, watching_email
 from app.alert_poller import send_opened
 from app.auth import CurrentUser, get_current_user, get_current_user_id
+from app.backcountry.alertable import alert_block, party_problem
 from app.backcountry.availability import AvailabilityChecker, ProviderError, RateLimited, group_of, summarize
 from app.database import get_db
 from app.models.availability import (
@@ -196,6 +197,10 @@ def create_alert(
         raise HTTPException(status_code=422, detail="That campground isn't available for alerts.")
     if group_of(site) is None:
         raise HTTPException(status_code=422, detail="Parks Canada doesn't show availability for that campground online.")
+    if blocked := alert_block(site):
+        raise HTTPException(status_code=422, detail=blocked)
+    if too_many := party_problem(site, payload.party_size):
+        raise HTTPException(status_code=422, detail=too_many)
     if payload.trail_id is not None and db.get(TrailCampground, (payload.trail_id, payload.site_id)) is None:
         raise HTTPException(status_code=422, detail="That campground isn't on this trail.")
 
@@ -274,6 +279,9 @@ def update_alert_stay(
     unchecked, and able to email once more, whatever state it was in."""
     alert = _get(db, user_id, alert_id)
     validate_stay(payload.start_date, payload.nights, today)
+    site = db.get(BackcountrySite, alert.site_id)
+    if site is not None and (too_many := party_problem(site, payload.party_size)):
+        raise HTTPException(status_code=422, detail=too_many)
     _lock_user_alerts(db, user_id)
     duplicate = db.scalar(
         select(AvailabilityAlert.id).where(

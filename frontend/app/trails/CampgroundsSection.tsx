@@ -84,11 +84,14 @@ function Availability({
       {label && <span className={styles.padLabel}>{label}</span>}
       <NightStrip found={found} />
       <span className={`${styles.summary} ${styles[`summary_${found.summary}`]}`}>{SUMMARY_LABELS[found.summary]}</span>
-      {canAlert(found.summary) && (
-        <button type="button" className={styles.alertButton} onClick={() => onAlert(site)}>
-          Alert me
-        </button>
-      )}
+      {canAlert(found.summary) &&
+        (site.watchable ? (
+          <button type="button" className={styles.alertButton} onClick={() => onAlert(site)}>
+            Alert me
+          </button>
+        ) : (
+          site.alert_note && <span className={styles.alertNote}>{site.alert_note}</span>
+        ))}
     </div>
   );
 }
@@ -497,6 +500,7 @@ export default function CampgroundsSection({
               ? `${alertSite.site.stop_name} ${alertSite.site.site_code}`
               : alertSite.site.name
           }
+          maxGroupSize={alertSite.site.max_group_size}
           stay={alertSite.stay}
           returnTo={urlFor(alertSite.stay, { alert: alertSite.site.site_id })}
           onClose={() => setAlertSite(null)}

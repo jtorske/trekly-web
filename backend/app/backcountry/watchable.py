@@ -17,9 +17,10 @@ from collections.abc import Iterable
 from functools import lru_cache
 from uuid import UUID
 
-from sqlalchemy import and_, exists, select
+from sqlalchemy import and_, exists, not_, select
 from sqlalchemy.orm import Session
 
+from app.backcountry.alertable import NOT_ONLINE, UNCONFIRMED_KINDS, UNLIMITED_QUOTA, alert_block
 from app.backcountry.parks_canada import PROVIDER as PARKS_CANADA
 from app.models.backcountry import BackcountrySite
 from app.models.trail import Trail
@@ -37,6 +38,10 @@ WATCHABLE_SITE = and_(
     BackcountrySite.provider_map_id.is_not(None),
     BackcountrySite.provider_booking_category_id.is_not(None),
     BackcountrySite.kind != TRAIL_PERMIT,
+    # The rest of app/backcountry/alertable.py's alert_block, in SQL.
+    BackcountrySite.kind.not_in(["horse_camp", *UNCONFIRMED_KINDS]),
+    not_(and_(BackcountrySite.kind == "random_zone", BackcountrySite.reservable_capacity >= UNLIMITED_QUOTA)),
+    BackcountrySite.provider_resource_id.not_in(list(NOT_ONLINE)),
 )
 
 # True for a trail with at least one watchable campground; correlates to Trail.
@@ -59,6 +64,7 @@ def is_watchable(site: BackcountrySite) -> bool:
         and site.provider_map_id
         and site.provider_booking_category_id
         and site.kind != TRAIL_PERMIT
+        and alert_block(site) is None
     )
 
 

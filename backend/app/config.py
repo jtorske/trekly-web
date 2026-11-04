@@ -15,7 +15,7 @@ def _csv(value: str) -> tuple[str, ...]:
 # comma-separated) and how many trails it keeps, by popularity rank. Read by
 # both the trail seed script and the /api/trails list endpoint.
 TRAIL_CATALOG_COUNTRIES = _csv(os.getenv("TRAIL_CATALOG_COUNTRIES", "CA"))
-TRAIL_CATALOG_LIMIT = int(os.getenv("TRAIL_CATALOG_LIMIT", "100"))
+TRAIL_CATALOG_LIMIT = int(os.getenv("TRAIL_CATALOG_LIMIT", "131"))
 
 
 def _ids(name: str) -> frozenset[str]:

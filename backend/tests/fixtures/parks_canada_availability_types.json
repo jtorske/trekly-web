@@ -1,0 +1,2999 @@
+{
+ "_comment": "Real availability/map responses recorded 2026-11-03 for the campground types the first fixtures didn't cover: cabins (booking category 5), shelters (7) and Chilkoot Trail campgrounds (17), each for 3 nights about 10 days out and in July 2027, party of 2. Every request was accepted; none showed the site available (2 = not operating, 3 = not released), which is why cabins and shelters stay off alerts (app/backcountry/alertable.py). Riding Mountain's cabin is 3 while its map shows 0.",
+ "cabin_kejimkujik_near": {
+  "site": {
+   "resource_id": "-2147483443",
+   "name": "W1",
+   "kind": "cabin"
+  },
+  "request": {
+   "resourceLocationId": "-2147483588",
+   "mapId": "-2147483398",
+   "bookingCategoryId": "5",
+   "startDate": "2026-11-13",
+   "endDate": "2026-11-15",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:25:53.427169+00:00",
+  "body": {
+   "mapId": -2147483398,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147483477": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483476": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483475": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483474": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483473": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483472": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483471": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483470": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483469": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483468": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483467": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483466": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483465": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483464": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483463": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483462": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483461": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483460": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483459": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483458": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483457": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483456": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483455": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483454": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483453": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483452": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483451": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483450": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483449": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483448": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483447": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483446": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483445": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483444": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483443": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483442": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483441": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483440": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483439": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483438": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483437": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483436": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483435": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483434": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483433": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483432": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483431": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "cabin_kejimkujik_summer": {
+  "site": {
+   "resource_id": "-2147483443",
+   "name": "W1",
+   "kind": "cabin"
+  },
+  "request": {
+   "resourceLocationId": "-2147483588",
+   "mapId": "-2147483398",
+   "bookingCategoryId": "5",
+   "startDate": "2027-07-20",
+   "endDate": "2027-07-22",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:25:55.417806+00:00",
+  "body": {
+   "mapId": -2147483398,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147483477": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483476": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483475": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483474": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483473": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483472": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483471": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483470": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483469": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483468": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483467": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483466": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483465": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483464": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483463": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483462": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483461": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483460": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483459": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483458": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483457": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483456": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483455": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483454": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483453": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483452": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483451": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483450": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483449": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483448": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483447": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483446": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483445": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483444": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483443": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483442": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483441": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483440": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483439": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483438": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483437": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483436": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483435": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483434": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483433": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483432": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483431": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "cabin_riding_mountain_near": {
+  "site": {
+   "resource_id": "-2147483319",
+   "name": "CC1",
+   "kind": "cabin"
+  },
+  "request": {
+   "resourceLocationId": "-2147483551",
+   "mapId": "-2147483245",
+   "bookingCategoryId": "5",
+   "startDate": "2026-11-13",
+   "endDate": "2026-11-15",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:25:57.547036+00:00",
+  "body": {
+   "mapId": -2147483245,
+   "mapAvailabilities": [
+    0,
+    0,
+    0
+   ],
+   "resourceAvailabilities": {
+    "-2147483355": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483354": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483353": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483352": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483351": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483350": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483349": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483348": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483347": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483346": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483345": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483344": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483343": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483342": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483341": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483340": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483339": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483338": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483337": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483336": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483335": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483334": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483333": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483332": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483331": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483330": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483329": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483328": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483327": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483326": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483325": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483324": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483323": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483322": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483321": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483320": [
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     },
+     {
+      "availability": 0,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483319": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "cabin_riding_mountain_summer": {
+  "site": {
+   "resource_id": "-2147483319",
+   "name": "CC1",
+   "kind": "cabin"
+  },
+  "request": {
+   "resourceLocationId": "-2147483551",
+   "mapId": "-2147483245",
+   "bookingCategoryId": "5",
+   "startDate": "2027-07-20",
+   "endDate": "2027-07-22",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:25:59.450402+00:00",
+  "body": {
+   "mapId": -2147483245,
+   "mapAvailabilities": [
+    3,
+    3,
+    3
+   ],
+   "resourceAvailabilities": {
+    "-2147483355": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483354": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483353": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483352": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483351": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483350": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483349": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483348": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483347": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483346": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483345": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483344": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483343": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483342": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483341": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483340": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483339": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483338": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483337": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483336": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483335": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483334": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483333": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483332": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483331": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483330": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483329": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483328": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483327": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483326": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483325": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483324": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483323": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483322": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483321": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483320": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ],
+    "-2147483319": [
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     },
+     {
+      "availability": 3,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "shelter_forillon_near": {
+  "site": {
+   "resource_id": "-2147471838",
+   "name": "Lean-to - Les Lacs",
+   "kind": "shelter"
+  },
+  "request": {
+   "resourceLocationId": "-2147483534",
+   "mapId": "-2147483539",
+   "bookingCategoryId": "7",
+   "startDate": "2026-11-13",
+   "endDate": "2026-11-15",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:26:01.425519+00:00",
+  "body": {
+   "mapId": -2147483539,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147471839": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471838": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471837": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471836": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471835": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "shelter_forillon_summer": {
+  "site": {
+   "resource_id": "-2147471838",
+   "name": "Lean-to - Les Lacs",
+   "kind": "shelter"
+  },
+  "request": {
+   "resourceLocationId": "-2147483534",
+   "mapId": "-2147483539",
+   "bookingCategoryId": "7",
+   "startDate": "2027-07-20",
+   "endDate": "2027-07-22",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:26:03.417986+00:00",
+  "body": {
+   "mapId": -2147483539,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147471839": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471838": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471837": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471836": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471835": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "backpacking_campground_chilkoot_near": {
+  "site": {
+   "resource_id": "-2147471324",
+   "name": "Happy Camp",
+   "kind": "backpacking_campground"
+  },
+  "request": {
+   "resourceLocationId": "-2147483526",
+   "mapId": "-2147483113",
+   "bookingCategoryId": "17",
+   "startDate": "2026-11-13",
+   "endDate": "2026-11-15",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:26:05.449920+00:00",
+  "body": {
+   "mapId": -2147483113,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147471329": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471328": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471327": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471326": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471325": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471324": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471323": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471322": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471321": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471320": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ },
+ "backpacking_campground_chilkoot_summer": {
+  "site": {
+   "resource_id": "-2147471324",
+   "name": "Happy Camp",
+   "kind": "backpacking_campground"
+  },
+  "request": {
+   "resourceLocationId": "-2147483526",
+   "mapId": "-2147483113",
+   "bookingCategoryId": "17",
+   "startDate": "2027-07-20",
+   "endDate": "2027-07-22",
+   "peopleCapacityCategoryCounts": "[{\"capacityCategoryId\": -32767, \"subCapacityCategoryId\": null, \"count\": 2}]",
+   "numEquipment": "1"
+  },
+  "captured_at": "2026-11-03T22:26:07.421811+00:00",
+  "body": {
+   "mapId": -2147483113,
+   "mapAvailabilities": [
+    2,
+    2,
+    2
+   ],
+   "resourceAvailabilities": {
+    "-2147471329": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471328": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471327": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471326": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471325": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471324": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471323": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471322": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471321": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ],
+    "-2147471320": [
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     },
+     {
+      "availability": 2,
+      "remainingQuota": null
+     }
+    ]
+   },
+   "mapLinkAvailabilities": {}
+  }
+ }
+}

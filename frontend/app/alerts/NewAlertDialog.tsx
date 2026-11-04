@@ -5,6 +5,7 @@ import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { choosePickerTrail, pickerOrder, pickerSearch, unwatchableReason } from "@/lib/alertWatch";
 import type { CampgroundAlert, Stay } from "@/lib/availabilityApi";
+import { partyLimitProblem } from "@/lib/alertRules";
 import { defaultStay } from "@/lib/stay";
 import { getTrailCampgrounds, searchTrails, type TrailCampground, type TrailPickItem } from "@/lib/trailsApi";
 import AlertDialog from "../trails/AlertDialog";
@@ -178,6 +179,7 @@ export default function NewAlertDialog({
   };
 
   const site = campgrounds?.find((c) => c.site_id === siteId) ?? null;
+  const tooMany = site ? partyLimitProblem(site, stay.party) : null;
 
   if (confirming && trail && site) {
     return (
@@ -185,6 +187,7 @@ export default function NewAlertDialog({
         trailId={trail.id}
         siteId={site.site_id}
         campground={site.name}
+        maxGroupSize={site.max_group_size}
         stay={stay}
         returnTo="/alerts"
         onCreated={onCreated}
@@ -195,7 +198,7 @@ export default function NewAlertDialog({
 
   const next = (event: FormEvent) => {
     event.preventDefault();
-    if (site) setConfirming(true);
+    if (site && !tooMany) setConfirming(true);
   };
 
   let body;
@@ -243,6 +246,11 @@ export default function NewAlertDialog({
               ))}
             </fieldset>
             <StayFields stay={stay} today={today} onChange={setStay} />
+            {tooMany && (
+              <p className={ui.error} role="alert">
+                {tooMany}
+              </p>
+            )}
           </>
         )}
       </form>
@@ -261,7 +269,7 @@ export default function NewAlertDialog({
             Cancel
           </button>
           {trail && (
-            <button type="submit" form="new-alert" className={ui.primary} disabled={!site}>
+            <button type="submit" form="new-alert" className={ui.primary} disabled={!site || Boolean(tooMany)}>
               Continue
             </button>
           )}

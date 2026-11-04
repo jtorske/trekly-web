@@ -201,8 +201,9 @@ export function hikedInGroup(group: JournalGroup, hiked: { has: (id: string) => 
   return group.trails.filter((trail) => hiked.has(trail.id)).length;
 }
 
-/** How many catalogue trails the journal and the profile's Journal tab load. */
-export const CATALOGUE_SIZE = 100;
+/** How many catalogue trails the journal and the profile's Journal tab load
+ * (the backend's TRAIL_CATALOG_LIMIT). */
+export const CATALOGUE_SIZE = 131;
 
 /** A hike as the profile sees it: a visitor's copy has no date when the owner hides dates. */
 export type SummaryHike = { trail: TrailListItem; hiked_on: string | null };

@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from app.config import TRAIL_CATALOG_LIMIT
 from app.models.account import SavedTrail
 from app.models.trail import TERRAIN_DIFFICULTIES, Trail
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
@@ -126,7 +127,7 @@ def test_popularity_score_is_derived_from_rank():
     assert popularity_score(10, 100) > popularity_score(11, 100)
 
 
-def test_list_returns_only_canadian_trails_capped_at_100_ordered_by_popularity(client, synced):
+def test_list_returns_only_canadian_trails_capped_and_ordered_by_popularity(client, synced):
     response = client.get("/api/trails", params={"limit": 100})
     assert response.status_code == 200
     trails = response.json()
@@ -135,7 +136,7 @@ def test_list_returns_only_canadian_trails_capped_at_100_ordered_by_popularity(c
     assert [t["popularity_rank"] for t in trails] == list(range(1, 101))
     assert all(t["retired_at"] is None for t in trails)
 
-    assert client.get("/api/trails", params={"limit": 101}).status_code == 422
+    assert client.get("/api/trails", params={"limit": TRAIL_CATALOG_LIMIT + 1}).status_code == 422
     assert [t["name"] for t in client.get("/api/trails").json()] == [f"Trail {i:03d}" for i in range(1, 11)]
 
 
@@ -181,9 +182,10 @@ def test_shipped_catalogue_is_valid():
     data = load_catalog()
     trails = data["trails"]
     assert data["meta"]["popularity_source"] == "editorial"
-    assert len(trails) == 100
-    assert sorted(t["rank"] for t in trails) == list(range(1, 101))
-    assert len({(t["name"], t["province_code"]) for t in trails}) == 100
+    # The editorial top 100, plus the Parks Canada backcountry trails added 2026-11-03.
+    assert len(trails) == TRAIL_CATALOG_LIMIT == 131
+    assert sorted(t["rank"] for t in trails) == list(range(1, 132))
+    assert len({(t["name"], t["province_code"]) for t in trails}) == 131
     for t in trails:
         assert t["country_code"] == "CA", t["name"]
         assert t["province_code"] in CA_PROVINCES, t["name"]
@@ -196,6 +198,10 @@ def test_shipped_catalogue_is_valid():
             assert 0 < t["distance_km"] < 1000, t["name"]
             assert t["route_type"] in ("out_and_back", "loop", "point_to_point"), t["name"]
             source = t["verification"]["distance_km"]
+            if source.get("source") == "published":
+                # The park's or a guide's figure (trails added for backcountry coverage).
+                assert t["rank"] > 100 and source["sources"], t["name"]
+                continue
             assert source.get("osm") or source.get("osm_named_ways"), t["name"]
             # An out-and-back shows the round trip: twice the mapped length.
             factor = 2 if t["route_type"] == "out_and_back" else 1

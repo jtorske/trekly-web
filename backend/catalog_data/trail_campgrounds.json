@@ -332,6 +332,392 @@
       "campgrounds": []
     },
     {
+      "name": "Gros Morne Mountain", "province_code": "NL",
+      "overnight_option": true,
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147471549", "name": "Ferry Gulch (Gros Morne Mountain)", "order": 1, "confidence": "exact", "review": "Parks Canada: 'located about halfway along the Gros Morne Mountain trail ... in a narrow valley between Gros Morne Mountain and Crow Cliff.'"}
+      ]
+    },
+    {
+      "name": "Sentinel Pass via Larch Valley", "province_code": "AB",
+      "overnight_option": true,
+      "booking": [{"system": "parks_canada", "covers": "all", "note": "Paradise Valley can only be booked within 24 hours of your trip, in person at the Lake Louise visitor centre or by phone."}],
+      "campgrounds": [
+        {"resource_id": "-2147482971", "name": "Paradise Valley", "code": "Pa10", "order": 1, "confidence": "exact", "notes": "Over Sentinel Pass and down the Paradise Valley side. Book within 24 hours of your trip, in person or by phone; often closed by trail restrictions.", "review": "Parks Canada: 'Nearby are the Giant Steps and the trail up the north side of Sentinel Pass.' Same description: 'only reserveable within 24 hours of start of trip ... only be obtained in person ... or by calling Lake Louise at 403-522-1264', so no alerts (app/backcountry/alertable.py)."}
+      ]
+    },
+    {
+      "name": "Johnston Canyon to the Ink Pots", "province_code": "AB",
+      "overnight_option": true,
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483105", "name": "Larry's Camp", "code": "Jo9", "order": 1, "confidence": "likely", "notes": "A short way up Johnston Creek past the Ink Pots.", "review": "The first campground up the Johnston Creek valley beyond the Ink Pots (getoutsideadventures.ca trip report: 'After the inkpots ... continued on up the valley' to Larry's Camp). Also the first stop on Mystic Pass. Johnston Creek (Jo18), proposed earlier, is much further up the valley, so it isn't linked."}
+      ]
+    },
+    {
+      "name": "Cyprus Lake to the Grotto", "province_code": "ON",
+      "overnight_option": true,
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "campgrounds": [
+        {"resource_id": "-2147483644", "name": "SH1", "code": "SH1", "stop": "Stormhaven", "order": 1, "confidence": "likely", "notes": "Stormhaven, on the Bruce Trail past the Grotto. Up to 4 people per site.", "review": "Parks Canada: backcountry sites are 'reached by backpacking on the Bruce Trail', nearest parking Cyprus Lake lot 2; allow 3 hours before sunset for Stormhaven. Trip reports put it about 3.4 km from Cyprus Lake. High Dump (HD1-9) is about 9.5 km further, so it's left off this day hike."},
+        {"resource_id": "-2147483642", "name": "SH2", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483637", "name": "SH3", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483641", "name": "SH4", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483638", "name": "SH5", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483635", "name": "SH6", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483647", "name": "SH7", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483643", "name": "SH8", "stop": "Stormhaven", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483636", "name": "SH9", "stop": "Stormhaven", "order": 1, "confidence": "likely"}
+      ]
+    },
+    {
+      "name": "Brazeau Loop", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 81 km, 5 days, 'demanding'. Seasonal caribou closure north of Four Point Nov 1 - May 15. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/brazeau",
+      "campgrounds": [
+        {"resource_id": "-2147483272", "name": "Boulder Creek", "code": "15", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483181", "name": "Four Point", "code": "16", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483238", "name": "Brazeau River", "code": "19", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483243", "name": "Brazeau Lake", "code": "21", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483258", "name": "John-John", "code": "22", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483179", "name": "Jonas Cutoff", "code": "23", "order": 6, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Chilkoot Trail", "province_code": "BC",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Dyea, Alaska over Chilkoot Pass to Bennett, BC: 'a hike for experienced backcountry hikers'. Campground distances from Parks Canada's descriptions. Bennett has no road (train, boat or plane out). Sources: https://parks.canada.ca/lhn-nhs/yt/chilkoot/activ/randonnee-cdn-hiking",
+      "campgrounds": [
+        {"resource_id": "-2147471328", "name": "Finnegan's Point", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147471327", "name": "Canyon City", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147471326", "name": "Pleasant Camp", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147471325", "name": "Sheep Camp", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147471324", "name": "Happy Camp", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147471323", "name": "Deep Lake", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147471322", "name": "Upper Lindeman", "order": 7, "confidence": "exact"},
+        {"resource_id": "-2147471321", "name": "Bare Loon", "order": 8, "confidence": "exact"},
+        {"resource_id": "-2147471320", "name": "Bennett", "order": 9, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Fundy Circuit", "province_code": "NB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: a 48 km network of seven linked trails, 3-5 days. Point Wolfe PW162/164 are frontcountry sites Parks Canada sets aside as an extra stop on the Circuit. Sources: https://parks.canada.ca/pn-np/nb/fundy/visit/sentiers-trails/circuit",
+      "campgrounds": [
+        {"resource_id": "-2147483613", "name": "CM1", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483614", "name": "CM2", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483616", "name": "FB10", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483612", "name": "TL11", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483617", "name": "TL12", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147471566", "name": "PW162", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147471565", "name": "PW164", "order": 7, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Mount Assiniboine via Bryant Creek", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "partial"}],
+      "review": "Added 2026-11-03 (approved). From the Mount Shark trailhead up Bryant Creek and over Assiniboine Pass to Lake Magog (BC Parks: 21 km to the pass). Lake Magog is booked through Assiniboine Lodge. Sources: https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry, https://bcparks.ca/mount-assiniboine-park/hiking/",
+      "campgrounds": [
+        {"resource_id": "-2147483122", "name": "Big Springs", "code": "Br9", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147482978", "name": "McBride's Camp", "code": "Br14", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483104", "name": "Marvel Lake", "code": "Br13", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483046", "name": "Allenby Junction", "code": "Br17", "order": 4, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Lake Minnewanka Shoreline Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada itinerary: 7.8, 9 or 11.1 km one way to Lm8/Lm9/Lm11. Lm20-Lm31 are further along the shore. Seasonal restriction Jul 10 - Sep 15 (groups of 4). Sources: https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry",
+      "campgrounds": [
+        {"resource_id": "-2147483101", "name": "Aylmer Pass Junction", "code": "Lm8", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147482984", "name": "Aylmer Canyon", "code": "Lm9", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147482990", "name": "Mount Inglismaldie", "code": "Lm11", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483118", "name": "Mount Costigan", "code": "Lm20", "order": 4, "confidence": "likely"},
+        {"resource_id": "-2147483025", "name": "The Narrows", "code": "Lm22", "order": 5, "confidence": "likely"},
+        {"resource_id": "-2147483060", "name": "Ghost Lakes", "code": "Lm31", "order": 6, "confidence": "likely"}
+      ]
+    },
+    {
+      "name": "Tamarack Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 36.4 km, the park's longest trail, 2-3 days, rated difficult. Rowe Lakes trailhead to Red Rock Canyon. Sources: https://parks.canada.ca/pn-np/ab/waterton/culture/histoire-history/faits-facts, https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/etat-sentiers-trail-conditions",
+      "campgrounds": [
+        {"resource_id": "-2147471809", "name": "Lone Lake", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147471807", "name": "Twin Lakes", "order": 2, "confidence": "likely"},
+        {"resource_id": "-2147471808", "name": "Snowshoe", "order": 3, "confidence": "likely"}
+      ]
+    },
+    {
+      "name": "North Molar Pass to Fish Lakes", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). About 15 km one way from the Mosquito Creek trailhead over North Molar Pass (about 795 m of gain). Parks Canada's Mo5 description mentions North Molar Pass. Sources: https://hikebiketravel.com/fish-lakes-hike-banff/, https://www.10adventures.com/hikes/icefields-parkway/north-molar-pass/",
+      "campgrounds": [
+        {"resource_id": "-2147483077", "name": "Mosquito Creek", "code": "Mo5", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483030", "name": "Fish Lakes", "code": "Mo18", "order": 2, "confidence": "likely"}
+      ]
+    },
+    {
+      "name": "Fryatt Valley", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 22 km one way, 2-3 days, very steep headwall. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fryatt",
+      "campgrounds": [
+        {"resource_id": "-2147483203", "name": "Lower Fryatt", "code": "34", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483214", "name": "Brussels", "code": "35", "order": 2, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Sawback Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada itinerary: 74 km over six nights, Banff to Lake Louise; Johnston Creek or Luellen Lake for one night. Sources: https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry",
+      "campgrounds": [
+        {"resource_id": "-2147482998", "name": "Mystic Junction", "code": "Fm19", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483105", "name": "Larry's Camp", "code": "Jo9", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147482983", "name": "Johnston Creek", "code": "Jo18", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483140", "name": "Luellen Lake", "code": "Jo19", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483093", "name": "Badger Pass Junction", "code": "Jo29", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483090", "name": "Wildflower Creek", "code": "Ba15", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483008", "name": "Baker Lake", "code": "Sk11", "order": 7, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "North Boundary Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "partial"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 159 km one way, 7-10 days, for experienced backpackers. Ends on BC Parks' Berg Lake trail. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/north-boundary",
+      "campgrounds": [
+        {"resource_id": "-2147483285", "name": "Willow Creek", "code": "66", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483200", "name": "Welbourne", "code": "68", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483174", "name": "Blue Creek", "code": "70", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483228", "name": "Three Slides", "code": "72", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483209", "name": "Oatmeal", "code": "73", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483270", "name": "Byng", "code": "74", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483198", "name": "Twintree", "code": "75", "order": 7, "confidence": "exact"},
+        {"resource_id": "-2147483263", "name": "Donaldson Creek", "code": "76", "order": 8, "confidence": "exact"},
+        {"resource_id": "-2147483216", "name": "Chown Creek", "code": "77", "order": 9, "confidence": "exact"},
+        {"resource_id": "-2147483201", "name": "Wolverine North", "code": "80", "order": 10, "confidence": "exact"},
+        {"resource_id": "-2147483236", "name": "Adolphus", "code": "81", "order": 11, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Eva Lake", "province_code": "BC",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 14.2 km return, 465 m, from the summit shuttle stop. Mid-July to September. Sources: https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day",
+      "campgrounds": [
+        {"resource_id": "-2147478763", "name": "Eva Lake", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Taylor Lake", "province_code": "AB",
+      "overnight_option": true,
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 6.3 km one way, 585 m gain. A day hike with an overnight option. Sources: https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/meleze-larch",
+      "campgrounds": [
+        {"resource_id": "-2147483063", "name": "Taylor Lake", "code": "Ta6", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Jonas Pass - Poboktan Creek", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 54 km one way, 3-4 days; needs a shuttle (44 km between trailheads). Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/poboktan",
+      "campgrounds": [
+        {"resource_id": "-2147483272", "name": "Boulder Creek", "code": "15", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483181", "name": "Four Point", "code": "16", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483179", "name": "Jonas Cutoff", "code": "23", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483187", "name": "Waterfalls", "code": "25", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483223", "name": "Poboktan", "code": "26", "order": 5, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Outport Trail", "province_code": "NL",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 35 km return from Newman Sound campground; Minchins Cove (14 km) and South Broad Cove (16 km), also reachable by boat. Sources: https://parks.canada.ca/pn-np/nl/terranova/activ/ran-hik/outport, https://parks.canada.ca/pn-np/nl/terranova/activ/camping/bc",
+      "campgrounds": [
+        {"resource_id": "-2147483295", "name": "BC4", "order": 1, "confidence": "likely"},
+        {"resource_id": "-2147483317", "name": "MC5", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483307", "name": "MC6", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483290", "name": "MC7", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483302", "name": "MC8", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483292", "name": "MC9", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483318", "name": "MC10", "order": 7, "confidence": "exact"},
+        {"resource_id": "-2147483305", "name": "MC11", "order": 8, "confidence": "exact"},
+        {"resource_id": "-2147483306", "name": "MC12", "order": 9, "confidence": "exact"},
+        {"resource_id": "-2147483303", "name": "SB13", "order": 10, "confidence": "exact"},
+        {"resource_id": "-2147483310", "name": "SB14", "order": 11, "confidence": "exact"},
+        {"resource_id": "-2147483313", "name": "SB15", "order": 12, "confidence": "exact"},
+        {"resource_id": "-2147483312", "name": "SB16", "order": 13, "confidence": "exact"},
+        {"resource_id": "-2147483291", "name": "SB17", "order": 14, "confidence": "exact"},
+        {"resource_id": "-2147483293", "name": "SB18", "order": 15, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Fishing Cove Trail", "province_code": "NS",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: the park's only designated wilderness campground, a 6 km hike down to the coast. Sources: Parks Canada site description (reservation system)",
+      "campgrounds": [
+        {"resource_id": "-2147483630", "name": "1", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483626", "name": "2", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483625", "name": "3", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483629", "name": "4", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483627", "name": "5", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483623", "name": "6", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483624", "name": "7", "order": 7, "confidence": "exact"},
+        {"resource_id": "-2147483628", "name": "8", "order": 8, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Maligne Pass", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 48 km one way, 2-3 days, fords and route finding. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/maligne-pass",
+      "campgrounds": [
+        {"resource_id": "-2147483251", "name": "Avalanche", "code": "100", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483232", "name": "Mary Vaux", "code": "101", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483261", "name": "Schäffer", "code": "102", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483240", "name": "Trapper Creek", "code": "103", "order": 4, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Les Crêtes", "province_code": "QC",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 33.2 km return including access, 1437 m of gain. The lean-to takes no alerts (shelters aren't confirmed). Sources: https://parks.canada.ca/pn-np/qc/forillon/activ/randonnee-hiking, https://parks.canada.ca/pn-np/qc/forillon/activ/camping/arriere-backcountry",
+      "campgrounds": [
+        {"resource_id": "-2147471837", "name": "Camping - Les Crêtes 1", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147471836", "name": "Camping - Les Crêtes 2", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147471835", "name": "Lean-to - Les Crêtes", "order": 3, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Snug Harbour", "province_code": "NL",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 15 km return on an unmarked route along Western Brook Pond; fording Western Brook. Sources: https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/snug",
+      "campgrounds": [
+        {"resource_id": "-2147471550", "name": "Snug Harbour", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Northern Traverse", "province_code": "NL",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: about 27 km (33 km in the hiker guide), 3-4 days, unmarked, harder than the Long Range Traverse. Starts with the Western Brook Pond boat. Sources: https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/northtrav",
+      "campgrounds": [
+        {"resource_id": "-2147471568", "name": "Northern Traverse", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147471550", "name": "Snug Harbour", "order": 2, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Jade Lakes", "province_code": "BC",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 18.8 km return, 714 m, branching off the Eva Lake trail at 5.4 km. Sources: https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day",
+      "campgrounds": [
+        {"resource_id": "-2147478728", "name": "Jade Lakes", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Athabasca Pass", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 48.5 km one way, 4-5 days, dangerous fords. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/athabasca-pass",
+      "campgrounds": [
+        {"resource_id": "-2147483185", "name": "Whirlpool", "code": "55", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483192", "name": "Tie Camp", "code": "56", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483242", "name": "Middle Forks", "code": "58", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483230", "name": "Scott Camp", "code": "59", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483178", "name": "Kane Meadows", "code": "60", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483256", "name": "Athabasca Pass", "code": "61", "order": 6, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Geraldine Lakes", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 6.2 km one way, 1-2 days, boulder fields and a steep headwall. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/geraldine",
+      "campgrounds": [
+        {"resource_id": "-2147483184", "name": "Second Geraldine Lake", "code": "37", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Jacques Lake", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 12.2 km one way, 1-2 days, valley-bottom hiking. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Jacques",
+      "campgrounds": [
+        {"resource_id": "-2147483190", "name": "Jacques Lake", "code": "38", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Goat Lake", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: from Red Rock Canyon, 4.6 km on the Snowshoe trail (hike or bike), then up to the lake. Sources: Parks Canada site description (reservation system)",
+      "campgrounds": [
+        {"resource_id": "-2147471810", "name": "Goat Lake", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Waterton Lakeshore Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: Bertha Bay is reached 'via the Bertha/Lakeshore trail'; Boundary Bay sits at the international boundary on Upper Waterton Lake. Sources: Parks Canada site descriptions (reservation system)",
+      "campgrounds": [
+        {"resource_id": "-2147471814", "name": "Bertha Bay", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147471813", "name": "Boundary Bay", "order": 2, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Crandell Lake", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 'perfect for first-time backcountry campers', a short hike or bike. Sources: Parks Canada site description (reservation system)",
+      "campgrounds": [
+        {"resource_id": "-2147471811", "name": "Crandell Lake", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "South Boundary Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 121 km one way, 7-10 days, route finding needed. Ends outside the park at Rocky Pass. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/south-boundary",
+      "campgrounds": [
+        {"resource_id": "-2147483272", "name": "Boulder Creek", "code": "15", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483181", "name": "Four Point", "code": "16", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483238", "name": "Brazeau River", "code": "19", "order": 3, "confidence": "exact"},
+        {"resource_id": "-2147483265", "name": "Arête", "code": "99", "order": 4, "confidence": "exact"},
+        {"resource_id": "-2147483287", "name": "Isaac Creek", "code": "98", "order": 5, "confidence": "exact"},
+        {"resource_id": "-2147483281", "name": "Southesk River", "code": "97", "order": 6, "confidence": "exact"},
+        {"resource_id": "-2147483188", "name": "Cairn River", "code": "96", "order": 7, "confidence": "exact"},
+        {"resource_id": "-2147483237", "name": "Cairn Pass", "code": "95", "order": 8, "confidence": "exact"},
+        {"resource_id": "-2147483183", "name": "La Grace", "code": "94", "order": 9, "confidence": "exact"},
+        {"resource_id": "-2147483221", "name": "Medicine Tent", "code": "92", "order": 10, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Saturday Night Lake Loop", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 24.6 km loop from Jasper town, 2-3 days. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/SaturdayNight",
+      "campgrounds": [
+        {"resource_id": "-2147483226", "name": "Saturday Night Lake", "code": "39", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483269", "name": "Minnow Lake", "code": "40", "order": 2, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Hermit Trail", "province_code": "BC",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 3.2 km one way, 820 m gain, one of the steepest trails in the park. Mostly a base for climbing in the Hermit Range. Sources: https://parks.canada.ca/pn-np/bc/glacier/activ/randonee-hiking/journee-day",
+      "campgrounds": [
+        {"resource_id": "-2147471851", "name": "Hermit Meadows", "order": 1, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Fiddle River", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "partial"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 37.8 km one way, 2-3 days, unbridged crossings. Ends in Whitehorse Wildland (Alberta Parks campgrounds). Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fiddle",
+      "campgrounds": [
+        {"resource_id": "-2147483204", "name": "Utopia", "code": "51", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483211", "name": "Slide Creek", "code": "52", "order": 2, "confidence": "exact"},
+        {"resource_id": "-2147483166", "name": "Whitehorse", "code": "54", "order": 3, "confidence": "exact"}
+      ]
+    },
+    {
+      "name": "Chaba Trail", "province_code": "AB",
+      "booking": [{"system": "parks_canada", "covers": "all"}],
+      "review": "Added 2026-11-03 (approved). Parks Canada: 14.8 km to Athabasca Crossing on an old fire road, suited to first-time backpackers. Sources: https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/chaba",
+      "campgrounds": [
+        {"resource_id": "-2147483224", "name": "Big Bend", "code": "49", "order": 1, "confidence": "exact"},
+        {"resource_id": "-2147483234", "name": "Athabasca Crossing", "code": "50", "order": 2, "confidence": "exact"}
+      ]
+    },
+    {
       "name": "Mantario Trail", "province_code": "MB",
       "booking": [{"system": "manitoba_parks", "covers": "all", "confirmed": false, "note": "Backcountry campsites in Whiteshell Provincial Park."}],
       "campgrounds": []

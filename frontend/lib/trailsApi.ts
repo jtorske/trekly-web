@@ -210,8 +210,10 @@ export interface TrailCampground {
   max_capacity: number | null;
   max_group_size: number | null;
   provider: string;
-  /** An alert can watch it (on Parks Canada's online map). */
+  /** An alert can watch it (backend app/backcountry/watchable.py). */
   watchable: boolean;
+  /** Why not, when it can't. */
+  alert_note: string | null;
 }
 
 /**
