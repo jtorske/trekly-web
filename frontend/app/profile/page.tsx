@@ -19,6 +19,7 @@ import { publicProfilePath } from "@/lib/profilesApi";
 import type { FeaturedBadges } from "@/lib/featuredBadges";
 import { getFeaturedBadges } from "@/lib/featuredBadgesApi";
 import { useRank } from "@/lib/useRank";
+import { useStreak } from "@/lib/useStreak";
 import { useUnits } from "@/lib/useUnits";
 import { legacySettingsHref, sectionHref } from "@/app/settings/settingsSections";
 import {
@@ -62,6 +63,7 @@ function ProfileContent() {
   const plans = usePlans();
   const hikes = useHikeLogs();
   const { rank: myRank } = useRank();
+  const { streak, grew: streakGrew } = useStreak();
   const [featured, setFeatured] = useState<FeaturedBadges | null>(null);
   const [pickingBadges, setPickingBadges] = useState(false);
   const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
@@ -142,6 +144,8 @@ function ProfileContent() {
       rank={myRank?.rank ?? null}
       rankDetail={myRank && <RankProgress mine={myRank} />}
       province={profile.home_province}
+      streak={streak}
+      streakGrew={streakGrew}
       badges={
         <FeaturedBadgeSlots badges={featured?.badges ?? []} loading={!featured} onEdit={() => setPickingBadges(true)} />
       }

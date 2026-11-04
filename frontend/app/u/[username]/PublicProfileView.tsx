@@ -204,6 +204,7 @@ export default function PublicProfileView({ username }: { username: string }) {
       bio={profile.bio}
       rank={profile.rank}
       province={profile.home_province}
+      streak={profile.visit_streak}
       badges={profile.featured_badges && <FeaturedBadgeSlots badges={profile.featured_badges} />}
       stats={stats}
       footer={

@@ -35,12 +35,14 @@ from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
 from app.models.setup import GearSetup
 from app.models.trip_plan import TripPlan
 from app.models.user_gear import UserGearItem
+from app.models.visit_streak import VisitStreak
 from app.notify import Email, EmailSender, email_sender_from_env
 from app.points import user_rank
 from app.privacy import Visibility, visibility
 from app.routers.me_gear import _item_query
 from app.schemas.gear import CapacityOut, CategoryRef, ProductSummaryOut, VariantOut, WeightOut
 from app.schemas.trail import TrailListItemOut
+from app.streaks import Streak, current_on, earliest_today
 
 router = APIRouter(prefix="/api/profiles", tags=["public profiles"])
 
@@ -111,6 +113,20 @@ class PublicTripPlan(BaseModel):
     nights: int
 
 
+class PublicStreak(BaseModel):
+    # 0 once it has lapsed in every time zone (the owner's isn't known).
+    current: int
+    longest: int
+
+
+def _visit_streak(db: Session, user_id: UUID) -> PublicStreak:
+    row = db.get(VisitStreak, user_id)
+    if row is None:
+        return PublicStreak(current=0, longest=0)
+    streak = Streak(row.current_streak, row.longest_streak, row.last_visit_date)
+    return PublicStreak(current=current_on(streak, earliest_today(datetime.now(timezone.utc))), longest=streak.longest)
+
+
 class PublicProfileOut(BaseModel):
     username: str
     display_name: str | None
@@ -122,6 +138,8 @@ class PublicProfileOut(BaseModel):
     # Two-letter code; only with "Home province" switched on (off by default).
     home_province: str | None = None
     rank: PublicRank | None = None
+    # Only with "Visit streak" switched on (off by default).
+    visit_streak: PublicStreak | None = None
     journal: PublicJournal | None = None
     # Shown with the Trail Journal: same switch, and no dates either way.
     featured_badges: list[FeaturedBadgeOut] | None = None
@@ -254,6 +272,8 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> Pub
         # The name and level only: points are the owner's business (app/routers/me_rank.py).
         _, rank = user_rank(db, profile.id)
         out.rank = PublicRank(level=rank.level, title=rank.title)
+    if seen.shows("visit_streak"):
+        out.visit_streak = _visit_streak(db, profile.id)
     if seen.shows("journal"):
         out.journal = _journal(db, profile.id, seen.hide_dates)
         _, out.featured_badges = featured_badges(db, profile.id, hide_dates=seen.hide_dates, province=province)

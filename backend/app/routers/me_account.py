@@ -24,6 +24,7 @@ from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
+from app.models.visit_streak import VisitStreak
 from app.privacy import visibility
 from app.provinces import ProvinceCode
 from app.usernames import RESERVED_MESSAGE, REQUIRED_MESSAGE, TAKEN_MESSAGE, is_taken, normalize, rule_problem
@@ -282,6 +283,7 @@ def delete_account(
     ))
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
+    db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))
     if _is_postgres(db):
         db.execute(text("delete from auth.users where id = :id"), {"id": user.id})

@@ -27,6 +27,8 @@ export interface PrivacySettings {
   show_in_community: boolean;
   /** "Home province": visitors see the home province (and its badge). Off until turned on. */
   show_home_province: boolean;
+  /** "Visit streak": visitors see the current and best streak. Off until turned on. */
+  show_visit_streak: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;
@@ -79,6 +81,8 @@ export interface PublicProfile {
   /** Only while the owner has "Home province" switched on. */
   home_province: ProvinceCode | null;
   rank: { level: number; title: string } | null;
+  /** Only while the owner has "Visit streak" switched on; current is 0 once lapsed. */
+  visit_streak: { current: number; longest: number } | null;
   /** `milestones`: earned ones only (seasonal ones left out while dates are hidden). */
   journal: { hide_dates: boolean; entries: PublicJournalEntry[]; milestones: MilestoneBadgeInfo[] } | null;
   /** Shown with the Trail Journal (same switch); the owner's picks or their latest badges. */

@@ -149,6 +149,28 @@
   width: 1.1rem;
 }
 
+/* The rank name stays on one line; the streak after it moves below when it doesn't fit. */
+.rank {
+  flex-wrap: wrap;
+  row-gap: 0.1rem;
+  column-gap: 0.6rem;
+}
+
+.rankName {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+/* The visit streak, after the rank: flame and day count. */
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .showProfile {
   color: var(--menu-muted);
   font-size: 0.8rem;

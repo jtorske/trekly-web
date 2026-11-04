@@ -7,8 +7,12 @@ import { Backpack, Bell, LogOut, Settings, Shield, Tent, type LucideIcon } from 
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
 import RankEmblem from "./RankEmblem";
+import StreakFlame from "./StreakFlame";
 import { useRank } from "@/lib/useRank";
+import { useStreak } from "@/lib/useStreak";
+import { showsStreak, streakLabel } from "@/lib/visitStreak";
 import { ADMIN_LINK, PROFILE_HREF, accountLinks, currentAccountHref } from "@/lib/accountMenu";
+import ui from "./ui.module.css";
 import styles from "./AccountMenu.module.css";
 
 /** Decorative icons for the account rows, keyed by href; the labels name them. */
@@ -34,7 +38,7 @@ export interface AccountIdentity {
 
 type ItemProps = { role?: "menuitem"; tabIndex?: -1 };
 
-/** The header row: avatar, name, rank and "Show profile"; opens the profile. */
+/** The header row: avatar, name, rank, visit streak and "Show profile"; opens the profile. */
 export function ProfileRow({
   identity,
   current,
@@ -47,6 +51,7 @@ export function ProfileRow({
   onChoose: () => void;
 }) {
   const { rank } = useRank();
+  const { streak, grew } = useStreak();
   const name = identity.displayName || identity.email || "Your account";
   return (
     <Link href={PROFILE_HREF} className={`${styles.row} ${styles.profileRow}`} {...item} aria-current={current ? "page" : undefined} onClick={onChoose}>
@@ -55,10 +60,21 @@ export function ProfileRow({
         <span className={styles.name} title={name}>
           {name}
         </span>
-        {rank && (
+        {(rank || showsStreak(streak)) && (
           <span className={styles.rank}>
-            <RankEmblem level={rank.rank.level} className={styles.rankEmblem} />
-            {rank.rank.title}
+            {rank && (
+              <span className={styles.rankName}>
+                <RankEmblem level={rank.rank.level} className={styles.rankEmblem} />
+                {rank.rank.title}
+              </span>
+            )}
+            {showsStreak(streak) && (
+              <span className={styles.streak} title={streakLabel(streak.current)}>
+                <StreakFlame size={14} grew={grew} />
+                {streak.current}
+                <span className={ui.srOnly}>-day streak</span>
+              </span>
+            )}
           </span>
         )}
         <span className={styles.showProfile}>Show profile</span>

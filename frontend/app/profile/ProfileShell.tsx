@@ -6,11 +6,13 @@ import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import ProvinceBadge from "@/components/ProvinceBadge";
 import RankEmblem from "@/components/RankEmblem";
+import StreakFlame from "@/components/StreakFlame";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import { groupColour } from "@/lib/journal";
 import { homeLabel, province as findProvince } from "@/lib/provinces";
 import type { Rank } from "@/lib/rank";
+import { bestLabel, showsStreak, streakLabel, type StreakCounts } from "@/lib/visitStreak";
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
 import styles from "./shell.module.css";
 
@@ -99,6 +101,8 @@ export function IdentityCard({
   rank,
   rankDetail,
   province,
+  streak,
+  streakGrew = false,
   badges,
   action,
   stats,
@@ -119,12 +123,17 @@ export function IdentityCard({
   rankDetail?: ReactNode;
   /** Home province or territory code, beside the rank; null hides it. */
   province?: string | null;
+  /** Visit streak; hidden below 2 days. */
+  streak?: StreakCounts | null;
+  /** The streak just grew: its flame animates once. */
+  streakGrew?: boolean;
   badges?: ReactNode;
   action?: ReactNode;
   stats: StatRow[];
   footer?: ReactNode;
 }) {
   const home = findProvince(province);
+  const best = showsStreak(streak) ? bestLabel(streak) : null;
   return (
     <div className={styles.card}>
       <div className={styles.identity}>
@@ -140,7 +149,7 @@ export function IdentityCard({
 
       {bio && <p className={styles.bio}>{bio}</p>}
 
-      {(region || joined) && (
+      {(region || joined || showsStreak(streak)) && (
         <ul className={styles.meta}>
           {region && (
             <li>
@@ -152,6 +161,13 @@ export function IdentityCard({
             <li>
               <CalendarDays size={16} aria-hidden="true" />
               {joined}
+            </li>
+          )}
+          {showsStreak(streak) && (
+            <li className={styles.streak}>
+              <StreakFlame size={16} grew={streakGrew} />
+              <span className={styles.streakDays}>{streakLabel(streak.current)}</span>
+              {best && <span className={styles.streakBest}>{best}</span>}
             </li>
           )}
         </ul>

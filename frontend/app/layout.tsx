@@ -7,6 +7,7 @@ import PublicProfileNotice from "@/components/PublicProfileNotice";
 import SiteFooter from "@/components/SiteFooter";
 import RankCelebration from "@/components/RankCelebration";
 import MilestoneWatcher from "@/components/MilestoneWatcher";
+import VisitStreakWatcher from "@/components/VisitStreakWatcher";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
 import UsernameGate from "@/components/UsernameGate";
@@ -57,6 +58,7 @@ export default function RootLayout({
           <Toaster />
           <RankCelebration />
           <MilestoneWatcher />
+          <VisitStreakWatcher />
         </AuthProvider>
       </body>
     </html>

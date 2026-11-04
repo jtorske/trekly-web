@@ -9,3 +9,5 @@ psycopg2-binary==2.9.12
 pyjwt[crypto]==2.10.1
 # Trail photo processing (resizes untrusted images to WebP); keep current for security fixes.
 pillow==11.3.0
+# IANA time zones for visit streaks (app/streaks.py). Keep current: zone rules change (2026f: Alberta).
+tzdata==2026.6

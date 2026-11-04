@@ -183,6 +183,14 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
           disabled={settings.is_private}
           onChange={(value) => change("show_home_province", value)}
         />
+        <Switch
+          id="privacy-visit-streak"
+          label="Visit streak"
+          hint="How many days in a row you've visited Trekly, and your best streak. Off until you turn it on."
+          checked={settings.show_visit_streak}
+          disabled={settings.is_private}
+          onChange={(value) => change("show_visit_streak", value)}
+        />
       </fieldset>
 
       <fieldset className={styles.switchGroup}>

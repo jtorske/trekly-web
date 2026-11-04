@@ -25,6 +25,7 @@ SECTION_COLUMNS = {
     "saved_trails": "show_saved_trails",
     "trip_plans": "show_trip_plans",
     "home_province": "show_home_province",
+    "visit_streak": "show_visit_streak",
 }
 
 MAX_REPORT_DETAILS = 1000
@@ -51,6 +52,9 @@ class ProfileSettings(Base):
     # "Home province" on the public profile. Off until they turn it on
     # (migration 4f8b2c6d9e13).
     show_home_province = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Visit streak" on the public profile. Off until they turn it on
+    # (migration f9c2d4e6a8b1).
+    show_visit_streak = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

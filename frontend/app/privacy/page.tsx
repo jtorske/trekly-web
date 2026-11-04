@@ -67,6 +67,11 @@ export default function PrivacyPage() {
             in standard server logs by our hosting providers.
           </li>
           <li>
+            <strong>Visit streak:</strong> when you&apos;re signed in, the date of your most recent
+            visit and your current and longest streak. We don&apos;t keep a history of your visits.
+            Your browser&apos;s time zone is used to work out the date and isn&apos;t stored.
+          </li>
+          <li>
             <strong>Cookies and local storage:</strong> used to keep you signed in and remember your
             settings.
           </li>
@@ -113,7 +118,7 @@ export default function PrivacyPage() {
             and loadouts, and saved trails.
           </li>
           <li>
-            Private by default, and you can choose to show them: your trip plans and your home province or territory. Public trip plans
+            Private by default, and you can choose to show them: your trip plans, your home province or territory, and your visit streak. Public trip plans
             show where and when you&apos;ll be on a trail, so think carefully before sharing them.
           </li>
           <li>

@@ -24,6 +24,7 @@ from app.models.trail_campground import TrailBookingSystem, TrailCampground
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
 from app.models.trip_plan import TripPlan, TripPlanNight
 from app.models.user_gear import UserGearItem
+from app.models.visit_streak import VisitStreak
 
 __all__ = [
     "AdminAuditLog",
@@ -62,4 +63,5 @@ __all__ = [
     "TripPlan",
     "TripPlanNight",
     "UserGearItem",
+    "VisitStreak",
 ]

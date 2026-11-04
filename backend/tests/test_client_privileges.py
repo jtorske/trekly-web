@@ -133,3 +133,23 @@ def test_data_grants_that_rls_guards_are_unchanged(conn):
             text("SELECT has_table_privilege('authenticated', :table, :privilege)"),
             {"table": f"public.{table}", "privilege": privilege},
         ).scalar_one(), (table, privilege)
+
+
+@pytest.mark.parametrize("role", ROLES)
+def test_visit_streaks_are_out_of_reach_of_clients(conn, role):
+    # Only the API (as postgres) reads or writes streak counts (migration f9c2d4e6a8b1).
+    assert conn.execute(text("SELECT relrowsecurity FROM pg_class WHERE oid = 'public.visit_streaks'::regclass")).scalar_one()
+    act_as(conn, role)
+    assert refused(conn, "SELECT * FROM public.visit_streaks")
+    assert refused(conn, "INSERT INTO public.visit_streaks VALUES (gen_random_uuid(), 99, 99, current_date)")
+    assert refused(conn, "UPDATE public.visit_streaks SET current_streak = 99")
+    assert refused(conn, "DELETE FROM public.visit_streaks")
+
+
+def test_only_the_streak_switch_is_client_writable(conn):
+    assert conn.execute(text(
+        "SELECT has_column_privilege('authenticated', 'public.profile_settings', 'show_visit_streak', 'UPDATE')"
+    )).scalar_one()
+    assert not conn.execute(text(
+        "SELECT has_column_privilege('anon', 'public.profile_settings', 'show_visit_streak', 'UPDATE')"
+    )).scalar_one()

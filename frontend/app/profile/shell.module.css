@@ -260,6 +260,22 @@
   flex-shrink: 0;
 }
 
+/* Visit streak: the count in full colour, the best muted beside it. */
+.meta .streak {
+  flex-wrap: wrap;
+  column-gap: 0.5rem;
+  row-gap: 0;
+}
+
+.streakDays {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.streakBest::before {
+  content: "· ";
+}
+
 /* The rank and, beside it, the home province badge. */
 .rankRow {
   display: flex;
