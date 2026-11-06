@@ -1180,3 +1180,27 @@
   text-align: center;
   white-space: pre-line;
 }
+
+/* GPS-verified hikes: a small check before the date under the stamp. */
+.slotVerified {
+  margin-right: 0.2em;
+}
+
+.verifiedLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+/* "Add past hikes", above the book. */
+.toolbar {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  width: min(100%, 76rem);
+  margin: 0 auto 0.5rem;
+}

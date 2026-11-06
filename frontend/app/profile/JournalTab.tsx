@@ -11,6 +11,7 @@ import { useTrailCatalogue } from "@/lib/useTrailCatalogue";
 import { SectionCard } from "./ProfileShell";
 import { EmptyState } from "./sections";
 import shell from "./shell.module.css";
+import VerifiedCheck from "@/components/VerifiedCheck";
 import styles from "./JournalTab.module.css";
 
 /**
@@ -22,11 +23,14 @@ export default function JournalTab({
   hikes,
   owner,
   units,
+  undatedCaption = null,
 }: {
   /** null while loading. */
   hikes: SummaryHike[] | null;
   owner: boolean;
   units: UnitSystem;
+  /** Under a stamp with no date: "Before Nov 2026". Null when dates are hidden. */
+  undatedCaption?: string | null;
 }) {
   const { catalogue, failed } = useTrailCatalogue();
 
@@ -104,8 +108,15 @@ export default function JournalTab({
             <li key={hike.trail.id}>
               <Link href={`/trails?id=${encodeURIComponent(hike.trail.id)}`} className={styles.stamp}>
                 <TrailBadge name={hike.trail.name} terrain={hike.trail.terrain} colour={colour} hiked className={styles.stampBadge} />
-                <span className={styles.stampName}>{hike.trail.name}</span>
-                {hike.hiked_on && <span className={styles.stampDate}>{formatHikeDate(hike.hiked_on)}</span>}
+                <span className={styles.stampName}>
+                  {hike.trail.name}
+                  {hike.verified && <> <VerifiedCheck /></>}
+                </span>
+                {hike.hiked_on ? (
+                  <span className={styles.stampDate}>{formatHikeDate(hike.hiked_on)}</span>
+                ) : (
+                  undatedCaption && <span className={styles.stampDate}>{undatedCaption}</span>
+                )}
               </Link>
             </li>
           ))}

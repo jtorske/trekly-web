@@ -9,11 +9,15 @@ The facts come from gather(); tests build Facts directly.
 
 Data rules:
 - A journal has one entry per trail, so nothing needs a trail hiked twice.
-- A trip's nights are its trail's typical nights. Its days run from the hike
+- A trip's nights are the GPS track's nights when it was verified with an
+  overnight track, else its trail's typical nights. Its days run from the hike
   date (the trip's first day) through the nights after it, so a trip that
   crosses into a new month or season counts for both.
 - Hike dates are calendar dates with no time of day: the day the hiker
   picked, wherever they were, never shifted by a time zone.
+- A hike from before Trekly has no date. It counts for everything except
+  the date-based rules (seasons, months, streaks, same day, a date or a
+  window), which only see dated hikes: Hike.days() is empty without one.
 - Distance, elevation and route type count only trails where they're known.
 - The catalogue's retired trails still count as hikes, but "every trail" (in
   the catalogue or a park) and the popularity ranks are the active trails.
@@ -48,9 +52,15 @@ class Hike:
     photo: bool = False
     # When it was logged, for dating a milestone when there's no hike date.
     logged_on: date | None = None
+    # Matched against a GPS track; see points.py before counting it anywhere.
+    verified: bool = False
+    # The track's own nights (overnight GPX), overriding the trail's typical nights.
+    track_nights: int | None = None
 
     @property
     def nights(self) -> int:
+        if self.track_nights is not None:
+            return self.track_nights
         return self.trail.typical_duration_nights or 0
 
     def days(self) -> list[date]:
@@ -485,7 +495,10 @@ def gather(db: Session, user_id: UUID) -> Facts:
     logs = db.scalars(select(HikeLog).where(HikeLog.user_id == user_id).options(joinedload(HikeLog.trail))).all()
     facts = Facts(
         hikes=[
-            Hike(log.trail, log.hiked_on, bool(log.note), bool(log.photo_path), log.created_at.date())
+            Hike(
+                log.trail, log.hiked_on, bool(log.note), bool(log.photo_path), log.created_at.date(),
+                verified=bool(log.verified), track_nights=log.nights,
+            )
             for log in logs
         ],
         plans=db.scalar(select(func.count()).select_from(TripPlan).where(TripPlan.user_id == user_id)) or 0,

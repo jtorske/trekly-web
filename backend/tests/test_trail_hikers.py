@@ -77,7 +77,7 @@ def test_an_opted_in_hiker_is_listed_with_their_note(client, world, hiker):  # n
     assert body["hikers"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None}]
     assert body["others"] == 0
     assert body["notes"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None, "note": "Larches!",
-                              "hiked_on": "2026-08-14", "photo_path": alice["photo"]}]
+                              "hiked_on": "2026-08-14", "verified": False, "photo_path": alice["photo"]}]
     # Only declared fields: no user id or email.
     text = str(body)
     assert str(alice["id"]) not in text.replace(alice["photo"], "") and "@example.com" not in text

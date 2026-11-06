@@ -70,3 +70,17 @@
   margin-right: auto;
   font-size: 0.9rem;
 }
+
+.undated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.undated input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-olive);
+}

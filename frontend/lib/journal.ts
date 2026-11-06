@@ -206,7 +206,7 @@ export function hikedInGroup(group: JournalGroup, hiked: { has: (id: string) => 
 export const CATALOGUE_SIZE = 131;
 
 /** A hike as the profile sees it: a visitor's copy has no date when the owner hides dates. */
-export type SummaryHike = { trail: TrailListItem; hiked_on: string | null };
+export type SummaryHike = { trail: TrailListItem; hiked_on: string | null; verified?: boolean; nights?: number | null };
 
 export interface JournalSummary {
   hiked: number;
@@ -226,6 +226,9 @@ export interface JournalSummary {
 
 export const RECENT_STAMPS = 6;
 
+/** A GPS track's own nights when it has them, else the trail's typical nights. */
+const nightsOf = (hike: SummaryHike) => hike.nights ?? hike.trail.typical_duration_nights ?? 0;
+
 /**
  * The Trail Journal in numbers, for the profile's Journal tab. Built on
  * buildJournal, so the counts, groups and colours match the book.
@@ -239,14 +242,17 @@ export function summarizeJournal(catalogue: TrailListItem[], hikes: SummaryHike[
     trails.length > 0 && trails.every((trail) => known(trail) != null)
       ? trails.reduce((sum, trail) => sum + Number(known(trail)), 0)
       : null;
-  const dated = hikes.every((hike) => hike.hiked_on);
-  const ordered = dated ? [...hikes].sort((a, b) => (b.hiked_on as string).localeCompare(a.hiked_on as string)) : hikes;
+  // Newest first; undated hikes (from before Trekly, or with dates hidden)
+  // after the dated ones, in the order given (the sort is stable).
+  const ordered = [...hikes].sort((a, b) =>
+    a.hiked_on && b.hiked_on ? b.hiked_on.localeCompare(a.hiked_on) : Number(Boolean(b.hiked_on)) - Number(Boolean(a.hiked_on)),
+  );
   return {
     hiked: journal.hiked,
     total: journal.total,
     places: new Set(trails.map((trail) => trail.region)).size,
-    overnights: trails.filter((trail) => (trail.typical_duration_nights ?? 0) >= 1).length,
-    nights: trails.reduce((sum, trail) => sum + (trail.typical_duration_nights ?? 0), 0),
+    overnights: hikes.filter((hike) => nightsOf(hike) >= 1).length,
+    nights: hikes.reduce((sum, hike) => sum + nightsOf(hike), 0),
     distanceKm: every((trail) => trail.distance_km),
     elevationM: every((trail) => trail.elevation_gain_m),
     recent: ordered.slice(0, RECENT_STAMPS).map((hike) => ({ hike, colour: colourOf.get(hike.trail.id) ?? groupColour(hike.trail.region) })),

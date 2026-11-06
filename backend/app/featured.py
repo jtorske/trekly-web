@@ -64,7 +64,7 @@ def _logs(db: Session, user_id: UUID) -> list[HikeLog]:
         select(HikeLog)
         .where(HikeLog.user_id == user_id)
         .options(joinedload(HikeLog.trail))
-        .order_by(HikeLog.hiked_on.desc(), HikeLog.created_at.desc())
+        .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
 
 

@@ -270,7 +270,7 @@ def test_hidden_dates_leave_no_date_and_no_date_order_anywhere(client, alice_pro
     for day in three_hikes:
         assert day not in text
     # No timestamps of any kind on journal entries either.
-    assert set(body["journal"]["entries"][0]) == {"trail", "hiked_on", "note", "photo_path"}
+    assert set(body["journal"]["entries"][0]) == {"trail", "hiked_on", "note", "photo_path", "verified"}
     assert all(e["hiked_on"] is None for e in body["journal"]["entries"])
     # Alphabetical everywhere, so "recent" can't be read off the order.
     assert [e["trail"]["name"] for e in body["journal"]["entries"]] == ["Agnes Lake", "Boom Lake", "Skyline Trail"]

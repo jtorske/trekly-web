@@ -59,10 +59,12 @@ class PublicRank(BaseModel):
 
 class PublicJournalEntry(BaseModel):
     trail: TrailListItemOut
-    # None when the owner hides dates.
+    # None when the owner hides dates, or for a hike from before they joined.
     hiked_on: date | None
     note: str | None
     photo_path: str | None
+    # Matched against a GPS track.
+    verified: bool
 
 
 class PublicJournal(BaseModel):
@@ -167,7 +169,10 @@ def _journal(db: Session, owner: UUID, hide_dates: bool) -> PublicJournal:
     if hide_dates:
         logs = sorted(logs, key=lambda log: log.trail.name.lower())
     else:
-        logs = sorted(logs, key=lambda log: (log.hiked_on, log.created_at), reverse=True)
+        # Newest first; undated hikes (from before they joined) after every dated one.
+        logs = sorted(
+            logs, key=lambda log: (log.hiked_on is not None, log.hiked_on or date.min, log.created_at), reverse=True
+        )
     earned = [
         badge_out(milestone)
         for milestone, result in evaluate(gather(db, owner))
@@ -182,6 +187,7 @@ def _journal(db: Session, owner: UUID, hide_dates: bool) -> PublicJournal:
                 hiked_on=None if hide_dates else log.hiked_on,
                 note=log.note,
                 photo_path=log.photo_path,
+                verified=bool(log.verified),
             )
             for log in logs
         ],

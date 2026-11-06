@@ -12,6 +12,7 @@ import { useMyGear } from "@/app/gear/useMyGear";
 import { useSetups } from "@/app/gear/useSetups";
 import type { Profile } from "@/lib/accountApi";
 import { usePlans } from "@/lib/usePlans";
+import { undatedLabel } from "@/lib/hikeDate";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
@@ -250,7 +251,12 @@ function ProfileContent() {
           </SectionCard>
         )}
 
-        {tab === "journal" && <JournalTab hikes={hikes.loading ? null : hikes.logs} owner units={units} />}
+        {tab === "journal" && <JournalTab
+            hikes={hikes.loading ? null : hikes.logs}
+            owner
+            units={units}
+            undatedCaption={undatedLabel(user?.created_at, false)}
+          />}
 
         {tab === "trips" && (
           <SectionCard id="trips" title="Trips" count={tripCount ?? undefined}>

@@ -40,8 +40,10 @@ class CommunityHiker(BaseModel):
 
 class CommunityNote(CommunityHiker):
     note: str
-    # None when they hide the dates of their hikes.
+    # None when they hide the dates of their hikes, or it's from before they joined.
     hiked_on: date | None
+    # Matched against a GPS track.
+    verified: bool
     # Their journal is public whenever they're listed here, so this is a
     # photo visitors can already see on it (storage RLS agrees).
     photo_path: str | None
@@ -89,6 +91,7 @@ def trail_hikers(trail_id: UUID, response: Response, db: Session = Depends(get_d
             **_hiker(profile),
             note=log.note,
             hiked_on=None if hide_dates else log.hiked_on,
+            verified=bool(log.verified),
             photo_path=log.photo_path,
         )
         for log, profile, hide_dates in db.execute(

@@ -768,3 +768,15 @@
     animation: none;
   }
 }
+
+/* "Which of these have you hiked?" and "What's in your pack?" */
+.historySkeleton {
+  height: 20rem;
+  border-radius: 1rem;
+}
+
+.historyCount {
+  margin: 0.75rem 0 0;
+  color: var(--color-muted-text);
+  font-size: 0.9rem;
+}

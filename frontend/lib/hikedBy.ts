@@ -15,8 +15,10 @@ export interface CommunityHiker {
 
 export interface CommunityNote extends CommunityHiker {
   note: string;
-  /** null when they hide the dates of their hikes. */
+  /** null when they hide the dates of their hikes, or it's from before Trekly. */
   hiked_on: string | null;
+  /** Matched against a GPS track. */
+  verified: boolean;
   /** A photo already visible on their public journal. */
   photo_path: string | null;
 }

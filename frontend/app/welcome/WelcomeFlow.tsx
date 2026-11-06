@@ -26,6 +26,8 @@ import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
 import { ChoiceCards, ExperienceCards, HikingStyleCards, InterestChips, RegionPicker } from "@/components/OnboardingChoices";
 import ui from "@/components/ui.module.css";
 import { getProfile, updateProfile, type Profile, type ProfileUpdate } from "@/lib/accountApi";
+import { addMyGear, type ProductSummary } from "@/lib/gearApi";
+import { addPastHikes } from "@/lib/hikeLogsApi";
 import { DEFAULT_AFTER_LOGIN, safeNextPath } from "@/lib/authLogic";
 import {
   EXPLORE_HREF,
@@ -55,6 +57,7 @@ import { announceProfile, useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { normalizeUsername, suggestionHint, usernameReady } from "@/lib/usernames";
 import { useProfilePhoto } from "../settings/ProfilePhoto";
+import { HikedStep, PackStep } from "./HistorySteps";
 import styles from "./welcome.module.css";
 
 // ---------------------------------------------------------------- visuals
@@ -70,6 +73,8 @@ const VISUALS: Record<StepKey, Visual> = {
   experience: { kind: "topo", tone: "dusk" },
   interests: { kind: "photo", src: "/images/IMG_9332.jpeg", position: "center 60%" },
   regions: { kind: "photo", src: "/images/IMG_9336.jpeg", position: "center 55%" },
+  hiked: { kind: "topo", tone: "olive" },
+  pack: { kind: "topo", tone: "sand" },
   units: { kind: "topo", tone: "rust" },
   privacy: { kind: "topo", tone: "sand" },
   done: { kind: "photo", src: "/images/IMG_8988.jpeg", position: "center 55%" },
@@ -215,6 +220,11 @@ function Flow({
   const [experience, setExperience] = useState<Experience | null>(prefs.experience);
   const [interests, setInterests] = useState<string[]>(prefs.interests);
   const [regions, setRegions] = useState<string[]>(prefs.favourite_regions);
+  // Picks on the two history steps, saved when they continue (not when they skip).
+  const [pastPicks, setPastPicks] = useState<Set<string>>(() => new Set());
+  const [packPicks, setPackPicks] = useState<Map<string, ProductSummary>>(() => new Map());
+  // One request id per product for the flow's life, so a retried Continue adds nothing twice.
+  const packRequestIds = useRef(new Map<string, string>());
   const [units, setUnits] = useState<UnitSystem>(profile.units ?? "metric");
   const [isPrivate, setIsPrivate] = useState(privacy.is_private);
   const [savedPrivacy, setSavedPrivacy] = useState(privacy);
@@ -270,6 +280,29 @@ function Flow({
         return { interests };
       case "regions":
         return { favourite_regions: regions };
+      case "hiked":
+        if (pastPicks.size > 0) {
+          await addPastHikes([...pastPicks]);
+          setPastPicks(new Set());
+        }
+        return {};
+      case "pack": {
+        const left = new Map(packPicks);
+        try {
+          for (const product of packPicks.values()) {
+            let requestId = packRequestIds.current.get(product.id);
+            if (!requestId) {
+              requestId = crypto.randomUUID();
+              packRequestIds.current.set(product.id, requestId);
+            }
+            await addMyGear({ product_id: product.id, client_request_id: requestId });
+            left.delete(product.id);
+          }
+        } finally {
+          setPackPicks(left);
+        }
+        return {};
+      }
       case "units":
         if (units !== profile.units) announceProfile(await updateProfile({ units }));
         return {};
@@ -390,6 +423,23 @@ function Flow({
     setInterests,
     regions,
     setRegions,
+    home: home === "none" ? null : home,
+    pastPicks,
+    togglePast: (trailId: string) =>
+      setPastPicks((current) => {
+        const next = new Set(current);
+        if (next.has(trailId)) next.delete(trailId);
+        else next.add(trailId);
+        return next;
+      }),
+    packPicks,
+    togglePack: (product: ProductSummary) =>
+      setPackPicks((current) => {
+        const next = new Map(current);
+        if (next.has(product.id)) next.delete(product.id);
+        else next.set(product.id, product);
+        return next;
+      }),
     units,
     setUnits,
     isPrivate,
@@ -496,6 +546,11 @@ interface ScreenProps {
   setInterests: (value: string[]) => void;
   regions: string[];
   setRegions: (value: string[]) => void;
+  home: ProvinceCode | null;
+  pastPicks: ReadonlySet<string>;
+  togglePast: (trailId: string) => void;
+  packPicks: ReadonlyMap<string, ProductSummary>;
+  togglePack: (product: ProductSummary) => void;
   units: UnitSystem;
   setUnits: (value: UnitSystem) => void;
   isPrivate: boolean;
@@ -555,6 +610,16 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
     title: "Which places are on your radar?",
     lead: "Pick the parks you'd love to explore. They'll come first when you open Explore.",
     body: <RegionPicker values={regions} onChange={setRegions} />,
+  }),
+  hiked: ({ home, regions, pastPicks, togglePast }) => ({
+    title: "Which of these have you hiked?",
+    lead: "Tap any you've done. They go in your Trail Journal, and you can add dates later.",
+    body: <HikedStep home={home} regions={regions} selected={pastPicks} onToggle={togglePast} />,
+  }),
+  pack: ({ packPicks, togglePack }) => ({
+    title: "What's in your pack?",
+    lead: "Tap the gear you own to add it to your kit. You can skip this and add gear any time.",
+    body: <PackStep selected={packPicks} onToggle={togglePack} />,
   }),
   units: ({ units, setUnits }) => ({
     title: "Metric or imperial?",

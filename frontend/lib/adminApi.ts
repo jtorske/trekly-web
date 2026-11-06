@@ -91,7 +91,7 @@ export interface AdminUserDetail extends AdminUser {
   hidden_at: string | null;
   hidden_reason: string | null;
   banned_until: string | null;
-  hikes_list: { id: string; trail: TrailRef; hiked_on: string; note: string | null; has_photo: boolean }[];
+  hikes_list: { id: string; trail: TrailRef; hiked_on: string | null; note: string | null; has_photo: boolean; verified: boolean }[];
   alerts_list: {
     id: string;
     site_name: string;

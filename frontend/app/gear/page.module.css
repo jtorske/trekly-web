@@ -60,6 +60,13 @@
   margin-left: auto;
 }
 
+/* Quick-add gear and LighterPack import. */
+.bringIn {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .searchInput {
   width: 13rem;
   min-height: 2.25rem;

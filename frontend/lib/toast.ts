@@ -114,7 +114,8 @@ export function failureMessage(what: string, error: unknown): string {
  */
 export function formProblem(error: unknown): string | null {
   const status = (error as { status?: unknown } | null)?.status;
-  if ((status === 400 || status === 409 || status === 422) && error instanceof Error) return error.message;
+  // 429: a fair-use limit (e.g. hikes dated today), explained in the message.
+  if ((status === 400 || status === 409 || status === 422 || status === 429) && error instanceof Error) return error.message;
   return null;
 }
 

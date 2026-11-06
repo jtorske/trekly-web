@@ -34,11 +34,17 @@ const signedIn = {
 
 // ------------------------------------------------------------------ steps
 
-test("nine questions, then the finish screen", () => {
-  assert.equal(QUESTION_COUNT, 9);
+test("eleven questions, then the finish screen", () => {
+  assert.equal(QUESTION_COUNT, 11);
   assert.equal(STEPS.at(-1), "done");
   assert.equal(stepNumber("home"), 3);
-  assert.equal(stepNumber("privacy"), 9);
+  assert.equal(stepNumber("privacy"), 11);
+});
+
+test("past hikes and the pack come right after the places on their radar", () => {
+  assert.deepEqual(STEPS.slice(STEPS.indexOf("regions"), STEPS.indexOf("regions") + 4), ["regions", "hiked", "pack", "units"]);
+  assert.equal(isOptional("hiked"), true);
+  assert.equal(isOptional("pack"), true);
 });
 
 test("only the username step is required", () => {

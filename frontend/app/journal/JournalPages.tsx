@@ -1,5 +1,7 @@
 "use client";
 
+import VerifiedCheck from "@/components/VerifiedCheck";
+import { undatedLabel } from "@/lib/hikeDate";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -43,6 +45,13 @@ export interface PageContext {
   /** Open a section by its slug (null is the contents). */
   onOpen: (slug: string | null) => void;
   units: UnitSystem;
+  /** When the owner joined, for "Hiked before Nov 2026" on undated hikes. */
+  joinedAt: string | null;
+}
+
+/** The long date, or "before Nov 2026" for a hike from before joining. */
+export function entryDate(log: HikeLog, joinedAt: string | null, month: "short" | "long" = "short"): string {
+  return log.hiked_on ? formatHikeDate(log.hiked_on, month) : undatedLabel(joinedAt, false);
 }
 
 /** The closed book a signed-out visitor sees. */
@@ -272,7 +281,7 @@ function Slot({ trail, group, ctx, active }: { trail: TrailListItem; group: Jour
       type="button"
       className={styles.slotCell}
       onClick={() => ctx.onOpenEntry(log, group.colour)}
-      aria-label={`${trail.name}: hiked ${formatHikeDate(log.hiked_on, "long")}. Open journal entry`}
+      aria-label={`${trail.name}: ${log.hiked_on ? `hiked ${formatHikeDate(log.hiked_on, "long")}` : undatedLabel(ctx.joinedAt)}${log.verified ? ", verified with a GPS track" : ""}. Open journal entry`}
     >
       <span className={styles.badgeBox}>
         <span className={styles.badgeWrap}>
@@ -298,7 +307,10 @@ function Slot({ trail, group, ctx, active }: { trail: TrailListItem; group: Jour
           />
         </span>
       </span>
-      <span className={`${styles.slotCaption} ${styles.slotDate}`}>{formatHikeDate(log.hiked_on)}</span>
+      <span className={`${styles.slotCaption} ${styles.slotDate}`}>
+        {log.verified && <VerifiedCheck size={12} className={styles.slotVerified} />}
+        {entryDate(log, ctx.joinedAt)}
+      </span>
     </button>
   );
 }

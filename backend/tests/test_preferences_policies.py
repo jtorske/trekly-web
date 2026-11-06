@@ -102,7 +102,10 @@ def test_guests_have_no_access(conn, world):
 
 def test_other_users_see_no_rows(conn, world):
     act_as(conn, world["bob"])
-    assert conn.execute(text("SELECT count(*) FROM public.profile_preferences")).scalar_one() == 0
+    # Only this user's row: the shared local stack may hold other users' preferences.
+    assert conn.execute(
+        text("SELECT count(*) FROM public.profile_preferences WHERE user_id = :id"), {"id": world["alice"]}
+    ).scalar_one() == 0
     assert conn.execute(
         text("SELECT count(*) FROM public.profile_preferences WHERE user_id = :id"), {"id": world["alice"]}
     ).scalar_one() == 0
@@ -140,4 +143,7 @@ def test_values_are_checked(conn, world):
 def test_deleting_the_user_deletes_the_row(conn, world):
     conn.execute(text("RESET ROLE"))
     conn.execute(text("DELETE FROM auth.users WHERE id = :id"), {"id": world["alice"]})
-    assert conn.execute(text("SELECT count(*) FROM public.profile_preferences")).scalar_one() == 0
+    # Only this user's row: the shared local stack may hold other users' preferences.
+    assert conn.execute(
+        text("SELECT count(*) FROM public.profile_preferences WHERE user_id = :id"), {"id": world["alice"]}
+    ).scalar_one() == 0

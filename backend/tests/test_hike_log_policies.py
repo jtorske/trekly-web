@@ -252,3 +252,46 @@ def test_only_processed_photo_names_are_accepted(conn, users, name):
     act_as(conn, alice)
     full = f"{alice}/{name.format(uuid=uuid.uuid4())}"
     assert refused(conn, "INSERT INTO storage.objects (bucket_id, name) VALUES ('hike-photos', :name)", {"name": full})
+
+
+# ------------------------------------------------- verification (migration b4e7a2c9d1f3)
+
+def test_clients_cannot_write_the_verification_columns(conn, users, trail):
+    alice, _ = users
+    act_as(conn, alice)
+    add_log(conn, alice, trail)
+    for column, value in (("verified", "true"), ("match_score", "0.9"), ("nights", "2")):
+        assert refused(conn, f"UPDATE public.hike_logs SET {column} = {value} WHERE trail_id = :trail", {"trail": trail},
+                       reason="permission denied"), column
+    assert refused(
+        conn,
+        "INSERT INTO public.hike_logs (user_id, trail_id, hiked_on, verified, match_score) "
+        "VALUES (:user, gen_random_uuid(), '2026-08-14', true, 0.9)",
+        {"user": alice},
+        reason="permission denied",
+    )
+    # Undated hikes are allowed.
+    assert conn.execute(text("UPDATE public.hike_logs SET hiked_on = NULL WHERE trail_id = :trail"), {"trail": trail}).rowcount == 1
+
+
+def test_a_client_date_change_drops_verification(conn, users, trail):
+    alice, _ = users
+    act_as(conn, alice)
+    add_log(conn, alice, trail)
+    conn.execute(text("RESET ROLE"))  # the API marks it verified
+    conn.execute(
+        text("UPDATE public.hike_logs SET verified = true, match_score = 0.9, nights = 1 WHERE trail_id = :trail"),
+        {"trail": trail},
+    )
+    act_as(conn, alice)
+    conn.execute(text("UPDATE public.hike_logs SET note = 'Still verified' WHERE trail_id = :trail"), {"trail": trail})
+    conn.execute(text("RESET ROLE"))
+    row = conn.execute(text("SELECT verified FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).one()
+    assert row.verified is True
+    act_as(conn, alice)
+    conn.execute(text("UPDATE public.hike_logs SET hiked_on = '2020-01-01' WHERE trail_id = :trail"), {"trail": trail})
+    conn.execute(text("RESET ROLE"))
+    row = conn.execute(
+        text("SELECT verified, match_score, nights FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}
+    ).one()
+    assert tuple(row) == (False, None, None)

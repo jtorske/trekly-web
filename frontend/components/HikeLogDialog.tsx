@@ -6,6 +6,8 @@ import Dialog from "./Dialog";
 import ui from "./ui.module.css";
 import { useAuth } from "./AuthProvider";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
+import { undatedLabel } from "@/lib/hikeDate";
+import { VERIFIED_LABEL } from "./VerifiedCheck";
 import { photoInputProblem } from "@/lib/journalPhoto";
 import { processPhoto } from "@/lib/processPhoto";
 import { formProblem, toast } from "@/lib/toast";
@@ -15,8 +17,8 @@ import { useHikePhoto } from "@/lib/useHikePhoto";
 import styles from "./HikeLogDialog.module.css";
 
 /**
- * Add or edit a Trail Journal entry: the date, an optional note and an
- * optional photo. The photo is resized and re-encoded on the device (which
+ * Add or edit a Trail Journal entry: the date (or "I don't remember", for a
+ * hike from before Trekly), an optional note and an optional photo. The photo is resized and re-encoded on the device (which
  * strips its GPS location) before it's uploaded to the user's private folder.
  */
 export default function HikeLogDialog({
@@ -35,6 +37,9 @@ export default function HikeLogDialog({
   const { user } = useAuth();
   const today = localToday();
   const [date, setDate] = useState(entry?.hiked_on ?? today);
+  // Only offered for an entry that's already undated or a new one.
+  const [undated, setUndated] = useState(entry ? entry.hiked_on === null : false);
+  const dateChanged = entry?.verified && (undated || date !== entry.hiked_on);
   const [note, setNote] = useState(entry?.note ?? "");
   // `undefined` keeps the saved photo; `null` removes it; a File replaces it.
   const [photo, setPhoto] = useState<File | null | undefined>(undefined);
@@ -62,7 +67,7 @@ export default function HikeLogDialog({
       } else if (photo === null) {
         photoPath = null;
       }
-      await onSave({ hiked_on: date, note: note.trim() || null, photo_path: photoPath });
+      await onSave({ hiked_on: undated ? null : date, note: note.trim() || null, photo_path: photoPath });
       onClose();
     } catch (caught) {
       // Don't leave an orphaned upload behind if the entry didn't save.
@@ -106,7 +111,7 @@ export default function HikeLogDialog({
       <button type="button" className={ui.secondary} onClick={onClose} disabled={busy !== null}>
         Cancel
       </button>
-      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || !date}>
+      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || (!undated && !date)}>
         {busy === "save" ? "Saving…" : entry ? "Save changes" : "Add to journal"}
       </button>
     </>
@@ -122,10 +127,31 @@ export default function HikeLogDialog({
       sheet
     >
       <div className={styles.form}>
-        <label className={ui.field}>
-          <span className={ui.label}>Date hiked</span>
-          <DateInput className={ui.input} value={date} onChange={setDate} max={today} min="1900-01-01" required data-autofocus />
-        </label>
+        <div className={ui.field}>
+          <label className={ui.field}>
+            <span className={ui.label}>Date hiked</span>
+            <DateInput
+              className={ui.input}
+              value={undated ? "" : date}
+              onChange={setDate}
+              max={today}
+              min="1900-01-01"
+              required={!undated}
+              disabled={undated}
+              data-autofocus
+            />
+          </label>
+          <label className={styles.undated}>
+            <input type="checkbox" checked={undated} onChange={(event) => setUndated(event.target.checked)} />
+            I don&apos;t remember the date
+          </label>
+          {undated && <span className={ui.hint}>It&apos;ll show as &ldquo;{undatedLabel(user?.created_at)}&rdquo;. Seasonal and date milestones need a date.</span>}
+          {dateChanged && (
+            <span className={ui.hint} role="status">
+              This hike is {VERIFIED_LABEL.toLowerCase()}. Changing its date removes the check.
+            </span>
+          )}
+        </div>
 
         <div className={ui.field}>
           <label className={ui.label} htmlFor={noteId}>

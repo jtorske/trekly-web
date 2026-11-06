@@ -5,6 +5,17 @@ deleting a hike, or retuning the config, changes the result next time.
 Only the owner sees points (app/routers/me_rank.py); visitors get the rank
 name and level alone, and only when the owner shows their rank
 (app/routers/public_profiles.py).
+
+Ranks are personal: every hike counts, including undated ones from before
+Trekly and ones that were never GPS-verified, because nobody else's standing
+depends on them.
+
+COMPETITIVE FEATURES MUST COUNT VERIFIED HIKES ONLY. Anything that compares
+users or awards a place against others (leaderboards, challenges, "first to
+hike", contests) must use verified_hikes() below, never facts.hikes or
+user_rank(). Unverified hikes are self-reported, and the only limit on them
+is the "a few hikes dated today" fair-use check (app/routers/me_hike_logs.py),
+which bulk past entries don't have.
 """
 
 from dataclasses import dataclass
@@ -12,7 +23,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.milestones import Facts, gather, milestone_points
+from app.milestones import Facts, Hike, gather, milestone_points
 from app.points_config import NEW_REGION_POINTS, POINTS_PER_NIGHT, RANKS, TRAIL_POINTS
 
 
@@ -36,12 +47,20 @@ class Rank:
     threshold: int
 
 
+def verified_hikes(facts: Facts) -> list[Hike]:
+    """The hikes a competitive feature may count (see the module docstring)."""
+    return [hike for hike in facts.hikes if hike.verified]
+
+
 def score(facts: Facts) -> Breakdown:
-    """Points for a user's hikes, and the milestones (by tier) they've earned."""
+    """Points for a user's hikes, and the milestones (by tier) they've earned.
+
+    Personal rank only. A leaderboard or challenge must score
+    verified_hikes(facts) instead (see the module docstring)."""
     trails = facts.trails
     return Breakdown(
         trails=sum(TRAIL_POINTS[trail.terrain_difficulty] for trail in trails),
-        nights=sum(POINTS_PER_NIGHT * (trail.typical_duration_nights or 0) for trail in trails),
+        nights=sum(POINTS_PER_NIGHT * hike.nights for hike in facts.hikes),
         regions=NEW_REGION_POINTS * len({trail.region for trail in trails}),
         milestones=milestone_points(facts),
     )

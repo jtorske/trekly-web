@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
-import { deleteHikeLog, listHikeLogs, putHikeLog, type HikeLog, type HikeLogInput } from "./hikeLogsApi";
+import {
+  addPastHikes,
+  deleteHikeLog,
+  listHikeLogs,
+  putHikeLog,
+  type HikeLog,
+  type HikeLogInput,
+  type PastHikesResult,
+} from "./hikeLogsApi";
 import { removeImages } from "./storage";
 import { refreshMilestones } from "./useMilestones";
 import { refreshRank } from "./useRank";
@@ -64,6 +72,18 @@ export function useHikeLogs() {
     [logs],
   );
 
+  /** Adds undated hikes from before Trekly (onboarding, "Add past hikes"). */
+  const addPast = useCallback(async (trailIds: string[]): Promise<PastHikesResult> => {
+    const result = await addPastHikes(trailIds);
+    // Undated hikes list after the dated ones, as the API orders them.
+    setState((s) => (s ? { ...s, logs: [...s.logs, ...result.added] } : s));
+    if (result.added.length > 0) {
+      void refreshRank("hike-added");
+      void refreshMilestones();
+    }
+    return result;
+  }, []);
+
   return {
     loading: Boolean(userId) && !current,
     error: current?.error ?? null,
@@ -71,5 +91,6 @@ export function useHikeLogs() {
     byTrail: new Map((logs ?? []).map((log) => [log.trail.id, log])),
     save,
     remove,
+    addPast,
   };
 }

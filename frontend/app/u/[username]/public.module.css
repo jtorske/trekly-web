@@ -81,6 +81,12 @@
   gap: 0.2rem;
 }
 
+.entryTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .entryTrail {
   font-weight: 600;
   overflow-wrap: anywhere;

@@ -6,10 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Dialog from "@/components/Dialog";
 import HikeLogDialog from "@/components/HikeLogDialog";
+import PastHikesDialog from "@/components/history/PastHikesDialog";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import type { HikeLog } from "@/lib/hikeLogsApi";
 import { buildJournal, sectionIndex } from "@/lib/journal";
+import { favouriteParks } from "@/lib/onboarding";
+import { getPreferences } from "@/lib/preferencesApi";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useMilestones } from "@/lib/useMilestones";
 import { useTrailCatalogue } from "@/lib/useTrailCatalogue";
@@ -17,7 +20,9 @@ import { useProfile } from "@/lib/useProfile";
 import { useUnits } from "@/lib/useUnits";
 import Book from "./Book";
 import { useHikePhoto } from "@/lib/useHikePhoto";
-import { formatHikeDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
+import VerifiedCheck, { VERIFIED_LABEL } from "@/components/VerifiedCheck";
+import { undatedLabel } from "@/lib/hikeDate";
+import { entryDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
 import styles from "./journal.module.css";
 
 const stampKey = (userId: string) => `trekly:journal-stamped:${userId}`;
@@ -69,11 +74,13 @@ function useStamped(userId: string | null) {
 function EntryDialog({
   log,
   colour,
+  joinedAt,
   onEdit,
   onClose,
 }: {
   log: HikeLog;
   colour: string;
+  joinedAt: string | null;
   onEdit: () => void;
   onClose: () => void;
 }) {
@@ -81,7 +88,7 @@ function EntryDialog({
   return (
     <Dialog
       title={log.trail.name}
-      subtitle={`Hiked ${formatHikeDate(log.hiked_on, "long")}`}
+      subtitle={log.hiked_on ? `Hiked ${entryDate(log, joinedAt, "long")}` : undatedLabel(joinedAt)}
       onClose={onClose}
       footer={
         <>
@@ -104,8 +111,14 @@ function EntryDialog({
               <TrailBadge name={log.trail.name} terrain={log.trail.terrain} colour={colour} hiked className={styles.polaroidBadge} />
             )}
           </div>
-          <figcaption className={styles.handwriting}>{log.note ?? formatHikeDate(log.hiked_on, "long")}</figcaption>
+          <figcaption className={styles.handwriting}>{log.note ?? entryDate(log, joinedAt, "long")}</figcaption>
         </figure>
+        {log.verified && (
+          <p className={styles.verifiedLine}>
+            <VerifiedCheck /> {VERIFIED_LABEL}
+            {log.nights ? ` · ${log.nights} ${log.nights === 1 ? "night" : "nights"}` : ""}
+          </p>
+        )}
         {log.trail.retired_at && <p className={ui.hint}>This trail has left the Trekly catalogue. Your badge stays in your journal.</p>}
       </div>
     </Dialog>
@@ -122,6 +135,21 @@ function Journal() {
   const guest = status !== "signedIn" && status !== "loading";
   const { catalogue, failed } = useTrailCatalogue(signedIn);
   const [open, setOpen] = useState<{ log: HikeLog; colour: string; editing: boolean } | null>(null);
+  const [addingPast, setAddingPast] = useState(false);
+  // Their "on your radar" parks from /welcome, for the past-hikes order; loaded when the picker opens.
+  const [favourites, setFavourites] = useState<string[]>([]);
+  useEffect(() => {
+    if (!addingPast) return;
+    const controller = new AbortController();
+    getPreferences(controller.signal)
+      .then((prefs) => setFavourites(favouriteParks(prefs.favourite_regions).map((region) => region.park)))
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [addingPast]);
+  const pickerPrefs = useMemo(
+    () => ({ homeProvince: profile?.home_province ?? null, favouriteRegions: favourites }),
+    [profile?.home_province, favourites],
+  );
   const { stamped, mark } = useStamped(user?.id ?? null);
   // Whether the current section was opened from the contents in this visit,
   // so "Back to contents" can step back through history instead of adding to it.
@@ -162,6 +190,7 @@ function Journal() {
         onOpenEntry: (log, colour) => setOpen({ log, colour, editing: false }),
         onOpen: openSection,
         units,
+        joinedAt: user?.created_at ?? null,
       }
     : null;
 
@@ -202,10 +231,27 @@ function Journal() {
           {hikeLogs.error}
         </p>
       )}
+      {ready && ctx && (
+        <div className={styles.toolbar}>
+          <button type="button" className={ui.secondary} onClick={() => setAddingPast(true)}>
+            Add past hikes
+          </button>
+        </div>
+      )}
       {body}
 
       {open && !open.editing && (
-        <EntryDialog log={open.log} colour={open.colour} onClose={() => setOpen(null)} onEdit={() => setOpen({ ...open, editing: true })} />
+        <EntryDialog log={open.log} colour={open.colour} joinedAt={user?.created_at ?? null} onClose={() => setOpen(null)} onEdit={() => setOpen({ ...open, editing: true })} />
+      )}
+      {addingPast && catalogue && (
+        <PastHikesDialog
+          catalogue={catalogue}
+          logged={new Set(hikeLogs.logs.map((log) => log.trail.id))}
+          joinedAt={user?.created_at ?? null}
+          preferences={pickerPrefs}
+          onAdd={hikeLogs.addPast}
+          onClose={() => setAddingPast(false)}
+        />
       )}
       {open?.editing && (
         <HikeLogDialog

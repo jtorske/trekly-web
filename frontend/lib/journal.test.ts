@@ -171,3 +171,27 @@ test("journal summary keeps the given order when dates are hidden, and stops at 
   assert.deepEqual(summary.recent.map((r) => r.hike.trail.id), trails.slice(0, 6).map((t) => t.id));
   assert.ok(summary.recent.every((r) => r.hike.hiked_on === null));
 });
+
+test("journal summary lists dated hikes newest first, then hikes from before Trekly", () => {
+  const [a, b, c, d] = Array.from({ length: 4 }, () => trail());
+  const hikes = [
+    { trail: a, hiked_on: null },
+    { trail: b, hiked_on: "2025-07-01" },
+    { trail: c, hiked_on: null },
+    { trail: d, hiked_on: "2026-02-01" },
+  ];
+  const summary = summarizeJournal([a, b, c, d], hikes);
+  assert.deepEqual(summary.recent.map((r) => r.hike.trail.id), [d.id, b.id, a.id, c.id]);
+  assert.equal(summary.hiked, 4);
+});
+
+test("journal summary counts a GPS track's own nights over the trail's typical nights", () => {
+  const dayHike = trail({ typical_duration_nights: 0 });
+  const overnight = trail({ typical_duration_nights: 2 });
+  const summary = summarizeJournal([dayHike, overnight], [
+    { trail: dayHike, hiked_on: "2026-08-01", verified: true, nights: 1 },
+    { trail: overnight, hiked_on: "2026-08-10" },
+  ]);
+  assert.equal(summary.overnights, 2);
+  assert.equal(summary.nights, 3);
+});

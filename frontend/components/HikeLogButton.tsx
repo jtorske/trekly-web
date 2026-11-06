@@ -5,11 +5,16 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import HikeLogDialog from "./HikeLogDialog";
 import { nextQuery } from "@/lib/authLogic";
+import { undatedLabel } from "@/lib/hikeDate";
 import type { HikeLog, HikeLogInput } from "@/lib/hikeLogsApi";
 import styles from "./SaveTrailButton.module.css";
 
 const formatHiked = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+
+/** "Hiked Aug 14, 2026", or "Hiked before Nov 2026" for a hike from before joining. */
+const hikedText = (entry: HikeLog, joinedAt: string | null | undefined) =>
+  entry.hiked_on ? `Hiked ${formatHiked(entry.hiked_on)}` : undatedLabel(joinedAt);
 
 /**
  * "Mark as hiked" on a trail page. Once logged it shows the date and opens
@@ -36,7 +41,7 @@ export default function HikeLogButton({
   onRemove: (trailId: string) => Promise<void>;
   returnTo: string;
 }) {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -55,7 +60,11 @@ export default function HikeLogButton({
           }
           setOpen(true);
         }}
-        aria-label={entry ? `Hiked ${formatHiked(entry.hiked_on)}. Edit this journal entry` : `Mark ${trailName} as hiked`}
+        aria-label={
+          entry
+            ? `${hikedText(entry, user?.created_at)}${entry.verified ? ", verified with a GPS track" : ""}. Edit this journal entry`
+            : `Mark ${trailName} as hiked`
+        }
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}>
           {entry ? (
@@ -64,7 +73,7 @@ export default function HikeLogButton({
             <path d="M3 20h18L14.5 8.5 11 14l-2.5-3.5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
           )}
         </svg>
-        <span>{entry ? `Hiked ${formatHiked(entry.hiked_on)}` : "Mark as hiked"}</span>
+        <span>{entry ? hikedText(entry, user?.created_at) : "Mark as hiked"}</span>
       </button>
       {open && (
         <HikeLogDialog

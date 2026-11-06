@@ -56,10 +56,12 @@ export interface PublicSetup {
 
 export interface PublicJournalEntry {
   trail: TrailListItem;
-  /** null when the owner hides the dates of their hikes. */
+  /** null when the owner hides the dates of their hikes, or for a hike from before Trekly. */
   hiked_on: string | null;
   note: string | null;
   photo_path: string | null;
+  /** Matched against a GPS track. */
+  verified: boolean;
 }
 
 export interface PublicTripPlan {

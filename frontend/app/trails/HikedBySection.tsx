@@ -13,6 +13,7 @@ import { getTrailHikers } from "@/lib/hikedByApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
 import { useProfile } from "@/lib/useProfile";
+import VerifiedCheck from "@/components/VerifiedCheck";
 import styles from "./HikedBySection.module.css";
 
 /**
@@ -121,9 +122,12 @@ function TripNote({ note, trailName, onReport }: { note: CommunityNote; trailNam
       <div className={styles.noteHeader}>
         <HikerAvatar hiker={note} size={36} className={styles.noteAvatar} />
         <div className={styles.noteWho}>
-          <Link href={publicProfilePath(note.username)} className={styles.noteName}>
-            {displayName(note)}
-          </Link>
+          <span className={styles.noteNameRow}>
+            <Link href={publicProfilePath(note.username)} className={styles.noteName}>
+              {displayName(note)}
+            </Link>
+            {note.verified && <VerifiedCheck />}
+          </span>
           {(note.display_name || note.hiked_on) && (
             <span className={styles.noteMeta}>
               {/* Without a display name, the name above is already the @username. */}

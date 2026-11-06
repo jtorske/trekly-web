@@ -1,0 +1,13 @@
+.check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  vertical-align: -2px;
+  color: var(--color-olive);
+  --verified-tick: var(--color-cream);
+  cursor: help;
+}
+
+.check svg {
+  display: block;
+}

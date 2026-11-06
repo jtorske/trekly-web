@@ -171,7 +171,8 @@ function Detail({ user, reload }: { user: AdminUserDetail; reload: () => void })
                       {hike.trail.name}
                     </Link>
                     <span className={`${styles.muted} ${styles.small}`}>
-                      {formatDate(hike.hiked_on)}
+                      {hike.hiked_on ? formatDate(hike.hiked_on) : "Before joining"}
+                      {hike.verified && " · GPS verified"}
                       {hike.has_photo && " · photo"}
                     </span>
                   </div>

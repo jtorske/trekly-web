@@ -27,6 +27,9 @@ ONBOARDING_STEPS = (
     "experience",
     "interests",
     "regions",
+    # Which trails they've hiked before, and what's in their pack (b4e7a2c9d1f3).
+    "hiked",
+    "pack",
     "units",
     "privacy",
     "done",

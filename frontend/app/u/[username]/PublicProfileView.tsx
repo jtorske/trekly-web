@@ -45,6 +45,8 @@ import { tripLengthLabel } from "@/lib/tripLength";
 import { formatWeight } from "@/lib/units";
 import { useProfile } from "@/lib/useProfile";
 import { useUnits } from "@/lib/useUnits";
+import VerifiedCheck from "@/components/VerifiedCheck";
+import { undatedLabel } from "@/lib/hikeDate";
 import styles from "./public.module.css";
 
 type PublicTab = "journal" | "gear" | "trails" | "trips";
@@ -235,7 +237,12 @@ export default function PublicProfileView({ username }: { username: string }) {
           <ProfilePanel tab={tab}>
             {tab === "journal" && profile.journal && (
               <>
-                <JournalTab hikes={profile.journal.entries} owner={false} units={units} />
+                <JournalTab
+                  hikes={profile.journal.entries}
+                  owner={false}
+                  units={units}
+                  undatedCaption={profile.journal.hide_dates ? null : undatedLabel(null, false)}
+                />
                 {profile.journal.entries.length > 0 && <JournalSection journal={profile.journal} />}
               </>
             )}
@@ -297,11 +304,17 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
             <li key={entry.trail.id} className={styles.entry}>
               <TrailBadge name={entry.trail.name} terrain={entry.trail.terrain} colour={badgeColour(entry)} hiked className={styles.entryBadge} />
               <div className={styles.entryBody}>
-                <Link href={`/trails?id=${encodeURIComponent(entry.trail.id)}`} className={styles.entryTrail}>
-                  {entry.trail.name}
-                </Link>
+                <span className={styles.entryTitle}>
+                  <Link href={`/trails?id=${encodeURIComponent(entry.trail.id)}`} className={styles.entryTrail}>
+                    {entry.trail.name}
+                  </Link>
+                  {entry.verified && <VerifiedCheck />}
+                </span>
                 <span className={profileStyles.trailMeta}>
-                  {[entry.trail.park_name ?? entry.trail.region, entry.hiked_on ? `Hiked ${formatHikeDate(entry.hiked_on)}` : null]
+                  {[
+                    entry.trail.park_name ?? entry.trail.region,
+                    entry.hiked_on ? `Hiked ${formatHikeDate(entry.hiked_on)}` : journal.hide_dates ? null : undatedLabel(null),
+                  ]
                     .filter(Boolean)
                     .join(" · ")}
                 </span>

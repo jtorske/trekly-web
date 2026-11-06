@@ -5,6 +5,17 @@ Entries are keyed to the verified access token; others see them only on a
 public profile (app/routers/public_profiles.py). One entry per
 trail: PUT creates it or replaces its fields. Retired trails stay listed
 for anyone who logged them.
+
+POST /past adds hikes from before the user joined, with no date, many at
+once (onboarding's "Which of these have you hiked?" and "Add past hikes").
+
+Fair use: at most TODAY_LIMIT different trails dated today (or the day either
+side, for time zones) per user, so nobody racks up a day of hikes they
+couldn't have done. Hikes further back, and undated ones, are unlimited.
+
+verified, match_score and nights come only from a matched GPS track. Editing
+a verified hike's date drops its verification: the date no longer comes from
+the track.
 """
 
 import re
@@ -13,7 +24,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -32,12 +43,16 @@ PHOTO_NAME = re.compile(r"^[0-9a-f-]{36}\.(?:webp|jpg)$")
 EARLIEST = date(1900, 1, 1)
 # A user east of the server can already be on "tomorrow".
 FUTURE_SLACK = timedelta(days=1)
+# Different trails a user can log as hiked "today" (see the module docstring).
+TODAY_LIMIT = 3
+MAX_PAST_BATCH = 500
 
 
 class HikeLogIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    hiked_on: date
+    # None: hiked before joining Trekly, date unknown.
+    hiked_on: date | None
     note: str | None = Field(default=None, max_length=MAX_NOTE_LENGTH)
     photo_path: str | None = Field(default=None, max_length=200)
 
@@ -52,11 +67,27 @@ class HikeLogIn(BaseModel):
 
 class HikeLogOut(BaseModel):
     trail: TrailListItemOut
-    hiked_on: date
+    hiked_on: date | None
     note: str | None
     photo_path: str | None
+    # Matched against a GPS track.
+    verified: bool
+    # The track's nights for an overnight trip; None means the trail's typical nights.
+    nights: int | None
     logged_at: datetime
     updated_at: datetime
+
+
+class PastHikesIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    trail_ids: list[UUID] = Field(min_length=1, max_length=MAX_PAST_BATCH)
+
+
+class PastHikesOut(BaseModel):
+    added: list[HikeLogOut]
+    # Already in the journal (left as they were), retired or unknown.
+    skipped: int
 
 
 def _out(log: HikeLog) -> HikeLogOut:
@@ -65,9 +96,39 @@ def _out(log: HikeLog) -> HikeLogOut:
         hiked_on=log.hiked_on,
         note=log.note,
         photo_path=log.photo_path,
+        verified=bool(log.verified),
+        nights=log.nights,
         logged_at=log.created_at,
         updated_at=log.updated_at,
     )
+
+
+def check_fair_use(db: Session, user_id: UUID, trail_id: UUID, hiked_on: date | None, today: date) -> None:
+    """Refuse a hike dated around today once TODAY_LIMIT other trails already are.
+    "Around today" is a day either side, the slack the date check allows."""
+    if hiked_on is None or abs((hiked_on - today).days) > 1:
+        return
+    recent = db.scalar(
+        select(func.count())
+        .select_from(HikeLog)
+        .where(
+            HikeLog.user_id == user_id,
+            HikeLog.trail_id != trail_id,
+            HikeLog.hiked_on.between(today - timedelta(days=1), today + FUTURE_SLACK),
+        )
+    ) or 0
+    if recent >= TODAY_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=f"You've already logged {TODAY_LIMIT} hikes for today. "
+            "If this one was on another day, pick that date.",
+        )
+
+
+def _apply(log: HikeLog, payload: HikeLogIn) -> None:
+    if log.verified and payload.hiked_on != log.hiked_on:
+        log.verified, log.match_score, log.nights = False, None, None
+    log.hiked_on, log.note, log.photo_path = payload.hiked_on, payload.note, payload.photo_path
 
 
 def _find(db: Session, user_id: UUID, trail_id: UUID) -> HikeLog | None:
@@ -84,7 +145,7 @@ def list_hike_logs(user_id: UUID = Depends(get_current_user_id), db: Session = D
         select(HikeLog)
         .where(HikeLog.user_id == user_id)
         .options(joinedload(HikeLog.trail))
-        .order_by(HikeLog.hiked_on.desc(), HikeLog.created_at.desc())
+        .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
     return [_out(row) for row in rows]
 
@@ -106,9 +167,9 @@ def put_hike_log(
     trail = db.get(Trail, trail_id)
     if trail is None:
         raise HTTPException(status_code=404, detail="Trail not found")
-    if payload.hiked_on > today + FUTURE_SLACK:
+    if payload.hiked_on is not None and payload.hiked_on > today + FUTURE_SLACK:
         raise HTTPException(status_code=422, detail="The hike date can't be in the future.")
-    if payload.hiked_on < EARLIEST:
+    if payload.hiked_on is not None and payload.hiked_on < EARLIEST:
         raise HTTPException(status_code=422, detail="Pick a date after 1900.")
     if payload.photo_path is not None:
         folder, _, name = payload.photo_path.partition("/")
@@ -116,25 +177,67 @@ def put_hike_log(
             raise HTTPException(status_code=422, detail="Photos must be uploaded to your own folder.")
 
     log = _find(db, user_id, trail_id)
+    if log is None or log.hiked_on != payload.hiked_on:
+        check_fair_use(db, user_id, trail_id, payload.hiked_on, today)
     if log is None:
         if trail.retired_at is not None:
             raise HTTPException(status_code=409, detail="This trail has been retired and can't be added.")
         log = HikeLog(user_id=user_id, trail_id=trail_id)
         db.add(log)
         response.status_code = status.HTTP_201_CREATED
-    log.hiked_on = payload.hiked_on
-    log.note = payload.note
-    log.photo_path = payload.photo_path
+    _apply(log, payload)
     try:
         db.commit()
     except IntegrityError:
         # A concurrent duplicate request created it first; apply this one on top.
         db.rollback()
         log = _find(db, user_id, trail_id)
-        log.hiked_on, log.note, log.photo_path = payload.hiked_on, payload.note, payload.photo_path
+        _apply(log, payload)
         db.commit()
         response.status_code = status.HTTP_200_OK
     return _out(_find(db, user_id, trail_id))
+
+
+@router.post("/past", response_model=PastHikesOut, status_code=status.HTTP_201_CREATED)
+def add_past_hikes(
+    payload: PastHikesIn,
+    user_id: UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """Add undated hikes from before Trekly. A trail already in the journal
+    keeps its entry (a date is never dropped), and retired or unknown trails
+    are skipped, so a retry adds nothing twice."""
+    wanted = list(dict.fromkeys(payload.trail_ids))
+    logged = set(db.scalars(select(HikeLog.trail_id).where(HikeLog.user_id == user_id, HikeLog.trail_id.in_(wanted))))
+    addable = set(db.scalars(select(Trail.id).where(Trail.id.in_(wanted), Trail.retired_at.is_(None))))
+    new_ids = [trail_id for trail_id in wanted if trail_id in addable and trail_id not in logged]
+    for trail_id in new_ids:
+        db.add(HikeLog(user_id=user_id, trail_id=trail_id, hiked_on=None))
+    try:
+        db.commit()
+    except IntegrityError:
+        # A concurrent request added some of them; add the rest one at a time.
+        db.rollback()
+        added_now = []
+        for trail_id in new_ids:
+            db.add(HikeLog(user_id=user_id, trail_id=trail_id, hiked_on=None))
+            try:
+                db.commit()
+                added_now.append(trail_id)
+            except IntegrityError:
+                db.rollback()
+        new_ids = added_now
+    added = (
+        db.scalars(
+            select(HikeLog)
+            .where(HikeLog.user_id == user_id, HikeLog.trail_id.in_(new_ids))
+            .options(joinedload(HikeLog.trail))
+        ).all()
+        if new_ids
+        else []
+    )
+    added = sorted(added, key=lambda log: log.trail.name.lower())
+    return PastHikesOut(added=[_out(log) for log in added], skipped=len(wanted) - len(added))
 
 
 @router.delete("/{trail_id}", status_code=status.HTTP_204_NO_CONTENT)

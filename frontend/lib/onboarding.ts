@@ -15,11 +15,15 @@ export type StepKey =
   | "experience"
   | "interests"
   | "regions"
+  | "hiked"
+  | "pack"
   | "units"
   | "privacy"
   | "done";
 
-export const STEPS: StepKey[] = ["name", "photo", "home", "style", "experience", "interests", "regions", "units", "privacy", "done"];
+export const STEPS: StepKey[] = [
+  "name", "photo", "home", "style", "experience", "interests", "regions", "hiked", "pack", "units", "privacy", "done",
+];
 
 /** The numbered questions ("Step 3 of 9"); the finish screen isn't one. */
 export const QUESTION_COUNT = STEPS.length - 1;

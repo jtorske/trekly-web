@@ -45,6 +45,8 @@ import { useGearDrag } from "./useGearDrag";
 import { useMyGear } from "./useMyGear";
 import { useSetups } from "./useSetups";
 import WeightSummary from "./WeightSummary";
+import LighterPackImportDialog from "@/components/history/LighterPackImportDialog";
+import QuickAddGearDialog from "@/components/history/QuickAddGearDialog";
 import styles from "./page.module.css";
 
 type PickerState = { slot: Slot; replacing: GearItem | null; resume: PendingAdd | null };
@@ -78,6 +80,7 @@ function GearContent() {
   const [details, setDetails] = useState<GearItem | null>(null);
   const [moving, setMoving] = useState<GearItem | null>(null);
   const [addingMore, setAddingMore] = useState(false);
+  const [bringIn, setBringIn] = useState<"quick-add" | "lighterpack" | null>(null);
   const [setupDialog, setSetupDialog] = useState<{ setup: GearSetup | null } | null>(null);
   const [snapId, setSnapId] = useState<string | null>(null);
   const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
@@ -263,6 +266,16 @@ function GearContent() {
           </div>
         )}
         <div className={styles.headTools}>
+          {isSignedIn && gear.status === "ready" && (
+            <div className={styles.bringIn} role="group" aria-label="Add gear in bulk">
+              <button type="button" className={ui.secondary} onClick={() => setBringIn("quick-add")}>
+                Quick-add gear
+              </button>
+              <button type="button" className={ui.ghost} onClick={() => setBringIn("lighterpack")}>
+                Import from LighterPack
+              </button>
+            </div>
+          )}
           {isSignedIn && allItems.length > 0 && (
             <label>
               <span className={ui.srOnly}>Search your gear</span>
@@ -552,6 +565,14 @@ function GearContent() {
           onClose={() => setSetupDialog(null)}
         />
       )}
+      {bringIn === "quick-add" && (
+        <QuickAddGearDialog
+          owned={new Set(gear.items.flatMap((item) => (item.product ? [item.product.id] : [])))}
+          onAdded={gear.reload}
+          onClose={() => setBringIn(null)}
+        />
+      )}
+      {bringIn === "lighterpack" && <LighterPackImportDialog onAdded={gear.reload} onClose={() => setBringIn(null)} />}
     </main>
   );
 }

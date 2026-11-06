@@ -256,9 +256,11 @@ class ReportPage(BaseModel):
 class HikeOut(BaseModel):
     id: UUID
     trail: TrailRef
-    hiked_on: date
+    # None for a hike from before they joined.
+    hiked_on: date | None
     note: str | None
     has_photo: bool
+    verified: bool
 
 
 class AlertOut(BaseModel):
@@ -491,7 +493,7 @@ def user_detail(user_id: UUID, db: Session = Depends(get_db)):
         select(HikeLog, Trail.name)
         .join(Trail, Trail.id == HikeLog.trail_id)
         .where(HikeLog.user_id == user_id)
-        .order_by(HikeLog.hiked_on.desc())
+        .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
     alert_trail = aliased(Trail)
     alerts = db.execute(
@@ -521,7 +523,7 @@ def user_detail(user_id: UUID, db: Session = Depends(get_db)):
         banned_until=_aware(row.banned_until) if base["banned"] else None,
         hikes_list=[
             HikeOut(id=log.id, trail=TrailRef(id=log.trail_id, name=name), hiked_on=log.hiked_on,
-                    note=log.note, has_photo=bool(log.photo_path))
+                    note=log.note, has_photo=bool(log.photo_path), verified=bool(log.verified))
             for log, name in hikes
         ],
         alerts_list=[
