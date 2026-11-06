@@ -259,3 +259,31 @@ class TrailCampgroundsOut(BaseModel):
     booking: list[TrailBookingOut]
     booking_links: list[TrailBookingLinkOut]
     campgrounds: list[TrailCampgroundOut]
+
+
+class MeasureSourceOut(BaseModel):
+    """Where one of a trail's measures came from."""
+
+    # measured: from the OpenStreetMap route and NRCan's MRDEM terrain model;
+    # published: the park's own figure (used when no route matched it).
+    kind: Literal["measured", "published"]
+    url: str
+    method: str | None = None
+    elevation_url: str | None = None
+    # The other figure, for comparison: the park's when measured, ours when published.
+    published: dict | None = None
+    measured: float | str | None = None
+
+
+class TrailRouteOut(BaseModel):
+    """The mapped route for the trail page. `line` is null when the mapped
+    line didn't match the park's figures, so the page shows no map."""
+
+    # [[lat, lng], ...] from the trailhead, one way for an out-and-back.
+    line: list[list[float]] | None = None
+    # [lat, lng, elevation_m]
+    trailhead: list[float | None] | None = None
+    high_point: list[float] | None = None
+    # [[km along the route, elevation_m], ...]
+    profile: list[list[float]] = []
+    sources: dict[str, MeasureSourceOut] = {}

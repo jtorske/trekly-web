@@ -28,20 +28,22 @@ from app.schemas.trail import (
     ProvinceFacetOut,
     SeasonalConditionOut,
     Terrain,
+    TrailAlertsOut,
     TrailBookingLinkOut,
     TrailBookingOut,
     TrailCampgroundOut,
     TrailCampgroundsOut,
     TrailDetailOut,
     TrailFacetsOut,
-    TrailAlertsOut,
     TrailPickItemOut,
+    TrailRouteOut,
     TrailSearchIn,
     TrailSearchItemOut,
     TrailSearchOut,
     TripType,
 )
 from app.trail_campgrounds import MAPPING_PATH, load_mapping
+from app.trail_routes import route_for
 
 router = APIRouter(prefix="/api/trails", tags=["trails"])
 
@@ -263,6 +265,26 @@ def get_trail(trail_id: UUID, db: Session = Depends(get_db)):
         for condition in sorted(conditions, key=lambda c: SEASON_ORDER.get(c.season, 99))
     ]
     return detail
+
+
+@router.get("/{trail_id}/route", response_model=TrailRouteOut)
+def get_trail_route(trail_id: UUID, db: Session = Depends(get_db)):
+    """Route line, trailhead, high point, elevation profile and the source of
+    each measure (catalog_data/trail_routes.json). Empty when not measured."""
+    trail = db.get(Trail, trail_id)
+    if trail is None:
+        raise HTTPException(status_code=404, detail="Trail not found")
+    entry = route_for(trail.name, trail.province_code)
+    if entry is None:
+        return TrailRouteOut()
+    route = entry.get("route") or {}
+    return TrailRouteOut(
+        line=route.get("line"),
+        trailhead=route.get("trailhead"),
+        high_point=route.get("high_point"),
+        profile=route.get("profile") or [],
+        sources=entry.get("sources") or {},
+    )
 
 
 PARKS_CANADA_RESULTS_URL = "https://reservation.pc.gc.ca/create-booking/results"

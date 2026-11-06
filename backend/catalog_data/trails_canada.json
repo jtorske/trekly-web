@@ -114,7 +114,7 @@
       "terrain_difficulty": "difficult",
       "typical_duration_nights": 0,
       "climate_zone": "coastal_temperate",
-      "description": "Relentless 2.9 km stair-climb up the face of Grouse Mountain, Vancouver's outdoor gym.",
+      "description": "Relentless 2.5 km stair-climb up the face of Grouse Mountain, Vancouver's outdoor gym.",
       "verification": {
         "coordinates": {
           "osm": "way/1554833699",
@@ -534,7 +534,7 @@
       "terrain_difficulty": "easy",
       "typical_duration_nights": 1,
       "climate_zone": "alpine",
-      "description": "A short but stunning alpine lake basin, day-hike or overnight friendly.",
+      "description": "A short but stunning alpine lake basin, day-hike or overnight friendly. Measured from Le Relais to Elizabeth Parker Hut; walking the 11 km road in from the parking lot instead of taking the bus is optional.",
       "verification": {
         "coordinates": {
           "osm": "way/356689552",

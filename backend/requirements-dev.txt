@@ -3,3 +3,6 @@ pytest>=8.3
 httpx>=0.28
 # scripts/scan_photo_metadata.py (EXIF/GPS check of stored photos)
 pillow==11.3.0
+# scripts/trail_routes.py only: OSM extracts (extract) and the MRDEM terrain model (build)
+osmium==4.3.2
+rasterio==1.4.3

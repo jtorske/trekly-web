@@ -1,0 +1,2986 @@
+{
+ "lake-agnes-tea-house-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.4171,
+    -116.2183
+   ],
+   [
+    51.416412,
+    -116.244238
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Lake Agnes Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 7.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "johnston-canyon-to-the-ink-pots-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.2457,
+    -115.84
+   ],
+   [
+    51.278572,
+    -115.823576
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Johnston Canyon Trail",
+   "Ink Pots Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.0,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "grouse-grind-bc": {
+  "method": "named",
+  "names": [
+   "Grouse Grind"
+  ],
+  "line": "point_to_point",
+  "from": [
+   49.371223,
+   -123.098431
+  ],
+  "published": {
+   "distance_km": {
+    "value": 2.5,
+    "url": "https://metrovancouver.org/services/regional-parks/grouse-grind"
+   },
+   "elevation_gain_m": {
+    "value": 800,
+    "url": "https://metrovancouver.org/services/regional-parks/grouse-grind"
+   },
+   "max_elevation_m": {
+    "value": 1100,
+    "url": "https://metrovancouver.org/services/regional-parks/grouse-grind"
+   }
+  },
+  "trust_elevation": true
+ },
+ "plain-of-six-glaciers-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.4171,
+    -116.2183
+   ],
+   [
+    51.393531,
+    -116.272881
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Plain of Six Glaciers Trail",
+   "Plain of the 6 Glaciers Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "joffre-lakes-bc": {
+  "method": "named",
+  "names": [
+   "Joffre Lakes Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   50.369479,
+   -122.498682
+  ],
+  "published": {
+   "elevation_gain_m": {
+    "value": 400,
+    "url": "https://bcparks.ca/joffre-lakes-park/",
+    "one_way": true
+   }
+  }
+ },
+ "west-coast-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.793122,
+    -125.114474
+   ],
+   [
+    48.576867,
+    -124.416464
+   ]
+  ],
+  "line": "point_to_point",
+  "within_relations": [
+   6955341
+  ],
+  "snap_limit_m": 800,
+  "published": {
+   "distance_km": {
+    "value": 75.0,
+    "url": "https://parks.canada.ca/pn-np/bc/pacificrim/activ/sco-wct"
+   }
+  }
+ },
+ "sentinel-pass-via-larch-valley-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.3227,
+    -116.1835
+   ],
+   [
+    51.34055,
+    -116.221902
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Larch Valley Trail",
+   "Sentinel Pass Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.2,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "garibaldi-lake-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.9566,
+    -123.1203
+   ],
+   [
+    49.9377,
+    -123.0478
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Garibaldi Lake Trail"
+  ],
+  "snap_limit_m": 700
+ },
+ "berg-lake-trail-bc": {
+  "method": "named",
+  "names": [
+   "Berg Lake Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   53.0377,
+   -119.2238
+  ],
+  "published": {
+   "distance_km": {
+    "value": 42.0,
+    "url": "https://bcparks.ca/mount-robson-park/berg-lake-trail/"
+   },
+   "elevation_gain_m": {
+    "value": 800,
+    "url": "https://bcparks.ca/mount-robson-park/berg-lake-trail/",
+    "one_way": true
+   }
+  }
+ },
+ "tunnel-mountain-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.175384,
+    -115.561865
+   ],
+   [
+    51.177539,
+    -115.55376
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   15985203
+  ],
+  "published": {
+   "distance_km": {
+    "value": 4.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "skyline-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.7289,
+    -117.6424
+   ],
+   [
+    52.872475,
+    -117.978848
+   ],
+   [
+    52.914286,
+    -118.001468
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_names": [
+   "Skyline Trail",
+   "Evelyn Creek/Skyline Trail",
+   "Signal Mountain Fire Road"
+  ],
+  "snap_limit_m": 900,
+  "published": {
+   "distance_km": {
+    "value": 44.1,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Skyline"
+   }
+  }
+ },
+ "stawamus-chief-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.6774,
+    -123.1553
+   ],
+   [
+    49.682789,
+    -123.144123
+   ],
+   [
+    49.684379,
+    -123.141616
+   ],
+   [
+    49.685831,
+    -123.135169
+   ],
+   [
+    49.6774,
+    -123.1553
+   ]
+  ],
+  "line": "loop",
+  "prefer_names": [
+   "Stawamus Chief / Sea to Summit",
+   "Chief Peaks Trail"
+  ]
+ },
+ "cyprus-lake-to-the-grotto-on": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    45.232176,
+    -81.530035
+   ],
+   [
+    45.245206,
+    -81.524178
+   ]
+  ],
+  "line": "out_and_back"
+ },
+ "elizabeth-parker-hut-lake-o-hara-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.3558,
+    -116.3308
+   ],
+   [
+    51.355446,
+    -116.34434
+   ]
+  ],
+  "line": "out_and_back"
+ },
+ "iceline-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.4958,
+    -116.4806
+   ],
+   [
+    51.51287,
+    -116.52984
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Iceline Trail"
+  ],
+  "snap_limit_m": 500
+ },
+ "ha-ling-peak-ab": {
+  "method": "named",
+  "names": [
+   "Ha Ling Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   51.06428,
+   -115.39949
+  ],
+  "published": {
+   "distance_km": {
+    "value": 7.8,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/trail-reports/canmore-and-area/ha-ling/"
+   },
+   "elevation_gain_m": {
+    "value": 810,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/trail-reports/canmore-and-area/ha-ling/",
+    "one_way": true
+   }
+  }
+ },
+ "skyline-trail-ns": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    46.743791,
+    -60.880607
+   ],
+   [
+    46.758988,
+    -60.899603
+   ],
+   [
+    46.743791,
+    -60.880607
+   ]
+  ],
+  "line": "loop",
+  "prefer_relations": [
+   15081831
+  ],
+  "published": {
+   "distance_km": {
+    "value": 8.2,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/skyline"
+   },
+   "max_elevation_m": {
+    "value": 405,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/skyline"
+   }
+  }
+ },
+ "panorama-ridge-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.9566,
+    -123.1203
+   ],
+   [
+    49.954117,
+    -123.013903
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 700,
+  "prefer_names": [
+   "Garibaldi Lake Trail",
+   "Panorama Ridge Trail",
+   "Taylor Meadows Trail"
+  ]
+ },
+ "maligne-canyon-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.920806,
+    -117.99941
+   ],
+   [
+    52.921291,
+    -118.016521
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Maligne Canyon Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 4.4,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails"
+   },
+   "elevation_gain_m": {
+    "value": 100,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails",
+    "one_way": true
+   }
+  }
+ },
+ "gros-morne-mountain-nl": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.565779,
+    -57.832247
+   ],
+   [
+    49.594008,
+    -57.783879
+   ],
+   [
+    49.565779,
+    -57.832247
+   ]
+  ],
+  "line": "loop",
+  "prefer_relations": [
+   15976460
+  ],
+  "published": {
+   "distance_km": {
+    "value": 17.0,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/randonnee-hiking/mgm-gmm"
+   },
+   "elevation_gain_m": {
+    "value": 1000,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/randonnee-hiking/mgm-gmm",
+    "one_way": true
+   }
+  }
+ },
+ "crypt-lake-ab": {
+  "method": "named",
+  "names": [
+   "Crypt Lake Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   49.001084,
+   -113.840473
+  ],
+  "published": {
+   "distance_km": {
+    "value": 17.2,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day"
+   },
+   "elevation_gain_m": {
+    "value": 675,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day",
+    "one_way": true
+   }
+  }
+ },
+ "grassi-lakes-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.081365,
+    -115.39486
+   ],
+   [
+    51.072409,
+    -115.40668
+   ],
+   [
+    51.081365,
+    -115.39486
+   ]
+  ],
+  "line": "loop",
+  "prefer_relations": [
+   15402568
+  ],
+  "published": {
+   "distance_km": {
+    "value": 3.8,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/trail-reports/canmore-and-area/grassi-lakes-interpretive/"
+   },
+   "elevation_gain_m": {
+    "value": 125,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/trail-reports/canmore-and-area/grassi-lakes-interpretive/",
+    "one_way": true
+   }
+  }
+ },
+ "quarry-rock-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.330026,
+    -122.949743
+   ],
+   [
+    49.333703,
+    -122.936586
+   ]
+  ],
+  "line": "out_and_back"
+ },
+ "emerald-lake-loop-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.439048,
+    -116.541281
+   ],
+   [
+    51.4495,
+    -116.531
+   ],
+   [
+    51.4402,
+    -116.5235
+   ],
+   [
+    51.439048,
+    -116.541281
+   ]
+  ],
+  "line": "loop",
+  "prefer_names": [
+   "Emerald Lake Loop Trail"
+  ],
+  "snap_limit_m": 500,
+  "published": {
+   "distance_km": {
+    "value": 5.2,
+    "url": "https://parks.canada.ca/pn-np/bc/yoho/activ/places"
+   }
+  }
+ },
+ "mount-assiniboine-via-sunshine-meadows-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.0786,
+    -115.7814
+   ],
+   [
+    50.9069,
+    -115.6352
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 800
+ },
+ "valley-of-the-five-lakes-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.8081,
+    -118.0222
+   ],
+   [
+    52.818353,
+    -118.010815
+   ],
+   [
+    52.817003,
+    -118.007258
+   ],
+   [
+    52.8081,
+    -118.0222
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 500
+ },
+ "rawson-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.6175,
+    -115.1255
+   ],
+   [
+    50.607088,
+    -115.132805
+   ],
+   [
+    50.591859,
+    -115.151421
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Rawson Lake Trail",
+   "Upper Kananaskis Lake Trail"
+  ],
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 7.8,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/"
+   },
+   "elevation_gain_m": {
+    "value": 320,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/",
+    "one_way": true
+   }
+  }
+ },
+ "path-of-the-glacier-and-cavell-meadows-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.6855,
+    -118.0517
+   ],
+   [
+    52.682571,
+    -118.04998
+   ],
+   [
+    52.676327,
+    -118.033094
+   ],
+   [
+    52.6855,
+    -118.0517
+   ]
+  ],
+  "line": "loop",
+  "prefer_relations": [
+   16463023,
+   16463022
+  ],
+  "snap_limit_m": 500
+ },
+ "east-coast-trail-nl": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    47.544086,
+    -52.917724
+   ],
+   [
+    47.625021,
+    -52.848276
+   ],
+   [
+    47.8096,
+    -52.7856
+   ],
+   [
+    47.766,
+    -52.762
+   ],
+   [
+    47.665,
+    -52.731
+   ],
+   [
+    47.585,
+    -52.685
+   ],
+   [
+    47.5633,
+    -52.6804
+   ],
+   [
+    46.860952,
+    -52.945417
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   2199386
+  ],
+  "snap_limit_m": 2000,
+  "published": {
+   "distance_km": {
+    "value": 336.0,
+    "url": "https://eastcoasttrail.com/6639/"
+   }
+  }
+ },
+ "parker-ridge-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.191709,
+    -117.115813
+   ],
+   [
+    52.181281,
+    -117.092297
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Parker Ridge Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 5.4,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails"
+   },
+   "elevation_gain_m": {
+    "value": 250,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails",
+    "one_way": true
+   }
+  }
+ },
+ "wilcox-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.2182,
+    -117.185
+   ],
+   [
+    52.236155,
+    -117.213461
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Wilcox Pass Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 8.0,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails"
+   },
+   "elevation_gain_m": {
+    "value": 390,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails",
+    "one_way": true
+   }
+  }
+ },
+ "juan-de-fuca-marine-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.43371,
+    -124.093442
+   ],
+   [
+    48.532804,
+    -124.444726
+   ]
+  ],
+  "line": "point_to_point",
+  "within_relations": [
+   7518802
+  ],
+  "snap_limit_m": 800,
+  "published": {
+   "distance_km": {
+    "value": 47.0,
+    "url": "https://bcparks.ca/juan-de-fuca-park/"
+   }
+  }
+ },
+ "lion-s-head-on": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    44.989881,
+    -81.242143
+   ],
+   [
+    45.005106,
+    -81.227138
+   ],
+   [
+    44.989881,
+    -81.242143
+   ]
+  ],
+  "line": "loop",
+  "prefer_names": [
+   "Bruce Trail"
+  ],
+  "snap_limit_m": 600
+ },
+ "l-acropole-des-draveurs-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    47.876525,
+    -70.481544
+   ],
+   [
+    47.89179,
+    -70.461621
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   4008074
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.2,
+    "url": "https://www.sepaq.com/pq/hgo/annexes/sentiers_pedestre.dot?language_id=1"
+   },
+   "elevation_gain_m": {
+    "value": 800,
+    "url": "https://www.sepaq.com/pq/hgo/annexes/sentiers_pedestre.dot?language_id=1",
+    "one_way": true
+   }
+  }
+ },
+ "rockwall-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.081351,
+    -116.054616
+   ],
+   [
+    51.151397,
+    -116.258649
+   ],
+   [
+    51.195587,
+    -116.305316
+   ],
+   [
+    51.169989,
+    -116.14752
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   16227288
+  ],
+  "snap_limit_m": 600,
+  "published": {
+   "distance_km": {
+    "value": 54.1,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/arrierepays-backcountry"
+   },
+   "elevation_gain_m": {
+    "value": 3405,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/arrierepays-backcountry",
+    "one_way": true
+   }
+  }
+ },
+ "stanley-glacier-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.205464,
+    -116.080654
+   ],
+   [
+    51.183876,
+    -116.041252
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Stanley Glacier Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 9.8,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/randonnee-hike/jour-day"
+   },
+   "elevation_gain_m": {
+    "value": 405,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/randonnee-hike/jour-day",
+    "one_way": true
+   }
+  }
+ },
+ "bow-glacier-falls-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.678427,
+    -116.466499
+   ],
+   [
+    51.65443,
+    -116.497834
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Bow Glacier Falls Trail"
+  ],
+  "snap_limit_m": 500,
+  "published": {
+   "distance_km": {
+    "value": 7.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "chester-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.790538,
+    -115.300595
+   ],
+   [
+    50.811777,
+    -115.27388
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 500,
+  "published": {
+   "distance_km": {
+    "value": 9.2,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/"
+   },
+   "elevation_gain_m": {
+    "value": 300,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/",
+    "one_way": true
+   }
+  }
+ },
+ "ptarmigan-cirque-ab": {
+  "method": "named",
+  "names": [
+   "Ptarmigan Cirque Trail"
+  ],
+  "line": "out_and_back",
+  "published": {
+   "distance_km": {
+    "value": 4.5,
+    "url": "http://www.albertaparks.ca/peter-lougheed/information-facilities/trails/ptarmigan-cirque-interpretive.aspx"
+   },
+   "elevation_gain_m": {
+    "value": 210,
+    "url": "http://www.albertaparks.ca/peter-lougheed/information-facilities/trails/ptarmigan-cirque-interpretive.aspx",
+    "one_way": true
+   }
+  }
+ },
+ "mont-albert-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.944404,
+    -66.122224
+   ],
+   [
+    48.935155,
+    -66.166684
+   ],
+   [
+    48.944404,
+    -66.122224
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 800
+ },
+ "top-of-the-giant-on": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.340515,
+    -88.821991
+   ],
+   [
+    48.347803,
+    -88.893169
+   ],
+   [
+    48.332188,
+    -88.906409
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 700
+ },
+ "bertha-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.046741,
+    -113.916855
+   ],
+   [
+    49.030884,
+    -113.936814
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Bertha Lake Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 10.4,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day"
+   },
+   "elevation_gain_m": {
+    "value": 460,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day",
+    "one_way": true
+   }
+  }
+ },
+ "elfin-lakes-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.750166,
+    -123.053141
+   ],
+   [
+    49.789303,
+    -122.987813
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Elfin Lakes Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 22.0,
+    "url": "https://bcparks.ca/garibaldi-park/diamond-head-area/"
+   },
+   "elevation_gain_m": {
+    "value": 600,
+    "url": "https://bcparks.ca/garibaldi-park/diamond-head-area/",
+    "one_way": true
+   }
+  }
+ },
+ "marble-canyon-bc": {
+  "method": "named",
+  "names": [
+   "Marble Canyon"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.186068,
+   -116.123042
+  ],
+  "published": {
+   "distance_km": {
+    "value": 1.8,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/randonnee-hike/jour-day"
+   },
+   "elevation_gain_m": {
+    "value": 65,
+    "url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/randonnee-hike/jour-day",
+    "one_way": true
+   }
+  }
+ },
+ "sunshine-meadows-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.0786,
+    -115.7814
+   ],
+   [
+    51.064263,
+    -115.781351
+   ],
+   [
+    51.068283,
+    -115.786961
+   ],
+   [
+    51.0786,
+    -115.7814
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 600
+ },
+ "fundy-footpath-nb": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    45.421417,
+    -65.404319
+   ],
+   [
+    45.52624,
+    -65.092973
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   4077806
+  ],
+  "snap_limit_m": 800
+ },
+ "cape-split-ns": {
+  "method": null,
+  "note": "the Cape Split trail isn't mapped in OpenStreetMap near the cape (nearest path 1.2 km away)",
+  "published": {
+   "distance_km": {
+    "value": 13.2,
+    "url": "https://parks.novascotia.ca/park/cape-split"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.novascotia.ca/park/cape-split"
+   }
+  }
+ },
+ "wild-pacific-trail-bc": {
+  "method": "named",
+  "names": [
+   "Wild Pacific Trail",
+   "wild pacific trail"
+  ],
+  "line": "loop",
+  "from": [
+   48.922459,
+   -125.540538
+  ]
+ },
+ "tonquin-valley-ab": {
+  "method": "named",
+  "names": [
+   "Tonquin Valley trail"
+  ],
+  "line": "point_to_point",
+  "from": [
+   52.702522,
+   -118.059985
+  ],
+  "published": {
+   "distance_km": {
+    "value": 43.1,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Tonquin"
+   }
+  }
+ },
+ "mount-yamnuska-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.121175,
+    -115.085631
+   ],
+   [
+    51.123586,
+    -115.118091
+   ],
+   [
+    51.121175,
+    -115.085631
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 500
+ },
+ "prairie-mountain-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.86756,
+    -114.78357
+   ],
+   [
+    50.88846,
+    -114.80654
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 500
+ },
+ "mont-jacques-cartier-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.024489,
+    -65.881847
+   ],
+   [
+    48.988723,
+    -65.948243
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 500,
+  "trim_start_km": 3.8
+ },
+ "helen-lake-ab": {
+  "method": "named",
+  "names": [
+   "Helen Lake Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.6625,
+   -116.439
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "consolation-lakes-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.3227,
+    -116.1835
+   ],
+   [
+    51.318725,
+    -116.156194
+   ]
+  ],
+  "line": "out_and_back",
+  "published": {
+   "distance_km": {
+    "value": 5.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "sulphur-skyline-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    53.130424,
+    -117.771434
+   ],
+   [
+    53.115698,
+    -117.744852
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   7467690
+  ],
+  "published": {
+   "distance_km": {
+    "value": 8.0,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails"
+   },
+   "elevation_gain_m": {
+    "value": 700,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails",
+    "one_way": true
+   }
+  }
+ },
+ "centennial-ridges-on": {
+  "method": "named",
+  "names": [
+   "Centennial Ridges Trail"
+  ],
+  "line": "loop",
+  "from": [
+   45.556465,
+   -78.420255
+  ]
+ },
+ "la-cloche-silhouette-trail-on": {
+  "method": "relation",
+  "relation": [
+   14141941
+  ],
+  "near": [
+   46.026777,
+   -81.405143
+  ],
+  "line": "loop",
+  "published": {
+   "distance_km": {
+    "value": 80.0,
+    "url": "https://www.ontarioparks.ca/park/killarney/activities"
+   }
+  }
+ },
+ "the-crack-on": {
+  "method": "named",
+  "names": [
+   "The \"Crack\" Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   46.061482,
+   -81.348159
+  ],
+  "published": {
+   "distance_km": {
+    "value": 6.0,
+    "url": "https://blog.ontarioparks.ca/hike-the-crack-killarney/"
+   }
+  }
+ },
+ "long-range-traverse-nl": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.760889,
+    -57.729831
+   ],
+   [
+    49.565779,
+    -57.832247
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   19672459
+  ],
+  "published": {
+   "distance_km": {
+    "value": 35.0,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/longrange"
+   }
+  }
+ },
+ "green-gardens-nl": {
+  "method": "named",
+  "names": [
+   "Green Gardens Trail"
+  ],
+  "line": "out_and_back",
+  "published": {
+   "distance_km": {
+    "value": 9.0,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/randonnee-hiking/gg"
+   },
+   "elevation_gain_m": {
+    "value": 415,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/randonnee-hiking/gg",
+    "one_way": true
+   }
+  }
+ },
+ "carthew-alderson-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.019666,
+    -114.045192
+   ],
+   [
+    49.0505,
+    -113.9187
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 600,
+  "published": {
+   "distance_km": {
+    "value": 20.1,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day"
+   },
+   "elevation_gain_m": {
+    "value": 650,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/randonee-hiking/journee-day",
+    "one_way": true
+   }
+  }
+ },
+ "skoki-valley-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.450102,
+    -116.113713
+   ],
+   [
+    51.516907,
+    -116.07975
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 600
+ },
+ "egypt-lake-healy-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.1149,
+    -115.7632
+   ],
+   [
+    51.092,
+    -115.853
+   ],
+   [
+    51.1003,
+    -115.9093
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 900
+ },
+ "burstall-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.790774,
+    -115.303622
+   ],
+   [
+    50.761295,
+    -115.374576
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Burstall Pass Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 14.8,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/"
+   },
+   "elevation_gain_m": {
+    "value": 470,
+    "url": "https://www.albertaparks.ca/parks/kananaskis/peter-lougheed-pp/information-facilities/trails/",
+    "one_way": true
+   }
+  }
+ },
+ "boom-lake-ab": {
+  "method": "named",
+  "names": [
+   "Boom Lake Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.248958,
+   -116.023878
+  ],
+  "published": {
+   "distance_km": {
+    "value": 10.2,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "tent-ridge-horseshoe-ab": {
+  "method": "named",
+  "names": [
+   "Tent Ridge Track"
+  ],
+  "line": "loop",
+  "rotate_to_lowest": true
+ },
+ "galatea-lakes-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.865006,
+    -115.199791
+   ],
+   [
+    50.864545,
+    -115.251799
+   ],
+   [
+    50.869,
+    -115.2655
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Galatea Lakes Tr"
+  ],
+  "snap_limit_m": 700
+ },
+ "eiffel-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.3227,
+    -116.1835
+   ],
+   [
+    51.32347,
+    -116.23892
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Eiffel Lake Tr",
+   "Larch Valley Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 11.4,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "c-level-cirque-ab": {
+  "method": "named",
+  "names": [
+   "C-level Cirque Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.236783,
+   -115.51919
+  ],
+  "published": {
+   "distance_km": {
+    "value": 7.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   }
+  }
+ },
+ "bald-hills-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.7246,
+    -117.6466
+   ],
+   [
+    52.708268,
+    -117.693885
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   7467684
+  ],
+  "snap_limit_m": 600,
+  "published": {
+   "distance_km": {
+    "value": 10.4,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails"
+   },
+   "elevation_gain_m": {
+    "value": 500,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/sentiers-trails",
+    "one_way": true
+   }
+  }
+ },
+ "lake-superior-coastal-trail-on": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    47.333153,
+    -84.615821
+   ],
+   [
+    47.615187,
+    -85.010937
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_names": [
+   "Lake Superior Coastal Trail"
+  ],
+  "snap_limit_m": 800,
+  "published": {
+   "distance_km": {
+    "value": 65.0,
+    "url": "https://blog.ontarioparks.ca/fall-colour-destinations/"
+   }
+  }
+ },
+ "mont-du-lac-des-cygnes-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    47.666957,
+    -70.627982
+   ],
+   [
+    47.666413,
+    -70.603431
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   9283643
+  ],
+  "snap_limit_m": 500
+ },
+ "pain-de-sucre-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    45.535835,
+    -73.156919
+   ],
+   [
+    45.550562,
+    -73.172353
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 700
+ },
+ "les-graves-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.78694,
+    -64.218163
+   ],
+   [
+    48.751211,
+    -64.161113
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   9337773
+  ]
+ },
+ "traversee-de-charlevoix-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    47.707902,
+    -70.658798
+   ],
+   [
+    47.771257,
+    -70.103669
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   8082269
+  ],
+  "snap_limit_m": 800,
+  "published": {
+   "distance_km": {
+    "value": 105.0,
+    "url": "https://www.traverseedecharlevoix.qc.ca/en/hiking/the-complete-crossing/"
+   }
+  }
+ },
+ "north-head-trail-nl": {
+  "method": "named",
+  "names": [
+   "North Head Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   47.572131,
+   -52.680367
+  ]
+ },
+ "franey-trail-ns": {
+  "method": "named",
+  "names": [
+   "Franey Trail",
+   "Big Franey",
+   "Little Franey"
+  ],
+  "line": "loop",
+  "from": [
+   46.66047,
+   -60.433899
+  ],
+  "published": {
+   "distance_km": {
+    "value": 13.0,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/franey"
+   },
+   "max_elevation_m": {
+    "value": 423,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/franey"
+   }
+  }
+ },
+ "cape-scott-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.68544,
+    -128.251572
+   ],
+   [
+    50.791759,
+    -128.361365
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Cape Scott Trail"
+  ],
+  "snap_limit_m": 900
+ },
+ "sunshine-coast-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.058941,
+    -124.83716
+   ],
+   [
+    49.783988,
+    -124.174923
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   7406716
+  ],
+  "snap_limit_m": 800,
+  "published": {
+   "distance_km": {
+    "value": 180.0,
+    "url": "https://sunshinecoasttrail.com/"
+   }
+  }
+ },
+ "wedgemount-lake-bc": {
+  "method": "named",
+  "names": [
+   "Wedgemount Lake Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   50.162686,
+   -122.815964
+  ],
+  "published": {
+   "distance_km": {
+    "value": 14.0,
+    "url": "https://bcparks.ca/garibaldi-park/wedgemount-lake/"
+   },
+   "elevation_gain_m": {
+    "value": 1200,
+    "url": "https://bcparks.ca/garibaldi-park/wedgemount-lake/",
+    "one_way": true
+   }
+  }
+ },
+ "mount-cheam-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.167981,
+    -121.69425
+   ],
+   [
+    49.186675,
+    -121.682124
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Mount Cheam Trail"
+  ]
+ },
+ "lookout-trail-on": {
+  "method": "named",
+  "names": [
+   "Lookout Loop",
+   "James Cooper Lookout Trail"
+  ],
+  "line": "loop"
+ },
+ "pukaskwa-coastal-hiking-trail-on": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.590568,
+    -86.29027
+   ],
+   [
+    48.212129,
+    -86.109889
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   15361195
+  ]
+ },
+ "highland-backpacking-trail-on": {
+  "method": "named",
+  "names": [
+   "Highland Backpacking Trail"
+  ],
+  "line": "loop"
+ },
+ "grizzly-lake-yt": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    64.413282,
+    -138.305522
+   ],
+   [
+    64.42643,
+    -138.465348
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   6381725
+  ]
+ },
+ "king-s-throne-yt": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    60.576327,
+    -137.217814
+   ],
+   [
+    60.546894,
+    -137.260103
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "King's Throne Trail",
+   "King's Throne Summit Trail"
+  ],
+  "snap_limit_m": 500
+ },
+ "miles-canyon-yt": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    60.661386,
+    -135.029192
+   ],
+   [
+    60.658603,
+    -135.001673
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Lower Canyon City Trail"
+  ],
+  "snap_limit_m": 500
+ },
+ "goldensides-yt": {
+  "method": "named",
+  "names": [
+   "Goldensides"
+  ],
+  "line": "out_and_back",
+  "to": [
+   64.531117,
+   -138.188868
+  ]
+ },
+ "shadow-lake-twin-lakes-redearth-creek-loop-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.220078,
+    -115.803886
+   ],
+   [
+    51.168176,
+    -115.946765
+   ],
+   [
+    51.186195,
+    -115.963886
+   ],
+   [
+    51.2022,
+    -115.98222
+   ],
+   [
+    51.241101,
+    -116.035737
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 900
+ },
+ "glacier-lake-trail-ab": {
+  "method": "named",
+  "names": [
+   "Glacier Lake Trail",
+   "Glacier Lake Route"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.973275,
+   -116.759766
+  ]
+ },
+ "ball-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.081351,
+    -116.054616
+   ],
+   [
+    51.126084,
+    -115.989209
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Ball Pass Trail"
+  ]
+ },
+ "mystic-pass-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.25696,
+    -115.857047
+   ],
+   [
+    51.278524,
+    -115.749603
+   ],
+   [
+    51.305138,
+    -115.760887
+   ],
+   [
+    51.2032,
+    -115.595
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 900
+ },
+ "northover-ridge-three-isle-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.631571,
+    -115.139984
+   ],
+   [
+    50.6292,
+    -115.26779
+   ],
+   [
+    50.597753,
+    -115.267888
+   ],
+   [
+    50.581307,
+    -115.205898
+   ],
+   [
+    50.631571,
+    -115.139984
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 900
+ },
+ "elbow-lake-to-rae-glacier-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.634526,
+    -115.022027
+   ],
+   [
+    50.637734,
+    -115.009546
+   ],
+   [
+    50.6265,
+    -114.989
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 900
+ },
+ "sentier-des-cretes-qc": {
+  "method": "named",
+  "names": [
+   "Sentier des Crêtes"
+  ],
+  "line": "out_and_back",
+  "published": {
+   "distance_km": {
+    "value": 11.4,
+    "url": "https://www.sepaq.com/pq/mor/annexes/sentiers_courte_pedestre.dot?language_id=1"
+   },
+   "elevation_gain_m": {
+    "value": 455,
+    "url": "https://www.sepaq.com/pq/mor/annexes/sentiers_courte_pedestre.dot?language_id=1",
+    "one_way": true
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://www.sepaq.com/pq/mor/annexes/sentiers_courte_pedestre.dot?language_id=1"
+   }
+  }
+ },
+ "greenwich-dunes-trail-pe": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    46.453811,
+    -62.684759
+   ],
+   [
+    46.448682,
+    -62.713901
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   5757127
+  ]
+ },
+ "grey-owl-trail-sk": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    54.025801,
+    -106.415828
+   ],
+   [
+    54.149862,
+    -106.46371
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   4204352
+  ],
+  "snap_limit_m": 600
+ },
+ "kokanee-glacier-via-gibson-lake-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.724128,
+    -117.15645
+   ],
+   [
+    49.770648,
+    -117.193806
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 600
+ },
+ "mantario-trail-mb": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.110067,
+    -95.368749
+   ],
+   [
+    49.801848,
+    -95.183976
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 800
+ },
+ "cameron-falls-nt": {
+  "method": "named",
+  "names": [
+   "Cameron Falls Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   62.512894,
+   -113.694968
+  ]
+ },
+ "brazeau-loop-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.186618,
+    -117.069531
+   ],
+   [
+    52.24082,
+    -117.092684
+   ],
+   [
+    52.400778,
+    -117.035498
+   ],
+   [
+    52.385779,
+    -117.171477
+   ],
+   [
+    52.334209,
+    -117.168886
+   ],
+   [
+    52.24082,
+    -117.092684
+   ],
+   [
+    52.186618,
+    -117.069531
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 81,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/brazeau"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/brazeau"
+   }
+  }
+ },
+ "chilkoot-trail-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    59.511895,
+    -135.346648
+   ],
+   [
+    59.845092,
+    -134.996114
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   1225005
+  ],
+  "published": {
+   "distance_km": {
+    "value": 53,
+    "url": "https://parks.canada.ca/lhn-nhs/yt/chilkoot/activ/randonnee-cdn-hiking"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/lhn-nhs/yt/chilkoot/activ/randonnee-cdn-hiking"
+   }
+  }
+ },
+ "fundy-circuit-nb": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    45.596,
+    -64.953
+   ],
+   [
+    45.5719,
+    -65.0937
+   ],
+   [
+    45.545,
+    -65.03
+   ],
+   [
+    45.596,
+    -64.953
+   ]
+  ],
+  "line": "loop",
+  "snap_limit_m": 1200,
+  "published": {
+   "distance_km": {
+    "value": 48,
+    "url": "https://parks.canada.ca/pn-np/nb/fundy/visit/sentiers-trails/circuit"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/nb/fundy/visit/sentiers-trails/circuit"
+   }
+  }
+ },
+ "mount-assiniboine-via-bryant-creek-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    50.850299,
+    -115.4276
+   ],
+   [
+    50.921602,
+    -115.605256
+   ],
+   [
+    50.9069,
+    -115.6352
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 54,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   }
+  }
+ },
+ "lake-minnewanka-shoreline-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.248213,
+    -115.496753
+   ],
+   [
+    51.276937,
+    -115.387264
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Minnewanka Trail",
+   "Minnewanka Tr"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 22.2,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   }
+  }
+ },
+ "tamarack-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.052372,
+    -114.054632
+   ],
+   [
+    49.134472,
+    -114.154436
+   ],
+   [
+    49.1265,
+    -114.0405
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 900,
+  "published": {
+   "distance_km": {
+    "value": 36.4,
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/culture/histoire-history/faits-facts"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/waterton/culture/histoire-history/faits-facts"
+   }
+  }
+ },
+ "north-molar-pass-to-fish-lakes-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.665116,
+    -116.293565
+   ],
+   [
+    51.646093,
+    -116.19117
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 600,
+  "published": {
+   "distance_km": {
+    "value": 30,
+    "url": "https://hikebiketravel.com/fish-lakes-hike-banff/"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://hikebiketravel.com/fish-lakes-hike-banff/"
+   }
+  }
+ },
+ "fryatt-valley-ab": {
+  "method": "named",
+  "names": [
+   "Fryatt Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   52.648889,
+   -117.89998
+  ],
+  "published": {
+   "distance_km": {
+    "value": 44,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fryatt"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fryatt"
+   }
+  }
+ },
+ "sawback-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.209631,
+    -115.593632
+   ],
+   [
+    51.305138,
+    -115.760887
+   ],
+   [
+    51.358906,
+    -115.755054
+   ],
+   [
+    51.410944,
+    -115.894268
+   ],
+   [
+    51.414003,
+    -115.961832
+   ],
+   [
+    51.348887,
+    -116.06568
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 900,
+  "published": {
+   "distance_km": {
+    "value": 74,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/arrierepays-backcountry"
+   }
+  }
+ },
+ "north-boundary-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    53.460951,
+    -118.264611
+   ],
+   [
+    53.294434,
+    -118.271551
+   ],
+   [
+    53.23155,
+    -119.0214
+   ],
+   [
+    53.166136,
+    -119.128631
+   ],
+   [
+    53.0377,
+    -119.2238
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 1500,
+  "published": {
+   "distance_km": {
+    "value": 159,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/north-boundary"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/north-boundary"
+   }
+  }
+ },
+ "eva-lake-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.0477,
+    -118.1426
+   ],
+   [
+    51.081485,
+    -118.108775
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Eva Lake Trail",
+   "Miller Lake Trail"
+  ],
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 14.2,
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   },
+   "elevation_gain_m": {
+    "value": 465,
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   }
+  }
+ },
+ "taylor-lake-ab": {
+  "method": "named",
+  "names": [
+   "Taylor Lake Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   51.295585,
+   -116.097174
+  ],
+  "published": {
+   "distance_km": {
+    "value": 12.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/meleze-larch"
+   }
+  }
+ },
+ "jonas-pass-poboktan-creek-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.186618,
+    -117.069531
+   ],
+   [
+    52.24082,
+    -117.092684
+   ],
+   [
+    52.334209,
+    -117.168886
+   ],
+   [
+    52.385779,
+    -117.171477
+   ],
+   [
+    52.450624,
+    -117.442887
+   ]
+  ],
+  "line": "point_to_point",
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 54,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/poboktan"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/poboktan"
+   }
+  }
+ },
+ "outport-trail-nl": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.536242,
+    -53.980376
+   ],
+   [
+    48.574222,
+    -53.87013
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 2000,
+  "published": {
+   "distance_km": {
+    "value": 35,
+    "url": "https://parks.canada.ca/pn-np/nl/terranova/activ/ran-hik/outport"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/nl/terranova/activ/ran-hik/outport"
+   }
+  }
+ },
+ "fishing-cove-trail-ns": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    46.771542,
+    -60.837338
+   ],
+   [
+    46.796525,
+    -60.880774
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Fishing Cove Trail"
+  ],
+  "snap_limit_m": 600,
+  "published": {
+   "distance_km": {
+    "value": 12.0,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/fishing"
+   },
+   "max_elevation_m": {
+    "value": 355,
+    "url": "https://parks.canada.ca/pn-np/ns/cbreton/activ/randonnee-hiking/fishing"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "Parks Canada site description (reservation system)"
+   }
+  }
+ },
+ "maligne-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.450624,
+    -117.442887
+   ],
+   [
+    52.509611,
+    -117.455189
+   ],
+   [
+    52.725769,
+    -117.645369
+   ]
+  ],
+  "line": "point_to_point",
+  "prefer_relations": [
+   18816143
+  ],
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 48,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/maligne-pass"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/maligne-pass"
+   }
+  }
+ },
+ "les-cretes-qc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    48.813873,
+    -64.241101
+   ],
+   [
+    48.866805,
+    -64.379978
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   9337779
+  ],
+  "published": {
+   "distance_km": {
+    "value": 33.2,
+    "url": "https://parks.canada.ca/pn-np/qc/forillon/activ/randonnee-hiking"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/qc/forillon/activ/randonnee-hiking"
+   }
+  }
+ },
+ "snug-harbour-nl": {
+  "method": "relation",
+  "relation": [
+   19751405
+  ],
+  "near": [
+   49.787332,
+   -57.874359
+  ],
+  "published": {
+   "distance_km": {
+    "value": 15,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/snug"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/snug"
+   }
+  }
+ },
+ "northern-traverse-nl": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.787332,
+    -57.874359
+   ],
+   [
+    49.773815,
+    -57.800469
+   ],
+   [
+    49.8,
+    -57.76
+   ],
+   [
+    49.787332,
+    -57.874359
+   ]
+  ],
+  "line": "loop",
+  "prefer_relations": [
+   19672496,
+   19751405
+  ],
+  "snap_limit_m": 1500,
+  "published": {
+   "distance_km": {
+    "value": 30,
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/northtrav"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/arriere-pays-backcountry/northtrav"
+   }
+  }
+ },
+ "jade-lakes-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.0477,
+    -118.1426
+   ],
+   [
+    51.071633,
+    -118.071946
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Eva Lake Trail",
+   "Jade Lakes Trail"
+  ],
+  "snap_limit_m": 700,
+  "published": {
+   "distance_km": {
+    "value": 18.8,
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   },
+   "elevation_gain_m": {
+    "value": 714,
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/sommet-journee-summit-day"
+   }
+  }
+ },
+ "athabasca-pass-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.669476,
+    -117.954523
+   ],
+   [
+    52.384656,
+    -118.1902
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Athabasca Pass Trail",
+   "Athabasca Pass"
+  ],
+  "snap_limit_m": 900,
+  "published": {
+   "distance_km": {
+    "value": 97,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/athabasca-pass"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/athabasca-pass"
+   }
+  }
+ },
+ "geraldine-lakes-ab": {
+  "method": "named",
+  "names": [
+   "Geraldine Lakes Trail"
+  ],
+  "line": "out_and_back",
+  "to": [
+   52.592688,
+   -117.942926
+  ],
+  "published": {
+   "distance_km": {
+    "value": 12.4,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/geraldine"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/geraldine"
+   }
+  }
+ },
+ "jacques-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    52.8796,
+    -117.788
+   ],
+   [
+    52.93329,
+    -117.745835
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 1500,
+  "published": {
+   "distance_km": {
+    "value": 24.4,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Jacques"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/Jacques"
+   }
+  }
+ },
+ "goat-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.127,
+    -114.042
+   ],
+   [
+    49.163302,
+    -114.090633
+   ]
+  ],
+  "line": "out_and_back",
+  "snap_limit_m": 1200,
+  "published": {
+   "distance_km": {
+    "value": 13.6,
+    "url": "Parks Canada site description (reservation system)"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "Parks Canada site description (reservation system)"
+   }
+  }
+ },
+ "waterton-lakeshore-trail-ab": {
+  "method": "named",
+  "names": [
+   "Waterton Lake Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   49.0414,
+   -113.9154
+  ],
+  "published": {
+   "distance_km": {
+    "value": 13,
+    "url": "Parks Canada site descriptions (reservation system)"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "Parks Canada site descriptions (reservation system)"
+   }
+  }
+ },
+ "crandell-lake-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    49.076673,
+    -113.974781
+   ],
+   [
+    49.086979,
+    -113.967442
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_relations": [
+   1572823
+  ],
+  "published": {
+   "distance_km": {
+    "value": 5,
+    "url": "Parks Canada site description (reservation system)"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "Parks Canada site description (reservation system)"
+   }
+  }
+ },
+ "south-boundary-trail-ab": {
+  "method": "named",
+  "names": [
+   "South Boundary Trail"
+  ],
+  "line": "point_to_point",
+  "published": {
+   "distance_km": {
+    "value": 121,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/south-boundary"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/south-boundary"
+   }
+  }
+ },
+ "saturday-night-lake-loop-ab": {
+  "method": "named",
+  "names": [
+   "3 Saturday Night Lake",
+   "3a Saturday Night Lake",
+   "3b Saturday Night Lake",
+   "3c Saturday Night Lake"
+  ],
+  "line": "loop",
+  "from": [
+   52.878127,
+   -118.121744
+  ],
+  "published": {
+   "distance_km": {
+    "value": 24.6,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/SaturdayNight"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/SaturdayNight"
+   }
+  }
+ },
+ "hermit-trail-bc": {
+  "method": "named",
+  "names": [
+   "Hermit Trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   51.314218,
+   -117.512542
+  ],
+  "published": {
+   "distance_km": {
+    "value": 6.4,
+    "url": "https://parks.canada.ca/pn-np/bc/glacier/activ/randonee-hiking/journee-day"
+   },
+   "elevation_gain_m": {
+    "value": 820,
+    "url": "https://parks.canada.ca/pn-np/bc/glacier/activ/randonee-hiking/journee-day",
+    "one_way": true
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/bc/glacier/activ/randonee-hiking/journee-day"
+   }
+  }
+ },
+ "fiddle-river-ab": {
+  "method": "named",
+  "names": [
+   "Fiddle River Trail",
+   "Fiddle River/Mystery Lake Trail"
+  ],
+  "line": "point_to_point",
+  "from": [
+   53.124811,
+   -117.775191
+  ],
+  "published": {
+   "distance_km": {
+    "value": 37.8,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fiddle"
+   },
+   "route_type": {
+    "value": "point_to_point",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/fiddle"
+   }
+  }
+ },
+ "chaba-trail-ab": {
+  "method": "named",
+  "names": [
+   "Chaba trail"
+  ],
+  "line": "out_and_back",
+  "from": [
+   52.532003,
+   -117.644812
+  ],
+  "published": {
+   "distance_km": {
+    "value": 29.6,
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/chaba"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/chaba"
+   }
+  }
+ }
+}

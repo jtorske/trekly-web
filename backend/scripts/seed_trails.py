@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.database import SessionLocal
 from app.trail_catalog import load_catalog, sync_trails
+from app.trail_routes import routes_by_name
 
 
 def main():
@@ -27,7 +28,7 @@ def main():
 
     db = SessionLocal()
     try:
-        result = sync_trails(db, load_catalog(), TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT)
+        result = sync_trails(db, load_catalog(), TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT, routes=routes_by_name())
         print(f"Countries: {','.join(TRAIL_CATALOG_COUNTRIES)}  limit: {TRAIL_CATALOG_LIMIT}")
         for label, names in (("Inserted", result.inserted), ("Updated", result.updated), ("Retired", result.retired)):
             print(f"{label}: {len(names)}")

@@ -27,6 +27,10 @@ TRAIL_FIELDS = (
 )
 
 
+# Fields catalog_data/trail_routes.json may set over the catalogue entry.
+OVERLAY_FIELDS = ("distance_km", "route_type", "elevation_gain_m", "max_elevation_m", "description")
+
+
 @dataclass
 class SyncResult:
     inserted: list[str] = field(default_factory=list)
@@ -71,8 +75,12 @@ def sync_trails(
     countries: tuple[str, ...],
     limit: int,
     now: datetime | None = None,
+    routes: dict | None = None,
 ) -> SyncResult:
-    """Apply the catalogue to the database (caller commits)."""
+    """Apply the catalogue to the database (caller commits).
+
+    `routes` (app.trail_routes.routes_by_name()) overlays the measured
+    distance, route type, gain and high point onto matching entries."""
     now = now or datetime.now(timezone.utc)
     source = catalog["meta"]["popularity_source"]
     selected = select_entries(catalog, countries, limit)
@@ -83,6 +91,10 @@ def sync_trails(
     live_ids = set()
 
     for position, entry in enumerate(selected, 1):
+        if routes:
+            route = routes.get((entry["name"], entry["province_code"]))
+            if route:
+                entry = {**entry, **{f: route[f] for f in OVERLAY_FIELDS if route.get(f) is not None}}
         wanted = {name: _normalize(name, entry.get(name)) for name in TRAIL_FIELDS}
         wanted["popularity_rank"] = position
         wanted["popularity_score"] = popularity_score(entry["rank"], total)
