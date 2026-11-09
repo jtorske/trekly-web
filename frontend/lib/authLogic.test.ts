@@ -25,6 +25,7 @@ test("safeNextPath blocks open redirects and loops", () => {
     "/login",
     "/signup?next=/gear",
     "/auth/callback",
+    "/auth/confirm?token_hash=x&type=signup",
     "/x\n",
     "%E0%A4%A",
     "",

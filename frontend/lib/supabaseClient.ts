@@ -10,9 +10,10 @@ let client: SupabaseClient | null = null;
  *
  * Sessions persist in localStorage and refresh automatically, so a signed-in
  * user stays signed in across refreshes, direct navigation and browser
- * restarts until the refresh token expires or they sign out. Email links
- * (confirmation, password reset, email change) use the PKCE flow and land on
- * /auth/callback, which exchanges the code for a session.
+ * restarts until the refresh token expires or they sign out. Links in auth
+ * emails land on /auth/confirm, which verifies their token hash (our own
+ * templates in supabase/templates); Google sign-in uses the PKCE flow and
+ * lands on /auth/callback, which exchanges the code for a session.
  */
 export function getSupabaseClient(): SupabaseClient {
   if (client) return client;

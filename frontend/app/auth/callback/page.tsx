@@ -9,8 +9,8 @@ import { authRedirectError, nextQuery, safeNextPath } from "@/lib/authLogic";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
 /**
- * Landing page for Supabase email links (signup confirmation, password
- * recovery, email change) and for Google sign-in. The Supabase client exchanges the PKCE `code` in
+ * Landing page for Google sign-in, and for email links sent with Supabase's
+ * default templates (ours in supabase/templates go to /auth/confirm). The Supabase client exchanges the PKCE `code` in
  * the URL for a session during initialisation; we wait for that, then send
  * the user on to `next`.
  */

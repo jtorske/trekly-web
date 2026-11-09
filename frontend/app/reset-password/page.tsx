@@ -10,7 +10,7 @@ import { friendlyAuthError, passwordChecks, passwordIsValid } from "@/lib/authLo
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
 /**
- * Reached from a password-recovery email via /auth/callback, which signs the
+ * Reached from a password-recovery or invite email via /auth/confirm, which signs the
  * user in with a recovery session. Without a session the link was invalid,
  * expired or opened elsewhere.
  */
