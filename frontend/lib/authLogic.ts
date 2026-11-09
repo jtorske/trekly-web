@@ -101,6 +101,18 @@ export function friendlyAuthError(error: unknown): string {
   return raw || "Something went wrong. Please try again.";
 }
 
+/**
+ * Sign-up with an address that already has an account. The hosted project
+ * answers those with a vague 200 (no new identity), but GoTrue says so
+ * outright (422 user_already_exists) when a project has confirmations off;
+ * either way the form shows the same "Check your inbox" screen.
+ */
+export function isExistingAccountSignUpError(error: unknown): boolean {
+  const code = (error as { code?: string } | null)?.code ?? "";
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return code === "user_already_exists" || code === "email_exists" || message.includes("already registered");
+}
+
 /** Reads `error_description` from an auth redirect's query string or hash. */
 export function authRedirectError(search: string, hash: string): string | null {
   for (const source of [search, hash.replace(/^#/, "?")]) {

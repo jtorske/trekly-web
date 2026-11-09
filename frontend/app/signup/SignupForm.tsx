@@ -8,7 +8,16 @@ import { Eye, EyeOff, MailCheck } from "lucide-react";
 import { GoogleButton, ResendConfirmation, callbackUrl } from "@/components/AuthForm";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import { emailLooksValid, friendlyAuthError, nextQuery, passwordChecks, passwordIsValid, safeNextPath } from "@/lib/authLogic";
+import {
+  emailLooksValid,
+  friendlyAuthError,
+  isExistingAccountSignUpError,
+  nextQuery,
+  passwordChecks,
+  passwordIsValid,
+  safeNextPath,
+} from "@/lib/authLogic";
+import { requestSignupEmail } from "@/lib/signupEmailApi";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import styles from "./signup.module.css";
 
@@ -51,17 +60,24 @@ export default function SignupForm() {
     if (!emailLooksValid(email) || !passwordIsValid(password)) return;
     setSubmitting(true);
     try {
+      const address = email.trim();
       const { data, error: authError } = await getSupabaseClient().auth.signUp({
-        email: email.trim(),
+        email: address,
         password,
         options: { emailRedirectTo: callbackUrl(nextPath) },
       });
-      if (authError) throw authError;
+      if (authError && !isExistingAccountSignUpError(authError)) throw authError;
       // With confirmation off there's a session at once; the app sends them to /welcome.
-      if (data.session) router.replace(nextPath);
-      // Supabase answers the same way whether or not the address is already
-      // registered, and so do we.
-      else setSentTo(email.trim());
+      if (data?.session) {
+        router.replace(nextPath);
+        return;
+      }
+      // Supabase only emails a new or unconfirmed address. The API emails a
+      // registered one ("you already have an account", or "use Google").
+      // Asked for every address, new or not, so its rate limit can't tell
+      // them apart either; whatever it answers, the next screen is the same.
+      await requestSignupEmail(address, nextPath, "signup").catch(() => undefined);
+      setSentTo(address);
     } catch (caught) {
       setError(friendlyAuthError(caught));
     } finally {
@@ -81,6 +97,7 @@ export default function SignupForm() {
           <p className={styles.lead}>
             We sent a link to <strong>{sentTo}</strong>. Click it to confirm your email, and we&apos;ll get your account set up.
           </p>
+          <p className={styles.lead}>If you already have an account, we&apos;ve emailed you a sign-in link instead.</p>
           <ul className={styles.tips}>
             <li>Open it in this browser: the link signs you in here.</li>
             <li>Nothing after a few minutes? Check your spam folder, or send it again.</li>

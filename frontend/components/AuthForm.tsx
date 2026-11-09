@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
 import { emailLooksValid, friendlyAuthError, nextQuery, safeNextPath } from "@/lib/authLogic";
+import { requestSignupEmail } from "@/lib/signupEmailApi";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import styles from "./AuthForm.module.css";
 
@@ -39,7 +40,12 @@ function useCooldown() {
   return { remaining, start: () => { setNow(Date.now()); setUntil(Date.now() + RESEND_COOLDOWN_SECONDS * 1000); } };
 }
 
-/** Resend the signup confirmation email, with a cooldown against spamming. */
+/**
+ * "Resend confirmation email". The API decides what goes out, by the same
+ * rules as sign-up: the confirmation again for an unconfirmed account, or a
+ * sign-in email for a registered one (lib/signupEmailApi). A cooldown here,
+ * and a limit per address and IP on the API, keep it from spamming anyone.
+ */
 export function ResendConfirmation({ email, next }: { email: string; next: string }) {
   const cooldown = useCooldown();
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
@@ -49,16 +55,11 @@ export function ResendConfirmation({ email, next }: { email: string; next: strin
     setSending(true);
     setStatus(null);
     try {
-      const { error } = await getSupabaseClient().auth.resend({
-        type: "signup",
-        email,
-        options: { emailRedirectTo: callbackUrl(next) },
-      });
-      if (error) throw error;
+      await requestSignupEmail(email, next, "resend");
       cooldown.start();
-      setStatus({ ok: true, message: "If that address needs confirming, a new link is on its way." });
+      setStatus({ ok: true, message: "Sent again. It can take a few minutes to arrive." });
     } catch (error) {
-      setStatus({ ok: false, message: friendlyAuthError(error) });
+      setStatus({ ok: false, message: error instanceof Error ? error.message : friendlyAuthError(error) });
     } finally {
       setSending(false);
     }

@@ -4,6 +4,7 @@ import {
   authRedirectError,
   emailLooksValid,
   friendlyAuthError,
+  isExistingAccountSignUpError,
   passwordChecks,
   passwordIsValid,
   safeNextPath,
@@ -78,4 +79,20 @@ test("authRedirectError explains a cancelled Google sign-in", () => {
     /cancelled/,
   );
   assert.match(friendlyAuthError(Object.assign(new Error("Unsupported provider: provider is not enabled"), { code: "validation_failed" })), /isn't available/);
+});
+
+test("isExistingAccountSignUpError spots GoTrue's already-registered answer", () => {
+  const already = Object.assign(new Error("User already registered"), { code: "user_already_exists" });
+  assert.equal(isExistingAccountSignUpError(already), true);
+  assert.equal(isExistingAccountSignUpError(Object.assign(new Error("x"), { code: "email_exists" })), true);
+  assert.equal(isExistingAccountSignUpError(new Error("User already registered")), true);
+  for (const other of [
+    Object.assign(new Error("Password should be at least 8 characters"), { code: "weak_password" }),
+    Object.assign(new Error("email rate limit exceeded"), { code: "over_email_send_rate_limit" }),
+    new Error("Failed to fetch"),
+    null,
+    "already registered",
+  ]) {
+    assert.equal(isExistingAccountSignUpError(other), false);
+  }
 });

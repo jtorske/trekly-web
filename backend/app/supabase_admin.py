@@ -1,7 +1,8 @@
 """Account actions through the Supabase Auth admin API (service-role key).
 
 Used by the admin area (app/routers/admin.py) to ban, unban and send a
-password reset. Like PhotoStorage (app/trail_photos.py), the key is read
+password reset, and by the sign-up email helper (app/routers/signup_email.py)
+to resend a sign-up confirmation. Like PhotoStorage (app/trail_photos.py), the key is read
 only by supabase_admin_from_env() and lives only inside a closure that
 builds request headers: it is never an attribute, never logged, and never in
 an error. A failed request raises SupabaseAdminError with just the HTTP
@@ -67,6 +68,11 @@ class SupabaseAdmin:
     def send_password_reset(self, email: str, redirect_to: str) -> None:
         query = urllib.parse.urlencode({"redirect_to": redirect_to})
         self._send("POST", f"{self.base}/recover?{query}", {"email": email})
+
+    def resend_signup_confirmation(self, email: str, redirect_to: str) -> None:
+        """Supabase's own "Confirm your email" email, sent again."""
+        query = urllib.parse.urlencode({"redirect_to": redirect_to})
+        self._send("POST", f"{self.base}/resend?{query}", {"type": "signup", "email": email})
 
 
 def supabase_admin_from_env() -> SupabaseAdmin | None:

@@ -4,9 +4,10 @@ admin_audit_log records every admin action (who, what, when, on whom). It
 has no client access and nothing in the app deletes from it; rows outlive
 the accounts they mention (no foreign keys).
 
-AUTH_USERS describes the columns of auth.users the admin area reads. It is
+AUTH_USERS describes the columns of auth.users the admin area (and the
+sign-up email helper) reads; AUTH_IDENTITIES does the same for auth.identities. It is
 on its own MetaData, so it's never created, migrated or dropped from here:
-Supabase owns that table. Writes to accounts (ban, password reset) go
+Supabase owns those tables. Writes to accounts (ban, password reset) go
 through the Supabase admin API instead (app/supabase_admin.py).
 """
 
@@ -62,4 +63,17 @@ AUTH_USERS = Table(
     Column("last_sign_in_at", DateTime(timezone=True)),
     Column("banned_until", DateTime(timezone=True)),
     Column("raw_app_meta_data", JSON().with_variant(JSONB(), "postgresql")),
+    Column("email_confirmed_at", DateTime(timezone=True)),
+    Column("confirmation_sent_at", DateTime(timezone=True)),
+    Column("deleted_at", DateTime(timezone=True)),
+)
+
+# How each account signs in: one row per provider ("email", "google").
+# Read by the sign-up email helper (app/routers/signup_email.py).
+AUTH_IDENTITIES = Table(
+    "identities",
+    auth_metadata,
+    Column("id", Uuid, primary_key=True),
+    Column("user_id", Uuid, nullable=False),
+    Column("provider", Text, nullable=False),
 )

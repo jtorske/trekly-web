@@ -282,7 +282,10 @@ content_path = "./supabase/templates/reauthentication.html"
 # Allow/disallow new user signups via SMS to your project.
 enable_signup = false
 # If enabled, users need to confirm their phone number before signing in.
-enable_confirmations = false
+# Kept on (SMS sign-up is off anyway) so sign-up with an existing email gets
+# the same deliberately vague 200 as the hosted project: GoTrue answers 422
+# "user_already_exists" when either email or SMS confirmations are off.
+enable_confirmations = true
 # Template for sending OTP to users
 template = "Your code is {{ .Code }}"
 # Controls the minimum amount of time that must pass before sending another sms otp.
