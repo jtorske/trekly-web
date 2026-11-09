@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: November 3, 2026</p>
+        <p className={styles.updated}>Last updated: November 9, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
             and loadouts, and saved trails.
           </li>
           <li>
-            Private by default, and you can choose to show them: your trip plans, your home province or territory, and your visit streak. Public trip plans
+            Private by default, and you can choose to show them: your trip plans, your home province or territory (or that you live outside Canada), and your visit streak. Public trip plans
             show where and when you&apos;ll be on a trail, so think carefully before sharing them.
           </li>
           <li>
