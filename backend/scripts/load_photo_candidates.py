@@ -4,7 +4,9 @@ Reads the output of scripts/find_trail_photos.py and matches each trail to
 the target database by (name, province_code), the trails' unique key, so a
 database gets its own trail ids. Every candidate is validated first (image
 host, https source page, license, a real credit), and nothing is written if
-any check fails. Review decisions and approved photos are never touched.
+any check fails. Review decisions and approved photos are never touched:
+a trail that already has a photo is skipped, and a trail whose new search
+found nothing keeps its earlier candidates.
 
 Run from backend/ (DATABASE_URL picks the database; backend/.env is local):
 
@@ -21,7 +23,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -31,7 +33,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.models.trail import Trail
-from app.models.trail_photo import TrailPhotoCandidates
+from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates
 from app.trail_photos import allowed_fetch_url
 
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
@@ -47,6 +49,8 @@ class LoadPlan:
     missing: list[str] = field(default_factory=list)        # live trails with no entry in the file
     problems: list[str] = field(default_factory=list)       # invalid candidates (nothing is written)
     replaced: int = 0                                       # trails that already had candidates
+    has_photo: list[str] = field(default_factory=list)      # skipped: an approved or uploaded photo
+    kept_earlier: list[str] = field(default_factory=list)   # skipped: nothing new found, earlier candidates stay
     table_exists: bool = True                               # migration aa84e0d9e26b has run
 
 
@@ -83,6 +87,10 @@ def plan_load(db, data: dict) -> LoadPlan:
     # A dry run works before migration aa84e0d9e26b; a write doesn't.
     plan.table_exists = inspect(db.get_bind()).has_table(TrailPhotoCandidates.__tablename__)
     existing = {row.trail_id for row in db.query(TrailPhotoCandidates.trail_id).all()} if plan.table_exists else set()
+    with_photo = {row.trail_id for row in db.query(TrailPhoto.trail_id).all()}
+    # Set explicitly: merge() on an existing row leaves the server default alone,
+    # and the review page compares this with the trail's last decision.
+    loaded_at = datetime.now(timezone.utc)
     searched_on = date.fromisoformat(data["generated"]) if data.get("generated") else None
     seen = set()
     for entry in data.get("trails", []):
@@ -94,6 +102,12 @@ def plan_load(db, data: dict) -> LoadPlan:
             continue
         seen.add(key)
         candidates = entry.get("candidates", [])
+        if trail.id in with_photo:
+            plan.has_photo.append(label)
+            continue
+        if not candidates and trail.id in existing:
+            plan.kept_earlier.append(label)
+            continue
         for c in candidates:
             problem = candidate_problem(c)
             if problem:
@@ -110,6 +124,7 @@ def plan_load(db, data: dict) -> LoadPlan:
             low_res=bool(entry.get("low_res")),
             candidates=candidates,
             searched_on=searched_on,
+            loaded_at=loaded_at,
         ))
     plan.missing = sorted(f"{name} ({province or '-'})" for name, province in live - seen)
     return plan
@@ -152,6 +167,12 @@ def main():
               f"{sum(1 for r in plan.rows if r.low_res)} low-res fallback)")
         print(f"Already loaded (would be replaced): {plan.replaced}"
               + ("" if plan.table_exists else "  [trail_photo_candidates doesn't exist yet: migrate first]"))
+        print(f"Skipped, already has a photo: {len(plan.has_photo)}")
+        for label in plan.has_photo:
+            print(f"  - {label}")
+        print(f"Skipped, nothing new found (earlier candidates kept): {len(plan.kept_earlier)}")
+        for label in plan.kept_earlier:
+            print(f"  - {label}")
         print(f"Unmatched (in file, not in database): {len(plan.unmatched)}")
         for label in plan.unmatched:
             print(f"  - {label}")

@@ -5,6 +5,12 @@
   margin-top: 1.5rem;
   border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
   padding-top: 1.5rem;
+  scroll-margin-top: 5rem;
+}
+
+/* The trail the keyboard shortcuts act on. */
+.trailActive {
+  box-shadow: -0.75rem 0 0 -0.5rem var(--color-rust);
 }
 
 .current {
@@ -108,6 +114,37 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
+}
+
+.match {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.key {
+  display: inline-block;
+  min-width: 1.3rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 25%, transparent);
+  border-radius: 0.3rem;
+  padding: 0 0.3rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3rem;
+  text-align: center;
+}
+
+.shortcuts {
+  margin: 0.4rem 0 0.9rem;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+}
+
+@media (hover: none) {
+  .key,
+  .shortcuts {
+    display: none;
+  }
 }
 
 .lowRes {

@@ -294,6 +294,40 @@ def test_dry_run_writes_nothing_and_reloading_replaces(trails, session_factory):
     session.close()
 
 
+def test_loader_leaves_trails_with_a_photo_and_keeps_earlier_candidates_when_nothing_new(
+        client, auth_headers, setup, session_factory):
+    client.post(f"/api/admin/trail-photos/{setup['agnes']}/approve",
+                json={"candidate_id": "commons:1"}, headers=auth_headers(ADMIN))
+    data = {"generated": "2026-11-09", "trails": [
+        {**SEARCH_OUTPUT["trails"][0], "candidates": [candidate("commons:5")], "default_choice": None},
+        {**SEARCH_OUTPUT["trails"][1], "candidates": [], "default_choice": None, "best_confidence": None},
+    ]}
+    plan = load(session_factory, data)
+    assert plan.has_photo == ["Lake Agnes Tea House (AB)"]
+    assert plan.kept_earlier == ["Joffre Lakes (BC)"] and plan.rows == []
+    listed = client.get("/api/admin/trail-photos", headers=auth_headers(ADMIN)).json()
+    assert [c["id"] for c in listed[0]["candidates"]] == ["commons:1", "commons:2"]
+    assert [c["id"] for c in listed[1]["candidates"]] == ["commons:9"]
+
+
+def test_new_candidates_are_newer_than_the_last_decision_until_reviewed_again(client, auth_headers, setup, session_factory):
+    base = f"/api/admin/trail-photos/{setup['joffre']}"
+    client.post(f"{base}/reject", headers=auth_headers(ADMIN))
+    fresh = {"generated": "2026-11-09", "trails": [{
+        **SEARCH_OUTPUT["trails"][1], "best_confidence": "high", "default_choice": "commons:7",
+        "candidates": [candidate("commons:7", match="Names Joffre Lakes", distance_from="route", distance_m=300)],
+    }]}
+    load(session_factory, fresh)
+    joffre = client.get("/api/admin/trail-photos", headers=auth_headers(ADMIN)).json()[1]
+    assert joffre["candidates_loaded_at"] > joffre["review"]["reviewed_at"]
+    assert joffre["candidates"][0]["match"] == "Names Joffre Lakes"
+    assert joffre["candidates"][0]["distance_from"] == "route"
+
+    client.post(f"{base}/reject", headers=auth_headers(ADMIN))
+    joffre = client.get("/api/admin/trail-photos", headers=auth_headers(ADMIN)).json()[1]
+    assert joffre["review"]["reviewed_at"] > joffre["candidates_loaded_at"]
+
+
 @pytest.mark.parametrize("bad,problem", [
     ({"image_url": "https://evil.example/a.jpg"}, "image host not allowed"),
     ({"source_url": "http://commons.wikimedia.org/x"}, "not https"),

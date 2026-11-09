@@ -13,6 +13,7 @@ new row is committed, so a trail is never left pointing at missing files.
 """
 
 import logging
+from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -85,6 +86,11 @@ class CandidateOut(BaseModel):
     license_url: str | None = None
     source_url: str
     distance_m: int | None = None
+    # What distance_m is measured from: the stored route, or (older searches
+    # and trails without a route) the trailhead / catalogue point.
+    distance_from: str = "trailhead"
+    # Why it got its confidence: "Names Brazeau Lake", "0.4 km from the route".
+    match: str | None = None
     # Below the 1600px search minimum: found by the 1024px fallback.
     low_res: bool = False
 
@@ -94,6 +100,7 @@ class ReviewOut(BaseModel):
 
     decision: str
     candidate_id: str | None = None
+    reviewed_at: datetime | None = None
 
 
 class ReviewTrailOut(BaseModel):
@@ -103,6 +110,9 @@ class ReviewTrailOut(BaseModel):
     # What the page selects first: a high/medium candidate, else none (topo).
     default_choice: str | None = None
     candidates: list[CandidateOut] = []
+    # When these candidates were loaded; newer than review.reviewed_at means
+    # a fresh search the reviewer hasn't seen ("To review" on the page).
+    candidates_loaded_at: datetime | None = None
     review: ReviewOut | None = None
 
 
@@ -132,6 +142,9 @@ def _candidate(db: Session, trail: Trail, candidate_id: str) -> dict:
 def _record_review(db: Session, trail_id: UUID, decision: str, candidate_id: str | None, admin: CurrentUser):
     review = db.get(TrailPhotoReview, trail_id) or TrailPhotoReview(trail_id=trail_id)
     review.decision, review.candidate_id, review.reviewed_by = decision, candidate_id, admin.id
+    # The column default covers only the first decision; a later one must move
+    # it too, or a re-reviewed trail would look unseen next to newer candidates.
+    review.reviewed_at = datetime.now(timezone.utc)
     db.add(review)
 
 
@@ -222,6 +235,7 @@ def review_list(_admin: CurrentUser = Depends(require_photo_admin), db: Session 
             best_confidence=entry.best_confidence if entry else None,
             default_choice=entry.default_choice if entry else None,
             candidates=[CandidateOut.model_validate(c) for c in (entry.candidates if entry else [])],
+            candidates_loaded_at=entry.loaded_at if entry else None,
             review=ReviewOut.model_validate(reviews[trail.id]) if trail.id in reviews else None,
         ))
     return out

@@ -18,13 +18,21 @@ license and source page URL.
 Trails with no candidate at 1600px are searched again at 1024px (Openverse
 serves Flickr at 1024px only); those candidates are flagged low_res.
 
-Every candidate gets a confidence:
-  high       Commons, names the trail or destination
-  medium     Commons, geotagged within NEARBY_M of the trailhead
-  low        Openverse keyword match (names trail/destination and region)
-  off_topic  Commons, only a regional shot
-The review page starts a trail on the topo fallback unless its best candidate
-is high or medium.
+Where a trail has a stored route (catalog_data/trail_routes.json), Commons is
+searched along it: a geosearch every SAMPLE_KM along the line plus the
+trailhead, high point and far end, within ROUTE_RADIUS_M of each. Landmarks
+on the route (lakes, passes, peaks... from Wikipedia articles geotagged
+within ROUTE_RADIUS_M, plus the trail's linked campgrounds) are searched by
+name on both sources. Trails without a route use their catalogue point.
+
+Every candidate gets a confidence (stored under the review page's keys):
+  strong  (high)       names the trail or a landmark on it, or taken within
+                       STRONG_M of the route
+  likely  (medium)     geotagged within LIKELY_M of the route
+  weak    (off_topic)  park or region match only
+and a `match` line saying why. The review page starts a trail on the topo
+fallback unless its best candidate is strong or likely. Image and preview
+URLs are checked to still load before a candidate is kept.
 
 Nothing is downloaded or published: the output is a JSON file for the review
 page. Run from backend/:
@@ -45,7 +53,9 @@ import json
 import math
 import os
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -54,7 +64,10 @@ from datetime import date
 from pathlib import Path
 
 CATALOG = Path(__file__).resolve().parent.parent / "catalog_data" / "trails_canada.json"
+ROUTES = CATALOG.parent / "trail_routes.json"
+CAMPGROUNDS = CATALOG.parent / "trail_campgrounds.json"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+WIKIPEDIA_API = "https://{lang}.wikipedia.org/w/api.php"
 OPENVERSE_API = "https://api.openverse.org/v1"
 USER_AGENT = "Trekly-photo-search/1.0 (jtorske27@gmail.com)"
 PAUSE_S = 0.5
@@ -62,7 +75,27 @@ OPENVERSE_PAUSE_S = 3.2  # anonymous burst limit is 20/minute
 
 GEO_RADIUS_M = 10000          # Commons geosearch maximum
 TEXT_MATCH_RADIUS_M = 25000   # text-search hits must be geotagged this close
-NEARBY_M = 3000               # "medium": geotagged this close to the trailhead
+SAMPLE_KM = 3                 # geosearch spacing along a stored route
+ROUTE_RADIUS_M = 3000         # geosearch / landmark radius around each route point
+STRONG_M = 1000               # "strong": taken this close to the route
+LIKELY_M = 3000               # "likely": taken this close to the route
+MAX_LANDMARKS = 8             # landmark name searches per trail on Commons
+OPENVERSE_LANDMARKS = 1       # ... and on Openverse (200 requests/day anonymous)
+LABELS = {"high": "strong", "medium": "likely", "low": "weak", "off_topic": "weak"}
+# Wikipedia article titles that name a place a hiker sees from the trail.
+LANDMARK = re.compile(
+    r"\b(lake|lakes|pass|mount|mountain|peak|glacier|falls|ridge|canyon|meadows?|cirque|tarn|basin|"
+    r"icefield|summit|cove|bay|beach|point|head|island|cape|gorge|bluffs?|hill|hills|dunes?|spire|"
+    r"needle|tower|lac|mont|pic|chute|chutes|anse|baie|cap|sommet|crete|cretes|plateau|campground)\b",
+    re.I,
+)
+NOT_LANDMARK = re.compile(
+    r"\b(park|parc|highway|route|station|airport|school|hospital|church|lodge|hotel|resort|ski|mine|"
+    r"dam|bridge|railway|district|county|municipality|village|town|city|reserve|nation|band|electoral|"
+    r"census|ward|road|street|treaty|fire|disaster|shooting|battle|massacre|incident|crash|list|"
+    r"generating|power|lighthouse|wreck)\b",
+    re.I,
+)
 MIN_WIDTH = 1600              # enough for a hero after resizing (--min-width)
 FALLBACK_MIN_WIDTH = 1024     # only for trails with nothing at MIN_WIDTH (--fallback-min-width)
 MIN_ASPECT, MAX_ASPECT = 1.25, 2.4  # landscape; wider is a panorama strip
@@ -85,7 +118,8 @@ NOT_LANDSCAPE = re.compile(
     r"manoir|maison|pavillon|barrage|chambre|façade|bâtiment|gîte|gite|"
     r"iss\d+|view of earth|astronaut|satellite|pictograms?|pictographs?|church|église|eglise|fox|ravens?|"
     r"magpie|hummingbird|sea ?lion|moon|imo \d{7}|mapillary|street|st|rd|tanker|ship|"
-    r"inaturalist|store|bären|sculpture|statue)\b",
+    r"inaturalist|store|bären|sculpture|statue|paintbrush|castilleja|wildflowers?|lupine?s?|asters?|"
+    r"daisy|daisies|berry|berries)\b",
     re.I,
 )
 # iNaturalist-style species uploads: "Physarum viride 177577162.jpg",
@@ -184,16 +218,6 @@ def candidate_text(candidate):
     return " ".join([candidate["title"], candidate["description"], *candidate["_categories"]])
 
 
-def confidence(candidate, terms):
-    if candidate["source"] == "openverse":
-        return "low"
-    if mentions(candidate_text(candidate), terms):
-        return "high"
-    if candidate["distance_m"] is not None and candidate["distance_m"] <= NEARBY_M:
-        return "medium"
-    return "off_topic"
-
-
 def score(candidate, dest_words):
     """Higher is better within a confidence level: close, big, on-topic, curated."""
     s = 0.0
@@ -217,16 +241,16 @@ def _cache_path(cache_dir, key):
     return cache_dir / (hashlib.sha256(key.encode()).hexdigest()[:20] + ".json")
 
 
-def get_json(url, params, cache_dir, headers=None, pause=PAUSE_S):
+def get_json(url, params, cache_dir, headers=None, pause=PAUSE_S, waits=(0, 10, 30, 60), timeout=60):
     query = f"{url}?{urllib.parse.urlencode(sorted(params.items()))}"
     cached = _cache_path(cache_dir, query)
     if cached.exists():
         return json.loads(cached.read_text(encoding="utf-8"))
     request = urllib.request.Request(query, headers={"User-Agent": USER_AGENT, **(headers or {})})
-    for wait in (0, 10, 30, 60):
+    for wait in waits:
         time.sleep(wait or pause)
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 data = json.loads(response.read())
             cached.write_text(json.dumps(data), encoding="utf-8")
             return data
@@ -246,7 +270,7 @@ COMMONS_PROPS = {
     "prop": "imageinfo|coordinates|categories",
     "iiprop": "url|size|mime|extmetadata",
     "iiextmetadatafilter": "Artist|LicenseShortName|LicenseUrl|ImageDescription|ObjectName|DateTimeOriginal",
-    "iiurlwidth": "800",
+    "iiurlwidth": "500",  # a standard Wikimedia thumbnail step
     "clshow": "!hidden", "cllimit": "max", "colimit": "max",
 }
 
@@ -328,11 +352,22 @@ def openverse_headers():
         return {"Authorization": f"Bearer {json.loads(response.read())['access_token']}"}
 
 
+# One Openverse request at a time across worker threads (20/minute burst
+# limit), and the queries that failed (it often answers 504) for the report.
+OPENVERSE_LOCK = threading.Lock()
+OPENVERSE_FAILED = []
+
+
 def openverse_search(text, cache_dir, headers):
     # No category filter: most Flickr photos carry none and would be dropped.
-    return get_json(f"{OPENVERSE_API}/images/", {
-        "q": text, "license": ",".join(OPENVERSE_LICENSES), "mature": "false", "page_size": "20",
-    }, cache_dir, headers, pause=OPENVERSE_PAUSE_S)
+    with OPENVERSE_LOCK:
+        # One quick retry: a 504 usually repeats, and Commons carries most trails.
+        data = get_json(f"{OPENVERSE_API}/images/", {
+            "q": text, "license": ",".join(OPENVERSE_LICENSES), "mature": "false", "page_size": "20",
+        }, cache_dir, headers, pause=OPENVERSE_PAUSE_S, waits=(0, 5), timeout=30)
+    if data is None:
+        OPENVERSE_FAILED.append(text)
+    return data
 
 
 def openverse_candidates(data):
@@ -421,50 +456,285 @@ def openverse_queries(trail, dest):
     return queries
 
 
-def search_one(trail, cache_dir, top, openverse, min_width):
+# ---------------------------------------------------------------- route geometry
+
+def _xy(point, ref):
+    """Metres east/north of ref (equirectangular; fine over a trail's length)."""
+    k = math.pi / 180 * 6371008.8
+    return ((point[1] - ref[1]) * k * math.cos(math.radians(ref[0])), (point[0] - ref[0]) * k)
+
+
+def distance_to_line(point, line):
+    """Shortest distance in metres from a point to a polyline of (lat, lon)."""
+    if len(line) == 1:
+        return haversine_m(point, line[0])
+    best = math.inf
+    for a, b in zip(line, line[1:]):
+        (ax, ay), (bx, by) = _xy(a, point), _xy(b, point)
+        dx, dy = bx - ax, by - ay
+        length2 = dx * dx + dy * dy
+        t = 0.0 if not length2 else max(0.0, min(1.0, -(ax * dx + ay * dy) / length2))
+        best = min(best, math.hypot(ax + t * dx, ay + t * dy))
+    return best
+
+
+def thin(line, step_m=50):
+    """Drop vertices closer than step_m to the last kept one (a 5,000-vertex
+    line costs seconds per candidate otherwise); the ends are kept."""
+    out = [line[0]]
+    for point in line[1:-1]:
+        if haversine_m(out[-1], point) >= step_m:
+            out.append(point)
+    return out + ([line[-1]] if len(line) > 1 else [])
+
+
+def sample_points(line, step_km=SAMPLE_KM, extra=()):
+    """A point every step_km along the line, its ends, the point farthest
+    from the start (an out-and-back's turnaround) and any extra points."""
+    points, walked, next_at = [line[0]], 0.0, step_km * 1000
+    for a, b in zip(line, line[1:]):
+        walked += haversine_m(a, b)
+        if walked >= next_at:
+            points.append(b)
+            next_at += step_km * 1000
+    points.append(line[-1])
+    points.append(max(line, key=lambda p: haversine_m(line[0], p)))
+    points += [tuple(p[:2]) for p in extra if p]
+    unique = []
+    for p in points:
+        if all(haversine_m(p, q) > 500 for q in unique):
+            unique.append(tuple(p))
+    return unique
+
+
+def trail_geometry(trail, routes):
+    """(line, sample points, distance_from) for a trail: its stored route,
+    or its catalogue point when it has none."""
+    entry = routes.get((trail["name"], trail["province_code"])) or {}
+    route = entry.get("route") or {}
+    if route.get("line"):
+        line = thin([tuple(p[:2]) for p in route["line"]])
+        extra = [route.get("trailhead") and route["trailhead"][:2], route.get("high_point") and route["high_point"][:2]]
+        return line, sample_points(line, extra=extra), "route"
+    point = (trail["latitude"], trail["longitude"])
+    return [point], [point], "trailhead"
+
+
+# ---------------------------------------------------------------- landmarks
+
+def clean_place(title):
+    """"Brazeau Lake (Alberta)" / "Lake Louise, Alberta" / "Mount X's" -> the place name."""
+    title = re.sub(r"\s*\([^)]*\)|['’]s$", "", title.strip())
+    return re.split(r",\s*", title)[0].strip()
+
+
+def wikipedia_geosearch(lat, lon, lang, cache_dir):
+    data = get_json(WIKIPEDIA_API.format(lang=lang), {
+        "action": "query", "format": "json", "formatversion": "2", "list": "geosearch",
+        "gscoord": f"{lat}|{lon}", "gsradius": str(ROUTE_RADIUS_M), "gslimit": "50", "gsnamespace": "0",
+    }, cache_dir)
+    return ((data or {}).get("query") or {}).get("geosearch", [])
+
+
+FEATURE_WORDS = set(re.findall(r"[a-z]+", LANDMARK.pattern.replace(r"\b", " ")))
+CAMP_WORDS = {"backcountry", "campground", "camp", "camping", "site", "sites", "group", "random", "zone",
+              "area", "wilderness", "primitive", "walk", "north", "south", "east", "west", "upper", "lower", "mid"}
+
+
+def is_landmark(name, park_words):
+    """A lake/pass/peak... name with a word of its own: "Brazeau Lake" yes;
+    "Falls", "Jasper National Park" or the park's own name no."""
+    folded = fold(name)
+    own = set(folded.split()) - park_words - CAMP_WORDS - FEATURE_WORDS
+    return bool(LANDMARK.search(folded)) and not NOT_LANDMARK.search(folded) and bool(own)
+
+
+def is_campground_name(name, park_words):
+    own = {w for w in fold(name).split() if len(w) > 3} - park_words - CAMP_WORDS
+    return bool(own) and not NOT_LANDMARK.search(fold(name))
+
+
+def campground_names(trail, links):
+    """Linked backcountry campground names, without codes and qualifiers:
+    "Jo9 Johnston Canyon" / "Pachena Bay (North)" -> usable place names."""
+    out = []
+    for link in links.get((trail["name"], trail["province_code"]), []):
+        name = re.sub(r"\s*\([^)]*\)|\s+-\s+.*$|\b[A-Z][a-z]?\d+[a-z]?\b", "", link.get("name") or "").strip(" -")
+        if name:
+            out.append(name)
+    return out
+
+
+def landmarks(trail, line, points, links, cache_dir):
+    """[(name, metres from the route)] for named places, nearest first:
+    Wikipedia articles geotagged within ROUTE_RADIUS_M of the route, the
+    trail's campgrounds and lake/pass/peak names in its description (both
+    taken as on the route)."""
+    park_words = set(fold(trail.get("park_name") or trail["region"]).split()) | REGION_FILLER
+    langs = ["en"] + (["fr"] if trail["province_code"] in ("QC", "NB") else [])
+    found = {}
+    for lat, lon in points:
+        for lang in langs:
+            for hit in wikipedia_geosearch(lat, lon, lang, cache_dir):
+                name = clean_place(hit["title"])
+                if is_landmark(name, park_words):
+                    d = distance_to_line((hit["lat"], hit["lon"]), line)
+                    if d <= ROUTE_RADIUS_M:
+                        found[name] = min(found.get(name, math.inf), d)
+    for name in campground_names(trail, links):
+        if is_campground_name(name, park_words):
+            found[name] = 0
+    phrase = r"(?:(?:Mount|Mont|Lac|Lake|Col)\s+(?:[A-Z][\w'’.-]+\s?){1,3}|(?:[A-Z][\w'’.-]+\s){1,3}(?:Lakes?|Pass|Peak|Glacier|Falls|Ridge|Canyon|Meadows|Cirque|Basin|Icefield))"
+    for match in re.findall(phrase, trail.get("description") or ""):
+        name = clean_place(match)
+        if is_landmark(name, park_words):
+            found[name] = 0
+    trail_words = set(distinctive(trail["name"]))
+    # The trail's own name is searched anyway.
+    return [(n, round(d)) for n, d in sorted(found.items(), key=lambda kv: kv[1])
+            if set(distinctive(n)) - trail_words or not trail_words]
+
+
+# ---------------------------------------------------------------- checks
+
+_URL_OK = {}
+
+
+def url_loads(url):
+    """True if the image still answers 200 (a HEAD, or a 1-byte GET where
+    HEAD isn't allowed). Results are remembered for the run."""
+    if url in _URL_OK:
+        return _URL_OK[url]
+    ok = False
+    for method, headers in (("HEAD", {}), ("GET", {"Range": "bytes=0-0"})):
+        request = urllib.request.Request(url, method=method, headers={"User-Agent": USER_AGENT, **headers})
+        for wait in (0, 5, 20):
+            time.sleep(wait or 0.25)
+            try:
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    ok = response.status in (200, 206) and response.headers.get_content_type().startswith("image/")
+                break
+            except urllib.error.HTTPError as error:
+                if error.code not in (429, 503):
+                    break
+            except (urllib.error.URLError, TimeoutError):
+                pass
+        if ok:
+            break
+    _URL_OK[url] = ok
+    return ok
+
+
+# ---------------------------------------------------------------- search
+
+def classify(candidate, named_terms, distance_from):
+    """(stored confidence, match line) by the strong/likely/weak rules.
+
+    named_terms is [(label, words, on_route)]. Naming the trail or a landmark
+    on it (within STRONG_M of the route) is strong. A landmark only near it
+    (a peak 2 km off) doesn't count by name: "Mount Bourgeau" from its
+    summit or from town is a view of the peak, not of the hike, so the
+    photo's own geotag decides; an untagged one is likely at best."""
+    text = candidate_text(candidate)
+    d = candidate["distance_m"]
+    where = "the route" if distance_from == "route" else "the trail point"
+    for label, term, on_route in named_terms:
+        if on_route and mentions(text, [term]):
+            return "high", f"Names {label}"
+    if d is None:
+        for label, term, on_route in named_terms:
+            if mentions(text, [term]):
+                return "medium", f"Names {label}, near the trail"
+    if d is not None and d <= STRONG_M:
+        return "high", f"{d / 1000:.1f} km from {where}"
+    if d is not None and d <= LIKELY_M:
+        return "medium", f"{d / 1000:.1f} km from {where}"
+    if d is not None:
+        return "off_topic", f"Regional: {d / 1000:.0f} km from {where}"
+    return "off_topic", "Park or region match only"
+
+
+def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=None, exclude=()):
     """openverse is None (Commons only) or the request headers to use."""
-    origin = (trail["latitude"], trail["longitude"])
+    routes, links = routes or {}, links or {}
+    line, points, distance_from = trail_geometry(trail, routes)
     dest = destination(trail)
     dest_words = distinctive(dest)
-    terms, region = topic_terms(trail, dest), region_terms(trail)
+    nearby = landmarks(trail, line, points, links, cache_dir)
+    places = [name for name, _ in nearby]
+    region = region_terms(trail)
+    # Labelled term sets: the trail and its destination, then each landmark.
+    own_terms = [frozenset(distinctive(label)) for label in [dest, trail["name"], *name_parts(trail["name"])]
+                 if distinctive(label)]
+    named_terms = [(label, frozenset(distinctive(label)), True)
+                   for label in [dest, trail["name"], *name_parts(trail["name"])] if distinctive(label)]
+    named_terms += [(name, frozenset(distinctive(name)), d <= STRONG_M) for name, d in nearby if distinctive(name)]
+    terms = [t for _, t, _ in named_terms]
+    allowed = f"{dest} {trail['name']} {' '.join(places)}"
 
-    found = [(c, False) for c in commons_candidates(commons_geosearch(*origin, cache_dir), origin)]
-    found += [(c, True) for c in commons_candidates(commons_text_search(dest, cache_dir), origin)]
+    found = []
+    for lat, lon in points:
+        found += [(c, False) for c in commons_candidates(commons_geosearch(lat, lon, cache_dir), (lat, lon))]
+    for query in dict.fromkeys([dest, re.sub(r"\s*/\s*", " ", trail["name"]), *places[:MAX_LANDMARKS]]):
+        found += [(c, True) for c in commons_candidates(commons_text_search(query, cache_dir), points[0])]
     if openverse is not None:
-        for query in openverse_queries(trail, dest):
+        park = " ".join(distinctive(trail.get("park_name") or trail["region"], REGION_FILLER)[:2])
+        queries = openverse_queries(trail, dest) + [f"{p} {park}".strip() for p in places[:OPENVERSE_LANDMARKS]]
+        for query in dict.fromkeys(queries):
             # Not held to the geotag rule: keyword hits are checked by name instead.
             found += [(c, False) for c in openverse_candidates(openverse_search(query, cache_dir, openverse))]
 
     # Commons comes first, so a photo found on both keeps its full-size
     # Commons copy and geotag.
-    seen, kept, rejected = set(), [], {}
+    seen, kept, rejected = set(exclude), [], {}
     for candidate, from_text in found:
         keys = photo_keys(candidate)
         if keys & seen:
+            if candidate["id"] in exclude:
+                rejected["rejected in an earlier review"] = rejected.get("rejected in an earlier review", 0) + 1
             continue
         seen |= keys
-        reason = rejection(candidate, from_text, dest, min_width, terms, region)
+        if candidate["latitude"] is not None:
+            candidate["distance_m"] = round(distance_to_line((candidate["latitude"], candidate["longitude"]), line))
+        # An untagged Commons hit is kept, like an Openverse one, when its title
+        # names the trail or a landmark and its text names the region.
+        untagged_named = (from_text and candidate["distance_m"] is None
+                          and mentions(candidate["title"], terms) and mentions(candidate_text(candidate), region))
+        reason = rejection(candidate, from_text and not untagged_named, allowed, min_width, terms, region)
         if reason:
             rejected[reason] = rejected.get(reason, 0) + 1
             continue
-        candidate["confidence"] = confidence(candidate, terms)
-        candidate["score"] = score(candidate, dest_words)
+        candidate["confidence"], candidate["match"] = classify(candidate, named_terms, distance_from)
+        candidate["distance_from"] = distance_from
+        # Naming the trail itself outranks naming a landmark on it.
+        candidate["score"] = score(candidate, dest_words) + (2 if mentions(candidate_text(candidate), own_terms) else 0)
         kept.append(candidate)
 
     kept.sort(key=lambda c: (CONFIDENCE_ORDER[c["confidence"]], -c["score"]))
     # One photo per photographer first, so the review offers real alternatives
-    # rather than three frames from one series; confidence order still wins.
-    picked, photographers = [], set()
+    # rather than frames from one series; confidence order still wins.
+    ordered, photographers = [], set()
     for level in CONFIDENCE_ORDER:
         tier = [c for c in kept if c["confidence"] == level]
         for candidate in tier:
             if candidate["photographer"] not in photographers:
                 photographers.add(candidate["photographer"])
-                picked.append(candidate)
-        picked += [c for c in tier if c not in picked]
+                ordered.append(candidate)
+        ordered += [c for c in tier if c not in ordered]
+    picked, broken = [], 0
+    for candidate in ordered:
+        if len(picked) == top:
+            break
+        if url_loads(candidate["image_url"]) and url_loads(candidate["preview_url"]):
+            picked.append(candidate)
+        else:
+            broken += 1
+    if broken:
+        rejected["image no longer loads"] = broken
     for candidate in picked:
         candidate.pop("_categories", None)
     best = picked[0]["confidence"] if picked else None
+    counts = {label: sum(1 for c in picked if LABELS[c["confidence"]] == label) for label in ("strong", "likely", "weak")}
     return {
         "rank": trail["rank"],
         "name": trail["name"],
@@ -473,24 +743,28 @@ def search_one(trail, cache_dir, top, openverse, min_width):
         "destination": dest,
         "latitude": trail["latitude"],
         "longitude": trail["longitude"],
+        "searched_along": distance_from,
+        "search_points": len(points),
+        "landmarks": [{"name": n, "route_m": d} for n, d in nearby],
         "best_confidence": best,
-        # The review page starts here; anything below medium falls back to topo.
+        # The review page starts here; a weak best falls back to topo.
         "default_choice": picked[0]["id"] if best in ("high", "medium") else None,
+        "counts": counts,
         "considered": len(found),
-        "usable": len(picked),
+        "usable": len(kept),
         "rejected": rejected,
-        "candidates": picked[:top],
+        "candidates": picked,
     }
 
 
-def search_with_fallback(trail, cache_dir, top, openverse, min_width, fallback_width):
+def search_with_fallback(trail, cache_dir, top, openverse, min_width, fallback_width, **context):
     """Search at min_width; a trail with no candidate at all there is searched
     again at fallback_width (from the cache, no extra requests) and its
     candidates are marked low_res so the review page says so."""
-    result = search_one(trail, cache_dir, top, openverse, min_width)
+    result = search_one(trail, cache_dir, top, openverse, min_width, **context)
     result["low_res"] = False
     if not result["candidates"] and fallback_width and fallback_width < min_width:
-        result = search_one(trail, cache_dir, top, openverse, fallback_width)
+        result = search_one(trail, cache_dir, top, openverse, fallback_width, **context)
         result["low_res"] = bool(result["candidates"])
     for candidate in result["candidates"]:
         candidate["low_res"] = candidate["width"] < min_width
@@ -501,8 +775,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", required=True, help="candidate JSON to write")
     parser.add_argument("--cache", default=".photo-search-cache")
-    parser.add_argument("--top", type=int, default=3)
+    parser.add_argument("--top", type=int, default=5)
+    parser.add_argument("--workers", type=int, default=4, help="trails searched at once")
     parser.add_argument("--only", type=int, nargs="*", help="limit to these catalogue ranks")
+    parser.add_argument("--targets", help="JSON list of {name, province_code, exclude: [candidate ids]}: "
+                        "search only these trails, leaving out candidates already rejected")
     parser.add_argument("--commons-only", action="store_true", help="skip Openverse")
     parser.add_argument("--min-width", type=int, default=MIN_WIDTH, help="smallest usable image width (px)")
     parser.add_argument("--fallback-min-width", type=int, default=FALLBACK_MIN_WIDTH,
@@ -512,6 +789,14 @@ def main():
     trails = json.loads(CATALOG.read_text(encoding="utf-8"))["trails"]
     if args.only:
         trails = [t for t in trails if t["rank"] in set(args.only)]
+    excludes = {}
+    if args.targets:
+        targets = json.loads(Path(args.targets).read_text(encoding="utf-8"))
+        excludes = {(t["name"], t["province_code"]): set(t.get("exclude") or ()) for t in targets}
+        trails = [t for t in trails if (t["name"], t["province_code"]) in excludes]
+    routes = {(t["name"], t["province_code"]): t for t in json.loads(ROUTES.read_text(encoding="utf-8"))["trails"].values()}
+    links = {(t["name"], t["province_code"]): t.get("campgrounds") or []
+             for t in json.loads(CAMPGROUNDS.read_text(encoding="utf-8"))["trails"]}
     cache_dir = Path(args.cache)
     cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -521,23 +806,34 @@ def main():
     else:
         print("Sources: Commons only")
 
+    state = {"openverse": openverse}
     results, skipped = [], []
-    for trail in trails:
-        if trail.get("latitude") is None:
-            continue
-        widths = (args.min_width, args.fallback_min_width)
+    widths = (args.min_width, args.fallback_min_width)
+
+    def run(trail):
+        context = {"routes": routes, "links": links, "exclude": excludes.get((trail["name"], trail["province_code"]), set())}
         try:
-            result = search_with_fallback(trail, cache_dir, args.top, openverse, *widths)
+            result = search_with_fallback(trail, cache_dir, args.top, state["openverse"], *widths, **context)
         except RateLimited as limit:
-            print(f"Openverse daily limit reached (retry after {limit}s); continuing with Commons only.")
-            openverse = None
-            result = search_with_fallback(trail, cache_dir, args.top, openverse, *widths)
-        if openverse is None and not args.commons_only:
+            if state["openverse"] is not None:
+                print(f"Openverse daily limit reached (retry after {limit}s); continuing with Commons only.")
+            state["openverse"] = None
+            result = search_with_fallback(trail, cache_dir, args.top, None, *widths, **context)
+        if state["openverse"] is None and not args.commons_only:
             skipped.append(trail["name"])
-        results.append(result)
-        sources = "/".join(sorted({c["source"] for c in result["candidates"]})) or "-"
-        print(f"{trail['rank']:>3} {trail['name'][:44]:<44} {result['usable']:>3} usable  "
-              f"best={result['best_confidence'] or '-':<9} [{sources}]{' low-res' if result['low_res'] else ''}", flush=True)
+        return result
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        futures = [pool.submit(run, t) for t in trails if t.get("latitude") is not None]
+        for future in as_completed(futures):
+            result = future.result()
+            results.append(result)
+            sources = "/".join(sorted({c["source"] for c in result["candidates"]})) or "-"
+            c = result["counts"]
+            print(f"{result['rank']:>3} {result['name'][:40]:<40} strong {c['strong']} likely {c['likely']} weak {c['weak']}  "
+                  f"({result['usable']} usable, {result['search_points']} pts, {len(result['landmarks'])} landmarks) "
+                  f"[{sources}]{' low-res' if result['low_res'] else ''}", flush=True)
+    results.sort(key=lambda r: r["rank"])
 
     Path(args.out).write_text(json.dumps({
         "generated": date.today().isoformat(),
@@ -548,14 +844,17 @@ def main():
         "trails": results,
     }, indent=1, ensure_ascii=False), encoding="utf-8")
 
-    levels = {level: sum(1 for r in results if r["best_confidence"] == level) for level in CONFIDENCE_ORDER}
-    print(f"\nBest candidate per trail: " + ", ".join(f"{k} {v}" for k, v in levels.items())
+    levels = {label: sum(1 for r in results if r["best_confidence"] and LABELS[r["best_confidence"]] == label)
+              for label in ("strong", "likely", "weak")}
+    print("\nBest candidate per trail: " + ", ".join(f"{k} {v}" for k, v in levels.items())
           + f", none {sum(1 for r in results if not r['candidates'])}")
     print(f"Low-resolution fallback ({args.fallback_min_width}px) used for "
           f"{sum(1 for r in results if r['low_res'])} trails with nothing at {args.min_width}px")
     print(f"Photo by default: {sum(1 for r in results if r['default_choice'])}/{len(results)} (rest start on topo)")
     if skipped:
         print(f"Openverse not searched for {len(skipped)} trails (rate limit): {', '.join(skipped)}")
+    if OPENVERSE_FAILED:
+        print(f"Openverse failed (5xx/timeout) for {len(OPENVERSE_FAILED)} queries; rerun to retry them (Commons is cached).")
     print(f"Wrote {args.out}. Nothing was downloaded or published.")
 
 

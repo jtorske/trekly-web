@@ -23,6 +23,10 @@ export interface PhotoCandidate {
   license_url: string | null;
   source_url: string;
   distance_m: number | null;
+  /** What distance_m is measured from: the stored route, or the trailhead (older searches). */
+  distance_from?: "route" | "trailhead";
+  /** Why it got its confidence: "Names Brazeau Lake", "0.4 km from the route". */
+  match?: string | null;
   /** Below the 1600px search minimum (found by the 1024px fallback). */
   low_res: boolean;
 }
@@ -34,7 +38,13 @@ export interface ReviewTrail {
   /** Preselected candidate; null starts the trail on the topo fallback. */
   default_choice: string | null;
   candidates: PhotoCandidate[];
-  review: { decision: "approved" | "rejected" | "uploaded"; candidate_id: string | null } | null;
+  /** When these candidates were loaded; newer than review.reviewed_at means "To review". */
+  candidates_loaded_at: string | null;
+  review: {
+    decision: "approved" | "rejected" | "uploaded";
+    candidate_id: string | null;
+    reviewed_at?: string | null;
+  } | null;
 }
 
 const BASE = "/api/admin/trail-photos";
@@ -71,9 +81,14 @@ export const trailPhotosAdminApi = {
   },
 };
 
+/**
+ * Strong: names the trail or a landmark on it, or taken within 1 km of the
+ * route. Likely: within 3 km. Weak: park or region match only (and the
+ * first search's Openverse keyword matches).
+ */
 export const CONFIDENCE_LABELS: Record<Confidence, string> = {
-  high: "Names the trail",
-  medium: "Near the trailhead",
-  low: "Keyword match (Openverse)",
-  off_topic: "Regional only",
+  high: "Strong",
+  medium: "Likely",
+  low: "Weak",
+  off_topic: "Weak",
 };
