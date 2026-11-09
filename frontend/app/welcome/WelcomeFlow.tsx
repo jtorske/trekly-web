@@ -57,6 +57,7 @@ import { announceProfile, useProfile } from "@/lib/useProfile";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { normalizeUsername, suggestionHint, usernameReady } from "@/lib/usernames";
 import { useProfilePhoto } from "../settings/ProfilePhoto";
+import { PHOTO_HINT } from "@/lib/photoPrep";
 import { HikedStep, PackStep } from "./HistorySteps";
 import styles from "./welcome.module.css";
 
@@ -736,6 +737,7 @@ function PhotoStep({ profile }: { profile: Profile }) {
       <button type="button" className={ui.secondary} onClick={photo.open} disabled={photo.busy}>
         {photo.hasPhoto ? "Change photo" : "Upload a photo"}
       </button>
+      <span className={ui.hint}>{PHOTO_HINT}.</span>
       {photo.status}
     </div>
   );

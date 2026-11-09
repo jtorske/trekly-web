@@ -1,25 +1,11 @@
 /**
- * Avatar input rules and crop geometry. Pure functions (no DOM) so they can
- * be unit-tested; the canvas work lives in processAvatar.ts.
+ * Avatar crop geometry. Pure functions (no DOM) so they can
+ * be unit-tested; the canvas work lives in processAvatar.ts. Picked photos
+ * are checked and resized first by lib/photoPrep.ts.
  */
 
-export const AVATAR_INPUT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-/** Limit on the photo the user picks. What's uploaded is a ~512px re-encode. */
-export const AVATAR_MAX_INPUT_BYTES = 5 * 1024 * 1024;
 export const AVATAR_OUTPUT_SIZE = 512;
 export const MAX_ZOOM = 4;
-
-export function validateAvatarFile(file: { type: string; size: number }): string | null {
-  if (!(AVATAR_INPUT_TYPES as readonly string[]).includes(file.type)) {
-    return "That file type isn't supported. Choose a JPEG, PNG or WebP image.";
-  }
-  if (file.size > AVATAR_MAX_INPUT_BYTES) {
-    const mb = (file.size / 1024 / 1024).toFixed(1);
-    return `That photo is ${mb} MB. Choose one that's 5 MB or smaller.`;
-  }
-  if (file.size === 0) return "That file is empty. Choose another photo.";
-  return null;
-}
 
 export type Size = { width: number; height: number };
 export type Offset = { x: number; y: number };

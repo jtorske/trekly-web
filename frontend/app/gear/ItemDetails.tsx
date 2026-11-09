@@ -13,7 +13,9 @@ import {
   type GearItemInput,
   type WeightUnit,
 } from "@/lib/gearApi";
+import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO } from "@/lib/photoPrep";
 import { removeImages, uploadImage, validateImage } from "@/lib/storage";
+import { usePreparedPhoto } from "@/lib/usePreparedPhoto";
 import {
   formatCapacity,
   formatSpecValue,
@@ -84,7 +86,8 @@ export default function ItemDetails({
   // "" keeps the slot's default (boots worn, the rest packed).
   const [carry, setCarry] = useState<Carry | "">(item.carry ?? "");
   const defaultCarry = CARRY_LABELS[carryOf({ ...item, carry: null })];
-  const [photo, setPhoto] = useState<File | null>(null);
+  const photoField = usePreparedPhoto();
+  const photo = photoField.photo;
   const [removePhoto, setRemovePhoto] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -185,7 +188,7 @@ export default function ItemDetails({
             <button type="button" className={ui.secondary} onClick={() => onReplace(item)} disabled={busy}>
               Replace…
             </button>
-            <button type="submit" form="item-details-form" className={ui.primary} disabled={busy}>
+            <button type="submit" form="item-details-form" className={ui.primary} disabled={busy || photoField.preparing}>
               {busy ? "Saving…" : "Save changes"}
             </button>
           </>
@@ -347,14 +350,24 @@ export default function ItemDetails({
 
         <div className={ui.field}>
           <span className={ui.label}>Your photo</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+          <input
+            type="file"
+            accept={PHOTO_ACCEPT}
+            disabled={photoField.preparing}
+            onChange={async (event) => {
+              const input = event.target;
+              if (!(await photoField.pick(input.files?.[0]))) input.value = "";
+            }}
+          />
           {item.image_path && !photo && (
             <label className={styles.checkbox}>
               <input type="checkbox" checked={removePhoto} onChange={(e) => setRemovePhoto(e.target.checked)} /> Remove current photo
             </label>
           )}
-          <span className={ui.hint}>JPEG, PNG or WebP up to 5 MB. Only you can see it.</span>
-          {errors.photo && <span className={ui.fieldError}>{errors.photo}</span>}
+          <span className={ui.hint} aria-live="polite">
+            {photoField.preparing ? PREPARING_PHOTO : `${PHOTO_HINT}. Only you can see it.`}
+          </span>
+          {(photoField.problem ?? errors.photo) && <span className={ui.fieldError}>{photoField.problem ?? errors.photo}</span>}
         </div>
 
         {error && (

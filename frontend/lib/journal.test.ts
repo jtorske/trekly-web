@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { badgeGrid, buildJournal, groupColour, groupTrails, halves, regionTitle, sectionIndex, slugify, summarizeJournal } from "./journal.ts";
 import { badgeOutline, nameFontSize, profileSilhouette } from "./badge.ts";
-import { photoInputProblem, photoSize } from "./journalPhoto.ts";
+import { photoSize } from "./journalPhoto.ts";
 import type { HikeLog } from "./hikeLogsApi.ts";
 import type { TrailListItem } from "./trailsApi.ts";
 import { sample } from "./milestones.fixtures.ts";
@@ -126,12 +126,9 @@ test("elevation profiles become a silhouette; missing data falls back", () => {
   assert.equal(d, "M10 60L10 60L60 26L110 46.4L110 60Z");
 });
 
-test("photos are scaled down, never up, and odd files are refused", () => {
+test("photos are scaled down, never up", () => {
   assert.deepEqual(photoSize(4000, 3000, 1400), { width: 1400, height: 1050 });
   assert.deepEqual(photoSize(800, 600, 1400), { width: 800, height: 600 });
-  assert.equal(photoInputProblem({ type: "image/heic", size: 10 }), "Use a JPEG, PNG or WebP photo.");
-  assert.match(photoInputProblem({ type: "image/jpeg", size: 30 * 1024 * 1024 }) ?? "", /25 MB/);
-  assert.equal(photoInputProblem({ type: "image/png", size: 10 }), null);
 });
 
 test("journal summary: counts, nights and region progress, most complete first", () => {

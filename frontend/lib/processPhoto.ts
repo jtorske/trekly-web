@@ -1,3 +1,4 @@
+import { NOT_AN_IMAGE } from "./imageType";
 import { photoSize } from "./journalPhoto";
 
 export type ProcessedPhoto = { blob: Blob; extension: "webp" | "jpg" };
@@ -13,7 +14,7 @@ export async function processPhoto(file: Blob): Promise<ProcessedPhoto> {
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
-    throw new Error("We couldn't read that image. Try a JPEG, PNG or WebP photo.");
+    throw new Error(NOT_AN_IMAGE);
   }
   try {
     const canvas = document.createElement("canvas");

@@ -19,7 +19,9 @@ import {
   type ProductSummary,
   type WeightUnit,
 } from "@/lib/gearApi";
+import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO } from "@/lib/photoPrep";
 import { uploadImage, validateImage } from "@/lib/storage";
+import { usePreparedPhoto } from "@/lib/usePreparedPhoto";
 import {
   bottleCapacityFilters,
   formatCapacity,
@@ -675,7 +677,8 @@ function CustomItemForm({
     const grams = gramsFromInput(initial.weight, initial.weightUnit);
     return { ...initial, weightUnit, weight: grams == null ? initial.weight : gramsToInput(grams, weightUnit) };
   });
-  const [photo, setPhoto] = useState<File | null>(null);
+  const photoField = usePreparedPhoto();
+  const photo = photoField.photo;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -818,11 +821,17 @@ function CustomItemForm({
           <span className={ui.label}>Photo (optional)</span>
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
+            accept={PHOTO_ACCEPT}
+            disabled={photoField.preparing}
+            onChange={async (event) => {
+              const input = event.target;
+              if (!(await photoField.pick(input.files?.[0]))) input.value = "";
+            }}
           />
-          <span className={ui.hint}>JPEG, PNG or WebP up to 5 MB. Only you can see it.</span>
-          {errors.photo && <span className={ui.fieldError}>{errors.photo}</span>}
+          <span className={ui.hint} aria-live="polite">
+            {photoField.preparing ? PREPARING_PHOTO : `${PHOTO_HINT}. Only you can see it.`}
+          </span>
+          {(photoField.problem ?? errors.photo) && <span className={ui.fieldError}>{photoField.problem ?? errors.photo}</span>}
         </label>
       )}
 
@@ -851,7 +860,7 @@ function CustomItemForm({
         <button type="button" className={ui.ghost} onClick={onBack} disabled={saving}>
           ← Back to products
         </button>
-        <button type="submit" className={ui.primary} disabled={saving}>
+        <button type="submit" className={ui.primary} disabled={saving || photoField.preparing}>
           {saving ? "Saving…" : replacing ? "Replace with custom item" : "Add to my gear"}
         </button>
       </div>

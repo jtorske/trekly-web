@@ -14,6 +14,7 @@ import ProvinceBadge from "@/components/ProvinceBadge";
 import { usernameReady } from "@/lib/usernames";
 import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
 import { useProfilePhoto } from "./ProfilePhoto";
+import { PHOTO_HINT } from "@/lib/photoPrep";
 import { sectionHref } from "./settingsSections";
 import styles from "./settings.module.css";
 
@@ -114,7 +115,7 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
           </div>
         </div>
         <span id="photo-hint" className={ui.hint}>
-          JPEG, PNG or WebP up to 5 MB. Photo changes save straight away.
+          {PHOTO_HINT}. Photo changes save straight away.
         </span>
         {photo.status}
       </div>

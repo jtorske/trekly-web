@@ -17,8 +17,9 @@ import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import { updateProfile, type Profile } from "@/lib/accountApi";
 import { AvatarCleanupError, REMOVE_FAILED, removeAvatar, replaceAvatar, type AvatarSteps } from "@/lib/avatarChange";
-import { validateAvatarFile } from "@/lib/avatarImage";
-import { NOT_AN_IMAGE, readImageType } from "@/lib/imageType";
+import { NOT_AN_IMAGE } from "@/lib/imageType";
+import { PHOTO_ACCEPT, PREPARING_PHOTO, photoProblemMessage } from "@/lib/photoPrep";
+import { preparePhoto } from "@/lib/preparePhoto";
 import type { ProcessedAvatar } from "@/lib/processAvatar";
 import { deleteImages, uploadAvatar } from "@/lib/storage";
 import { toast } from "@/lib/toast";
@@ -65,7 +66,7 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
   const [menu, setMenu] = useState<"closed" | "open" | "confirmRemove">("closed");
   // Picked and checked, waiting for the crop; a fresh cropper for every pick.
   const [cropping, setCropping] = useState<{ file: File; key: number } | null>(null);
-  const [saving, setSaving] = useState<"upload" | "remove" | null>(null);
+  const [saving, setSaving] = useState<"prepare" | "upload" | "remove" | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -106,14 +107,20 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     setTimeout(() => inputRef.current?.click(), 0);
   };
 
-  const pickPhoto = async (file: File | undefined) => {
-    if (!file) return;
-    const problem = validateAvatarFile(file) ?? ((await readImageType(file)) ? null : NOT_AN_IMAGE);
-    if (problem) {
-      setError(problem);
-      return;
+  const pickPhoto = async (picked: File | undefined) => {
+    if (!picked) return;
+    // Upright, under 2048px and a JPEG, so the cropper is quick even for a 12 MB HEIC.
+    setSaving("prepare");
+    setError(null);
+    try {
+      const file = await preparePhoto(picked);
+      setCropping((current) => ({ file, key: (current?.key ?? 0) + 1 }));
+    } catch (caught) {
+      setError(photoProblemMessage(caught));
+      triggerRef.current?.focus();
+    } finally {
+      setSaving(null);
     }
-    setCropping((current) => ({ file, key: (current?.key ?? 0) + 1 }));
   };
 
   const savePhoto = async (image: ProcessedAvatar) => {
@@ -232,9 +239,11 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     );
 
   const label = busy
-    ? saving === "upload"
-      ? "Saving your new photo"
-      : "Removing your photo"
+    ? saving === "prepare"
+      ? "Preparing your photo"
+      : saving === "upload"
+        ? "Saving your new photo"
+        : "Removing your photo"
     : hasPhoto
       ? "Change profile photo"
       : "Add a profile photo";
@@ -278,7 +287,7 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={PHOTO_ACCEPT}
         className={ui.srOnly}
         tabIndex={-1}
         aria-hidden="true"
@@ -321,6 +330,7 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
 
   const status = (
     <div className={styles.status} aria-live="polite">
+      {saving === "prepare" && <span className={ui.hint}>{PREPARING_PHOTO}</span>}
       {saving === "upload" && <span className={ui.hint}>Saving your new photo…</span>}
       {saving === "remove" && <span className={ui.hint}>Removing your photo…</span>}
       {error && (

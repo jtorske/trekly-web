@@ -8,7 +8,8 @@ import { useAuth } from "./AuthProvider";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
 import { undatedLabel } from "@/lib/hikeDate";
 import { VERIFIED_LABEL } from "./VerifiedCheck";
-import { photoInputProblem } from "@/lib/journalPhoto";
+import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO, photoProblemMessage } from "@/lib/photoPrep";
+import { preparePhoto } from "@/lib/preparePhoto";
 import { processPhoto } from "@/lib/processPhoto";
 import { formProblem, toast } from "@/lib/toast";
 import { localToday } from "@/lib/stay";
@@ -44,6 +45,8 @@ export default function HikeLogDialog({
   // `undefined` keeps the saved photo; `null` removes it; a File replaces it.
   const [photo, setPhoto] = useState<File | null | undefined>(undefined);
   const [busy, setBusy] = useState<"save" | "remove" | null>(null);
+  // Turning a picked photo upright and down to size, before its preview shows.
+  const [preparing, setPreparing] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const noteId = useId();
@@ -111,7 +114,7 @@ export default function HikeLogDialog({
       <button type="button" className={ui.secondary} onClick={onClose} disabled={busy !== null}>
         Cancel
       </button>
-      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || (!undated && !date)}>
+      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || preparing || (!undated && !date)}>
         {busy === "save" ? "Saving…" : entry ? "Save changes" : "Add to journal"}
       </button>
     </>
@@ -196,22 +199,29 @@ export default function HikeLogDialog({
           <input
             id={photoId}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={PHOTO_ACCEPT}
             className={ui.srOnly}
-            onChange={(event) => {
+            disabled={preparing}
+            onChange={async (event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
               if (!file) return;
-              const problem = photoInputProblem(file);
-              if (problem) {
-                setError(problem);
-                return;
-              }
               setError(null);
-              setPhoto(file);
+              setPreparing(true);
+              try {
+                setPhoto(await preparePhoto(file));
+              } catch (caught) {
+                setError(photoProblemMessage(caught));
+              } finally {
+                setPreparing(false);
+              }
             }}
           />
-          <span className={ui.hint}>Only you can see your journal. Location data is removed from photos before upload.</span>
+          <span className={ui.hint} aria-live="polite">
+            {preparing
+              ? PREPARING_PHOTO
+              : `${PHOTO_HINT}. Only you can see your journal. Location data is removed from photos before upload.`}
+          </span>
         </div>
 
         {error && (

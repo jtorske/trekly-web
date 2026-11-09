@@ -8,7 +8,8 @@ import { ApiError } from "@/lib/api";
 import { pageOf } from "@/lib/paging";
 import { formatDistance } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
-import { photoInputProblem } from "@/lib/journalPhoto";
+import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO, photoProblemMessage } from "@/lib/photoPrep";
+import { preparePhoto, TRAIL_PHOTO_EDGE } from "@/lib/preparePhoto";
 import {
   CONFIDENCE_LABELS,
   trailPhotosAdminApi as api,
@@ -76,6 +77,7 @@ function TrailReview({ item, onChange }: { item: ReviewTrail; onChange: (next: R
     item.review?.decision === "approved" && item.review.candidate_id ? item.review.candidate_id : item.default_choice ?? TOPO,
   );
   const [busy, setBusy] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const run = async (work: () => Promise<Partial<ReviewTrail>>) => {
@@ -104,12 +106,20 @@ function TrailReview({ item, onChange }: { item: ReviewTrail; onChange: (next: R
       return { trail: { ...trail, photo }, review: { decision: "approved", candidate_id: choice } };
     });
 
-  const upload = (file: File | undefined) => {
-    if (!file) return;
-    const problem = photoInputProblem(file);
-    if (problem) {
-      setError(problem);
+  const upload = async (picked: File | undefined) => {
+    if (!picked) return;
+    setError(null);
+    setPreparing(true);
+    let file: File;
+    try {
+      // Upright and at most 3200px, so a 12 MB phone photo uploads quickly;
+      // the API still checks it and makes the 1600px hero itself.
+      file = await preparePhoto(picked, { maxEdge: TRAIL_PHOTO_EDGE, quality: 0.92 });
+    } catch (caught) {
+      setError(photoProblemMessage(caught));
       return;
+    } finally {
+      setPreparing(false);
     }
     void run(async () => {
       const photo = await api.upload(trail.id, file);
@@ -124,7 +134,7 @@ function TrailReview({ item, onChange }: { item: ReviewTrail; onChange: (next: R
     });
 
   return (
-    <section className={styles.trail} aria-busy={busy}>
+    <section className={styles.trail} aria-busy={busy || preparing}>
       <div className={styles.current}>
         <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
         <PhotoCredit photo={trail.photo} />
@@ -161,15 +171,15 @@ function TrailReview({ item, onChange }: { item: ReviewTrail; onChange: (next: R
           <button type="button" className={ui.primary} onClick={save} disabled={busy}>
             {busy ? "Saving…" : choice === TOPO ? "Use topo" : "Approve photo"}
           </button>
-          <label className={ui.secondary}>
-            Upload my own
+          <label className={ui.secondary} title={PHOTO_HINT}>
+            {preparing ? PREPARING_PHOTO : "Upload my own"}
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept={PHOTO_ACCEPT}
               className={ui.srOnly}
-              disabled={busy}
+              disabled={busy || preparing}
               onChange={(event) => {
-                upload(event.target.files?.[0]);
+                void upload(event.target.files?.[0]);
                 event.target.value = "";
               }}
             />
