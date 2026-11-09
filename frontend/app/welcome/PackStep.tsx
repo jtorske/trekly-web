@@ -208,12 +208,12 @@ function SlotPicker({
       </div>
 
       <label htmlFor={searchId}>
-        <span className={ui.srOnly}>Search {info.label.toLowerCase()}s</span>
+        <span className={ui.srOnly}>Search {info.searchNoun}</span>
         <input
           id={searchId}
           type="search"
           className={ui.input}
-          placeholder={`Search ${info.label.toLowerCase()}s by brand or model`}
+          placeholder={`Search ${info.searchNoun} by brand or model`}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           autoComplete="off"

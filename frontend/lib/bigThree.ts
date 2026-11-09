@@ -18,6 +18,8 @@ export interface SlotInfo {
   title: string;
   /** This pick within its category (the sleep system has two). */
   label: string;
+  /** What its search looks through ("Search sleeping bags and quilts"). */
+  searchNoun: string;
   /** Catalogue subcategory slugs. */
   subcategories: string[];
   /** A gear icon key (app/gear/icons.tsx) for the empty mat tile. */
@@ -25,12 +27,13 @@ export interface SlotInfo {
 }
 
 export const BIG_THREE_SLOTS: SlotInfo[] = [
-  { slot: "backpack", category: "backpack", title: "Backpack", label: "Backpack", subcategories: ["backpacks"], icon: "backpack" },
+  { slot: "backpack", category: "backpack", title: "Backpack", label: "Backpack", searchNoun: "backpacks", subcategories: ["backpacks"], icon: "backpack" },
   {
     slot: "shelter",
     category: "shelter",
     title: "Shelter",
     label: "Tent, tarp or bivy",
+    searchNoun: "tents, tarps and bivies",
     subcategories: ["tents", "tarps", "bivy-sacks"],
     icon: "tent",
   },
@@ -39,10 +42,11 @@ export const BIG_THREE_SLOTS: SlotInfo[] = [
     category: "sleep",
     title: "Sleep system",
     label: "Sleeping bag or quilt",
+    searchNoun: "sleeping bags and quilts",
     subcategories: ["sleeping-bags", "quilts"],
     icon: "sleepingBag",
   },
-  { slot: "sleepPad", category: "sleep", title: "Sleep system", label: "Sleeping pad", subcategories: ["sleeping-pads"], icon: "sleepingPad" },
+  { slot: "sleepPad", category: "sleep", title: "Sleep system", label: "Sleeping pad", searchNoun: "sleeping pads", subcategories: ["sleeping-pads"], icon: "sleepingPad" },
 ];
 
 export const BIG_THREE_CATEGORIES: { category: BigThreeCategory; title: string }[] = [
