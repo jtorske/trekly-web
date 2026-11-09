@@ -36,7 +36,7 @@ import styles from "./MobileMenu.module.css";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/trail-list": Compass,
-  Activity,
+  "/activity": Activity,
 };
 
 const reducedMotion = () =>
