@@ -29,6 +29,11 @@ export interface Milestone {
   earned: boolean;
   /** The day it was first earned (YYYY-MM-DD); null until earned. */
   earned_on?: string | null;
+  /**
+   * Earned on the strength of hikes from before Trekly (undated): "joining"
+   * when they were picked during onboarding, "past_hikes" when added later.
+   */
+  earned_with?: "joining" | "past_hikes" | null;
   /** Only partway there (never at zero or once earned). */
   progress: { current: number; goal: number; unit: "km" | "m" | null; near: string | null } | null;
 }
@@ -216,4 +221,18 @@ export function categorySlug(data: Milestones, categoryId: string): string {
 export function newlyEarned(data: Milestones, seen: Set<string> | null): Milestone[] {
   if (!seen) return [];
   return data.milestones.filter((m) => m.earned && m.id && !seen.has(m.id));
+}
+
+/**
+ * When an earned milestone was earned, for its card: a date, or, for one
+ * earned from hikes before Trekly (which have no date), when they were added.
+ */
+export function earnedWhen(
+  milestone: Pick<Milestone, "earned" | "earned_on" | "earned_with">,
+  formatDate: (day: string) => string,
+): string | null {
+  if (!milestone.earned) return null;
+  if (milestone.earned_with === "joining") return "Earned when you joined";
+  if (milestone.earned_with === "past_hikes") return "Earned from your past hikes";
+  return milestone.earned_on ? formatDate(milestone.earned_on) : null;
 }

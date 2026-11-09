@@ -40,6 +40,7 @@ import {
   type Experience,
   type HikingStyle,
   type StepKey,
+  finishSummary,
 } from "@/lib/onboarding";
 import {
   getPreferences,
@@ -53,8 +54,13 @@ import { PROVINCES, homeLabel, province as provinceByCode, type ProvinceCode } f
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import type { TrailListItem } from "@/lib/trailsApi";
 import { formatDistance, formatElevation, formatTrailDistance, type UnitSystem } from "@/lib/units";
+import { refreshAfterHikesAdded } from "@/lib/hikesAdded";
+import { useHikeLogs } from "@/lib/useHikeLogs";
+import { useMilestones } from "@/lib/useMilestones";
 import { announceProfile, useProfile } from "@/lib/useProfile";
+import { useRank } from "@/lib/useRank";
 import { useSavedTrails } from "@/lib/useSavedTrails";
+import MilestoneBadge from "@/components/MilestoneBadge";
 import { normalizeUsername, suggestionHint, usernameReady } from "@/lib/usernames";
 import { useProfilePhoto } from "../settings/ProfilePhoto";
 import { PHOTO_HINT } from "@/lib/photoPrep";
@@ -285,6 +291,9 @@ function Flow({
         if (pastPicks.size > 0) {
           await addPastHikes([...pastPicks]);
           setPastPicks(new Set());
+          // Bring rank and milestones up to date without toasts or a rank-up
+          // celebration: the finish screen sums it all up once.
+          await refreshAfterHikesAdded({ quiet: true });
         }
         return {};
       case "pack": {
@@ -821,12 +830,28 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
   );
 }
 
+const MAX_SUMMARY_BADGES = 6;
+
 function FinishStep({ next }: { next: string }) {
   const [picks, setPicks] = useState<TrailListItem[] | null>(null);
   const [failed, setFailed] = useState(false);
   const saved = useSavedTrails();
   const { profile } = useProfile();
   const units: UnitSystem = profile?.units ?? "metric";
+
+  // What their past hikes (and gear) earned, from the same data the journal
+  // and profile read; refreshed quietly, so this is the only celebration.
+  const { rank } = useRank();
+  const { milestones } = useMilestones();
+  const journal = useHikeLogs();
+  useEffect(() => {
+    void refreshAfterHikesAdded({ quiet: true });
+  }, []);
+  const earned = milestones?.milestones.filter((m) => m.earned && m.id) ?? [];
+  const summary =
+    rank && milestones && !journal.loading
+      ? finishSummary({ stamps: journal.logs.length, milestones: earned.length, rank: rank.rank.title })
+      : null;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -847,6 +872,27 @@ function FinishStep({ next }: { next: string }) {
           <span key={index} style={{ "--i": index } as React.CSSProperties} />
         ))}
       </div>
+
+      {summary && (
+        <section className={styles.summary} aria-label="Your journal so far">
+          <p className={styles.summaryText}>{summary}</p>
+          {earned.length > 0 && (
+            <ul className={styles.summaryBadges}>
+              {earned.slice(0, MAX_SUMMARY_BADGES).map((m, index) => (
+                <li key={m.id} style={{ "--i": index } as React.CSSProperties}>
+                  <MilestoneBadge icon={m.icon} tier={m.tier} title={m.title} stamp />
+                </li>
+              ))}
+              {earned.length > MAX_SUMMARY_BADGES && (
+                <li className={styles.summaryMore}>+{earned.length - MAX_SUMMARY_BADGES}</li>
+              )}
+            </ul>
+          )}
+          <Link href="/journal" className={styles.summaryLink}>
+            Open your Trail Journal
+          </Link>
+        </section>
+      )}
 
       {picks === null && !failed && (
         <ul className={styles.picks} aria-busy="true" aria-label="Loading trail picks">

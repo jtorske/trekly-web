@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { DEFAULT_AFTER_LOGIN, safeNextPath } from "./authLogic.ts";
 import {
   EXPERIENCE_LEVELS,
+  finishSummary,
   HIKING_STYLES,
   INTERESTS,
   QUESTION_COUNT,
@@ -177,4 +178,15 @@ test("the options match the API's (backend/app/preferences.py)", () => {
   assert.deepEqual(HIKING_STYLES.map((s) => s.value), ["day", "overnight", "both"]);
   assert.match(source, /EXPERIENCE_LEVELS = \("new", "few_seasons", "seasoned"\)/);
   assert.deepEqual(EXPERIENCE_LEVELS.map((s) => s.value), ["new", "few_seasons", "seasoned"]);
+});
+
+test("the finish summary says what their past hikes earned", () => {
+  assert.equal(
+    finishSummary({ stamps: 12, milestones: 4, rank: "Day Tripper" }),
+    "You've stamped 12 trails, earned 4 milestones and reached Day Tripper.",
+  );
+  assert.equal(finishSummary({ stamps: 1, milestones: 1, rank: "Day Tripper" }), "You've stamped 1 trail, earned 1 milestone and reached Day Tripper.");
+  assert.equal(finishSummary({ stamps: 2, milestones: 0, rank: "Trailhead Rookie" }), "You've stamped 2 trails and reached Trailhead Rookie.");
+  assert.equal(finishSummary({ stamps: 3, milestones: 0, rank: null }), "You've stamped 3 trails.");
+  assert.equal(finishSummary({ stamps: 0, milestones: 0, rank: "Trailhead Rookie" }), null);
 });

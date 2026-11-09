@@ -11,6 +11,7 @@ import {
   type HikeLogInput,
   type PastHikesResult,
 } from "./hikeLogsApi";
+import { refreshAfterHikesAdded } from "./hikesAdded";
 import { removeImages } from "./storage";
 import { refreshMilestones } from "./useMilestones";
 import { refreshRank } from "./useRank";
@@ -47,8 +48,12 @@ export function useHikeLogs() {
       const saved = await putHikeLog(trailId, input);
       setState((s) => (s ? { ...s, logs: [saved, ...s.logs.filter((log) => log.trail.id !== trailId)] } : s));
       // Points come from hikes; a new one may be a rank-up to celebrate.
-      void refreshRank(previous ? "hike-changed" : "hike-added");
-      void refreshMilestones();
+      if (previous) {
+        void refreshRank("hike-changed");
+        void refreshMilestones();
+      } else {
+        void refreshAfterHikesAdded();
+      }
       if (previous) toast.success("Hike log updated");
       else toast.success("Stamped in your Trail Journal", { link: { label: "Open journal", href: "/journal" } });
       if (previous?.photo_path && previous.photo_path !== saved.photo_path) {
@@ -77,10 +82,7 @@ export function useHikeLogs() {
     const result = await addPastHikes(trailIds);
     // Undated hikes list after the dated ones, as the API orders them.
     setState((s) => (s ? { ...s, logs: [...s.logs, ...result.added] } : s));
-    if (result.added.length > 0) {
-      void refreshRank("hike-added");
-      void refreshMilestones();
-    }
+    if (result.added.length > 0) void refreshAfterHikesAdded();
     return result;
   }, []);
 

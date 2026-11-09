@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { Tier } from "./milestones";
 import type { TrailListItem } from "./trailsApi";
 
 /** One Trail Journal entry: a trail the user has hiked. Private to them. */
@@ -25,12 +26,32 @@ export interface HikeLogInput {
 
 export const HIKE_NOTE_MAX = 500;
 
+/**
+ * What new hikes changed, from one evaluation of the whole journal on the
+ * server (app/hike_service.py): totals after, and what's new.
+ */
+export interface JournalProgress {
+  /** Trails in the journal now. */
+  stamps: number;
+  new_stamps: number;
+  /** Earned by these hikes, in journal order. */
+  new_milestones: { id: string; category: string; title: string; tier: Tier | null; icon: string }[];
+  milestones_earned: number;
+  points: number;
+  points_gained: number;
+  rank: { level: number; title: string };
+  ranked_up: boolean;
+}
+
+/** A saved entry; `progress` is set when it was new, null for an edit. */
+export type SavedHikeLog = HikeLog & { progress: JournalProgress | null };
+
 export const listHikeLogs = (signal?: AbortSignal) =>
   apiFetch<HikeLog[]>("/api/me/hike-logs", { auth: true, signal });
 
 /** Creates the entry or replaces all of its fields. */
 export const putHikeLog = (trailId: string, input: HikeLogInput) =>
-  apiFetch<HikeLog>(`/api/me/hike-logs/${encodeURIComponent(trailId)}`, {
+  apiFetch<SavedHikeLog>(`/api/me/hike-logs/${encodeURIComponent(trailId)}`, {
     method: "PUT",
     body: input,
     auth: true,
@@ -40,6 +61,7 @@ export interface PastHikesResult {
   added: HikeLog[];
   /** Already in the journal, or retired from the catalogue. */
   skipped: number;
+  progress: JournalProgress;
 }
 
 /** Adds undated hikes from before Trekly; trails already logged keep their entry. */

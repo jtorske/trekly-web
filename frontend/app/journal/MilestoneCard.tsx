@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { formatHikeDate } from "@/lib/publicProfile";
-import { earnedSummary, milestoneDetail, progressFraction, progressLabel, TIER_NAMES, type Milestone, type Tier } from "@/lib/milestones";
+import { earnedSummary, earnedWhen, milestoneDetail, progressFraction, progressLabel, TIER_NAMES, type Milestone, type Tier } from "@/lib/milestones";
 import type { UnitSystem } from "@/lib/units";
 import styles from "./MilestoneCard.module.css";
 
@@ -144,6 +144,7 @@ function CardBody({ milestone, units, tierPoints }: { milestone: Milestone; unit
   );
 
   if (milestone.earned) {
+    const when = earnedWhen(milestone, formatHikeDate);
     return (
       <>
         <p className={styles.status}>
@@ -156,7 +157,7 @@ function CardBody({ milestone, units, tierPoints }: { milestone: Milestone; unit
         <p className={styles.title}>{milestone.title}</p>
         <p className={styles.how}>{earnedSummary(milestone, units)}</p>
         <p className={styles.meta}>
-          {milestone.earned_on && <span>{formatHikeDate(milestone.earned_on)}</span>}
+          {when && <span>{when}</span>}
           {tierLine}
         </p>
       </>

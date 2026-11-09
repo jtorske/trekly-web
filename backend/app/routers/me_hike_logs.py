@@ -9,6 +9,10 @@ for anyone who logged them.
 POST /past adds hikes from before the user joined, with no date, many at
 once (onboarding's "Which of these have you hiked?" and "Add past hikes").
 
+Every new entry, one or many, goes through app/hike_service.add_hikes, which
+evaluates the journal once and says what the hikes earned; both responses
+carry that as `progress` (None when PUT only edits an entry).
+
 Fair use: at most TODAY_LIMIT different trails dated today (or the day either
 side, for time zones) per user, so nobody racks up a day of hikes they
 couldn't have done. Hikes further back, and undated ones, are unlimited.
@@ -25,12 +29,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import delete, func, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.auth import get_current_user_id
 from app.database import get_db
 from app.featured import prune_featured
+from app.hike_service import NewHike, Progress, add_hikes
+from app.milestones import MilestoneBadgeOut, badge_out
 from app.models.hike_log import MAX_NOTE_LENGTH, HikeLog
 from app.models.trail import Trail
 from app.routers.availability import get_today
@@ -84,10 +89,50 @@ class PastHikesIn(BaseModel):
     trail_ids: list[UUID] = Field(min_length=1, max_length=MAX_PAST_BATCH)
 
 
+class RankBriefOut(BaseModel):
+    level: int
+    title: str
+
+
+class JournalProgressOut(BaseModel):
+    """What new hikes changed, from one evaluation of the whole journal."""
+
+    # Trails in the journal now.
+    stamps: int
+    new_stamps: int
+    # Earned by these hikes, in journal order.
+    new_milestones: list[MilestoneBadgeOut]
+    milestones_earned: int
+    points: int
+    points_gained: int
+    rank: RankBriefOut
+    ranked_up: bool
+
+
+def progress_out(progress: Progress) -> JournalProgressOut:
+    before, after = progress.before, progress.after
+    return JournalProgressOut(
+        stamps=after.stamps,
+        new_stamps=after.stamps - before.stamps,
+        new_milestones=[badge_out(m) for m in progress.new_milestones],
+        milestones_earned=len(after.earned),
+        points=after.points,
+        points_gained=after.points - before.points,
+        rank=RankBriefOut(level=after.rank.level, title=after.rank.title),
+        ranked_up=progress.ranked_up,
+    )
+
+
+class HikeSavedOut(HikeLogOut):
+    # Set when the entry is new; None for an edit.
+    progress: JournalProgressOut | None = None
+
+
 class PastHikesOut(BaseModel):
     added: list[HikeLogOut]
     # Already in the journal (left as they were), retired or unknown.
     skipped: int
+    progress: JournalProgressOut
 
 
 def _out(log: HikeLog) -> HikeLogOut:
@@ -150,7 +195,7 @@ def list_hike_logs(user_id: UUID = Depends(get_current_user_id), db: Session = D
     return [_out(row) for row in rows]
 
 
-@router.put("/{trail_id}", response_model=HikeLogOut)
+@router.put("/{trail_id}", response_model=HikeSavedOut)
 def put_hike_log(
     trail_id: UUID,
     payload: HikeLogIn,
@@ -182,20 +227,17 @@ def put_hike_log(
     if log is None:
         if trail.retired_at is not None:
             raise HTTPException(status_code=409, detail="This trail has been retired and can't be added.")
-        log = HikeLog(user_id=user_id, trail_id=trail_id)
-        db.add(log)
-        response.status_code = status.HTTP_201_CREATED
-    _apply(log, payload)
-    try:
-        db.commit()
-    except IntegrityError:
+        result = add_hikes(
+            db, user_id, [NewHike(trail_id, payload.hiked_on, payload.note, payload.photo_path)]
+        )
+        if result.added:
+            response.status_code = status.HTTP_201_CREATED
+            return HikeSavedOut(**_out(result.added[0]).model_dump(), progress=progress_out(result.progress))
         # A concurrent duplicate request created it first; apply this one on top.
-        db.rollback()
         log = _find(db, user_id, trail_id)
-        _apply(log, payload)
-        db.commit()
-        response.status_code = status.HTTP_200_OK
-    return _out(_find(db, user_id, trail_id))
+    _apply(log, payload)
+    db.commit()
+    return HikeSavedOut(**_out(_find(db, user_id, trail_id)).model_dump())
 
 
 @router.post("/past", response_model=PastHikesOut, status_code=status.HTTP_201_CREATED)
@@ -206,38 +248,11 @@ def add_past_hikes(
 ):
     """Add undated hikes from before Trekly. A trail already in the journal
     keeps its entry (a date is never dropped), and retired or unknown trails
-    are skipped, so a retry adds nothing twice."""
-    wanted = list(dict.fromkeys(payload.trail_ids))
-    logged = set(db.scalars(select(HikeLog.trail_id).where(HikeLog.user_id == user_id, HikeLog.trail_id.in_(wanted))))
-    addable = set(db.scalars(select(Trail.id).where(Trail.id.in_(wanted), Trail.retired_at.is_(None))))
-    new_ids = [trail_id for trail_id in wanted if trail_id in addable and trail_id not in logged]
-    for trail_id in new_ids:
-        db.add(HikeLog(user_id=user_id, trail_id=trail_id, hiked_on=None))
-    try:
-        db.commit()
-    except IntegrityError:
-        # A concurrent request added some of them; add the rest one at a time.
-        db.rollback()
-        added_now = []
-        for trail_id in new_ids:
-            db.add(HikeLog(user_id=user_id, trail_id=trail_id, hiked_on=None))
-            try:
-                db.commit()
-                added_now.append(trail_id)
-            except IntegrityError:
-                db.rollback()
-        new_ids = added_now
-    added = (
-        db.scalars(
-            select(HikeLog)
-            .where(HikeLog.user_id == user_id, HikeLog.trail_id.in_(new_ids))
-            .options(joinedload(HikeLog.trail))
-        ).all()
-        if new_ids
-        else []
-    )
-    added = sorted(added, key=lambda log: log.trail.name.lower())
-    return PastHikesOut(added=[_out(log) for log in added], skipped=len(wanted) - len(added))
+    are skipped, so a retry adds nothing twice. The journal is evaluated once
+    for the whole batch."""
+    result = add_hikes(db, user_id, [NewHike(trail_id) for trail_id in payload.trail_ids])
+    added = sorted(result.added, key=lambda log: log.trail.name.lower())
+    return PastHikesOut(added=[_out(log) for log in added], skipped=result.skipped, progress=progress_out(result.progress))
 
 
 @router.delete("/{trail_id}", status_code=status.HTTP_204_NO_CONTENT)

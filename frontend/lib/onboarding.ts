@@ -203,3 +203,17 @@ export function isFullPage(pathname: string): boolean {
 
 /** Where "Explore all trails" goes. */
 export const EXPLORE_HREF = "/trail-list";
+
+/**
+ * The finish screen's one-line summary of what their history earned, e.g.
+ * "You've stamped 12 trails, earned 4 milestones and reached Day Tripper."
+ * Null when they didn't add any hikes.
+ */
+export function finishSummary({ stamps, milestones, rank }: { stamps: number; milestones: number; rank: string | null }): string | null {
+  if (stamps <= 0) return null;
+  const parts = [`stamped ${stamps} ${stamps === 1 ? "trail" : "trails"}`];
+  if (milestones > 0) parts.push(`earned ${milestones} ${milestones === 1 ? "milestone" : "milestones"}`);
+  if (rank) parts.push(`reached ${rank}`);
+  const list = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0];
+  return `You've ${list}.`;
+}

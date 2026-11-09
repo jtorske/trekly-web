@@ -53,10 +53,14 @@ function writeSeen(userId: string, ids: Set<string>) {
   }
 }
 
-/** Toast what's new since last time, then remember it. The first time only sets the baseline. */
-function announce(userId: string, data: Milestones) {
+/**
+ * Toast what's new since last time, then remember it. The first time only
+ * sets the baseline; `quiet` remembers without toasting (onboarding shows its
+ * own summary).
+ */
+function announce(userId: string, data: Milestones, quiet: boolean) {
   const seen = readSeen(userId);
-  for (const milestone of newlyEarned(data, seen)) {
+  for (const milestone of quiet ? [] : newlyEarned(data, seen)) {
     toast.success(`Milestone earned: ${milestone.title}`, {
       link: { label: "See it", href: `/journal?section=${categorySlug(data, milestone.category)}` },
     });
@@ -65,7 +69,7 @@ function announce(userId: string, data: Milestones) {
   writeSeen(userId, new Set([...(seen ?? []), ...earned]));
 }
 
-export async function refreshMilestones(): Promise<void> {
+export async function refreshMilestones({ quiet = false }: { quiet?: boolean } = {}): Promise<void> {
   if (!state.userId) return;
   inFlight?.abort();
   const controller = new AbortController();
@@ -75,7 +79,7 @@ export async function refreshMilestones(): Promise<void> {
     const data = await getMyMilestones(controller.signal);
     if (state.userId !== userId) return;
     set({ data });
-    announce(userId, data);
+    announce(userId, data, quiet);
   } catch {
     // Keep what's shown; the next refresh tries again.
   }

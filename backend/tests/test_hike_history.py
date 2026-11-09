@@ -68,7 +68,9 @@ def test_past_hikes_are_added_undated_and_never_overwrite(client, auth_headers, 
     assert [log["hiked_on"] for log in logs[1:]] == [None, None]
 
     again = client.post(PAST, json={"trail_ids": [trails[1], trails[2]]}, headers=headers).json()
-    assert again == {"added": [], "skipped": 2}
+    assert (again["added"], again["skipped"]) == ([], 2)
+    assert again["progress"]["new_stamps"] == 0 and again["progress"]["points_gained"] == 0
+    assert again["progress"]["new_milestones"] == []
 
 
 def test_past_hikes_need_a_list_and_sign_in(client, auth_headers, alice, trails):

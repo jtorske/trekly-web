@@ -25,6 +25,7 @@ Data rules:
 
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
+from typing import Literal
 from datetime import date, timedelta
 from uuid import UUID
 
@@ -429,6 +430,9 @@ class MilestoneOut(BaseModel):
     needs_data: bool = False
     # The first day it was earned (app/milestone_dates.py); None when unearned.
     earned_on: date | None = None
+    # Earned on the strength of hikes from before Trekly: "joining" when they
+    # were added during onboarding, "past_hikes" for ones added later.
+    earned_with: Literal["joining", "past_hikes"] | None = None
     progress: ProgressOut | None = None
 
 
@@ -449,7 +453,11 @@ GOAL_UNITS = {
 
 
 def milestone_out(
-    milestone: Milestone, result: Result, needs_data: bool = False, earned_on: date | None = None
+    milestone: Milestone,
+    result: Result,
+    needs_data: bool = False,
+    earned_on: date | None = None,
+    earned_with: Literal["joining", "past_hikes"] | None = None,
 ) -> MilestoneOut:
     if milestone.secret and not result.earned:
         return MilestoneOut(
@@ -465,7 +473,7 @@ def milestone_out(
         goal=goal_of(milestone), unit=GOAL_UNITS.get(milestone.rule), note=milestone.note, tier=milestone.tier,
         icon=milestone.icon, secret=milestone.secret, earned=result.earned,
         needs_data=needs_data and not result.earned, earned_on=earned_on if result.earned else None,
-        progress=progress,
+        earned_with=earned_with if result.earned else None, progress=progress,
     )
 
 

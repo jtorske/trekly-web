@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   categorySlug,
   earnedCount,
+  earnedWhen,
   milestoneDetail,
   milestoneSpreads,
   newlyEarned,
@@ -144,4 +145,13 @@ test("a category longer than a page carries on under the same heading", () => {
   assert.equal(pages.at(-1)?.kind, "back");
   assert.equal(pages.length % 2, 0);
   assert.equal(spreads.filter((s) => s.title.includes("Exploration")).length, 2);
+});
+
+test("milestones from hikes before Trekly say when they were added, not a date", () => {
+  const date = (day: string) => `on ${day}`;
+  assert.equal(earnedWhen({ earned: true, earned_on: "2026-11-09", earned_with: "joining" }, date), "Earned when you joined");
+  assert.equal(earnedWhen({ earned: true, earned_on: "2026-11-09", earned_with: "past_hikes" }, date), "Earned from your past hikes");
+  assert.equal(earnedWhen({ earned: true, earned_on: "2026-07-01", earned_with: null }, date), "on 2026-07-01");
+  assert.equal(earnedWhen({ earned: true, earned_on: null }, date), null);
+  assert.equal(earnedWhen({ earned: false, earned_on: null, earned_with: "joining" }, date), null);
 });

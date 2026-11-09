@@ -615,6 +615,54 @@
   gap: 0.5rem;
 }
 
+/* What their past hikes earned, above the trail picks. */
+.summary {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--color-tan) 55%, transparent);
+  border-radius: 1rem;
+  background: var(--color-cream);
+}
+
+.summaryText {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.summaryBadges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryBadges > li {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+.summaryMore {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-tan) 35%, transparent);
+  color: var(--color-dark-olive);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.summaryLink {
+  justify-self: start;
+  color: var(--color-rust-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 /* A one-off burst of trail-coloured confetti behind the heading. */
 .burst {
   position: absolute;

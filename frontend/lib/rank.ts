@@ -37,7 +37,8 @@ export function progressLabel(mine: MyRank): string {
 }
 
 /** Why the rank was re-fetched: only logging a new hike can celebrate. */
-export type RankCause = "load" | "hike-added" | "hike-changed";
+/** "onboarding": hikes added in /welcome, which celebrates on its finish screen instead. */
+export type RankCause = "load" | "hike-added" | "hike-changed" | "onboarding";
 
 /**
  * A rank-up is celebrated once, right after logging the hike that earned

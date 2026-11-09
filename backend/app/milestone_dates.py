@@ -14,9 +14,13 @@ The dates come from:
   looked as it does now.
 
 Days are calendar days: hike dates as the hiker picked them, timestamps in UTC.
+
+A milestone that needed undated hikes ("before Trekly") added on the day it
+was earned is marked as earned from past hikes (past_hike_milestones): the
+journal shows "Earned when you joined" for those from onboarding.
 """
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import date
 from uuid import UUID
 
@@ -24,7 +28,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.milestones import Facts, Result, check
-from app.milestones_config import Milestone
+from app.milestones_config import ACTIVE, Milestone
 from app.models.availability import AvailabilityAlert
 from app.models.trip_plan import TripPlan
 
@@ -48,15 +52,7 @@ def earned_dates(
     )
     found: dict[str, date] = {}
     for day in days:
-        upto = replace(
-            facts,
-            hikes=[hike for hike, on in zip(facts.hikes, hike_dates) if on and on <= day],
-            plans=sum(1 for d in plan_dates if d <= day),
-            alerts=sum(1 for d in alert_dates if d <= day),
-            alert_notified=any(d <= day for d in notified_dates),
-            setups=[s for s, d in zip(facts.setups, facts.setup_dates) if d <= day],
-            base_weights_kg=[w for w, d in zip(facts.base_weights_kg, facts.base_weight_dates) if d <= day],
-        )
+        upto = facts_on(facts, day, plan_dates=plan_dates, alert_dates=alert_dates, notified_dates=notified_dates)
         for milestone in [m for m in pending if check(m, upto).earned]:
             found[milestone.id] = day
             pending.remove(milestone)
@@ -65,10 +61,74 @@ def earned_dates(
     return found
 
 
-def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[tuple[Milestone, Result]]) -> dict[str, date]:
-    """earned_dates with the plan and alert dates read for one user."""
+def facts_on(
+    facts: Facts,
+    day: date,
+    *,
+    plan_dates: list[date],
+    alert_dates: list[date],
+    notified_dates: list[date],
+    without_past_hikes_from: date | None = None,
+) -> Facts:
+    """The facts as they stood at the end of `day`. With
+    `without_past_hikes_from`, undated hikes logged on or after that day are
+    left out."""
+
+    def keep(hike) -> bool:
+        on = hike.hiked_on or hike.logged_on
+        if not on or on > day:
+            return False
+        return not (
+            without_past_hikes_from and hike.hiked_on is None and hike.logged_on and hike.logged_on >= without_past_hikes_from
+        )
+
+    return replace(
+        facts,
+        hikes=[hike for hike in facts.hikes if keep(hike)],
+        plans=sum(1 for d in plan_dates if d <= day),
+        alerts=sum(1 for d in alert_dates if d <= day),
+        alert_notified=any(d <= day for d in notified_dates),
+        setups=[s for s, d in zip(facts.setups, facts.setup_dates) if d <= day],
+        base_weights_kg=[w for w, d in zip(facts.base_weights_kg, facts.base_weight_dates) if d <= day],
+    )
+
+
+def past_hike_milestones(
+    facts: Facts,
+    dates: dict[str, date],
+    *,
+    plan_dates: list[date],
+    alert_dates: list[date],
+    notified_dates: list[date],
+) -> set[str]:
+    """The earned milestones that only held on their day thanks to undated
+    hikes added that day."""
+    by_id = {milestone.id: milestone for milestone in ACTIVE}
+    found = set()
+    for milestone_id, day in dates.items():
+        milestone = by_id.get(milestone_id)
+        if milestone is None:
+            continue
+        without = facts_on(
+            facts, day, plan_dates=plan_dates, alert_dates=alert_dates, notified_dates=notified_dates,
+            without_past_hikes_from=day,
+        )
+        if not check(milestone, without).earned:
+            found.add(milestone_id)
+    return found
+
+
+@dataclass(frozen=True)
+class EarnedDates:
+    dates: dict[str, date]
+    # Earned on the strength of undated hikes added that day.
+    from_past_hikes: set[str]
+
+
+def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[tuple[Milestone, Result]]) -> EarnedDates:
+    """earned_dates (and past_hike_milestones) with the plan and alert dates read for one user."""
     if not any(result.earned for _, result in results):
-        return {}
+        return EarnedDates({}, set())
     plan_dates = [d.date() for d in db.scalars(select(TripPlan.created_at).where(TripPlan.user_id == user_id))]
     alerts = db.execute(
         select(AvailabilityAlert.created_at, AvailabilityAlert.notified_at, AvailabilityAlert.status, AvailabilityAlert.updated_at)
@@ -79,10 +139,10 @@ def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[
         for _, notified_at, status, updated_at in alerts
         if notified_at is not None or status == "notified"
     ]
-    return earned_dates(
-        facts,
-        results,
-        plan_dates=plan_dates,
-        alert_dates=[created_at.date() for created_at, *_ in alerts],
-        notified_dates=notified,
-    )
+    others = {
+        "plan_dates": plan_dates,
+        "alert_dates": [created_at.date() for created_at, *_ in alerts],
+        "notified_dates": notified,
+    }
+    dates = earned_dates(facts, results, **others)
+    return EarnedDates(dates, past_hike_milestones(facts, dates, **others))
