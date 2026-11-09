@@ -1,0 +1,302 @@
+.pack {
+  display: grid;
+  gap: 1.1rem;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ the mat */
+
+.matWrap {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border-radius: 1.1rem;
+  /* A sleeping-mat stripe, like the gear page's mat. */
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-olive) 9%, transparent) 0 14px,
+      transparent 14px 28px
+    ),
+    color-mix(in srgb, var(--color-tan) 22%, var(--color-cream));
+}
+
+.steps {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--color-muted-text);
+}
+
+.stepName {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stepName + .stepName::before {
+  content: "›";
+  color: var(--color-muted-text);
+}
+
+.stepName[data-done] {
+  color: var(--color-dark-olive);
+}
+
+.stepName[data-here] {
+  color: var(--color-dark-olive);
+  font-weight: 700;
+}
+
+.mat {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spot {
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.25rem;
+  border: 1.5px dashed color-mix(in srgb, var(--color-dark-olive) 30%, transparent);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, white 55%, transparent);
+  color: var(--color-muted-text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.spotIcon {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+.spot[data-state="picked"] {
+  border-style: solid;
+  border-color: var(--color-olive);
+  background: white;
+  color: var(--color-dark-olive);
+}
+
+.spot[data-state="picked"] .spotIcon {
+  opacity: 1;
+}
+
+.spot[data-state="none"] {
+  border-style: solid;
+  background: transparent;
+}
+
+.spot[data-state="none"] .spotIcon {
+  opacity: 0.25;
+}
+
+.spot[data-here] {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 1px;
+}
+
+.spot:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.spotLabel {
+  max-width: 100%;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------- one pick */
+
+.slot {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.slotHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.slotTitle {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.slotPart {
+  color: var(--color-muted-text);
+  font-size: 0.8125rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 420px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+}
+
+.card {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  justify-items: center;
+  align-content: start;
+  gap: 0.2rem;
+  padding: 0.9rem 0.6rem;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--color-olive) 6%, var(--color-cream));
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.card:hover {
+  background: color-mix(in srgb, var(--color-olive) 12%, var(--color-cream));
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card[data-on] {
+  border-color: var(--color-olive);
+  background: white;
+}
+
+.card:focus-visible,
+.none:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.cardBrand {
+  margin-top: 0.3rem;
+  color: var(--color-muted-text);
+  font-size: 0.75rem;
+}
+
+.cardName {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.cardMeta {
+  color: var(--color-dark-olive);
+  font-size: 0.8125rem;
+}
+
+.cardSkeleton {
+  height: 11rem;
+  border-radius: 1rem;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  color: var(--color-muted-text);
+  text-align: center;
+}
+
+.none {
+  min-height: 3rem;
+  border: 1.5px dashed color-mix(in srgb, var(--color-dark-olive) 30%, transparent);
+  border-radius: 0.9rem;
+  background: transparent;
+  color: var(--color-dark-olive);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.none[data-on] {
+  border-style: solid;
+  border-color: var(--color-dark-olive);
+}
+
+/* ------------------------------------------------------------ after three */
+
+.finished {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.finishedTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--color-dark-olive);
+  font-weight: 700;
+}
+
+.moreLink {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--color-rust-text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.more {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.moreTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot,
+  .spotIcon,
+  .card {
+    transition: none;
+  }
+
+  .card:active {
+    transform: none;
+  }
+}

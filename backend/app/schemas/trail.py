@@ -69,6 +69,9 @@ class TrailListItemOut(TrailOut):
     distance_km: float | None = None
     elevation_gain_m: int | None = None
     popularity_rank: int | None = None
+    # The trailhead, for "Nearest to me" ordering (done in the browser).
+    latitude: float | None = None
+    longitude: float | None = None
     # Set when the trail has left the catalogue; it still resolves for
     # bookmarks but no longer appears in search.
     retired_at: datetime | None = None

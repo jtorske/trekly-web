@@ -16,7 +16,7 @@ import {
 } from "@/lib/featuredBadges";
 import { saveFeaturedBadges } from "@/lib/featuredBadgesApi";
 import type { HikeLog } from "@/lib/hikeLogsApi";
-import type { ProvinceCode } from "@/lib/provinces";
+import type { HomeCode } from "@/lib/provinces";
 import { BadgeArt } from "./ProfileShell";
 import { useMilestones } from "@/lib/useMilestones";
 import styles from "./BadgePicker.module.css";
@@ -34,7 +34,7 @@ export default function BadgePicker({
   onSaved,
 }: {
   logs: HikeLog[];
-  homeProvince?: ProvinceCode | null;
+  homeProvince?: HomeCode | null;
   current: FeaturedBadge[];
   onClose: () => void;
   onSaved: (featured: FeaturedBadges) => void;

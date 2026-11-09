@@ -14,14 +14,14 @@ import pytest
 
 from app.main import app
 from app.models.trail import Trail
-from app.preferences import INTERESTS, ONBOARDING_STEPS, REGION_SLUGS, REGIONS, Preferences, matched_interests, recommend
+from app.preferences import ONBOARDING_STEPS, REGION_SLUGS, REGIONS, Preferences, recommend
 
 PROFILE = "/api/me/profile"
 PREFS = "/api/me/preferences"
 RECS = "/api/me/recommendations"
 PRIVACY = "/api/me/privacy"
 
-PRIVATE_KEYS = ("hiking_style", "experience", "interests", "favourite_regions", "onboarding")
+PRIVATE_KEYS = ("hiking_style", "experience", "favourite_regions", "onboarding")
 
 
 @pytest.fixture
@@ -39,6 +39,12 @@ def pending(client, who) -> bool:
     return response.json()["onboarding_pending"]
 
 
+def choose_visibility(client, who, is_private=False):
+    """The privacy step's answer, which finishing or skipping the flow needs."""
+    response = client.patch(PRIVACY, json={"is_private": is_private}, headers=who)
+    assert response.status_code == 200, response.text
+
+
 def patch_prefs(client, who, **changes):
     response = client.patch(PREFS, json=changes, headers=who)
     assert response.status_code == 200, response.text
@@ -54,7 +60,6 @@ def test_a_new_account_starts_with_the_flow_pending_and_nothing_answered(client,
     assert client.get(PREFS, headers=alice).json() == {
         "hiking_style": None,
         "experience": None,
-        "interests": [],
         "favourite_regions": [],
         "onboarding": {"step": None, "status": None, "finished_at": None},
     }
@@ -70,6 +75,7 @@ def test_the_username_step_cant_be_left_empty(client, people, username):
 def test_finishing_without_a_username_still_leaves_the_flow_pending(client, people):
     """Every later step is optional, but the gate keeps asking until there's a username."""
     _, alice = people["alice"]
+    choose_visibility(client, alice)
     patch_prefs(client, alice, onboarding_status="completed")
     assert pending(client, alice) is True
     assert client.patch(PROFILE, json={"username": "alice", "display_name": "Alice"}, headers=alice).status_code == 200
@@ -90,10 +96,10 @@ def test_reserved_and_taken_usernames_are_refused_on_the_name_step(client, peopl
 def test_progress_and_answers_survive_leaving_and_coming_back(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
-    patch_prefs(client, alice, hiking_style="both", experience="few_seasons", onboarding_step="interests")
+    patch_prefs(client, alice, hiking_style="both", experience="few_seasons", onboarding_step="regions")
     # A later visit: same answers, same step.
     again = client.get(PREFS, headers=alice).json()
-    assert again["onboarding"] == {"step": "interests", "status": None, "finished_at": None}
+    assert again["onboarding"] == {"step": "regions", "status": None, "finished_at": None}
     assert again["hiking_style"] == "both" and again["experience"] == "few_seasons"
     assert pending(client, alice) is True
 
@@ -108,30 +114,31 @@ def test_unknown_steps_and_answers_are_refused(client, people):
     _, alice = people["alice"]
     for bad in (
         {"onboarding_step": "bonus"},
+        # The interests step is gone; its answers aren't taken any more.
+        {"onboarding_step": "interests"},
+        {"interests": ["alpine_lakes"]},
         {"hiking_style": "running"},
         {"experience": "expert"},
         {"interests": ["alpine_lakes", "nightlife"]},
         {"favourite_regions": ["banff", "narnia"]},
-        {"interests": "alpine_lakes"},
         {"user_id": str(uuid.uuid4())},
     ):
         assert client.patch(PREFS, json=bad, headers=alice).status_code == 422, bad
-    assert client.get(PREFS, headers=alice).json()["interests"] == []
+    assert "interests" not in client.get(PREFS, headers=alice).json()
 
 
 def test_multi_selects_keep_their_order_once_each_and_can_be_cleared(client, people):
     _, alice = people["alice"]
-    saved = patch_prefs(client, alice, interests=["waterfalls", "summits", "waterfalls"], favourite_regions=["yoho", "banff"])
-    assert saved["interests"] == ["waterfalls", "summits"]
+    saved = patch_prefs(client, alice, favourite_regions=["yoho", "banff", "yoho"])
     assert saved["favourite_regions"] == ["yoho", "banff"]
-    assert patch_prefs(client, alice, interests=[])["interests"] == []
+    assert patch_prefs(client, alice, favourite_regions=[])["favourite_regions"] == []
     assert patch_prefs(client, alice, hiking_style=None)["hiking_style"] is None
 
 
 def test_all_options_are_accepted(client, people):
     _, alice = people["alice"]
-    saved = patch_prefs(client, alice, interests=list(INTERESTS), favourite_regions=list(REGION_SLUGS))
-    assert saved["interests"] == list(INTERESTS) and saved["favourite_regions"] == list(REGION_SLUGS)
+    saved = patch_prefs(client, alice, favourite_regions=list(REGION_SLUGS))
+    assert saved["favourite_regions"] == list(REGION_SLUGS)
 
 
 # ------------------------------------------------------- skipping and once
@@ -140,6 +147,7 @@ def test_all_options_are_accepted(client, people):
 def test_skip_for_now_ends_the_flow_for_good(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    choose_visibility(client, alice)
     saved = patch_prefs(client, alice, onboarding_step="home", onboarding_status="skipped")
     assert saved["onboarding"]["status"] == "skipped" and saved["onboarding"]["finished_at"]
     assert pending(client, alice) is False
@@ -152,10 +160,11 @@ def test_skip_for_now_ends_the_flow_for_good(client, people):
 def test_skipping_single_steps_saves_nothing_but_the_step(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
-    for step in ("home", "style", "experience", "interests", "regions", "units", "privacy", "done"):
+    for step in ("home", "style", "experience", "regions", "hiked", "pack", "units", "privacy", "done"):
         patch_prefs(client, alice, onboarding_step=step)
+    choose_visibility(client, alice)
     prefs = patch_prefs(client, alice, onboarding_status="completed")
-    assert prefs["hiking_style"] is None and prefs["interests"] == [] and prefs["favourite_regions"] == []
+    assert prefs["hiking_style"] is None and prefs["favourite_regions"] == []
     assert prefs["onboarding"]["status"] == "completed"
     profile = client.get(PROFILE, headers=alice).json()
     assert profile["home_province"] is None and profile["units"] is None and profile["onboarding_pending"] is False
@@ -166,6 +175,7 @@ def test_existing_users_see_it_once(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "old_timer"}, headers=alice)
     assert pending(client, alice) is True
+    choose_visibility(client, alice)
     patch_prefs(client, alice, onboarding_status="skipped")
     assert pending(client, alice) is False
     assert pending(client, alice) is False
@@ -174,7 +184,7 @@ def test_existing_users_see_it_once(client, people):
 def test_preferences_are_only_your_own(client, people):
     _, alice = people["alice"]
     _, bob = people["bob"]
-    patch_prefs(client, alice, hiking_style="overnight", interests=["solitude"])
+    patch_prefs(client, alice, hiking_style="overnight")
     assert client.get(PREFS, headers=bob).json()["hiking_style"] is None
     assert client.get(PREFS).status_code == 401
     assert client.patch(PREFS, json={"hiking_style": "day"}).status_code == 401
@@ -206,7 +216,6 @@ def alice_public(client, people):
         alice,
         hiking_style="overnight",
         experience="seasoned",
-        interests=["solitude", "wildlife"],
         favourite_regions=["tombstone", "kluane"],
         onboarding_step="privacy",
     )
@@ -221,7 +230,7 @@ def test_public_profile_never_includes_the_new_fields(client, alice_public, peop
         body = response.json()
         for key in (*PRIVATE_KEYS, "onboarding_step", "onboarding_status", "onboarding_pending"):
             assert key not in body
-        for value in ("overnight", "seasoned", "solitude", "wildlife", "tombstone", "kluane"):
+        for value in ("overnight", "seasoned", "tombstone", "kluane"):
             assert value not in response.text.lower(), value
 
 
@@ -243,7 +252,7 @@ def test_no_get_endpoint_shows_preferences_to_visitors(client, alice_public, peo
             except Exception:  # noqa: BLE001  (a crash returns nothing, so nothing leaks)
                 continue
             text = response.text.lower()
-            for secret in ("tombstone", "kluane", "seasoned", '"solitude"'):
+            for secret in ("tombstone", "kluane", "seasoned"):
                 assert secret not in text, f"{secret} leaked from GET {url}"
 
 
@@ -268,20 +277,7 @@ def _trail(**fields):
     return SimpleNamespace(**defaults)
 
 
-def test_interests_match_names_descriptions_tags_and_trip_shape():
-    larch = _trail(name="Larch Valley", tags=["larch"])
-    falls = _trail(name="Johnston Canyon", description="Two waterfalls on a catwalk.")
-    lake = _trail(name="Lake Agnes Teahouse")
-    traverse = _trail(name="Rockwall", typical_duration_nights=3, route_type="point_to_point", popularity_rank=80)
-    family = _trail(name="Marsh Loop", terrain_difficulty="easy", distance_km=2)
-    assert matched_interests(larch, INTERESTS) == ["larches"]
-    assert matched_interests(falls, INTERESTS) == ["waterfalls"]
-    assert matched_interests(lake, INTERESTS) == ["alpine_lakes"]
-    assert matched_interests(traverse, INTERESTS) == ["solitude", "traverses"]
-    assert matched_interests(family, INTERESTS) == ["family"]
-
-
-def test_picks_follow_style_experience_interests_regions_and_home():
+def test_picks_follow_style_experience_regions_and_home():
     trails = [
         _trail(name="Busy hard day", terrain_difficulty="difficult", popularity_rank=1),
         _trail(name="Easy lake stroll", terrain_difficulty="easy", distance_km=3, popularity_rank=30),
@@ -294,8 +290,10 @@ def test_picks_follow_style_experience_interests_regions_and_home():
     assert [t.name for t in backpacker] == ["Big overnight"]
     yoho_fan = recommend(trails, Preferences(favourite_regions=("yoho",)), limit=1)
     assert [t.name for t in yoho_fan] == ["Yoho Lake"]
-    lake_lover = recommend(trails, Preferences(interests=("alpine_lakes",), home_province="BC"), limit=1)
-    assert [t.name for t in lake_lover] == ["Yoho Lake"]
+    from_bc = recommend(trails, Preferences(experience="few_seasons", home_province="BC"), limit=1)
+    assert [t.name for t in from_bc] == ["Yoho Lake"]
+    # Outside Canada matches no province, so it changes nothing.
+    assert recommend(trails, Preferences(home_province="outside"), limit=4) == recommend(trails, Preferences(), limit=4)
 
 
 def test_no_answers_means_most_popular_first_and_at_most_two_per_park():
@@ -324,9 +322,9 @@ def test_recommendations_endpoint_uses_the_answers_and_skips_saved_trails(client
 
     names = lambda: [t["name"] for t in client.get(RECS, headers=alice).json()]  # noqa: E731
     assert names() == ["Hard summit", "Easy falls", "Iceline"]  # popularity, nothing answered
-    patch_prefs(client, alice, experience="new", hiking_style="day", interests=["waterfalls"])
+    patch_prefs(client, alice, experience="new", hiking_style="day")
     assert names()[0] == "Easy falls"
-    patch_prefs(client, alice, favourite_regions=["yoho"], interests=[], experience="few_seasons")
+    patch_prefs(client, alice, favourite_regions=["yoho"], experience="few_seasons")
     assert names()[0] == "Iceline"
     assert client.put(f"/api/me/saved-trails/{ids['yoho']}", headers=alice).status_code == 201
     assert "Iceline" not in names()
@@ -337,3 +335,35 @@ def test_recommendations_endpoint_uses_the_answers_and_skips_saved_trails(client
 def test_region_list_has_unique_slugs_and_parks():
     assert len(set(REGION_SLUGS)) == len(REGIONS)
     assert len({region.park_name for region in REGIONS}) == len(REGIONS)
+
+
+# ------------------------------------------------ the privacy choice is required
+
+
+@pytest.mark.parametrize("outcome", ["completed", "skipped"])
+def test_the_flow_cant_end_until_public_or_private_is_chosen(client, people, outcome):
+    _, alice = people["alice"]
+    client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    # Even with every other step done, and even via "Skip for now".
+    patch_prefs(client, alice, onboarding_step="privacy")
+    refused = client.patch(PREFS, json={"onboarding_status": outcome}, headers=alice)
+    assert refused.status_code == 409
+    assert "public or private" in refused.json()["detail"]
+    assert pending(client, alice) is True
+    assert client.get(PREFS, headers=alice).json()["onboarding"]["status"] is None
+    # Choosing, even the setting they already had, lets it end.
+    choose_visibility(client, alice, is_private=True)
+    assert patch_prefs(client, alice, onboarding_status=outcome)["onboarding"]["status"] == outcome
+    assert pending(client, alice) is False
+
+
+def test_other_privacy_switches_dont_count_as_the_choice(client, people):
+    _, alice = people["alice"]
+    client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    assert client.patch(PRIVACY, json={"show_rank": False}, headers=alice).status_code == 200
+    assert client.patch(PREFS, json={"onboarding_status": "completed"}, headers=alice).status_code == 409
+
+
+def test_saving_progress_doesnt_need_the_choice(client, people):
+    _, alice = people["alice"]
+    assert patch_prefs(client, alice, onboarding_step="hiked", hiking_style="day")["onboarding"]["step"] == "hiked"

@@ -43,6 +43,9 @@ export interface TrailListItem extends TrailSummary {
   distance_km: number | null;
   elevation_gain_m: number | null;
   popularity_rank: number | null;
+  /** The trailhead; used for "Nearest to me" ordering. */
+  latitude?: number | null;
+  longitude?: number | null;
   /** Set once a trail leaves the catalogue; bookmarks to it still resolve. */
   retired_at: string | null;
   photo?: TrailPhoto | null;

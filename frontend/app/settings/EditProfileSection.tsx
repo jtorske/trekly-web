@@ -9,7 +9,7 @@ import { ApiError } from "@/lib/api";
 import { updateProfile, type Profile } from "@/lib/accountApi";
 import { toast } from "@/lib/toast";
 import { announceProfile } from "@/lib/useProfile";
-import { province, provinceOptions, type ProvinceCode } from "@/lib/provinces";
+import { province, provinceOptions, type HomeCode } from "@/lib/provinces";
 import ProvinceBadge from "@/components/ProvinceBadge";
 import { usernameReady } from "@/lib/usernames";
 import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
@@ -165,7 +165,7 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
             <select
               className={ui.input}
               value={values.home_province}
-              onChange={(event) => setValues((current) => ({ ...current, home_province: event.target.value as ProvinceCode | "" }))}
+              onChange={(event) => setValues((current) => ({ ...current, home_province: event.target.value as HomeCode | "" }))}
               aria-describedby="province-hint"
             >
               <option value="">Prefer not to say</option>

@@ -27,7 +27,7 @@ from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
 from app.privacy import visibility
-from app.provinces import ProvinceCode
+from app.provinces import HomeProvince
 from app.usernames import RESERVED_MESSAGE, REQUIRED_MESSAGE, TAKEN_MESSAGE, is_taken, normalize, rule_problem
 from app.schemas.trail import TrailListItemOut
 
@@ -53,7 +53,7 @@ class ProfileOut(BaseModel):
     username: str | None
     bio: str | None
     home_region: str | None
-    home_province: ProvinceCode | None
+    home_province: HomeProvince | None
     avatar_path: str | None
     units: UnitSystem | None
     member_since: datetime | None
@@ -83,7 +83,7 @@ class ProfileUpdate(BaseModel):
     bio: str | None = Field(default=None, max_length=280)
     home_region: str | None = Field(default=None, max_length=80)
     # None is "Prefer not to say".
-    home_province: ProvinceCode | None = None
+    home_province: HomeProvince | None = None
     avatar_path: str | None = Field(default=None, max_length=200)
     units: UnitSystem | None = None
 

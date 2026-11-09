@@ -1,17 +1,20 @@
 """Trail preferences from the /welcome setup flow, and the picks they drive.
 
-Hiking style, experience, interests and favourite regions are private: only
+Hiking style, experience and favourite regions are private: only
 the owner reads them (GET /api/me/preferences), they never appear on a public
 profile, and row-level security keeps other clients off the table (migration
 6d1a8f3b2c57). Their only use is ordering trail recommendations.
 
 The option lists are mirrored in frontend/lib/onboarding.ts; a frontend test
 checks the two agree.
+
+The interests step ("What gets you out there?") was removed (migration
+c7e3a9f1d5b2): profile_preferences.interests is still stored but nothing
+reads it, and picks rely on home province, style, experience and regions.
 """
 
 from __future__ import annotations
 
-import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 
@@ -25,7 +28,6 @@ ONBOARDING_STEPS = (
     "home",
     "style",
     "experience",
-    "interests",
     "regions",
     # Which trails they've hiked before, and what's in their pack (b4e7a2c9d1f3).
     "hiked",
@@ -77,31 +79,6 @@ REGIONS = (
 REGION_SLUGS = tuple(region.slug for region in REGIONS)
 PARK_BY_REGION = {region.slug: region.park_name for region in REGIONS}
 
-INTERESTS = (
-    "alpine_lakes",
-    "summits",
-    "larches",
-    "waterfalls",
-    "solitude",
-    "wildlife",
-    "family",
-    "traverses",
-    "coast",
-    "wildflowers",
-)
-
-# Words in a trail's name or description that say it has what the interest is about.
-_INTEREST_WORDS = {
-    "alpine_lakes": r"\blakes?\b|\btarns?\b",
-    "summits": r"summit|\bpeaks?\b|\bmount\b|\bridge\b|lookout|viewpoint|panoram|\bviews?\b",
-    "larches": r"larch",
-    "waterfalls": r"\bfalls\b|waterfall|cascade",
-    "wildlife": r"wildlife|\bbears?\b|caribou|moose|\belk\b|mountain goat|bighorn|marmot|whales?|puffin|\bbirds?\b",
-    "coast": r"coast|beach|ocean|\bsea\b|shore|\bcove\b|\bbay\b",
-    "wildflowers": r"wildflower|meadow|flowers|alpine bloom",
-}
-_INTEREST_PATTERNS = {key: re.compile(pattern, re.IGNORECASE) for key, pattern in _INTEREST_WORDS.items()}
-
 # How well each terrain suits each experience level.
 _DIFFICULTY_FIT = {
     "new": {"easy": 3.0, "moderate": 1.0, "difficult": -3.0, "extreme": -6.0},
@@ -109,8 +86,6 @@ _DIFFICULTY_FIT = {
     "seasoned": {"easy": -1.0, "moderate": 1.0, "difficult": 3.0, "extreme": 2.0},
 }
 
-# A trail ranked past this is off the busiest list: good for "Solitude".
-QUIET_RANK = 40
 MAX_PER_PARK = 2
 
 
@@ -118,34 +93,8 @@ MAX_PER_PARK = 2
 class Preferences:
     hiking_style: str | None = None
     experience: str | None = None
-    interests: tuple[str, ...] = ()
     favourite_regions: tuple[str, ...] = ()
     home_province: str | None = None
-
-
-def matched_interests(trail, interests: Iterable[str]) -> list[str]:
-    """Which of `interests` this trail offers."""
-    text = f"{trail.name} {trail.description or ''}"
-    tags = set(trail.tags or [])
-    nights = trail.typical_duration_nights or 0
-    found = []
-    for interest in interests:
-        if interest == "larches":
-            hit = "larch" in tags or bool(_INTEREST_PATTERNS["larches"].search(text))
-        elif interest == "solitude":
-            hit = trail.popularity_rank is None or trail.popularity_rank > QUIET_RANK
-        elif interest == "family":
-            distance = float(trail.distance_km) if trail.distance_km is not None else None
-            hit = trail.terrain_difficulty == "easy" and nights == 0 and (distance is None or distance <= 10)
-        elif interest == "traverses":
-            hit = nights >= 2 or (nights >= 1 and trail.route_type == "point_to_point")
-        elif interest in _INTEREST_PATTERNS:
-            hit = bool(_INTEREST_PATTERNS[interest].search(text))
-        else:
-            hit = False
-        if hit:
-            found.append(interest)
-    return found
 
 
 def score(trail, prefs: Preferences) -> float:
@@ -158,7 +107,6 @@ def score(trail, prefs: Preferences) -> float:
         total += 3.0 if nights >= 1 else -2.0
     if prefs.experience in _DIFFICULTY_FIT:
         total += _DIFFICULTY_FIT[prefs.experience].get(trail.terrain_difficulty, 0.0)
-    total += 2.0 * len(matched_interests(trail, prefs.interests))
     favourite_parks = {PARK_BY_REGION[slug] for slug in prefs.favourite_regions if slug in PARK_BY_REGION}
     if trail.park_name and trail.park_name in favourite_parks:
         total += 4.0

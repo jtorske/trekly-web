@@ -56,6 +56,9 @@ class ProfileSettings(Base):
     # (migration f9c2d4e6a8b1).
     show_visit_streak = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
+    # When they last chose Public or Private themselves; the setup flow can't
+    # finish or be skipped without it (migration c7e3a9f1d5b2). API-only.
+    visibility_chosen_at = Column(DateTime(timezone=True))
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )

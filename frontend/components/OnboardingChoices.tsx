@@ -2,7 +2,7 @@
 
 import { useId, useState, type ReactNode } from "react";
 import { Check, Search } from "lucide-react";
-import { EXPERIENCE_LEVELS, HIKING_STYLES, INTERESTS, REGIONS, searchRegions, type Choice } from "@/lib/onboarding";
+import { EXPERIENCE_LEVELS, HIKING_STYLES, REGIONS, searchRegions, type Choice } from "@/lib/onboarding";
 import { PROVINCE_NAMES } from "@/lib/exploreFilters";
 import styles from "./OnboardingChoices.module.css";
 
@@ -147,17 +147,6 @@ export function ExperienceCards({
       options={EXPERIENCE_LEVELS.map((option) => ({ ...option, icon: icons?.[option.value] }))}
       value={value as (typeof EXPERIENCE_LEVELS)[number]["value"] | null}
       onChange={onChange}
-    />
-  );
-}
-
-export function InterestChips({ values, onChange }: { values: string[]; onChange: (values: string[]) => void }) {
-  return (
-    <ChipChecks
-      legend="What gets you out there? Pick any."
-      options={INTERESTS}
-      values={values}
-      onToggle={(value) => onChange(toggleValue(values, value))}
     />
   );
 }

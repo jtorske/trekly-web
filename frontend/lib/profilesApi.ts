@@ -3,7 +3,7 @@ import type { FeaturedBadge } from "./featuredBadges";
 import type { GearItem } from "./gearApi";
 import type { TrailListItem } from "./trailsApi";
 import type { MilestoneBadgeInfo } from "./milestones";
-import type { ProvinceCode } from "./provinces";
+import type { HomeCode } from "./provinces";
 
 /**
  * Public profiles (/u/[username]) and the owner's privacy settings.
@@ -81,7 +81,7 @@ export interface PublicProfile {
   /** Each of these is null when the profile is private or the section is hidden. */
   bio: string | null;
   /** Only while the owner has "Home province" switched on. */
-  home_province: ProvinceCode | null;
+  home_province: HomeCode | null;
   rank: { level: number; title: string } | null;
   /** Only while the owner has "Visit streak" switched on; current is 0 once lapsed. */
   visit_streak: { current: number; longest: number } | null;

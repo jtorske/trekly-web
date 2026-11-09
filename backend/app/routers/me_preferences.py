@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -19,9 +19,9 @@ from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile, SavedTrail
 from app.models.preferences import ProfilePreferences
+from app.models.privacy import ProfileSettings
 from app.models.trail import Trail
 from app.preferences import (
-    INTERESTS,
     ONBOARDING_STEPS,
     REGION_SLUGS,
     Preferences,
@@ -46,7 +46,6 @@ class OnboardingOut(BaseModel):
 class PreferencesOut(BaseModel):
     hiking_style: HikingStyle | None
     experience: Experience | None
-    interests: list[str]
     favourite_regions: list[str]
     onboarding: OnboardingOut
 
@@ -69,13 +68,12 @@ class PreferencesUpdate(BaseModel):
 
     hiking_style: HikingStyle | None = None
     experience: Experience | None = None
-    interests: list[str] | None = Field(default=None, max_length=len(INTERESTS))
     favourite_regions: list[str] | None = Field(default=None, max_length=len(REGION_SLUGS))
     onboarding_step: OnboardingStep | None = None
     # Finishing or "Skip for now". Once set it stays: the flow shows once.
+    # Either needs the profile visibility chosen first (see update_preferences).
     onboarding_status: OnboardingOutcome | None = None
 
-    _check_interests = field_validator("interests")(_unique_in(INTERESTS, "interest"))
     _check_regions = field_validator("favourite_regions")(_unique_in(REGION_SLUGS, "region"))
 
     @field_validator("onboarding_status", mode="before")
@@ -94,7 +92,7 @@ def _ensure_row(db: Session, user_id: UUID) -> ProfilePreferences:
     row = db.get(ProfilePreferences, user_id)
     if row is not None:
         return row
-    db.add(ProfilePreferences(user_id=user_id, interests=[], favourite_regions=[]))
+    db.add(ProfilePreferences(user_id=user_id, favourite_regions=[]))
     try:
         db.commit()
     except IntegrityError:
@@ -107,14 +105,12 @@ def preferences_out(row: ProfilePreferences | None) -> PreferencesOut:
         return PreferencesOut(
             hiking_style=None,
             experience=None,
-            interests=[],
             favourite_regions=[],
             onboarding=OnboardingOut(step=None, status=None, finished_at=None),
         )
     return PreferencesOut(
         hiking_style=row.hiking_style,
         experience=row.experience,
-        interests=list(row.interests or []),
         favourite_regions=list(row.favourite_regions or []),
         onboarding=OnboardingOut(
             step=row.onboarding_step, status=row.onboarding_status, finished_at=row.onboarding_finished_at
@@ -133,9 +129,18 @@ def update_preferences(
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    row = _ensure_row(db, user.id)
     data = payload.model_dump(exclude_unset=True)
     status = data.pop("onboarding_status", None)
+    if status:
+        # Everyone chooses Public or Private: finishing the flow, or leaving it
+        # with "Skip for now", needs that answer (it's the last question).
+        settings = db.get(ProfileSettings, user.id)
+        if settings is None or settings.visibility_chosen_at is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Choose whether your profile is public or private before finishing.",
+            )
+    row = _ensure_row(db, user.id)
     for field, value in data.items():
         setattr(row, field, value)
     if status and row.onboarding_status is None:
@@ -159,7 +164,6 @@ def get_recommendations(
     prefs = Preferences(
         hiking_style=row.hiking_style if row else None,
         experience=row.experience if row else None,
-        interests=tuple(row.interests or ()) if row else (),
         favourite_regions=tuple(row.favourite_regions or ()) if row else (),
         home_province=profile.home_province if profile else None,
     )

@@ -41,7 +41,7 @@ class Profile(Base):
         ),
         CheckConstraint(
             "home_province is null or home_province in "
-            "('AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT')",
+            "('AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'outside')",
             name="profiles_home_province_check",
         ),
         CheckConstraint(

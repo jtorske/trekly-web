@@ -202,3 +202,34 @@ def test_the_frontend_lists_the_same_thirteen():
     source = (pathlib.Path(__file__).parents[2] / "frontend" / "lib" / "provinces.ts").read_text(encoding="utf-8")
     block = source.split("PROVINCES", 1)[1]
     assert sorted(set(re.findall(r'\bcode: "([A-Z]{2})"', block))) == sorted(PROVINCE_CODES)
+
+
+# ------------------------------------------------------------ outside Canada
+
+
+def test_outside_canada_can_be_chosen_and_earns_its_own_badge(client, alice):
+    response = client.patch(PROFILE, json={"home_province": "outside"}, headers=alice)
+    assert response.status_code == 200 and response.json()["home_province"] == "outside"
+    assert client.put(FEATURED, json={"badges": [{"province": True}]}, headers=alice).status_code == 200
+    assert featured_kinds(client.get(FEATURED, headers=alice).json()) == [("province", "outside")]
+
+
+def test_outside_canada_follows_the_same_privacy_switch(client, alice, people):
+    client.patch(PROFILE, json={"home_province": "outside"}, headers=alice)
+    client.put(FEATURED, json={"badges": [{"province": True}]}, headers=alice)
+    for body in visitor_views(client, people):
+        assert body["home_province"] is None and body["featured_badges"] == []
+    set_privacy(client, alice, show_home_province=True)
+    for body in visitor_views(client, people):
+        assert body["home_province"] == "outside"
+        assert [(b["kind"], b["province"]) for b in body["featured_badges"]] == [("province", "outside")]
+
+
+@pytest.mark.parametrize("value", ["Outside", "OUTSIDE", "outside-canada", "abroad"])
+def test_only_the_exact_outside_value_is_accepted(client, alice, value):
+    assert client.patch(PROFILE, json={"home_province": value}, headers=alice).status_code == 422
+
+
+def test_the_frontend_has_the_outside_canada_option():
+    source = (pathlib.Path(__file__).parents[2] / "frontend" / "lib" / "provinces.ts").read_text(encoding="utf-8")
+    assert 'OUTSIDE_CANADA = "outside"' in source

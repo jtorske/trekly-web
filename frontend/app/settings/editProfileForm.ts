@@ -1,5 +1,5 @@
 import type { Profile, ProfileUpdate } from "@/lib/accountApi";
-import type { ProvinceCode } from "@/lib/provinces";
+import type { HomeCode } from "@/lib/provinces";
 import { formatProblem, normalizeUsername } from "../../lib/usernames.ts";
 
 export const BIO_LIMIT = 280;
@@ -10,7 +10,7 @@ export type ProfileFormValues = {
   bio: string;
   home_region: string;
   /** "" is "Prefer not to say". */
-  home_province: ProvinceCode | "";
+  home_province: HomeCode | "";
 };
 
 export function initialValues(profile: Profile): ProfileFormValues {

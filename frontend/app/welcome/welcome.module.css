@@ -266,6 +266,20 @@
   max-width: 42rem;
 }
 
+.actionStatus {
+  align-self: center;
+  color: var(--color-dark-olive);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.actionHint {
+  margin: 0 auto 0.6rem;
+  max-width: 42rem;
+  text-align: right;
+}
+
 .actionRow {
   display: flex;
   max-width: 42rem;
@@ -356,8 +370,22 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* Outside Canada and "Prefer not to say", on their own row after the 13. */
+.provincesExtra {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed color-mix(in srgb, var(--color-dark-olive) 22%, transparent);
+}
+
 @media (min-width: 640px) {
   .provinces {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .provincesExtra {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -777,7 +805,8 @@
   }
 
   .actionRow,
-  .actionError {
+  .actionError,
+  .actionHint {
     max-width: 44rem;
   }
 }
@@ -823,8 +852,3 @@
   border-radius: 1rem;
 }
 
-.historyCount {
-  margin: 0.75rem 0 0;
-  color: var(--color-muted-text);
-  font-size: 0.9rem;
-}

@@ -2,7 +2,9 @@
  * Canada's 13 provinces and territories, for a profile's home province: the
  * name, the badge colour and the badge motif. The API stores the two-letter
  * code (backend app/provinces.py; a backend test checks the two lists match)
- * and null means "Prefer not to say".
+ * and null means "Prefer not to say". "Outside Canada" (OUTSIDE_CANADA) is a
+ * fourteenth choice with a badge of its own in the same style; province()
+ * returns it too, so everything that shows a home badge shows it.
  *
  * Motifs are drawn in the badge's 120 square, inside the centre disc (radius
  * 29 around 60,60), as layers:
@@ -14,12 +16,20 @@
 
 export type ProvinceCode = "AB" | "BC" | "MB" | "NB" | "NL" | "NS" | "NT" | "NU" | "ON" | "PE" | "QC" | "SK" | "YT";
 
+export const OUTSIDE_CANADA = "outside";
+/** What a profile's home can be: a province or territory, or outside Canada. */
+export type HomeCode = ProvinceCode | typeof OUTSIDE_CANADA;
+
 export type MotifLayer = "fill" | "stroke" | "accent" | "faint";
 
 export interface Province {
-  code: ProvinceCode;
+  code: HomeCode;
   name: string;
-  kind: "province" | "territory";
+  kind: "province" | "territory" | "outside";
+  /** The badge's edge text when it isn't the name (Outside Canada's label). */
+  badgeName?: string;
+  /** The badge's foot text when it isn't the code. */
+  badgeFoot?: string;
   colour: string;
   /** What the motif shows, for the badge's accessible name. */
   motif: string;
@@ -245,22 +255,66 @@ export const PROVINCES: Province[] = [
   },
 ];
 
-const BY_CODE = new Map(PROVINCES.map((province) => [province.code, province]));
+/**
+ * Two designs for the "Outside Canada" badge, in the province badge style.
+ * OUTSIDE_CANADA_DESIGN picks the one in use.
+ */
+export const OUTSIDE_CANADA_DESIGNS: Record<"globe" | "compass", Province> = {
+  // A: a globe, "From away" (what Maritimers call anyone who isn't from here).
+  globe: {
+    code: OUTSIDE_CANADA,
+    name: "Outside Canada",
+    kind: "outside",
+    badgeName: "From away",
+    badgeFoot: "✦",
+    colour: "#3f6470",
+    motif: "a globe",
+    shapes: [
+      { layer: "faint", d: circle(60, 60, 19) },
+      { layer: "stroke", d: `${circle(60, 60, 19)}M60 41a8.5 19 0 1 0 0 38a8.5 19 0 1 0 0-38ZM60 41V79`, width: 2.2 },
+      { layer: "stroke", d: "M41 60H79M44.5 50H75.5M44.5 70H75.5", width: 1.8 },
+    ],
+  },
+  // B: a compass rose, "Visitor".
+  compass: {
+    code: OUTSIDE_CANADA,
+    name: "Outside Canada",
+    kind: "outside",
+    badgeName: "Visitor",
+    badgeFoot: "✦",
+    colour: "#7a5a2c",
+    motif: "a compass rose",
+    shapes: [
+      { layer: "stroke", d: circle(60, 60, 22), width: 1.6 },
+      { layer: "faint", d: "M60 60L71 49L64 60L71 71ZM60 60L49 49L56 60L49 71Z" },
+      { layer: "fill", d: "M60 34L64.5 55.5L86 60L64.5 64.5L60 86L55.5 64.5L34 60L55.5 55.5Z" },
+      { layer: "accent", d: `M60 34L64.5 55.5L60 60L55.5 55.5Z${circle(60, 60, 2.4)}` },
+    ],
+  },
+};
 
+export const OUTSIDE_CANADA_DESIGN: keyof typeof OUTSIDE_CANADA_DESIGNS = "globe";
+export const OUTSIDE: Province = OUTSIDE_CANADA_DESIGNS[OUTSIDE_CANADA_DESIGN];
+
+const BY_CODE = new Map<string, Province>([...PROVINCES.map((p) => [p.code, p] as const), [OUTSIDE_CANADA, OUTSIDE]]);
+
+/** The province, territory or Outside Canada for a stored home code. */
 export function province(code: string | null | undefined): Province | null {
-  return (code && BY_CODE.get(code as ProvinceCode)) || null;
+  return (code && BY_CODE.get(code)) || null;
 }
 
-/** "Home province" or "Home territory". */
+/** "Home province", "Home territory", or "Home" for Outside Canada. */
 export function homeLabel(p: Province): string {
+  if (p.kind === "outside") return "Home";
   return p.kind === "territory" ? "Home territory" : "Home province";
 }
 
-/** Provinces then territories, each A–Z, for the Edit profile menu. */
+/** Provinces then territories, each A–Z, then Outside Canada, for the Edit profile menu. */
 export function provinceOptions(): { label: string; options: Province[] }[] {
   const sorted = [...PROVINCES].sort((a, b) => a.name.localeCompare(b.name));
   return [
     { label: "Provinces", options: sorted.filter((p) => p.kind === "province") },
     { label: "Territories", options: sorted.filter((p) => p.kind === "territory") },
+    { label: "Elsewhere", options: [OUTSIDE] },
   ];
 }

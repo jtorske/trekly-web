@@ -13,7 +13,6 @@ export type StepKey =
   | "home"
   | "style"
   | "experience"
-  | "interests"
   | "regions"
   | "hiked"
   | "pack"
@@ -22,15 +21,15 @@ export type StepKey =
   | "done";
 
 export const STEPS: StepKey[] = [
-  "name", "photo", "home", "style", "experience", "interests", "regions", "hiked", "pack", "units", "privacy", "done",
+  "name", "photo", "home", "style", "experience", "regions", "hiked", "pack", "units", "privacy", "done",
 ];
 
 /** The numbered questions ("Step 3 of 9"); the finish screen isn't one. */
 export const QUESTION_COUNT = STEPS.length - 1;
 
-/** Only the username can't be skipped. */
+/** The username and the profile's Public/Private choice can't be skipped. */
 export function isOptional(step: StepKey): boolean {
-  return step !== "name" && step !== "done";
+  return step !== "name" && step !== "privacy" && step !== "done";
 }
 
 export function isStep(value: unknown): value is StepKey {
@@ -57,8 +56,16 @@ export function previousStep(step: StepKey): StepKey | null {
  */
 export function resumeStep(username: string | null | undefined, saved: string | null | undefined): StepKey {
   if (!username) return "name";
+  if (saved && saved in REMOVED_STEPS) return REMOVED_STEPS[saved];
   return isStep(saved) ? saved : "name";
 }
+
+/**
+ * Steps that have been taken out, and where someone paused on one goes
+ * instead: the step that followed it. (The API moves saved progress too,
+ * migration c7e3a9f1d5b2; this covers a page loaded before it ran.)
+ */
+const REMOVED_STEPS: Record<string, StepKey> = { interests: "regions" };
 
 export type HikingStyle = "day" | "overnight" | "both";
 export type Experience = "new" | "few_seasons" | "seasoned";
@@ -79,19 +86,6 @@ export const EXPERIENCE_LEVELS: Choice<Experience>[] = [
   { value: "new", label: "New to hiking", hint: "We'll start with gentle, well-marked trails." },
   { value: "few_seasons", label: "A few seasons", hint: "Comfortable on a full day with some climbing." },
   { value: "seasoned", label: "Seasoned backpacker", hint: "Big days, scrambles and multi-day routes." },
-];
-
-export const INTERESTS: { value: string; label: string }[] = [
-  { value: "alpine_lakes", label: "Alpine lakes" },
-  { value: "summits", label: "Summits and views" },
-  { value: "larches", label: "Larches in fall" },
-  { value: "waterfalls", label: "Waterfalls" },
-  { value: "solitude", label: "Solitude" },
-  { value: "wildlife", label: "Wildlife" },
-  { value: "family", label: "Easy family outings" },
-  { value: "traverses", label: "Multi-day traverses" },
-  { value: "coast", label: "Coast and beaches" },
-  { value: "wildflowers", label: "Wildflower meadows" },
 ];
 
 export interface Region {

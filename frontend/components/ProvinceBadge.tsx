@@ -12,7 +12,7 @@ const C = BADGE_SIZE / 2;
  * A home province or territory badge, in the Trail Journal badge style: a
  * round patch in the province's colour with a dashed inner ring, its motif
  * in cream on the centre disc, its name around the edge and its two-letter
- * code at the foot.
+ * code at the foot (Outside Canada has its own label and mark instead).
  *
  * With `decorative` it's hidden from screen readers (for use beside text
  * that already names the province).
@@ -27,7 +27,7 @@ export default function ProvinceBadge({
   className?: string;
 }) {
   const id = useId().replace(/:/g, "");
-  const name = province.name.toUpperCase();
+  const name = (province.badgeName ?? province.name).toUpperCase();
   const fontSize = nameFontSize(name, NAME_RADIUS);
   const label = decorative
     ? { "aria-hidden": true as const }
@@ -66,7 +66,7 @@ export default function ProvinceBadge({
         </textPath>
       </text>
       <text x={C} y={C + 43} className={styles.code} textAnchor="middle">
-        {province.code}
+        {province.badgeFoot ?? province.code}
       </text>
     </svg>
   );

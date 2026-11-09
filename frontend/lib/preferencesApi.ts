@@ -10,12 +10,11 @@ import type { TrailListItem } from "./trailsApi";
 export interface Preferences {
   hiking_style: HikingStyle | null;
   experience: Experience | null;
-  interests: string[];
   favourite_regions: string[];
   onboarding: { step: StepKey | null; status: "completed" | "skipped" | null; finished_at: string | null };
 }
 
-export type PreferencesUpdate = Partial<Pick<Preferences, "hiking_style" | "experience" | "interests" | "favourite_regions">> & {
+export type PreferencesUpdate = Partial<Pick<Preferences, "hiking_style" | "experience" | "favourite_regions">> & {
   onboarding_step?: StepKey;
   onboarding_status?: "completed" | "skipped";
 };

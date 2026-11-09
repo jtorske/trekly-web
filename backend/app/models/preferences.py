@@ -34,7 +34,7 @@ class ProfilePreferences(Base):
     user_id = Column(Uuid, primary_key=True)
     hiking_style = Column(Text)
     experience = Column(Text)
-    # Slugs from app/preferences.py (INTERESTS, REGION_SLUGS), checked by the API.
+    # Unused since the interests step was removed (migration c7e3a9f1d5b2); kept for now.
     interests = Column(JsonType, nullable=False, default=list, server_default="[]")
     favourite_regions = Column(JsonType, nullable=False, default=list, server_default="[]")
     # The /welcome screen to resume at (ONBOARDING_STEPS).

@@ -23,10 +23,11 @@ import ProvinceBadge from "@/components/ProvinceBadge";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto from "@/components/TrailPhoto";
 import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
-import { ChoiceCards, ExperienceCards, HikingStyleCards, InterestChips, RegionPicker } from "@/components/OnboardingChoices";
+import { ChoiceCards, ExperienceCards, HikingStyleCards, RegionPicker } from "@/components/OnboardingChoices";
 import ui from "@/components/ui.module.css";
 import { getProfile, updateProfile, type Profile, type ProfileUpdate } from "@/lib/accountApi";
-import { addMyGear, type ProductSummary } from "@/lib/gearApi";
+import { bigThreeDone, productsToAdd } from "@/lib/bigThree";
+import { addMyGear, listMyGear, type ProductSummary } from "@/lib/gearApi";
 import { addPastHikes } from "@/lib/hikeLogsApi";
 import { DEFAULT_AFTER_LOGIN, safeNextPath } from "@/lib/authLogic";
 import {
@@ -50,7 +51,7 @@ import {
   type PreferencesUpdate,
 } from "@/lib/preferencesApi";
 import { getPrivacy, updatePrivacy, type PrivacySettings } from "@/lib/profilesApi";
-import { PROVINCES, homeLabel, province as provinceByCode, type ProvinceCode } from "@/lib/provinces";
+import { PROVINCES, homeLabel, province as provinceByCode, OUTSIDE, type HomeCode, type ProvinceCode } from "@/lib/provinces";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import type { TrailListItem } from "@/lib/trailsApi";
 import { formatDistance, formatElevation, formatTrailDistance, type UnitSystem } from "@/lib/units";
@@ -64,7 +65,9 @@ import MilestoneBadge from "@/components/MilestoneBadge";
 import { normalizeUsername, suggestionHint, usernameReady } from "@/lib/usernames";
 import { useProfilePhoto } from "../settings/ProfilePhoto";
 import { PHOTO_HINT } from "@/lib/photoPrep";
-import { HikedStep, PackStep } from "./HistorySteps";
+import { pickedCount } from "@/lib/pastHikes";
+import { HikedStep } from "./HistorySteps";
+import PackStep, { type PackChoices } from "./PackStep";
 import styles from "./welcome.module.css";
 
 // ---------------------------------------------------------------- visuals
@@ -78,7 +81,6 @@ const VISUALS: Record<StepKey, Visual> = {
   home: { kind: "photo", src: "/images/IMG_9031.jpeg", position: "center 60%" },
   style: { kind: "photo", src: "/images/IMG_9627.jpg", position: "center 55%" },
   experience: { kind: "topo", tone: "dusk" },
-  interests: { kind: "photo", src: "/images/IMG_9332.jpeg", position: "center 60%" },
   regions: { kind: "photo", src: "/images/IMG_9336.jpeg", position: "center 55%" },
   hiked: { kind: "topo", tone: "olive" },
   pack: { kind: "topo", tone: "sand" },
@@ -122,6 +124,8 @@ function VisualPanel({ step }: { step: StepKey }) {
 // ---------------------------------------------------------------- the page
 
 class StepProblem extends Error {}
+
+const CHOOSE_VISIBILITY = "Choose Public or Private to finish.";
 
 const messageOf = (error: unknown) =>
   error instanceof Error && error.message ? error.message : "That didn't save. Check your connection and try again.";
@@ -208,7 +212,6 @@ function Flow({
   next: string;
   email: string | null;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState<StepKey>(() => resumeStep(profile.username, prefs.onboarding.step));
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [saving, setSaving] = useState<"continue" | "skip" | "skipAll" | null>(null);
@@ -221,19 +224,21 @@ function Flow({
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
   const usernameStatus = useUsernameStatus(username, profile.username);
-  const [home, setHome] = useState<ProvinceCode | "none" | null>(profile.home_province ?? (prefs.onboarding.step ? "none" : null));
+  const [home, setHome] = useState<HomeCode | "none" | null>(profile.home_province ?? (prefs.onboarding.step ? "none" : null));
   const [showHome, setShowHome] = useState(privacy.show_home_province);
   const [style, setStyle] = useState<HikingStyle | null>(prefs.hiking_style);
   const [experience, setExperience] = useState<Experience | null>(prefs.experience);
-  const [interests, setInterests] = useState<string[]>(prefs.interests);
   const [regions, setRegions] = useState<string[]>(prefs.favourite_regions);
   // Picks on the two history steps, saved when they continue (not when they skip).
   const [pastPicks, setPastPicks] = useState<Set<string>>(() => new Set());
+  // The Big Three picks, and any extras from "Add more gear".
+  const [packChoices, setPackChoices] = useState<PackChoices>({});
   const [packPicks, setPackPicks] = useState<Map<string, ProductSummary>>(() => new Map());
   // One request id per product for the flow's life, so a retried Continue adds nothing twice.
   const packRequestIds = useRef(new Map<string, string>());
   const [units, setUnits] = useState<UnitSystem>(profile.units ?? "metric");
-  const [isPrivate, setIsPrivate] = useState(privacy.is_private);
+  // No answer to start with: everyone chooses Public or Private themselves.
+  const [isPrivate, setIsPrivate] = useState<boolean | null>(null);
   const [savedPrivacy, setSavedPrivacy] = useState(privacy);
 
   // Every new screen: its heading takes focus (read out first), from the top.
@@ -283,8 +288,6 @@ function Flow({
         return { hiking_style: style };
       case "experience":
         return { experience };
-      case "interests":
-        return { interests };
       case "regions":
         return { favourite_regions: regions };
       case "hiked":
@@ -297,27 +300,32 @@ function Flow({
         }
         return {};
       case "pack": {
-        const left = new Map(packPicks);
-        try {
-          for (const product of packPicks.values()) {
-            let requestId = packRequestIds.current.get(product.id);
-            if (!requestId) {
-              requestId = crypto.randomUUID();
-              packRequestIds.current.set(product.id, requestId);
-            }
-            await addMyGear({ product_id: product.id, client_request_id: requestId });
-            left.delete(product.id);
+        const wanted = productsToAdd(packChoices, packPicks.values());
+        if (wanted.length === 0) return {};
+        // A Big Three pick can be something they already own; don't add it twice.
+        const owned = new Set((await listMyGear()).items.flatMap((item) => (item.product ? [item.product.id] : [])));
+        for (const product of wanted) {
+          if (owned.has(product.id)) continue;
+          let requestId = packRequestIds.current.get(product.id);
+          if (!requestId) {
+            requestId = crypto.randomUUID();
+            packRequestIds.current.set(product.id, requestId);
           }
-        } finally {
-          setPackPicks(left);
+          // Retrying after a failure re-sends the same request ids, so nothing is added twice.
+          await addMyGear({ product_id: product.id, client_request_id: requestId });
         }
+        setPackChoices({});
+        setPackPicks(new Map());
         return {};
       }
       case "units":
         if (units !== profile.units) announceProfile(await updateProfile({ units }));
         return {};
       case "privacy":
-        if (isPrivate !== savedPrivacy.is_private) setSavedPrivacy(await updatePrivacy({ is_private: isPrivate }));
+        if (isPrivate === null) throw new StepProblem(CHOOSE_VISIBILITY);
+        // Sent even when unchanged: the API records that they chose (it won't
+        // let the flow finish otherwise).
+        setSavedPrivacy(await updatePrivacy({ is_private: isPrivate }));
         return {};
       default:
         return {};
@@ -367,16 +375,18 @@ function Flow({
     updatePreferences({ onboarding_step: previous }).catch(() => undefined);
   };
 
+  // "Skip for now" jumps to the one question everyone answers, the profile's
+  // visibility; finishing from there ends the flow.
   const onSkipAll = async () => {
     if (saving) return;
     setSaving("skipAll");
     setError(null);
     try {
-      await updatePreferences({ onboarding_step: step, onboarding_status: "skipped" });
-      announceProfile(await getProfile());
-      router.replace(next);
+      await updatePreferences({ onboarding_step: "privacy" });
+      go("privacy", "forward");
     } catch (caught) {
       setError(messageOf(caught));
+    } finally {
       setSaving(null);
     }
   };
@@ -400,7 +410,9 @@ function Flow({
 
   const number = stepNumber(step);
   const done = step === "done";
-  const canSkipAll = Boolean(profile.username) && !done;
+  // Not on the privacy step itself: that's where it leads.
+  const canSkipAll = Boolean(profile.username) && !done && step !== "privacy";
+  const mustChoose = step === "privacy" && isPrivate === null;
   const previous = previousStep(step);
   const firstName = (profile.display_name ?? displayName).trim().split(/\s+/)[0] || profile.username || "friend";
 
@@ -429,8 +441,6 @@ function Flow({
     setStyle,
     experience,
     setExperience,
-    interests,
-    setInterests,
     regions,
     setRegions,
     home: home === "none" ? null : home,
@@ -442,6 +452,8 @@ function Flow({
         else next.add(trailId);
         return next;
       }),
+    packChoices,
+    setPackChoices,
     packPicks,
     togglePack: (product: ProductSummary) =>
       setPackPicks((current) => {
@@ -501,6 +513,11 @@ function Flow({
                   {error}
                 </p>
               )}
+              {mustChoose && (
+                <p id="choose-visibility" className={`${ui.hint} ${styles.actionHint}`}>
+                  {CHOOSE_VISIBILITY}
+                </p>
+              )}
               <div className={styles.actionRow}>
                 {previous && (
                   <button type="button" className={styles.back} onClick={onBack} disabled={saving !== null}>
@@ -508,14 +525,30 @@ function Flow({
                     Back
                   </button>
                 )}
+                {screen.status && (
+                  <span className={styles.actionStatus} aria-live="polite">
+                    {screen.status}
+                  </span>
+                )}
                 <span className={styles.spacer} />
                 {isOptional(step) && (
                   <button type="button" className={styles.skip} onClick={onSkip} disabled={saving !== null}>
                     {saving === "skip" ? "Skipping…" : "Skip"}
                   </button>
                 )}
-                <button type="submit" className={styles.continue} disabled={saving !== null}>
-                  {saving === "continue" ? "Saving…" : step === "privacy" ? "Finish" : "Continue"}
+                <button
+                  type="submit"
+                  className={styles.continue}
+                  disabled={saving !== null || mustChoose}
+                  aria-describedby={mustChoose ? "choose-visibility" : undefined}
+                >
+                  {saving === "continue"
+                    ? "Saving…"
+                    : step === "privacy"
+                      ? "Finish"
+                      : step === "pack" && bigThreeDone(packChoices)
+                        ? "Done"
+                        : "Continue"}
                   <ArrowRight size={18} aria-hidden="true" />
                 </button>
               </div>
@@ -543,8 +576,8 @@ interface ScreenProps {
     submitted: boolean;
   };
   homeStep: {
-    home: ProvinceCode | "none" | null;
-    setHome: (value: ProvinceCode | "none") => void;
+    home: HomeCode | "none" | null;
+    setHome: (value: HomeCode | "none") => void;
     showHome: boolean;
     setShowHome: (value: boolean) => void;
   };
@@ -552,18 +585,18 @@ interface ScreenProps {
   setStyle: (value: HikingStyle) => void;
   experience: Experience | null;
   setExperience: (value: Experience) => void;
-  interests: string[];
-  setInterests: (value: string[]) => void;
   regions: string[];
   setRegions: (value: string[]) => void;
-  home: ProvinceCode | null;
+  home: HomeCode | null;
   pastPicks: ReadonlySet<string>;
   togglePast: (trailId: string) => void;
+  packChoices: PackChoices;
+  setPackChoices: (next: PackChoices) => void;
   packPicks: ReadonlyMap<string, ProductSummary>;
   togglePack: (product: ProductSummary) => void;
   units: UnitSystem;
   setUnits: (value: UnitSystem) => void;
-  isPrivate: boolean;
+  isPrivate: boolean | null;
   setIsPrivate: (value: boolean) => void;
 }
 
@@ -571,6 +604,8 @@ interface Screen {
   title: string;
   lead?: ReactNode;
   body: ReactNode;
+  /** Shown in the sticky bar beside Continue (e.g. how many trails are picked). */
+  status?: string;
 }
 
 const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
@@ -611,11 +646,6 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       />
     ),
   }),
-  interests: ({ interests, setInterests }) => ({
-    title: "What gets you out there?",
-    lead: "Pick as many as you like.",
-    body: <InterestChips values={interests} onChange={setInterests} />,
-  }),
   regions: ({ regions, setRegions }) => ({
     title: "Which places are on your radar?",
     lead: "Pick the parks you'd love to explore. They'll come first when you open Explore.",
@@ -625,11 +655,12 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
     title: "Which of these have you hiked?",
     lead: "Tap any you've done. They go in your Trail Journal, and you can add dates later.",
     body: <HikedStep home={home} regions={regions} selected={pastPicks} onToggle={togglePast} />,
+    status: pickedCount(pastPicks.size),
   }),
-  pack: ({ packPicks, togglePack }) => ({
+  pack: ({ packChoices, setPackChoices, packPicks, togglePack }) => ({
     title: "What's in your pack?",
-    lead: "Tap the gear you own to add it to your kit. You can skip this and add gear any time.",
-    body: <PackStep selected={packPicks} onToggle={togglePack} />,
+    lead: "Start with the Big Three. One tap each, and you can skip this and add gear any time.",
+    body: <PackStep choices={packChoices} onChoices={setPackChoices} extras={packPicks} onToggleExtra={togglePack} />,
   }),
   units: ({ units, setUnits }) => ({
     title: "Metric or imperial?",
@@ -662,7 +693,7 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
         <ChoiceCards
           legend="Profile visibility"
           columns={2}
-          value={isPrivate ? "private" : "public"}
+          value={isPrivate === null ? null : isPrivate ? "private" : "public"}
           onChange={(value) => setIsPrivate(value === "private")}
           options={[
             {
@@ -778,6 +809,21 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
               <span className={styles.provinceName}>{p.name}</span>
             </label>
           ))}
+        </div>
+        {/* Outside Canada on a row of its own, after the 13. */}
+        <div className={styles.provincesExtra}>
+          <label className={styles.province} data-checked={home === OUTSIDE.code || undefined}>
+            <input
+              type="radio"
+              name={name}
+              value={OUTSIDE.code}
+              checked={home === OUTSIDE.code}
+              onChange={() => setHome(OUTSIDE.code)}
+              className={styles.hiddenInput}
+            />
+            <ProvinceBadge province={OUTSIDE} decorative className={styles.provinceBadge} />
+            <span className={styles.provinceName}>{OUTSIDE.name}</span>
+          </label>
           <label className={`${styles.province} ${styles.provinceNone}`} data-checked={home === "none" || undefined}>
             <input
               type="radio"
@@ -797,8 +843,14 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
           <>
             <ProvinceBadge province={picked} className={styles.earnBadge} />
             <div className={styles.earnText}>
-              <p className={styles.earnTitle}>You&apos;ll earn the {picked.name} badge</p>
-              <p className={ui.hint}>It sits with your milestones as your {homeLabel(picked).toLowerCase()}.</p>
+              <p className={styles.earnTitle}>
+                You&apos;ll earn the {picked.kind === "outside" ? `“${picked.badgeName}”` : picked.name} badge
+              </p>
+              <p className={ui.hint}>
+                {picked.kind === "outside"
+                  ? "It sits with your milestones, wherever home is."
+                  : `It sits with your milestones as your ${homeLabel(picked).toLowerCase()}.`}
+              </p>
             </div>
           </>
         ) : (
@@ -812,7 +864,8 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
         <span className={styles.switchText}>
           <span className={styles.switchLabel}>Show on my profile</span>
           <span className={ui.hint} id={`${switchId}-hint`}>
-            Off by default: only you see your home {picked?.kind ?? "province"} until you turn this on.
+            Off by default: only you see {picked?.kind === "outside" ? "where you're from" : `your home ${picked?.kind ?? "province"}`} until
+            you turn this on.
           </span>
         </span>
         <input

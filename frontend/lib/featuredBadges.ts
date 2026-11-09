@@ -1,7 +1,7 @@
 import type { HikeLog } from "./hikeLogsApi";
 import { regionTitle } from "./journal.ts";
 import type { MilestoneBadgeInfo, Milestones } from "./milestones.ts";
-import { homeLabel, province as findProvince, type ProvinceCode } from "./provinces.ts";
+import { homeLabel, province as findProvince, type HomeCode } from "./provinces.ts";
 import type { TrailListItem } from "./trailsApi";
 
 /**
@@ -17,7 +17,7 @@ export type FeaturedBadge =
   /** `badge` is the milestone's name, tier and icon. */
   | { kind: "milestone"; milestone: string; badge: MilestoneBadgeInfo; trail?: null }
   /** The home province badge; only sent to viewers who may see the province. */
-  | { kind: "province"; province: ProvinceCode; trail?: null; milestone?: null; badge?: null };
+  | { kind: "province"; province: HomeCode; trail?: null; milestone?: null; badge?: null };
 
 export interface FeaturedBadges {
   /** false: nothing picked, so these are the most recent trail badges. */
@@ -52,7 +52,7 @@ export function earnedBadgeGroups(
   logs: HikeLog[],
   milestones: Milestones | null,
   query = "",
-  homeProvince: ProvinceCode | null = null,
+  homeProvince: HomeCode | null = null,
 ): BadgeGroup[] {
   const needle = query.trim().toLowerCase();
   const matches = (...texts: string[]) => !needle || texts.some((text) => text.toLowerCase().includes(needle));

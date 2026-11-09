@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ExperienceCards, HikingStyleCards, InterestChips, RegionPicker } from "@/components/OnboardingChoices";
+import { ExperienceCards, HikingStyleCards, RegionPicker } from "@/components/OnboardingChoices";
 import ui from "@/components/ui.module.css";
 import type { Experience, HikingStyle } from "@/lib/onboarding";
 import { getPreferences, updatePreferences, type Preferences } from "@/lib/preferencesApi";
@@ -42,7 +42,6 @@ export default function TrailPreferences() {
 function PreferencesForm({ saved, onSaved }: { saved: Preferences; onSaved: (prefs: Preferences) => void }) {
   const [style, setStyle] = useState<HikingStyle | null>(saved.hiking_style);
   const [experience, setExperience] = useState<Experience | null>(saved.experience);
-  const [interests, setInterests] = useState(saved.interests);
   const [regions, setRegions] = useState(saved.favourite_regions);
   const [saving, setSaving] = useState(false);
 
@@ -50,7 +49,6 @@ function PreferencesForm({ saved, onSaved }: { saved: Preferences; onSaved: (pre
   const dirty =
     style !== saved.hiking_style ||
     experience !== saved.experience ||
-    !same(interests, saved.interests) ||
     !same(regions, saved.favourite_regions);
 
   const submit = async (event: FormEvent) => {
@@ -58,7 +56,7 @@ function PreferencesForm({ saved, onSaved }: { saved: Preferences; onSaved: (pre
     if (!dirty || saving) return;
     setSaving(true);
     try {
-      onSaved(await updatePreferences({ hiking_style: style, experience, interests, favourite_regions: regions }));
+      onSaved(await updatePreferences({ hiking_style: style, experience, favourite_regions: regions }));
       toast.success("Trail preferences saved");
     } catch (caught) {
       toast.failure("save your trail preferences", caught);
@@ -80,12 +78,6 @@ function PreferencesForm({ saved, onSaved }: { saved: Preferences; onSaved: (pre
           Trail experience
         </h3>
         <ExperienceCards value={experience} onChange={setExperience} />
-      </section>
-      <section className={styles.preferenceGroup} aria-labelledby="pref-interests">
-        <h3 id="pref-interests" className={styles.cardTitle}>
-          What gets you out there
-        </h3>
-        <InterestChips values={interests} onChange={setInterests} />
       </section>
       <section className={styles.preferenceGroup} aria-labelledby="pref-regions">
         <h3 id="pref-regions" className={styles.cardTitle}>

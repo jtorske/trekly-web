@@ -7,7 +7,6 @@ import {
   EXPERIENCE_LEVELS,
   finishSummary,
   HIKING_STYLES,
-  INTERESTS,
   QUESTION_COUNT,
   REGIONS,
   STEPS,
@@ -35,11 +34,12 @@ const signedIn = {
 
 // ------------------------------------------------------------------ steps
 
-test("eleven questions, then the finish screen", () => {
-  assert.equal(QUESTION_COUNT, 11);
+test("ten questions, then the finish screen", () => {
+  assert.equal(QUESTION_COUNT, 10);
   assert.equal(STEPS.at(-1), "done");
   assert.equal(stepNumber("home"), 3);
-  assert.equal(stepNumber("privacy"), 11);
+  assert.equal(stepNumber("regions"), 6);
+  assert.equal(stepNumber("privacy"), 10);
 });
 
 test("past hikes and the pack come right after the places on their radar", () => {
@@ -48,9 +48,10 @@ test("past hikes and the pack come right after the places on their radar", () =>
   assert.equal(isOptional("pack"), true);
 });
 
-test("only the username step is required", () => {
+test("only the username and privacy steps are required", () => {
   assert.equal(isOptional("name"), false);
-  for (const step of STEPS.filter((s) => s !== "name" && s !== "done")) assert.equal(isOptional(step), true, step);
+  assert.equal(isOptional("privacy"), false);
+  for (const step of STEPS.filter((s) => !["name", "privacy", "done"].includes(s))) assert.equal(isOptional(step), true, step);
 });
 
 test("next and back walk the steps in order and stop at the ends", () => {
@@ -64,12 +65,12 @@ test("next and back walk the steps in order and stop at the ends", () => {
 // ----------------------------------------------------------------- resume
 
 test("leaving and coming back resumes at the saved step", () => {
-  assert.equal(resumeStep("trail_jo", "interests"), "interests");
+  assert.equal(resumeStep("trail_jo", "regions"), "regions");
   assert.equal(resumeStep("trail_jo", "done"), "done");
 });
 
 test("without a username it always starts at the username step", () => {
-  assert.equal(resumeStep(null, "interests"), "name");
+  assert.equal(resumeStep(null, "regions"), "name");
   assert.equal(resumeStep("", "units"), "name");
 });
 
@@ -169,7 +170,7 @@ function pythonTuple(source: string, name: string): string[] {
 test("the options match the API's (backend/app/preferences.py)", () => {
   const source = readFileSync(fileURLToPath(new URL("../../backend/app/preferences.py", import.meta.url)), "utf8");
   assert.deepEqual(pythonTuple(source, "ONBOARDING_STEPS"), STEPS);
-  assert.deepEqual(pythonTuple(source, "INTERESTS"), INTERESTS.map((i) => i.value));
+  assert.doesNotMatch(source, /^INTERESTS = /m);
   assert.deepEqual(pythonTuple(source, "REGIONS"), REGIONS.map((r) => r.slug));
   for (const region of REGIONS) {
     assert.ok(source.includes(`Region("${region.slug}", "${region.label}", "${region.park}", "${region.province}")`), region.slug);
@@ -189,4 +190,11 @@ test("the finish summary says what their past hikes earned", () => {
   assert.equal(finishSummary({ stamps: 2, milestones: 0, rank: "Trailhead Rookie" }), "You've stamped 2 trails and reached Trailhead Rookie.");
   assert.equal(finishSummary({ stamps: 3, milestones: 0, rank: null }), "You've stamped 3 trails.");
   assert.equal(finishSummary({ stamps: 0, milestones: 0, rank: "Trailhead Rookie" }), null);
+});
+
+test("anyone paused on the removed interests step resumes at the next one", () => {
+  assert.equal(resumeStep("trail_jo", "interests"), "regions");
+  assert.ok(!(STEPS as string[]).includes("interests"));
+  assert.equal(nextStep("experience"), "regions");
+  assert.equal(previousStep("regions"), "experience");
 });

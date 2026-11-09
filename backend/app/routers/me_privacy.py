@@ -4,6 +4,7 @@ Changes apply immediately: nothing caches visibility (app/privacy.py).
 Availability alerts have no setting; they're always private.
 """
 
+from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends
@@ -82,5 +83,9 @@ def update_privacy(
     # Choosing any setting means they've seen the "profiles can be public" notice.
     if changes:
         settings.public_notice_pending = False
+    # Public or Private, chosen by them (even if it's what they had): the
+    # setup flow needs this before it can finish (app/routers/me_preferences.py).
+    if "is_private" in changes:
+        settings.visibility_chosen_at = datetime.now(timezone.utc)
     db.commit()
     return _out(db, user)

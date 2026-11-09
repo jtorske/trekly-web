@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PROVINCES, homeLabel, province, provinceOptions } from "./provinces.ts";
+import { OUTSIDE, OUTSIDE_CANADA, OUTSIDE_CANADA_DESIGNS, PROVINCES, homeLabel, province, provinceOptions } from "./provinces.ts";
 
 test("all 13 provinces and territories, once each", () => {
   const codes = PROVINCES.map((p) => p.code);
@@ -25,10 +25,27 @@ test("lookups and labels", () => {
   assert.equal(homeLabel(province("YT")!), "Home territory");
 });
 
-test("the menu lists provinces then territories, A–Z", () => {
-  const [provinces, territories] = provinceOptions();
+test("the menu lists provinces then territories, A–Z, then Outside Canada", () => {
+  const [provinces, territories, elsewhere] = provinceOptions();
+  assert.deepEqual(elsewhere.options, [OUTSIDE]);
   assert.equal(provinces.options.length, 10);
   assert.deepEqual(territories.options.map((p) => p.name), ["Northwest Territories", "Nunavut", "Yukon"]);
   assert.equal(provinces.options[0].name, "Alberta");
   assert.equal(provinces.options.at(-1)?.name, "Saskatchewan");
+});
+
+test("Outside Canada is a home with a badge of its own in the same style", () => {
+  assert.equal(OUTSIDE_CANADA, "outside");
+  assert.equal(province("outside"), OUTSIDE);
+  assert.equal(OUTSIDE.name, "Outside Canada");
+  assert.equal(homeLabel(OUTSIDE), "Home");
+  // Not one of the 13, so nothing that counts provinces counts it.
+  assert.ok(!PROVINCES.some((p) => p.code === OUTSIDE_CANADA));
+  for (const design of Object.values(OUTSIDE_CANADA_DESIGNS)) {
+    assert.equal(design.code, OUTSIDE_CANADA);
+    assert.ok(design.badgeName && design.badgeFoot);
+    assert.match(design.colour, /^#[0-9a-f]{6}$/);
+    assert.ok(!PROVINCES.some((p) => p.colour === design.colour), "a colour no province uses");
+    assert.ok(design.shapes.length > 0 && design.shapes.every((shape) => shape.d.startsWith("M") && !shape.d.includes("NaN")));
+  }
 });

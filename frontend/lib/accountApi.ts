@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { ProvinceCode } from "./provinces";
+import type { HomeCode } from "./provinces";
 import type { TrailListItem } from "./trailsApi";
 import type { UnitSystem } from "./units";
 
@@ -11,7 +11,7 @@ export interface Profile {
   bio: string | null;
   home_region: string | null;
   /** null is "Prefer not to say". Visitors see it only with Settings → Privacy → Home province on. */
-  home_province: ProvinceCode | null;
+  home_province: HomeCode | null;
   avatar_path: string | null;
   /** Display units; null until the user picks, which reads as metric. */
   units: UnitSystem | null;
