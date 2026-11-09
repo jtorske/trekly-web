@@ -10,7 +10,6 @@ import {
   currentMobileHref,
   isNavCurrent,
   isSwipeClose,
-  mobileAccountLinks,
 } from "./accountMenu.ts";
 
 test("currentAccountHref tells profile tabs apart", () => {
@@ -19,12 +18,15 @@ test("currentAccountHref tells profile tabs apart", () => {
   assert.equal(currentAccountHref("/profile", "?tab=trips"), "/profile?tab=trips");
   assert.equal(currentAccountHref("/profile", "?tab=settings"), "/settings");
   assert.equal(currentAccountHref("/profile", "?tab=gear"), "/gear");
+  assert.equal(currentAccountHref("/profile", "?tab=journal"), "/journal");
   assert.equal(currentAccountHref("/profile", "?tab=trails"), null);
 });
 
 test("currentAccountHref maps other account pages", () => {
   assert.equal(currentAccountHref("/plans", "?id=abc"), "/profile?tab=trips");
   assert.equal(currentAccountHref("/gear", ""), "/gear");
+  assert.equal(currentAccountHref("/journal", "?section=summits"), "/journal");
+  assert.equal(currentAccountHref("/journalist", ""), null);
   assert.equal(currentAccountHref("/alerts", ""), "/alerts");
   assert.equal(currentAccountHref("/settings", ""), "/settings");
   assert.equal(currentAccountHref("/settings/privacy", ""), "/settings");
@@ -41,7 +43,7 @@ test("Settings sits between Alerts and Log out, and opens the Settings page", ()
 
 test("every current href is a menu link", () => {
   const hrefs = new Set([PROFILE_HREF, ...ACCOUNT_LINKS.map((link) => link.href)]);
-  for (const [path, search] of [["/profile", ""], ["/profile", "?tab=trips"], ["/settings/units", ""], ["/gear", ""], ["/alerts", ""]]) {
+  for (const [path, search] of [["/profile", ""], ["/profile", "?tab=trips"], ["/settings/units", ""], ["/gear", ""], ["/journal", ""], ["/alerts", ""]]) {
     assert.ok(hrefs.has(currentAccountHref(path, search) ?? ""), `${path}${search}`);
   }
 });
@@ -57,13 +59,17 @@ test("only admins get the Admin row, after Settings", () => {
   assert.equal(currentAccountHref("/administrator", ""), null);
 });
 
-test("the mobile menu lists Gear once, in Navigation", () => {
-  const account = mobileAccountLinks(false).map((link) => link.label);
-  assert.deepEqual(account, ["Trips", "Alerts", "Settings"]);
-  assert.deepEqual(mobileAccountLinks(true).map((link) => link.label), ["Trips", "Alerts", "Settings", "Admin"]);
-  assert.deepEqual(NAV_LINKS.map((link) => link.label), ["Explore", "Gear", "Journal"]);
-  // The desktop dropdown is unchanged.
-  assert.ok(accountLinks(false).some((link) => link.href === "/gear"));
+test("the avatar menu runs Journal, Gear, Trips, Alerts, Settings, then Admin", () => {
+  assert.deepEqual(accountLinks(false).map((link) => link.label), ["Journal", "Gear", "Trips", "Alerts", "Settings"]);
+  assert.deepEqual(accountLinks(true).map((link) => link.label), ["Journal", "Gear", "Trips", "Alerts", "Settings", "Admin"]);
+});
+
+test("Journal and Gear are account rows, not header links, and nothing is listed twice", () => {
+  const nav = NAV_LINKS.map((link) => link.href);
+  assert.ok(!nav.includes("/journal") && !nav.includes("/gear"));
+  assert.equal(NAV_LINKS[0].label, "Explore");
+  const all = [PROFILE_HREF, ...nav, ...accountLinks(true).map((link) => link.href)];
+  assert.equal(new Set(all).size, all.length);
 });
 
 test("the mobile menu highlights the current page", () => {

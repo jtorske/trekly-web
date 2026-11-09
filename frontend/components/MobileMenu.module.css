@@ -167,7 +167,7 @@
   }
 }
 
-/* Signed out there's no profile header, so nothing above to divide from. */
+/* Navigation sits straight under the close button: nothing above to divide from. */
 .top + .group {
   border-top: 0;
   padding-top: 0;

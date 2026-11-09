@@ -10,8 +10,6 @@ import {
   type TouchEvent,
 } from "react";
 import {
-  Backpack,
-  BookOpen,
   Compass,
   LogIn,
   UserPlus,
@@ -28,17 +26,15 @@ import {
 import {
   NAV_LINKS,
   PROFILE_HREF,
+  accountLinks,
   currentMobileHref,
   isSwipeClose,
-  mobileAccountLinks,
 } from "@/lib/accountMenu";
 import accountStyles from "./AccountMenu.module.css";
 import styles from "./MobileMenu.module.css";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/trail-list": Compass,
-  "/gear": Backpack,
-  "/journal": BookOpen,
 };
 
 const reducedMotion = () =>
@@ -46,8 +42,9 @@ const reducedMotion = () =>
 
 /**
  * The phone menu (below 900px): one sheet that slides in from the right over
- * a dimmed backdrop. Signed in it holds the profile header, Navigation,
- * Account and Log out; signed out, Navigation plus Sign in and Sign up.
+ * a dimmed backdrop. Signed in it holds Navigation, then Account (the profile
+ * header and the avatar menu's rows) and Log out; signed out, Navigation plus
+ * Sign in and Sign up.
  *
  * Built on a modal <dialog>, so focus stays inside and the page behind is
  * inert. Closes on a backdrop tap, Escape, a swipe right or choosing an item;
@@ -108,8 +105,7 @@ export default function MobileMenu({
     root.style.overflow = "hidden";
     if (dialog && !dialog.open) {
       dialog.showModal();
-      // Start on the first row (the profile header, or Explore) rather than
-      // the close button.
+      // Start on the first row (Explore) rather than the close button.
       const marked = dialog.querySelector<HTMLElement>("[data-autofocus]");
       (marked?.matches("a, button")
         ? marked
@@ -222,16 +218,6 @@ export default function MobileMenu({
           </button>
         </div>
 
-        {identity && (
-          <div className={styles.profile} data-autofocus>
-            <ProfileRow
-              identity={identity}
-              current={current === PROFILE_HREF}
-              onChoose={requestClose}
-            />
-          </div>
-        )}
-
         <nav className={styles.group} aria-labelledby="mobile-menu-nav">
           <h2 id="mobile-menu-nav" className={styles.label}>
             Navigation
@@ -242,7 +228,7 @@ export default function MobileMenu({
               href={link.href}
               className={row}
               {...currentProps(link.href)}
-              {...(!identity && index === 0 ? { "data-autofocus": true } : {})}
+              {...(index === 0 ? { "data-autofocus": true } : {})}
               onClick={requestClose}
             >
               <RowIcon icon={NAV_ICONS[link.href]} />
@@ -257,7 +243,14 @@ export default function MobileMenu({
               <h2 id="mobile-menu-account" className={styles.label}>
                 Account
               </h2>
-              {mobileAccountLinks(identity.isAdmin === true).map((link) => (
+              <div className={styles.profile}>
+                <ProfileRow
+                  identity={identity}
+                  current={current === PROFILE_HREF}
+                  onChoose={requestClose}
+                />
+              </div>
+              {accountLinks(identity.isAdmin === true).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

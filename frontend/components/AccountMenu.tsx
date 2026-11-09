@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Backpack, Bell, LogOut, Settings, Shield, Tent, type LucideIcon } from "lucide-react";
+import { Backpack, Bell, BookOpen, LogOut, Settings, Shield, Tent, type LucideIcon } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
 import RankEmblem from "./RankEmblem";
@@ -17,8 +17,9 @@ import styles from "./AccountMenu.module.css";
 
 /** Decorative icons for the account rows, keyed by href; the labels name them. */
 export const ROW_ICONS: Record<string, LucideIcon> = {
-  "/profile?tab=trips": Tent,
+  "/journal": BookOpen,
   "/gear": Backpack,
+  "/profile?tab=trips": Tent,
   "/alerts": Bell,
   "/settings": Settings,
   [ADMIN_LINK.href]: Shield,

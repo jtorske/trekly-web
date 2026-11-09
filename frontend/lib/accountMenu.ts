@@ -11,10 +11,12 @@ export interface AccountLink {
 export const PROFILE_HREF = "/profile";
 export const SUPPORT_EMAIL = "treklyusersupport@gmail.com";
 
-/** The rows under the profile header row, before Log out. */
+/** The rows under the profile header row, before Log out. Journal and Gear
+ * live here rather than in the header: both need an account. */
 export const ACCOUNT_LINKS: AccountLink[] = [
-  { href: "/profile?tab=trips", label: "Trips" },
+  { href: "/journal", label: "Journal" },
   { href: "/gear", label: "Gear" },
+  { href: "/profile?tab=trips", label: "Trips" },
   { href: "/alerts", label: "Alerts" },
   { href: "/settings", label: "Settings" },
 ];
@@ -35,25 +37,15 @@ export interface NavLink extends AccountLink {
   match: string[];
 }
 
-/** The site sections in the header (and the mobile menu's Navigation group).
+/** The site sections in the header (and the mobile menu's Navigation group),
+ * shown signed in or out. Account pages go in ACCOUNT_LINKS, never both.
  * A trail page is opened from Explore, so it highlights Explore too. */
 export const NAV_LINKS: NavLink[] = [
   { href: "/trail-list", label: "Explore", match: ["/trail-list", "/trails"] },
-  { href: "/gear", label: "Gear", match: ["/gear"] },
-  { href: "/journal", label: "Journal", match: ["/journal"] },
 ];
 
 export const isNavCurrent = (pathname: string, link: NavLink) =>
   link.match.some((prefix) => under(pathname, prefix));
-
-/**
- * The mobile menu's Account group: the account rows minus any that already
- * sit in its Navigation group (Gear), so nothing is listed twice.
- */
-export function mobileAccountLinks(isAdmin: boolean): AccountLink[] {
-  const nav = new Set(NAV_LINKS.map((link) => link.href));
-  return accountLinks(isAdmin).filter((link) => !nav.has(link.href));
-}
 
 /**
  * The mobile menu's current row: an account row, or else a Navigation link
@@ -75,7 +67,8 @@ export function isSwipeClose(dx: number, dy: number, ms: number): boolean {
 /**
  * The href of the account row for the page being viewed (the profile header
  * row is PROFILE_HREF), or null. Profile tabs are told apart by `?tab=`; a
- * single trip plan counts as Trips, and the profile's gear tab as Gear.
+ * single trip plan counts as Trips, and the profile's gear and journal tabs
+ * as Gear and Journal.
  */
 export function currentAccountHref(
   pathname: string,
@@ -85,6 +78,7 @@ export function currentAccountHref(
   if (under(pathname, "/profile")) {
     if (tab === "trips") return "/profile?tab=trips";
     if (tab === "gear") return "/gear";
+    if (tab === "journal") return "/journal";
     // The old Settings tab, on its way to /settings.
     if (tab === "settings") return "/settings";
     // No menu row for this tab since ab3955c.
@@ -92,6 +86,7 @@ export function currentAccountHref(
     return "/profile";
   }
   if (under(pathname, "/plans")) return "/profile?tab=trips";
+  if (under(pathname, "/journal")) return "/journal";
   if (under(pathname, "/gear")) return "/gear";
   if (under(pathname, "/alerts")) return "/alerts";
   if (under(pathname, "/settings")) return "/settings";
