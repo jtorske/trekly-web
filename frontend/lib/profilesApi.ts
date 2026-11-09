@@ -29,6 +29,8 @@ export interface PrivacySettings {
   show_home_province: boolean;
   /** "Visit streak": visitors see the current and best streak. Off until turned on. */
   show_visit_streak: boolean;
+  /** "Share my activity in the feed": hikes and badges on the Activity page. Off until turned on. */
+  share_activity: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;
@@ -126,11 +128,21 @@ export function onPrivacyUpdated(listener: (settings: PrivacySettings) => void):
 export const getPublicProfile = (username: string, signal?: AbortSignal) =>
   apiFetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`, { signal });
 
-/** Reports a profile, or with `trailId`, their trip note on that trail. */
-export const reportProfile = (username: string, reason: ReportReason, details: string, trailId?: string) =>
+/** Reports a profile; with `trailId`, their trip note on that trail; with `postId`, one of their Activity posts. */
+export const reportProfile = (
+  username: string,
+  reason: ReportReason,
+  details: string,
+  about: { trailId?: string; postId?: string } = {},
+) =>
   apiFetch<{ status: string }>(`/api/profiles/${encodeURIComponent(username)}/report`, {
     method: "POST",
-    body: { reason, details: details.trim() || null, ...(trailId ? { trail_id: trailId } : {}) },
+    body: {
+      reason,
+      details: details.trim() || null,
+      ...(about.trailId ? { trail_id: about.trailId } : {}),
+      ...(about.postId ? { post_id: about.postId } : {}),
+    },
     auth: true,
   });
 

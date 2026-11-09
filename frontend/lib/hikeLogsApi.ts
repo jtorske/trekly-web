@@ -16,12 +16,16 @@ export interface HikeLog {
   nights: number | null;
   logged_at: string;
   updated_at: string;
+  /** Posted to the Activity feed. */
+  shared: boolean;
 }
 
 export interface HikeLogInput {
   hiked_on: string | null;
   note: string | null;
   photo_path: string | null;
+  /** "Share to Activity": true posts it, false removes its post, left out changes nothing. */
+  share?: boolean;
 }
 
 export const HIKE_NOTE_MAX = 500;

@@ -10,6 +10,7 @@ import {
   type TouchEvent,
 } from "react";
 import {
+  Activity,
   Compass,
   LogIn,
   UserPlus,
@@ -35,6 +36,7 @@ import styles from "./MobileMenu.module.css";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/trail-list": Compass,
+  Activity,
 };
 
 const reducedMotion = () =>

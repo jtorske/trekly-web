@@ -8,27 +8,31 @@ import { REPORT_REASONS, reportProfile, type ReportReason } from "@/lib/profiles
 import styles from "./ReportDialog.module.css";
 
 /**
- * "Report profile", and "Report" on a trip note in a trail's "Hiked by"
- * section (pass `trailId`). Both go to the same endpoint and count against
- * the same daily limit; a note report also tells the team which note.
+ * "Report profile", "Report" on a trip note in a trail's "Hiked by"
+ * section (pass `trailId`), and "Report" on an Activity post (pass
+ * `postId`). All go to the same endpoint and count against the same daily
+ * limit; a note or post report also tells the team which one.
  */
 export default function ReportDialog({
   username,
   name,
   trailId,
+  postId,
   onClose,
 }: {
   username: string;
   name: string;
   /** Report this person's trip note on the trail, not their whole profile. */
   trailId?: string;
+  /** Report this Activity post of theirs. */
+  postId?: string;
   onClose: () => void;
 }) {
   const [reason, setReason] = useState<ReportReason | "">("");
   const [details, setDetails] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
-  const subject = trailId ? "trip note" : "profile";
+  const subject = postId ? "post" : trailId ? "trip note" : "profile";
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -39,7 +43,7 @@ export default function ReportDialog({
     setBusy(true);
     setResult(null);
     try {
-      await reportProfile(username, reason, details, trailId);
+      await reportProfile(username, reason, details, { trailId, postId });
       setResult({ ok: true, message: `Thanks. Our team will review this ${subject}.` });
     } catch (caught) {
       setResult({ ok: false, message: caught instanceof Error ? caught.message : "Your report didn't send. Try again." });
@@ -51,7 +55,7 @@ export default function ReportDialog({
   const sent = result?.ok;
   return (
     <Dialog
-      title={trailId ? `Report ${name}'s trip note` : `Report ${name}`}
+      title={postId ? `Report ${name}'s post` : trailId ? `Report ${name}'s trip note` : `Report ${name}`}
       subtitle="Reports go to the Trekly team. The person you report isn't told who sent it."
       onClose={onClose}
       busy={busy}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ui from "@/components/ui.module.css";
+import { activityBlocker } from "@/lib/activity";
 import { communityBlocker } from "@/lib/hikedBy";
 import { getPrivacy, publicProfilePath, updatePrivacy, type PrivacySettings, type PrivacyUpdate } from "@/lib/profilesApi";
 import { SECTION_LABELS, type SectionSetting } from "@/lib/publicProfile";
@@ -203,6 +204,16 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
           checked={settings.show_in_community}
           disabled={communityBlocker(settings) !== null}
           onChange={(value) => change("show_in_community", value)}
+        />
+        <Switch
+          id="privacy-activity"
+          label="Share my activity in the feed"
+          hint="Hikes you choose to share, and the badges and ranks they earn, appear on the Activity page with your photo and username. Never trip plans or future dates. Turning this off hides all your posts right away. Off until you turn it on."
+          disabledReason={activityBlocker(settings) ?? undefined}
+          checked={settings.share_activity}
+          // Always possible to turn off; turning on needs a public profile and journal.
+          disabled={activityBlocker(settings) !== null && !settings.share_activity}
+          onChange={(value) => change("share_activity", value)}
         />
       </fieldset>
 

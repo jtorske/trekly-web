@@ -49,9 +49,22 @@ export interface TrailRef {
   name: string;
 }
 
+/** A reported Activity post, as it reads now. */
+export interface ReportPost {
+  id: string;
+  kind: "hike" | "milestone" | "rank";
+  /** e.g. "Hiked Skyline Trail", "Earned Park hopper", "Reached Ridge Walker". */
+  summary: string;
+  trail: TrailRef | null;
+  note: string | null;
+  has_photo: boolean;
+  hidden: boolean;
+  hidden_reason: string | null;
+}
+
 export interface AdminReport {
   id: string;
-  kind: "profile" | "trip_note";
+  kind: "profile" | "trip_note" | "post";
   status: ReportStatus;
   reason: string;
   details: string | null;
@@ -63,6 +76,8 @@ export interface AdminReport {
   reporter: PersonRef;
   trail: TrailRef | null;
   note: string | null;
+  /** A post report's post; null once its owner deleted it. */
+  post?: ReportPost | null;
 }
 
 export type AuditAction =
@@ -73,7 +88,9 @@ export type AuditAction =
   | "unban_user"
   | "send_password_reset"
   | "resolve_report"
-  | "reopen_report";
+  | "reopen_report"
+  | "hide_post"
+  | "unhide_post";
 
 export interface AuditEntry {
   id: string;
@@ -152,6 +169,11 @@ export const adminApi = {
     apiFetch<Page<AdminReport>>(`${BASE}/reports?${query({ status, page, per_page: perPage })}`, { auth: true, signal }),
   setReportStatus: (id: string, status: ReportStatus) =>
     apiFetch<AdminReport>(`${BASE}/reports/${encodeURIComponent(id)}`, { method: "PATCH", auth: true, body: { status } }),
+  setPostHidden: (postId: string, hidden: boolean, reason?: string) =>
+    apiFetch<{ ok: true; message: string }>(
+      `${BASE}/activity/${encodeURIComponent(postId)}/${hidden ? "hide" : "unhide"}`,
+      { method: "POST", auth: true, body: hidden ? { reason: reason || null } : undefined },
+    ),
   audit: (page: number, perPage: number, signal?: AbortSignal) =>
     apiFetch<Page<AuditEntry>>(`${BASE}/audit?${query({ page, per_page: perPage })}`, { auth: true, signal }),
 };

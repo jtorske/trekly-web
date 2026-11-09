@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.activity import ActivityPost, ActivityReaction
 from app.models.admin import AdminAuditLog
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
 from app.models.backcountry import BackcountryPark, BackcountrySite
@@ -29,6 +30,8 @@ from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
 
 __all__ = [
+    "ActivityPost",
+    "ActivityReaction",
     "AdminAuditLog",
     "AvailabilityAlert",
     "AvailabilityCache",

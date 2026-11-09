@@ -67,7 +67,7 @@ test("the avatar menu runs Journal, Gear, Trips, Alerts, Settings, then Admin", 
 test("Journal and Gear are account rows, not header links, and nothing is listed twice", () => {
   const nav = NAV_LINKS.map((link) => link.href);
   assert.ok(!nav.includes("/journal") && !nav.includes("/gear"));
-  assert.equal(NAV_LINKS[0].label, "Explore");
+  assert.deepEqual(NAV_LINKS.map((link) => link.label), ["Explore", "Activity"]);
   const all = [PROFILE_HREF, ...nav, ...accountLinks(true).map((link) => link.href)];
   assert.equal(new Set(all).size, all.length);
 });

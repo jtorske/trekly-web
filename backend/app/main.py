@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
+    activity,
     admin,
     admin_profiles,
     admin_trail_photos,
@@ -67,6 +68,7 @@ app.add_middleware(CORSMiddleware, **cors_options())
 app.include_router(trails.router)
 app.include_router(signup_email.router)
 app.include_router(trail_hikers.router)
+app.include_router(activity.router)
 app.include_router(availability.router)
 app.include_router(gear.router)
 app.include_router(me_gear_import.router)

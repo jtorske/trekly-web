@@ -84,3 +84,15 @@
   height: 1rem;
   accent-color: var(--color-olive);
 }
+
+.shareOff {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.shareLink {
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

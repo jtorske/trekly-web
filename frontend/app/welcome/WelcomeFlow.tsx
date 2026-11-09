@@ -239,6 +239,7 @@ function Flow({
   const [units, setUnits] = useState<UnitSystem>(profile.units ?? "metric");
   // No answer to start with: everyone chooses Public or Private themselves.
   const [isPrivate, setIsPrivate] = useState<boolean | null>(null);
+  const [shareActivity, setShareActivity] = useState(privacy.share_activity);
   const [savedPrivacy, setSavedPrivacy] = useState(privacy);
 
   // Every new screen: its heading takes focus (read out first), from the top.
@@ -321,12 +322,18 @@ function Flow({
       case "units":
         if (units !== profile.units) announceProfile(await updateProfile({ units }));
         return {};
-      case "privacy":
+      case "privacy": {
         if (isPrivate === null) throw new StepProblem(CHOOSE_VISIBILITY);
-        // Sent even when unchanged: the API records that they chose (it won't
-        // let the flow finish otherwise).
-        setSavedPrivacy(await updatePrivacy({ is_private: isPrivate }));
+        // A private profile shares nothing, so the switch saves as off with it.
+        const share = shareActivity && !isPrivate;
+        // is_private is sent even when unchanged: the API records that they
+        // chose (it won't let the flow finish otherwise).
+        setSavedPrivacy(await updatePrivacy({
+          is_private: isPrivate,
+          ...(share !== savedPrivacy.share_activity ? { share_activity: share } : {}),
+        }));
         return {};
+      }
       default:
         return {};
     }
@@ -466,6 +473,9 @@ function Flow({
     setUnits,
     isPrivate,
     setIsPrivate,
+    shareActivity,
+    setShareActivity,
+    journalShown: savedPrivacy.show_journal,
   });
 
   return (
@@ -598,6 +608,10 @@ interface ScreenProps {
   setUnits: (value: UnitSystem) => void;
   isPrivate: boolean | null;
   setIsPrivate: (value: boolean) => void;
+  shareActivity: boolean;
+  setShareActivity: (value: boolean) => void;
+  /** The Trail Journal section is shown (Privacy settings), which sharing needs. */
+  journalShown: boolean;
 }
 
 interface Screen {
@@ -685,7 +699,7 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       />
     ),
   }),
-  privacy: ({ isPrivate, setIsPrivate }) => ({
+  privacy: ({ isPrivate, setIsPrivate, shareActivity, setShareActivity, journalShown }) => ({
     title: "Who can see your profile?",
     lead: "You can change this any time.",
     body: (
@@ -709,6 +723,17 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
               icon: <Lock size={22} />,
             },
           ]}
+        />
+        <ShareActivitySwitch
+          checked={shareActivity && isPrivate !== true}
+          disabledReason={
+            isPrivate === true
+              ? "A private profile shares nothing in the feed."
+              : journalShown
+                ? null
+                : "Your Trail Journal is hidden, so there's nothing to share. Change it in Privacy settings."
+          }
+          onChange={setShareActivity}
         />
         <p className={styles.note}>
           Pick exactly which sections show in <Link href="/settings/privacy">Privacy settings</Link>.
@@ -884,6 +909,39 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
 }
 
 const MAX_SUMMARY_BADGES = 6;
+
+function ShareActivitySwitch({
+  checked,
+  disabledReason,
+  onChange,
+}: {
+  checked: boolean;
+  disabledReason: string | null;
+  onChange: (value: boolean) => void;
+}) {
+  const switchId = useId();
+  return (
+    <label className={styles.switchRow} htmlFor={switchId} data-disabled={disabledReason ? true : undefined}>
+      <span className={styles.switchText}>
+        <span className={styles.switchLabel}>Share my activity in the feed</span>
+        <span className={ui.hint} id={`${switchId}-hint`}>
+          {disabledReason ??
+            "Hikes you choose to share, and the badges they earn, appear on the Activity page. Never trip plans or future dates. Off until you turn it on."}
+        </span>
+      </span>
+      <input
+        id={switchId}
+        type="checkbox"
+        role="switch"
+        className={styles.switch}
+        checked={checked}
+        disabled={disabledReason !== null}
+        onChange={(event) => onChange(event.target.checked)}
+        aria-describedby={`${switchId}-hint`}
+      />
+    </label>
+  );
+}
 
 function FinishStep({ next }: { next: string }) {
   const [picks, setPicks] = useState<TrailListItem[] | null>(null);

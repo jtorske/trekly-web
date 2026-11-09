@@ -42,6 +42,7 @@ export interface NavLink extends AccountLink {
  * A trail page is opened from Explore, so it highlights Explore too. */
 export const NAV_LINKS: NavLink[] = [
   { href: "/trail-list", label: "Explore", match: ["/trail-list", "/trails"] },
+  { href: "/activity", label: "Activity", match: ["/activity"] },
 ];
 
 export const isNavCurrent = (pathname: string, link: NavLink) =>

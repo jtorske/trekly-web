@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import Link from "next/link";
 import DateInput from "./DateInput";
 import Dialog from "./Dialog";
 import ui from "./ui.module.css";
@@ -15,6 +16,9 @@ import { formProblem, toast } from "@/lib/toast";
 import { localToday } from "@/lib/stay";
 import { removeImages, uploadHikePhoto } from "@/lib/storage";
 import { useHikePhoto } from "@/lib/useHikePhoto";
+import { activityBlocker, canShareHikes } from "@/lib/activity";
+import { getPrivacy, type PrivacySettings } from "@/lib/profilesApi";
+import { sectionHref } from "@/app/settings/settingsSections";
 import styles from "./HikeLogDialog.module.css";
 
 /**
@@ -51,6 +55,20 @@ export default function HikeLogDialog({
   const [error, setError] = useState<string | null>(null);
   const noteId = useId();
   const photoId = useId();
+  // "Share to Activity": ticked by default when their privacy settings share
+  // activity (or, editing, when the hike is already posted).
+  const [privacy, setPrivacy] = useState<PrivacySettings | null>(null);
+  const [shareChoice, setShareChoice] = useState<boolean | null>(null);
+  const shareAllowed = privacy !== null && canShareHikes(privacy);
+  const share = shareChoice ?? (entry ? entry.shared : shareAllowed);
+  useEffect(() => {
+    const controller = new AbortController();
+    getPrivacy(controller.signal)
+      .then(setPrivacy)
+      // Without settings the box stays off and nothing changes about sharing.
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   const localPreview = useMemo(() => (photo instanceof File ? URL.createObjectURL(photo) : null), [photo]);
   useEffect(() => (localPreview ? () => URL.revokeObjectURL(localPreview) : undefined), [localPreview]);
@@ -70,7 +88,13 @@ export default function HikeLogDialog({
       } else if (photo === null) {
         photoPath = null;
       }
-      await onSave({ hiked_on: undated ? null : date, note: note.trim() || null, photo_path: photoPath });
+      await onSave({
+        hiked_on: undated ? null : date,
+        note: note.trim() || null,
+        photo_path: photoPath,
+        // Only sent when it can take effect (or to take a post down).
+        ...(shareAllowed || (entry?.shared && !share) ? { share } : {}),
+      });
       onClose();
     } catch (caught) {
       // Don't leave an orphaned upload behind if the entry didn't save.
@@ -220,7 +244,36 @@ export default function HikeLogDialog({
           <span className={ui.hint} aria-live="polite">
             {preparing
               ? PREPARING_PHOTO
-              : `${PHOTO_HINT}. Only you can see your journal. Location data is removed from photos before upload.`}
+              : `${PHOTO_HINT}. Location data is removed from photos before upload.`}
+          </span>
+        </div>
+
+        <div className={ui.field}>
+          <label className={`${styles.undated} ${!shareAllowed && !entry?.shared ? styles.shareOff : ""}`}>
+            <input
+              type="checkbox"
+              checked={share && (shareAllowed || Boolean(entry?.shared))}
+              disabled={!shareAllowed && !entry?.shared}
+              onChange={(event) => setShareChoice(event.target.checked)}
+            />
+            Share to Activity
+          </label>
+          <span className={ui.hint}>
+            {privacy === null ? (
+              "Shows this hike, with your note and photo, on the Activity page."
+            ) : shareAllowed ? (
+              <>
+                Shows this hike, with your note and photo, on the Activity page
+                {privacy.hide_hike_dates ? ", without the date" : ""}. Badges it earns are shared too.
+              </>
+            ) : (
+              <>
+                {activityBlocker(privacy) ?? "Your activity isn't shared in the feed."}{" "}
+                <Link href={sectionHref("privacy")} className={styles.shareLink}>
+                  Privacy settings
+                </Link>
+              </>
+            )}
           </span>
         </div>
 

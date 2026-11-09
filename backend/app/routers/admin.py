@@ -24,11 +24,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import and_, case, exists, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
+from app.activity import MILESTONES
 from app.admin_access import audit, is_admin, require_admin
 from app.alert_poller import JOB_NAME as POLLER_JOB
 from app.auth import CurrentUser
 from app.database import get_db
 from app.models.account import Profile
+from app.models.activity import ActivityPost
 from app.models.admin import AUTH_USERS, AdminAuditLog
 from app.models.availability import AvailabilityAlert, JobLock
 from app.models.backcountry import BackcountrySite
@@ -36,6 +38,7 @@ from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
+from app.points_config import RANKS
 from app.supabase_admin import SupabaseAdmin, SupabaseAdminError, reset_redirect, supabase_admin_from_env
 
 router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -229,9 +232,23 @@ class TrailRef(BaseModel):
     name: str
 
 
+class ReportPost(BaseModel):
+    """The reported Activity post as it reads now."""
+
+    id: UUID
+    kind: Literal["hike", "milestone", "rank"]
+    # e.g. "Hiked Skyline Trail", "Earned Park hopper", "Reached Ridge Walker".
+    summary: str
+    trail: TrailRef | None
+    note: str | None
+    has_photo: bool
+    hidden: bool
+    hidden_reason: str | None
+
+
 class ReportOut(BaseModel):
     id: UUID
-    kind: Literal["profile", "trip_note"]
+    kind: Literal["profile", "trip_note", "post"]
     status: Literal["open", "resolved"]
     reason: str
     details: str | None
@@ -244,6 +261,8 @@ class ReportOut(BaseModel):
     trail: TrailRef | None
     # The trip note as it reads now (None once it's removed or edited away).
     note: str | None
+    # A post report's post (None once the owner deleted it).
+    post: ReportPost | None = None
 
 
 class ReportPage(BaseModel):
@@ -340,6 +359,30 @@ def _audit_out(db: Session, rows: list[AdminAuditLog]) -> list[AuditOut]:
     ]
 
 
+def _post_summary(post: ActivityPost) -> str:
+    if post.kind == "hike":
+        return f"Hiked {post.hike_log.trail.name}" if post.hike_log else "Hike"
+    if post.kind == "milestone":
+        milestone = MILESTONES.get(post.milestone)
+        return f"Earned {milestone.title if milestone else post.milestone}"
+    title = RANKS[post.rank_level - 1][1] if 1 <= post.rank_level <= len(RANKS) else f"level {post.rank_level}"
+    return f"Reached {title}"
+
+
+def _post_out(post: ActivityPost) -> ReportPost:
+    hike = post.hike_log if post.kind == "hike" else None
+    return ReportPost(
+        id=post.id,
+        kind=post.kind,
+        summary=_post_summary(post),
+        trail=TrailRef(id=hike.trail.id, name=hike.trail.name) if hike else None,
+        note=hike.note if hike else None,
+        has_photo=bool(hike and hike.photo_path),
+        hidden=post.hidden_at is not None,
+        hidden_reason=post.hidden_reason,
+    )
+
+
 def _reports_out(db: Session, reports: list[ProfileReport]) -> list[ReportOut]:
     people = _people(
         db,
@@ -356,12 +399,15 @@ def _reports_out(db: Session, reports: list[ProfileReport]) -> list[ReportOut]:
             HikeLog.trail_id.in_(trail_ids), HikeLog.user_id.in_({r.profile_id for r in reports})
         )):
             notes[(log.user_id, log.trail_id)] = log.note
+    post_ids = {r.post_id for r in reports if r.post_id}
+    posts = {p.id: p for p in db.scalars(select(ActivityPost).where(ActivityPost.id.in_(post_ids)))} if post_ids else {}
     out = []
     for r in reports:
         trail = trails.get(r.trail_id) if r.trail_id else None
+        post = posts.get(r.post_id) if r.post_id else None
         out.append(ReportOut(
             id=r.id,
-            kind="trip_note" if r.trail_id else "profile",
+            kind="post" if post else "trip_note" if r.trail_id else "profile",
             status=r.status,
             reason=r.reason,
             details=r.details,
@@ -373,6 +419,7 @@ def _reports_out(db: Session, reports: list[ProfileReport]) -> list[ReportOut]:
             reporter=people[r.reporter_id],
             trail=TrailRef(id=trail.id, name=trail.name) if trail else None,
             note=notes.get((r.profile_id, r.trail_id)) if r.trail_id else None,
+            post=_post_out(post) if post else None,
         ))
     return out
 
@@ -704,3 +751,39 @@ def set_report_status(
         )
         db.commit()
     return _reports_out(db, [report])[0]
+
+
+# ----------------------------------------------------------------- Activity posts
+
+
+def _post(db: Session, post_id: UUID) -> ActivityPost:
+    post = db.get(ActivityPost, post_id)
+    if post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
+
+
+@router.post("/activity/{post_id}/hide", response_model=ActionOut)
+def hide_post(
+    post_id: UUID, payload: ReasonIn, admin: CurrentUser = Depends(require_admin), db: Session = Depends(get_db)
+):
+    """Hide one Activity post from everyone (its owner keeps the hike itself)."""
+    post = _post(db, post_id)
+    if post.hidden_at is not None:
+        raise HTTPException(status_code=409, detail="This post is already hidden.")
+    post.hidden_at, post.hidden_by, post.hidden_reason = _now(), admin.id, payload.reason
+    audit(db, admin, "hide_post", user_id=post.user_id, post_id=str(post.id), post=_post_summary(post),
+          reason=payload.reason)
+    db.commit()
+    return ActionOut(message="Post hidden.")
+
+
+@router.post("/activity/{post_id}/unhide", response_model=ActionOut)
+def unhide_post(post_id: UUID, admin: CurrentUser = Depends(require_admin), db: Session = Depends(get_db)):
+    post = _post(db, post_id)
+    if post.hidden_at is None:
+        raise HTTPException(status_code=409, detail="This post isn't hidden.")
+    post.hidden_at = post.hidden_by = post.hidden_reason = None
+    audit(db, admin, "unhide_post", user_id=post.user_id, post_id=str(post.id), post=_post_summary(post))
+    db.commit()
+    return ActionOut(message="Post visible again.")

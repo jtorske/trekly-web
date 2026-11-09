@@ -1,0 +1,354 @@
+.page {
+  --ink: var(--color-dark-olive);
+  --hair: color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  /* >= 4.5:1 on the cream paper. */
+  --soft-ink: color-mix(in srgb, var(--color-dark-olive) 82%, transparent);
+
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 auto;
+  min-height: 100%;
+  padding-bottom: 4rem;
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wrap {
+  max-width: 40rem;
+  margin: 0 auto;
+  /* Clears the fixed navbar. */
+  padding: 6.5rem 1rem 0;
+}
+
+/* Header */
+
+.header {
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.35rem;
+  color: var(--color-olive);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4.5vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.lead {
+  margin-top: 0.6rem;
+  color: var(--soft-ink);
+  line-height: 1.5;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.toolbar:empty {
+  display: none;
+}
+
+.shareNote {
+  color: var(--soft-ink);
+  font-size: 0.85rem;
+}
+
+.inlineLink {
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The list */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonCard {
+  height: 11rem;
+  border-radius: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 72%, var(--color-cream));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent);
+  padding: 0.9rem 1rem 0.6rem;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.avatarLink {
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+
+.who {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.nameRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.name:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.meta {
+  overflow: hidden;
+  color: var(--soft-ink);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The trail, a tappable row */
+
+.trail {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--color-olive) 7%, transparent);
+  padding: 0.5rem;
+  transition: background 0.15s ease;
+}
+
+.trail:hover {
+  background: color-mix(in srgb, var(--color-olive) 13%, transparent);
+}
+
+.trailThumb {
+  display: block;
+  width: 6.5rem;
+  height: 4.75rem;
+  flex-shrink: 0;
+  /* The topo fallback prints the trail name; keep it from breaking mid-word. */
+  font-size: 0.8rem;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.trailText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.trailLabel {
+  color: var(--color-olive);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trailName {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.trailMeta {
+  color: var(--soft-ink);
+  font-size: 0.82rem;
+}
+
+.note {
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  max-height: 26rem;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.8rem;
+  object-fit: cover;
+}
+
+/* Milestone and rank posts: one line with the badge */
+
+.compact {
+  gap: 0.35rem;
+  padding-top: 0.7rem;
+}
+
+.compactRow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.compactBadge {
+  flex-shrink: 0;
+}
+
+.badge {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.compactText {
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.compactText .meta {
+  white-space: normal;
+}
+
+/* High five, delete, report */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--hair);
+  padding-top: 0.45rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.highFive,
+.iconAction {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.highFive {
+  color: var(--ink);
+}
+
+.highFive:hover {
+  background: color-mix(in srgb, var(--color-dark-olive) 8%, transparent);
+}
+
+.highFive[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-rust) 14%, transparent);
+  color: var(--color-rust-text);
+}
+
+.count {
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+  padding: 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.iconAction {
+  color: var(--soft-ink);
+  font-weight: 500;
+}
+
+.iconAction:hover {
+  background: color-mix(in srgb, var(--color-dark-olive) 8%, transparent);
+  color: var(--ink);
+}
+
+/* Paging and empty state */
+
+.sentinel {
+  height: 1px;
+}
+
+.more {
+  margin-top: 1rem;
+  color: var(--soft-ink);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--color-dark-olive) 25%, transparent);
+  border-radius: 1rem;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.emptyText {
+  max-width: 28rem;
+  color: var(--soft-ink);
+  line-height: 1.5;
+}
+
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trail,
+  .highFive,
+  .iconAction {
+    transition: none;
+  }
+}

@@ -20,6 +20,10 @@ couldn't have done. Hikes further back, and undated ones, are unlimited.
 verified, match_score and nights come only from a matched GPS track. Editing
 a verified hike's date drops its verification: the date no longer comes from
 the track.
+
+`share` ("Share to Activity" in the dialog) posts the hike, and any milestone
+or rank it earns, to the Activity feed; false removes the hike's post; left
+out, nothing changes (app/activity.py). POST /past never posts.
 """
 
 import re
@@ -31,11 +35,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.activity import after_hike_saved, standing
 from app.auth import get_current_user_id
 from app.database import get_db
 from app.featured import prune_featured
 from app.hike_service import NewHike, Progress, add_hikes
 from app.milestones import MilestoneBadgeOut, badge_out
+from app.models.activity import ActivityPost
 from app.models.hike_log import MAX_NOTE_LENGTH, HikeLog
 from app.models.trail import Trail
 from app.routers.availability import get_today
@@ -60,6 +66,8 @@ class HikeLogIn(BaseModel):
     hiked_on: date | None
     note: str | None = Field(default=None, max_length=MAX_NOTE_LENGTH)
     photo_path: str | None = Field(default=None, max_length=200)
+    # "Share to Activity": True posts it, False removes its post, None leaves it.
+    share: bool | None = None
 
     @field_validator("note", mode="before")
     @classmethod
@@ -81,6 +89,8 @@ class HikeLogOut(BaseModel):
     nights: int | None
     logged_at: datetime
     updated_at: datetime
+    # Posted to the Activity feed (whether or not the feed shows it right now).
+    shared: bool = False
 
 
 class PastHikesIn(BaseModel):
@@ -135,7 +145,13 @@ class PastHikesOut(BaseModel):
     progress: JournalProgressOut
 
 
-def _out(log: HikeLog) -> HikeLogOut:
+def _shared_ids(db: Session, user_id: UUID) -> set[UUID]:
+    return set(db.scalars(
+        select(ActivityPost.hike_log_id).where(ActivityPost.user_id == user_id, ActivityPost.kind == "hike")
+    ))
+
+
+def _out(log: HikeLog, shared: set[UUID] = frozenset()) -> HikeLogOut:
     return HikeLogOut(
         trail=TrailListItemOut.model_validate(log.trail),
         hiked_on=log.hiked_on,
@@ -145,6 +161,7 @@ def _out(log: HikeLog) -> HikeLogOut:
         nights=log.nights,
         logged_at=log.created_at,
         updated_at=log.updated_at,
+        shared=log.id in shared,
     )
 
 
@@ -192,7 +209,8 @@ def list_hike_logs(user_id: UUID = Depends(get_current_user_id), db: Session = D
         .options(joinedload(HikeLog.trail))
         .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
-    return [_out(row) for row in rows]
+    shared = _shared_ids(db, user_id)
+    return [_out(row, shared) for row in rows]
 
 
 @router.put("/{trail_id}", response_model=HikeSavedOut)
@@ -224,6 +242,8 @@ def put_hike_log(
     log = _find(db, user_id, trail_id)
     if log is None or log.hiked_on != payload.hiked_on:
         check_fair_use(db, user_id, trail_id, payload.hiked_on, today)
+    # What they'd earned before, to post what this hike adds.
+    before = standing(db, user_id) if payload.share else None
     if log is None:
         if trail.retired_at is not None:
             raise HTTPException(status_code=409, detail="This trail has been retired and can't be added.")
@@ -232,12 +252,18 @@ def put_hike_log(
         )
         if result.added:
             response.status_code = status.HTTP_201_CREATED
-            return HikeSavedOut(**_out(result.added[0]).model_dump(), progress=progress_out(result.progress))
+            added = result.added[0]
+            after_hike_saved(db, user_id, added, payload.share, before, today)
+            return HikeSavedOut(
+                **_out(added, _shared_ids(db, user_id)).model_dump(), progress=progress_out(result.progress)
+            )
         # A concurrent duplicate request created it first; apply this one on top.
         log = _find(db, user_id, trail_id)
     _apply(log, payload)
     db.commit()
-    return HikeSavedOut(**_out(_find(db, user_id, trail_id)).model_dump())
+    log = _find(db, user_id, trail_id)
+    after_hike_saved(db, user_id, log, payload.share, before, today)
+    return HikeSavedOut(**_out(log, _shared_ids(db, user_id)).model_dump())
 
 
 @router.post("/past", response_model=PastHikesOut, status_code=status.HTTP_201_CREATED)
@@ -263,7 +289,8 @@ def delete_hike_log(
 ):
     """Idempotent: removing a trail that isn't logged still returns 204. The
     client removes the entry's photo from Storage itself. Its featured badge
-    goes with it, as do milestone badges it no longer earns."""
+    goes with it, as do milestone badges it no longer earns, and its
+    Activity posts (the hike's, and any milestone or rank it earned)."""
     db.execute(delete(HikeLog).where(HikeLog.user_id == user_id, HikeLog.trail_id == trail_id))
     db.commit()
     prune_featured(db, user_id)

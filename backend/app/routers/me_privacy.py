@@ -32,6 +32,7 @@ class PrivacyOut(BaseModel):
     show_in_community: bool
     show_home_province: bool
     show_visit_streak: bool
+    share_activity: bool
     public_notice_pending: bool
     username: str | None
     hidden_by_moderators: bool
@@ -51,6 +52,7 @@ class PrivacyUpdate(BaseModel):
     show_in_community: bool | None = None
     show_home_province: bool | None = None
     show_visit_streak: bool | None = None
+    share_activity: bool | None = None
     # The one-time notice can only be dismissed, never brought back.
     public_notice_pending: Literal[False] | None = None
 

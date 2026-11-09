@@ -20,6 +20,8 @@ export default function ReportItem({
   showReported?: boolean;
 }) {
   const [confirming, setConfirming] = useState(false);
+  const [moderatingPost, setModeratingPost] = useState(false);
+  const post = report.post ?? null;
   const resolving = report.status === "open";
   const reported = whoLabel(report.reported);
   const username = report.reported.username;
@@ -28,7 +30,7 @@ export default function ReportItem({
     <li className={styles.listItem}>
       <div className={styles.listRow}>
         <span>
-          <strong>{report.kind === "trip_note" ? "Trip note" : "Profile"}</strong>
+          <strong>{report.kind === "post" ? "Activity post" : report.kind === "trip_note" ? "Trip note" : "Profile"}</strong>
           {showReported && (
             <>
               {" · "}
@@ -42,6 +44,7 @@ export default function ReportItem({
         </span>
         <span className={styles.pills}>
           {report.reported_hidden && <span className={styles.pillWarn}>Profile hidden</span>}
+          {post?.hidden && <span className={styles.pillWarn}>Post hidden</span>}
           <span className={report.status === "open" ? styles.pillDark : styles.pill}>{report.status === "open" ? "Open" : "Resolved"}</span>
         </span>
       </div>
@@ -52,6 +55,16 @@ export default function ReportItem({
         </span>
       )}
       {report.note && <p className={styles.quote}>{report.note}</p>}
+      {post && (
+        <>
+          <span className={styles.small}>
+            {post.summary}
+            {post.has_photo ? " (with a photo)" : ""}
+            {post.note ? ":" : ""}
+          </span>
+          {post.note && <p className={styles.quote}>{post.note}</p>}
+        </>
+      )}
       {report.details && (
         <p className={styles.small}>
           <span className={styles.muted}>Reporter&apos;s details:</span> {report.details}
@@ -80,6 +93,16 @@ export default function ReportItem({
             View trail ↗
           </Link>
         )}
+        {post?.trail && (
+          <Link className={styles.link} href={`/trails?id=${post.trail.id}`} target="_blank">
+            View trail ↗
+          </Link>
+        )}
+        {post && (
+          <button type="button" className={ui.secondary} onClick={() => setModeratingPost(true)}>
+            {post.hidden ? "Unhide post" : "Hide post"}
+          </button>
+        )}
         {showReported && (
           <Link className={styles.link} href={`/admin/users/${report.reported.id}`}>
             Moderate {reported}
@@ -89,6 +112,33 @@ export default function ReportItem({
           {resolving ? "Mark resolved" : "Reopen"}
         </button>
       </div>
+      {moderatingPost && post && (
+        <ConfirmDialog
+          confirmation={
+            post.hidden
+              ? {
+                  title: "Show this post again?",
+                  body: `It goes back to following ${reported}'s own sharing settings.`,
+                  confirm: "Unhide post",
+                  reason: false,
+                  danger: false,
+                }
+              : {
+                  title: "Hide this post?",
+                  body: `Nobody sees it in the Activity feed, ${reported} included. Their hike and journal stay as they are.`,
+                  confirm: "Hide post",
+                  reason: true,
+                  danger: true,
+                }
+          }
+          onClose={() => setModeratingPost(false)}
+          onConfirm={async (reason) => {
+            await adminApi.setPostHidden(post.id, !post.hidden, reason);
+            toast.success(post.hidden ? "Post visible again." : "Post hidden.");
+            onChange();
+          }}
+        />
+      )}
       {confirming && (
         <ConfirmDialog
           confirmation={{

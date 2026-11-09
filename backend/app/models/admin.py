@@ -28,6 +28,8 @@ AUDIT_ACTIONS = (
     "send_password_reset",
     "resolve_report",
     "reopen_report",
+    "hide_post",
+    "unhide_post",
 )
 
 

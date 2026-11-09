@@ -82,6 +82,8 @@ export const ACTION_LABELS: Record<AuditEntry["action"], string> = {
   send_password_reset: "Sent password reset",
   resolve_report: "Resolved report",
   reopen_report: "Reopened report",
+  hide_post: "Hid Activity post",
+  unhide_post: "Unhid Activity post",
 };
 
 export interface Confirmation {

@@ -55,6 +55,11 @@ class ProfileSettings(Base):
     # "Visit streak" on the public profile. Off until they turn it on
     # (migration f9c2d4e6a8b1).
     show_visit_streak = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Share my activity in the feed": hike, milestone and rank posts on the
+    # Activity page. Off until they turn it on, and only in effect while the
+    # profile is public (migration a8c3f1d5e7b2). Turning it off hides every
+    # post they've made.
+    share_activity = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     # When they last chose Public or Private themselves; the setup flow can't
     # finish or be skipped without it (migration c7e3a9f1d5b2). API-only.
@@ -81,7 +86,8 @@ class ProfileModeration(Base):
 class ProfileReport(Base):
     """A "Report profile" submission: rate-limits reporters, and is the admin
     area's report queue (open until an admin resolves it). A report with a
-    trail_id is about that user's trip note on the trail."""
+    trail_id is about that user's trip note on the trail; one with a post_id
+    is about one of their Activity posts."""
 
     __tablename__ = "profile_reports"
     __table_args__ = (
@@ -100,6 +106,8 @@ class ProfileReport(Base):
     details = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="SET NULL"))
+    # Set when reporting one of their Activity posts.
+    post_id = Column(Uuid, ForeignKey("activity_posts.id", ondelete="SET NULL"))
     status = Column(Text, nullable=False, default="open", server_default="open")
     resolved_at = Column(DateTime(timezone=True))
     resolved_by = Column(Uuid)

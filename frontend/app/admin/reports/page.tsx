@@ -29,7 +29,7 @@ function ReportsBody() {
     <section className={styles.card} aria-labelledby="reports-title">
       <div className={styles.cardHead}>
         <h2 id="reports-title" className={styles.cardTitle}>
-          Profile and trip-note reports
+          Profile, trip-note and post reports
         </h2>
         <div className={`${ui.segmented} ${styles.filters}`} role="group" aria-label="Show">
           {FILTERS.map((filter) => (

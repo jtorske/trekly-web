@@ -29,7 +29,9 @@ from app.catalog.presenters import effective_weight, gear_item_out
 from app.database import get_db
 from app.featured import FeaturedBadgeOut, featured_badges
 from app.milestones import MilestoneBadgeOut, badge_out, evaluate, gather
+from app.activity import is_visible
 from app.models.account import Profile, SavedTrail
+from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
 from app.models.setup import GearSetup
@@ -39,6 +41,7 @@ from app.models.visit_streak import VisitStreak
 from app.notify import Email, EmailSender, email_sender_from_env
 from app.points import user_rank
 from app.privacy import Visibility, visibility
+from app.routers.availability import get_today
 from app.routers.me_gear import _item_query
 from app.schemas.gear import CapacityOut, CategoryRef, ProductSummaryOut, VariantOut, WeightOut
 from app.schemas.trail import TrailListItemOut
@@ -309,6 +312,8 @@ class ReportIn(BaseModel):
     details: str | None = Field(default=None, max_length=MAX_REPORT_DETAILS)
     # Set when reporting their trip note on this trail's "Hiked by" section.
     trail_id: UUID | None = None
+    # Set when reporting one of their posts on the Activity page.
+    post_id: UUID | None = None
 
     @field_validator("details", mode="before")
     @classmethod
@@ -334,6 +339,7 @@ def report_email(
     reporter_profile: Profile | None,
     payload: ReportIn,
     trip_note: HikeLog | None = None,
+    post: ActivityPost | None = None,
 ) -> Email:
     app_url = os.getenv("APP_URL", "http://localhost:3000").rstrip("/")
     reporter_name = (reporter_profile.username if reporter_profile else None) or "(no username)"
@@ -345,9 +351,16 @@ def report_email(
         if trip_note
         else []
     )
+    if post is not None:
+        hike = post.hike_log if post.kind == "hike" else None
+        note_lines = [
+            f"Activity post: {post.kind} post {post.id}",
+            *([f"Trail: {hike.trail.name}", f"Note: {hike.note or '(none)'}"] if hike else []),
+        ]
+    subject = "An Activity post" if post else "A trip note" if trip_note else "A profile"
     text = "\n".join(
         [
-            f"{'A trip note' if trip_note else 'A profile'} was reported on Trekly.",
+            f"{subject} was reported on Trekly.",
             "",
             f"Profile: @{profile.username} ({app_url}/u/{profile.username})",
             f"Profile user id: {profile.id}",
@@ -361,7 +374,7 @@ def report_email(
             f"Review it in the admin area: {app_url}/admin/reports",
         ]
     )
-    kind = "Trip note report" if trip_note else "Profile report"
+    kind = "Activity post report" if post else "Trip note report" if trip_note else "Profile report"
     return Email(to=REPORTS_TO, subject=f"{kind}: @{profile.username} ({payload.reason})", text=text)
 
 
@@ -372,11 +385,13 @@ def report_profile(
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
     sender: EmailSender = Depends(get_email_sender),
+    today: date = Depends(get_today),
 ):
     """Email support about a profile. Signed-in users only, and rate-limited:
-    REPORTS_PER_DAY reports a day, and one per profile a day. A trip note
-    counts as its owner's profile, and can only be reported while it shows
-    in "Hiked by"."""
+    REPORTS_PER_DAY reports a day, and one per profile a day. A trip note or
+    an Activity post counts as its owner's profile; a trip note can only be
+    reported while it shows in "Hiked by", a post while it shows in the
+    feed."""
     profile, seen = find_listed(db, username)
     if profile.id == user.id:
         raise HTTPException(status_code=422, detail="You can't report your own profile.")
@@ -389,6 +404,17 @@ def report_profile(
         )
         if trip_note is None or not seen.in_community:
             raise HTTPException(status_code=404, detail="Trip note not found")
+    post = None
+    if payload.post_id is not None:
+        if trip_note is not None:
+            raise HTTPException(status_code=422, detail="Report a trip note or a post, not both.")
+        post = db.scalar(
+            select(ActivityPost)
+            .where(ActivityPost.id == payload.post_id, ActivityPost.user_id == profile.id)
+            .options(joinedload(ActivityPost.hike_log).joinedload(HikeLog.trail))
+        )
+        if post is None or not is_visible(db, post.id, today):
+            raise HTTPException(status_code=404, detail="Post not found")
     since = _now() - timedelta(days=1)
     recent = db.scalars(
         select(ProfileReport.profile_id).where(
@@ -402,10 +428,11 @@ def report_profile(
 
     db.add(ProfileReport(reporter_id=user.id, profile_id=profile.id, reason=payload.reason,
                          details=payload.details, created_at=_now(),
-                         trail_id=trip_note.trail_id if trip_note else None))
+                         trail_id=trip_note.trail_id if trip_note else None,
+                         post_id=post.id if post else None))
     db.flush()
     try:
-        sender.send(report_email(profile, user, db.get(Profile, user.id), payload, trip_note))
+        sender.send(report_email(profile, user, db.get(Profile, user.id), payload, trip_note, post))
     except Exception as error:
         db.rollback()  # not sent, so it doesn't count against the limit
         raise HTTPException(

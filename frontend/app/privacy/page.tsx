@@ -136,6 +136,14 @@ export default function PrivacyPage() {
           stays private until you change your settings.
         </p>
         <p>
+          If you turn on Share my activity in the feed (off by default), hikes you choose to share,
+          and the milestones and ranks they earn, appear on the Activity page with your username,
+          display name and profile picture, plus the note and photo on that hike, without dates if
+          you&apos;ve chosen to hide them. Trip plans, alerts and future dates are never shared.
+          Turning it off hides your posts right away, and you can delete any post. Other users can
+          give a post a high five or report it; a report includes the post.
+        </p>
+        <p>
           Other signed-in users can report a profile they believe breaks our Terms of Use. A report
           includes the profile, the trip note if one was reported, the reason and any details
           given, and the reporter&apos;s account so we can follow up. It&apos;s sent only to us, and
