@@ -9,11 +9,17 @@ The sign-up form calls this after every email sign-up (reason "signup"),
 and the "Resend confirmation email" button calls it too (reason "resend").
 It looks the address up and sends whichever email helps:
 
+- an unconfirmed account: Supabase's own confirmation email again;
 - a confirmed account with a password: "You already have a Trekly account",
   with a "Sign in" button and a "Reset your password" link;
-- an unconfirmed account: Supabase's own confirmation email again;
-- an account that only signs in with Google: "You signed up with Google";
+- an account that only signs in with Google: "You signed up with Google",
+  with a "Set a password" link (a one-time reset link made with the
+  service-role key, or the "Forgot password" page without one);
 - no account: nothing.
+
+"Has a password" is the account's password hash, not an "email" identity:
+a Google account that sets a password through a reset link keeps only its
+Google identity. The Trekly emails come from RESEND_ACCOUNT_FROM_EMAIL.
 
 The answer never says which of those happened. Every accepted request gets
 the same 202 and body, and the lookup is the only work done before
@@ -42,15 +48,15 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import delete, func, select
+from sqlalchemy import and_, delete, func, select
 from sqlalchemy.orm import Session
 
 from app.account_emails import already_registered_email, google_account_email
 from app.database import get_db
 from app.models.admin import AUTH_IDENTITIES, AUTH_USERS
 from app.models.signup_email import SignupEmailRequest
-from app.notify import EmailSender, get_email_sender
-from app.supabase_admin import SupabaseAdmin, supabase_admin_from_env
+from app.notify import EmailSender, get_account_email_sender
+from app.supabase_admin import SupabaseAdmin, SupabaseAdminError, supabase_admin_from_env
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +136,25 @@ def _links(next_path: str) -> dict[str, str]:
     }
 
 
+def _set_password_url(token_hash: str) -> str:
+    """A reset link the same shape as the recovery template's: /auth/confirm
+    verifies it and sends them to /reset-password."""
+    return f"{_app_url()}/auth/confirm?token_hash={quote(token_hash, safe='')}&type=recovery"
+
+
+def _google_email(email: str, links: dict[str, str], supabase: SupabaseAdmin | None):
+    """Built when it's sent: the reset token is made then, not before."""
+    if supabase is not None:
+        try:
+            url, one_time = _set_password_url(supabase.recovery_token_hash(email)), True
+        except SupabaseAdminError:
+            logger.warning("signup email: no reset link for a Google account; linking Forgot password")
+            url, one_time = links["reset"], False
+    else:
+        url, one_time = links["reset"], False
+    return google_account_email(email, sign_in_url=links["sign_in"], set_password_url=url, one_time_link=one_time)
+
+
 def _refused_until(db: Session, column, key: str, limit: int, since: datetime) -> datetime | None:
     """When this key may ask again, or None if it's under the limit now."""
     times = db.scalars(
@@ -146,8 +171,14 @@ def _refused_until(db: Session, column, key: str, limit: int, since: datetime) -
 def _plan(db: Session, payload: SignupEmailIn, now: datetime, sender: EmailSender,
           supabase: SupabaseAdmin | None) -> tuple[str, Callable[[], None]] | None:
     """What to send for this address, as (kind, send), or None."""
+    has_password = and_(AUTH_USERS.c.encrypted_password.is_not(None), AUTH_USERS.c.encrypted_password != "")
     user = db.execute(
-        select(AUTH_USERS.c.id, AUTH_USERS.c.email_confirmed_at, AUTH_USERS.c.confirmation_sent_at)
+        select(
+            AUTH_USERS.c.id,
+            AUTH_USERS.c.email_confirmed_at,
+            AUTH_USERS.c.confirmation_sent_at,
+            has_password.label("has_password"),
+        )
         .where(func.lower(AUTH_USERS.c.email) == payload.email, AUTH_USERS.c.deleted_at.is_(None))
         .limit(1)
     ).first()
@@ -156,13 +187,9 @@ def _plan(db: Session, payload: SignupEmailIn, now: datetime, sender: EmailSende
     providers = set(db.scalars(select(AUTH_IDENTITIES.c.provider).where(AUTH_IDENTITIES.c.user_id == user.id)))
     links = _links(_safe_next(payload.next))
 
-    if "email" not in providers:
-        if "google" not in providers:
-            return None  # no password and no provider we offer: nothing useful to say
-        message = google_account_email(payload.email, sign_in_url=links["sign_in"])
-        return "google", lambda: sender.send(message)
-
     if user.email_confirmed_at is None:
+        if "email" not in providers:
+            return None
         sent_at = _aware(user.confirmation_sent_at)
         if payload.reason == "signup" and sent_at and now - sent_at < JUST_SENT:
             return None
@@ -171,8 +198,13 @@ def _plan(db: Session, payload: SignupEmailIn, now: datetime, sender: EmailSende
             return None
         return "confirmation", lambda: supabase.resend_signup_confirmation(payload.email, links["confirm"])
 
-    message = already_registered_email(payload.email, sign_in_url=links["sign_in"], reset_url=links["reset"])
-    return "already_registered", lambda: sender.send(message)
+    if user.has_password:
+        message = already_registered_email(payload.email, sign_in_url=links["sign_in"], reset_url=links["reset"])
+        return "already_registered", lambda: sender.send(message)
+
+    if "google" in providers:
+        return "google", lambda: sender.send(_google_email(payload.email, links, supabase))
+    return None  # no password and no provider we offer: nothing useful to say
 
 
 def _deliver(kind: str, send: Callable[[], None]) -> None:
@@ -189,7 +221,7 @@ def signup_email(
     background: BackgroundTasks,
     db: Session = Depends(get_db),
     client_ip: str = Depends(get_client_ip),
-    sender: EmailSender = Depends(get_email_sender),
+    sender: EmailSender = Depends(get_account_email_sender),
     supabase: SupabaseAdmin | None = Depends(get_signup_supabase_admin),
 ):
     """Email whoever owns this address whatever helps them sign in. The

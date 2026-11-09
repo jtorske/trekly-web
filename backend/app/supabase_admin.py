@@ -31,6 +31,15 @@ class SupabaseAdminError(RuntimeError):
     pass
 
 
+def _json_object(response) -> dict:
+    """The body of a successful call, or {} when it has none worth reading."""
+    try:
+        payload = json.loads(response.read() or b"{}")
+    except (ValueError, AttributeError, TypeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 class SupabaseAdmin:
     def __init__(self, supabase_url: str, service_key: str):
         self.base = f"{supabase_url.rstrip('/')}/auth/v1"
@@ -40,7 +49,7 @@ class SupabaseAdmin:
     def __repr__(self) -> str:
         return f"SupabaseAdmin({self.base!r})"
 
-    def _send(self, method: str, url: str, body: dict) -> None:
+    def _send(self, method: str, url: str, body: dict) -> dict:
         request = urllib.request.Request(
             url,
             data=json.dumps(body).encode(),
@@ -49,8 +58,8 @@ class SupabaseAdmin:
         )
         status = None
         try:
-            with urllib.request.urlopen(request, timeout=20):
-                return
+            with urllib.request.urlopen(request, timeout=20) as response:
+                return _json_object(response)
         except urllib.error.HTTPError as error:
             status = error.code
         except (urllib.error.URLError, TimeoutError, OSError):
@@ -68,6 +77,16 @@ class SupabaseAdmin:
     def send_password_reset(self, email: str, redirect_to: str) -> None:
         query = urllib.parse.urlencode({"redirect_to": redirect_to})
         self._send("POST", f"{self.base}/recover?{query}", {"email": email})
+
+    def recovery_token_hash(self, email: str) -> str:
+        """A password-reset token for this address, without sending anything.
+        Works for an account that only signs in with Google, too: verifying it
+        signs them in, and the password they then choose works alongside Google."""
+        payload = self._send("POST", f"{self.base}/admin/generate_link", {"type": "recovery", "email": email})
+        token_hash = payload.get("hashed_token") or (payload.get("properties") or {}).get("hashed_token")
+        if not isinstance(token_hash, str) or not token_hash:
+            raise SupabaseAdminError("Supabase didn't return a reset token.")
+        return token_hash
 
     def resend_signup_confirmation(self, email: str, redirect_to: str) -> None:
         """Supabase's own "Confirm your email" email, sent again."""

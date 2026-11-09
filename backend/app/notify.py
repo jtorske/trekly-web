@@ -6,6 +6,11 @@ EMAIL_BACKEND picks the transport:
               (MAILPIT_URL, default http://127.0.0.1:44324), so nothing leaves
               the machine and no SMTP port has to be exposed
     console   print instead of sending (the default when unset)
+
+Two senders share the transport: campground alerts come from
+RESEND_FROM_EMAIL (e.g. alerts@), and emails about someone's own account
+(app/account_emails.py) from RESEND_ACCOUNT_FROM_EMAIL (e.g. no-reply@),
+which falls back to RESEND_FROM_EMAIL while it's unset.
 """
 
 import json
@@ -97,9 +102,9 @@ class ConsoleSender:
         print(f"--- email to {email.to}: {email.subject}\n{email.text}\n---")
 
 
-def email_sender_from_env() -> EmailSender:
+def email_sender_from_env(from_email: str | None = None) -> EmailSender:
     backend = (os.getenv("EMAIL_BACKEND") or "console").lower()
-    from_email = os.getenv("RESEND_FROM_EMAIL") or "alerts@trekly.local"
+    from_email = from_email or os.getenv("RESEND_FROM_EMAIL") or "alerts@trekly.local"
     if backend == "resend":
         api_key = os.getenv("RESEND_API_KEY")
         if not api_key or not os.getenv("RESEND_FROM_EMAIL"):
@@ -127,5 +132,17 @@ def get_email_sender() -> EmailSender:
     """FastAPI dependency for the API's own emails; overridden in tests."""
     try:
         return email_sender_from_env()
+    except RuntimeError as error:
+        return UnconfiguredSender(str(error))
+
+
+def account_from_email() -> str | None:
+    return os.getenv("RESEND_ACCOUNT_FROM_EMAIL") or None
+
+
+def get_account_email_sender() -> EmailSender:
+    """FastAPI dependency for account emails (no-reply@); overridden in tests."""
+    try:
+        return email_sender_from_env(account_from_email())
     except RuntimeError as error:
         return UnconfiguredSender(str(error))

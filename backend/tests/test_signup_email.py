@@ -21,7 +21,7 @@ from sqlalchemy import insert, select
 from app.main import app
 from app.models.admin import AUTH_IDENTITIES, AUTH_USERS
 from app.models.signup_email import SignupEmailRequest
-from app.notify import get_email_sender
+from app.notify import get_account_email_sender
 from app.routers import signup_email
 from app.routers.signup_email import ACCEPTED, TOO_MANY, get_client_ip, get_signup_supabase_admin
 from app.supabase_admin import SupabaseAdminError
@@ -41,12 +41,19 @@ ALL_CASES = (CONFIRMED, UNCONFIRMED, GOOGLE, NOBODY)
 class FakeSupabase:
     def __init__(self):
         self.resent: list[tuple[str, str]] = []
+        self.reset_tokens: list[str] = []
         self.fail = False
 
     def resend_signup_confirmation(self, email, redirect_to):
         if self.fail:
             raise SupabaseAdminError("Supabase didn't accept that (HTTP 500).")
         self.resent.append((email, redirect_to))
+
+    def recovery_token_hash(self, email):
+        if self.fail:
+            raise SupabaseAdminError("Supabase didn't accept that (HTTP 500).")
+        self.reset_tokens.append(email)
+        return "tok/123"
 
 
 class Caller:
@@ -58,7 +65,7 @@ class Caller:
 @pytest.fixture
 def outbox():
     box = Outbox()
-    app.dependency_overrides[get_email_sender] = lambda: box
+    app.dependency_overrides[get_account_email_sender] = lambda: box
     return box
 
 
@@ -81,9 +88,13 @@ def app_url(monkeypatch):
     monkeypatch.setenv("APP_URL", "https://trekly.example")
 
 
-def add_account(db, email, *, providers=("email",), confirmed=True, confirmation_sent_at=None, deleted=False):
+def add_account(db, email, *, providers=("email",), confirmed=True, confirmation_sent_at=None, deleted=False,
+                password=None):
     user_id = uuid.uuid4()
+    if password is None:
+        password = "email" in providers
     db.execute(insert(AUTH_USERS).values(
+        encrypted_password="$2a$10$hash" if password else None,
         id=user_id, email=email, created_at=NOW - timedelta(days=30),
         email_confirmed_at=NOW - timedelta(days=30) if confirmed else None,
         confirmation_sent_at=confirmation_sent_at,
@@ -135,7 +146,8 @@ def test_a_confirmed_password_account_gets_the_already_registered_email(ready, o
     for body in (email.text, email.html):
         assert "Sign in" in body and sign_in in body.replace("&amp;", "&")
         assert reset in body.replace("&amp;", "&")
-    assert "Reset your password" in email.html
+    assert "Reset your password</a>" in email.html
+    assert "Reset your password: " + reset in email.text
     assert f'href="{sign_in}"' in email.html
 
 
@@ -155,6 +167,47 @@ def test_a_google_only_account_is_told_to_continue_with_google(ready, outbox, su
     assert "Use 'Continue with Google' to sign in" in email.text
     assert "<strong>Continue with Google</strong> to sign in" in email.html
     assert "https://trekly.example/login?next=%2Fprofile" in email.text
+
+
+def test_the_google_email_offers_a_one_time_link_to_set_a_password(ready, outbox, supabase):
+    ask(ready, GOOGLE)
+    assert supabase.reset_tokens == [GOOGLE]  # made when sending, nothing emailed by Supabase
+    [email] = outbox.sent
+    link = "https://trekly.example/auth/confirm?token_hash=tok%2F123&type=recovery"
+    assert f"Prefer email and password? Set a password: {link} This link works once" in email.text
+    assert f'Prefer email and password? <a href="{link.replace("&", "&amp;")}"' in email.html
+    assert "Set a password</a>" in email.html and "expires in an hour" in email.html
+
+
+def test_without_a_reset_token_the_google_email_links_forgot_password(ready, outbox, supabase):
+    supabase.fail = True
+    ask(ready, GOOGLE)
+    app.dependency_overrides[get_signup_supabase_admin] = lambda: None
+    ask(ready, GOOGLE)
+    for email in outbox.sent:
+        assert "Set a password: https://trekly.example/forgot-password?next=%2Fprofile\n" in email.text
+        assert "expires" not in email.html
+    assert len(outbox.sent) == 2
+
+
+def test_a_google_account_that_set_a_password_is_a_password_account(ready, session_factory, outbox):
+    """Setting a password by reset link leaves only the Google identity."""
+    db = session_factory()
+    add_account(db, "added.password@example.com", providers=("google",), password=True)
+    db.close()
+    ask(ready, "added.password@example.com")
+    assert [e.subject for e in outbox.sent] == ["You already have a Trekly account"]
+
+
+def test_both_emails_use_the_auth_template_header_and_footer(ready, outbox):
+    ask(ready, CONFIRMED)
+    ask(ready, GOOGLE)
+    assert len(outbox.sent) == 2
+    for email in outbox.sent:
+        assert '<img src="https://trekly.example/email/trekly-mark.png" width="32" height="32" alt="Trekly logo"' in email.html
+        assert '<a href="https://trekly.example" style="text-decoration:none' in email.html
+        assert "mailto:treklyusersupport@gmail.com" in email.html
+        assert "Questions? Email treklyusersupport@gmail.com." in email.text
 
 
 def test_an_account_with_a_password_and_google_is_a_password_account(ready, outbox):
@@ -362,3 +415,20 @@ def test_only_digests_are_stored(ready, session_factory, caller):
     for value in (row.email_key, row.ip_key):
         assert len(value) == 64 and all(c in "0123456789abcdef" for c in value)
     assert "confirmed" not in row.email_key and caller.ip not in row.ip_key
+
+
+# ----------------------------------------------------------------- the sender
+
+
+def test_account_emails_come_from_their_own_address(monkeypatch):
+    from app.notify import ResendSender, email_sender_from_env
+
+    monkeypatch.setenv("EMAIL_BACKEND", "resend")
+    monkeypatch.setenv("RESEND_API_KEY", "re_test")
+    monkeypatch.setenv("RESEND_FROM_EMAIL", "alerts@mail.example.com")
+    monkeypatch.setenv("RESEND_ACCOUNT_FROM_EMAIL", "no-reply@mail.example.com")
+    account = get_account_email_sender()
+    assert isinstance(account, ResendSender) and account.from_email == "no-reply@mail.example.com"
+    assert email_sender_from_env().from_email == "alerts@mail.example.com"  # alerts unchanged
+    monkeypatch.delenv("RESEND_ACCOUNT_FROM_EMAIL")
+    assert get_account_email_sender().from_email == "alerts@mail.example.com"  # until it's set

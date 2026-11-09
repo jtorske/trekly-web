@@ -66,6 +66,8 @@ AUTH_USERS = Table(
     Column("email_confirmed_at", DateTime(timezone=True)),
     Column("confirmation_sent_at", DateTime(timezone=True)),
     Column("deleted_at", DateTime(timezone=True)),
+    # Only ever read as "is there one" (app/routers/signup_email.py), never the hash.
+    Column("encrypted_password", Text),
 )
 
 # How each account signs in: one row per provider ("email", "google").
