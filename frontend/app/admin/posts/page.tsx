@@ -47,7 +47,7 @@ function TrailPicker({ trail, onChange }: { trail: TrailListItem | null; onChang
     return (
       <div className={page.chosenTrail}>
         <span className={page.trailThumb}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
         </span>
         <span className={page.trailName}>
           {trail.name}
@@ -90,7 +90,7 @@ function TrailPicker({ trail, onChange }: { trail: TrailListItem | null; onChang
                 }}
               >
                 <span className={page.trailThumb}>
-                  <TrailPhoto photo={option.photo} name={option.name} variant="thumb" mini />
+                  <TrailPhoto photo={option.photo} routeMap={option.route_map} name={option.name} variant="thumb" mini />
                 </span>
                 <span>
                   {option.name}

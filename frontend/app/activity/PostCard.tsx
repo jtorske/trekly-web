@@ -182,13 +182,13 @@ export default function PostCard({
         )}
         {trail?.photo && !announcement.photo_url && (
           <Link href={postHref(post)} className={styles.featureLink} aria-label={`Open ${trail.name}`}>
-            <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+            <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" />
           </Link>
         )}
         {trail && (
           <Link href={postHref(post)} className={styles.trail}>
             <span className={styles.trailThumb}>
-              <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+              <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
             </span>
             <span className={styles.trailText}>
               <span className={styles.trailName}>{trail.name}</span>

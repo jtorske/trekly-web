@@ -34,7 +34,7 @@ from app.routers.me_setups import SetupOut
 from app.routers.me_setups import _load as load_setups
 from app.routers.me_setups import _out as setup_out
 from app.routers.trails import booking_links
-from app.schemas.trail import TrailPhotoOut
+from app.schemas.trail import TrailPhotoOut, TrailRouteMapOut
 
 router = APIRouter(prefix="/api/me/plans", tags=["my trip plans"])
 
@@ -106,6 +106,8 @@ class PlanTrailOut(BaseModel):
     typical_duration_nights: int | None
     # The trail's approved photo, for the plan's thumbnail (null: topo fallback).
     photo: TrailPhotoOut | None = None
+    # Its route on the topo style, shown when there's no photo.
+    route_map: TrailRouteMapOut | None = None
 
 
 class PlanSiteOut(BaseModel):
@@ -189,6 +191,7 @@ def _trail_out(trail: Trail) -> PlanTrailOut:
         id=trail.id, name=trail.name, region=trail.region,
         typical_duration_nights=trail.typical_duration_nights,
         photo=TrailPhotoOut.model_validate(trail.photo) if trail.photo is not None else None,
+        route_map=TrailRouteMapOut.model_validate(trail.route_map) if trail.route_map is not None else None,
     )
 
 

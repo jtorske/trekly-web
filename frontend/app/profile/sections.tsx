@@ -5,7 +5,7 @@ import { Backpack, Bookmark, Layers, Tent, type LucideIcon } from "lucide-react"
 import ui from "@/components/ui.module.css";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto from "@/components/TrailPhoto";
-import type { TrailPhoto as Photo } from "@/lib/trailsApi";
+import type { TrailPhoto as Photo, TrailRouteMap } from "@/lib/trailsApi";
 import GearList from "@/app/gear/GearList";
 import { summarize } from "@/app/gear/useMyGear";
 import { slotForItem, zoneCoverage } from "@/app/gear/slots";
@@ -87,19 +87,35 @@ export interface SavedData {
 }
 
 /** A trail's photo (or the topo fallback) at the start of a profile list row. */
-export function TrailThumb({ photo, name }: { photo: Photo | null | undefined; name: string }) {
+export function TrailThumb({
+  photo,
+  routeMap,
+  name,
+}: {
+  photo: Photo | null | undefined;
+  routeMap?: TrailRouteMap | null;
+  name: string;
+}) {
   return (
     <span className={styles.trailThumb} aria-hidden="true">
-      <TrailPhoto photo={photo} name={name} variant="thumb" mini />
+      <TrailPhoto photo={photo} routeMap={routeMap} name={name} variant="thumb" mini />
     </span>
   );
 }
 
 /** The photo across the top of a trip card. */
-export function TripThumb({ photo, name }: { photo: Photo | null | undefined; name: string }) {
+export function TripThumb({
+  photo,
+  routeMap,
+  name,
+}: {
+  photo: Photo | null | undefined;
+  routeMap?: TrailRouteMap | null;
+  name: string;
+}) {
   return (
     <span className={styles.tripThumb} aria-hidden="true">
-      <TrailPhoto photo={photo} name={name} variant="thumb" />
+      <TrailPhoto photo={photo} routeMap={routeMap} name={name} variant="thumb" />
     </span>
   );
 }
@@ -126,7 +142,7 @@ export function SavedTrailList({ data, units, limit }: { data: SavedData; units:
       {shown.map(({ trail, saved_at }) => (
         <li key={trail.id} className={styles.trailRow}>
           <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.trailLink}>
-            <TrailThumb photo={trail.photo} name={trail.name} />
+            <TrailThumb photo={trail.photo} routeMap={trail.route_map} name={trail.name} />
             <span className={styles.trailText}>
               <span className={styles.trailName}>{trail.name}</span>
               <span className={styles.trailMeta}>
@@ -191,7 +207,7 @@ function TripCard({ plan }: { plan: TripPlanSummary }) {
   return (
     <li>
       <Link href={`/plans?id=${encodeURIComponent(plan.id)}`} className={styles.tripCard}>
-        <TripThumb photo={plan.trail.photo} name={plan.trail.name} />
+        <TripThumb photo={plan.trail.photo} routeMap={plan.trail.route_map} name={plan.trail.name} />
         <span className={styles.tripBody}>
           <span className={styles.tripTrail}>{plan.title ?? plan.trail.name}</span>
           {plan.title && <span className={styles.tripMeta}>{plan.trail.name}</span>}

@@ -15,7 +15,7 @@ export default function PickCard({ pick }: { pick: FeedPick }) {
     <li className={styles.pickItem}>
       <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.pick}>
         <span className={styles.pickThumb}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
         </span>
         <span className={styles.pickText}>
           <span className={styles.pickEyebrow}>
