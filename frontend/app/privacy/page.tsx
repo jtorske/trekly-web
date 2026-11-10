@@ -114,7 +114,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             Shown whenever your profile is public, and to followers you&apos;ve approved while
-            it&apos;s private: your bio.
+            it&apos;s private: your bio and the month you joined.
           </li>
           <li>
             Public by default, and you can hide each one: your Trail Journal and badges, rank, gear

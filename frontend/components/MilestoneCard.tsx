@@ -68,6 +68,63 @@ export default function MilestoneCard({
   /** The medal art, or the name for variant "text". */
   children: ReactNode;
 }) {
+  const hidden = milestone.secret && !milestone.earned;
+  const name = hidden ? "the secret milestone" : milestone.title;
+  return (
+    <DetailCard
+      label={label ?? `Details for ${name}`}
+      dialogLabel={`${hidden ? "Secret milestone" : milestone.title} details`}
+      earned={milestone.earned}
+      variant={variant}
+      keyboard={keyboard}
+      className={className}
+      footer={footer}
+      body={
+        badge ? (
+          <BadgeBody milestone={milestone} units={units} badge={badge} />
+        ) : (
+          <CardBody milestone={milestone} units={units} tierPoints={tierPoints} />
+        )
+      }
+    >
+      {children}
+    </DetailCard>
+  );
+}
+
+/**
+ * The hover, focus and tap card behind MilestoneCard, for any badge: a trail
+ * stamp, the home province badge. `body` is the card's content (BadgeCardBody
+ * for a badge); `footer` adds a last row that may hold a link, which makes the
+ * card a small dialog that Tab moves into.
+ *
+ * It's portalled to the body with fixed positioning and kept inside the
+ * window, so no scrolling area or card edge can clip it, on a phone too.
+ */
+export function DetailCard({
+  label,
+  dialogLabel,
+  body,
+  footer,
+  earned = false,
+  variant = "medal",
+  keyboard = true,
+  className = "",
+  children,
+}: {
+  /** The trigger's accessible name. */
+  label: string;
+  /** The card's name when it holds a link. */
+  dialogLabel?: string;
+  body: ReactNode;
+  footer?: ReactNode;
+  /** Colours the status line green. */
+  earned?: boolean;
+  variant?: "medal" | "text";
+  keyboard?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const card = useRef<HTMLDivElement>(null);
@@ -170,8 +227,6 @@ export default function MilestoneCard({
     else focusTrigger();
   };
 
-  const hidden = milestone.secret && !milestone.earned;
-  const name = hidden ? "the secret milestone" : milestone.title;
   const interactive = Boolean(footer);
 
   return (
@@ -180,7 +235,7 @@ export default function MilestoneCard({
         ref={trigger}
         type="button"
         className={`${variant === "text" ? styles.textTrigger : styles.trigger} ${className}`}
-        aria-label={label ?? `Details for ${name}`}
+        aria-label={label}
         tabIndex={keyboard ? undefined : -1}
         aria-hidden={keyboard ? undefined : true}
         aria-expanded={open}
@@ -212,9 +267,9 @@ export default function MilestoneCard({
             ref={card}
             id={id}
             role={interactive ? "dialog" : "tooltip"}
-            aria-label={interactive ? `${hidden ? "Secret milestone" : milestone.title} details` : undefined}
+            aria-label={interactive ? (dialogLabel ?? label) : undefined}
             className={styles.card}
-            data-earned={milestone.earned || undefined}
+            data-earned={earned || undefined}
             style={{ left: 0, top: 0, visibility: "hidden" }}
             onPointerEnter={hoverIn}
             onPointerLeave={hoverOut}
@@ -234,11 +289,7 @@ export default function MilestoneCard({
               }
             }}
           >
-            {badge ? (
-              <BadgeBody milestone={milestone} units={units} badge={badge} />
-            ) : (
-              <CardBody milestone={milestone} units={units} tierPoints={tierPoints} />
-            )}
+            {body}
             {footer && <div className={styles.footer}>{footer}</div>}
           </div>,
           document.body,
@@ -266,28 +317,63 @@ function Check() {
   );
 }
 
-function BadgeBody({ milestone, units, badge }: { milestone: Milestone; units: UnitSystem; badge: BadgeView }) {
-  const detail = milestoneDetail(milestone, units);
+/**
+ * A badge's card: its art beside a status line (with a check when `earned`)
+ * and its name, then whatever lines follow.
+ */
+export function BadgeCardBody({
+  art,
+  status,
+  title,
+  sub,
+  earned = false,
+  children,
+}: {
+  art: ReactNode;
+  status?: string;
+  title: string;
+  /** A muted line under the name, e.g. a trail's park. */
+  sub?: string | null;
+  earned?: boolean;
+  children?: ReactNode;
+}) {
   return (
     <>
       <div className={styles.badgeHead}>
         <span className={styles.badgeArt} aria-hidden="true">
-          {badge.art}
+          {art}
         </span>
         <span className={styles.badgeHeadText}>
-          <span className={styles.status}>
-            <Check />
-            {badge.status}
-          </span>
-          <span className={styles.title}>{milestone.title}</span>
+          {status && (
+            <span className={styles.status}>
+              {earned && <Check />}
+              {status}
+            </span>
+          )}
+          <span className={styles.title}>{title}</span>
+          {sub && <span className={styles.sub}>{sub}</span>}
         </span>
       </div>
+      {children}
+    </>
+  );
+}
+
+/** A plain line under a BadgeCardBody's head, e.g. a trail's park. */
+export function CardLine({ children, muted = false }: { children: ReactNode; muted?: boolean }) {
+  return <p className={muted ? styles.meta : styles.how}>{children}</p>;
+}
+
+function BadgeBody({ milestone, units, badge }: { milestone: Milestone; units: UnitSystem; badge: BadgeView }) {
+  const detail = milestoneDetail(milestone, units);
+  return (
+    <BadgeCardBody art={badge.art} status={badge.status} title={milestone.title} earned>
       {detail && <p className={styles.how}>{detail}</p>}
       <p className={styles.meta}>
         {badge.when && <span>{badge.when}</span>}
         <TierLine milestone={milestone} />
       </p>
-    </>
+    </BadgeCardBody>
   );
 }
 

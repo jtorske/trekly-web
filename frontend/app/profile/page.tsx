@@ -34,10 +34,10 @@ import {
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
-  joinedLabel,
   type TabItem,
 } from "./ProfileShell";
 import FollowCounts from "@/components/social/FollowCounts";
+import { joinedLabel } from "@/lib/publicProfile";
 import BadgePicker from "./BadgePicker";
 import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
@@ -154,6 +154,7 @@ function ProfileContent() {
         profile.username && (
           <>
             <Link href={publicProfilePath(profile.username)}>View public profile</Link>
+            <Link href={`${publicProfilePath(profile.username)}?preview=1`}>Preview as visitor</Link>
             {profile.visibility === "private" && <span className={ui.hint}>(private)</span>}
           </>
         )
@@ -191,10 +192,11 @@ function ProfileContent() {
         </Link>
       }
       stats={[
-        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear") },
-        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails") },
-        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips") },
-        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, href: "/journal" },
+        // Every tab's data loads with the page, so switching never waits on a request.
+        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear"), active: tab === "gear" },
+        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails"), active: tab === "trails" },
+        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips"), active: tab === "trips" },
+        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, onSelect: () => setTab("journal"), active: tab === "journal" },
       ]}
     />
   );

@@ -1,6 +1,7 @@
 import { apiFetch } from "./api";
 import { thenRefreshMilestones } from "./useMilestones";
 import type { GearSetup } from "./setupsApi";
+import type { TrailPhoto } from "./trailsApi";
 
 /** campground: a site on the trail. undecided: not chosen yet. outside: somewhere Parks Canada doesn't book. */
 export type NightChoice = "campground" | "undecided" | "outside";
@@ -48,6 +49,8 @@ export interface PlanTrail {
   name: string;
   region: string;
   typical_duration_nights: number | null;
+  /** The approved photo for thumbnails; null means the topo fallback. */
+  photo?: TrailPhoto | null;
 }
 
 export interface TripPlanSummary {

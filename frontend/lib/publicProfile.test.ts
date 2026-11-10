@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { displayName, hiddenSections, robotsFor } from "./publicProfile.ts";
+import { displayName, hiddenSections, joinedLabel, robotsFor, trailBadgeHiked } from "./publicProfile.ts";
 import type { PrivacySettings } from "./profilesApi.ts";
 
 const SETTINGS: PrivacySettings = {
@@ -31,4 +31,17 @@ test("profiles are noindex unless the owner opted in", () => {
 test("display name falls back to the handle", () => {
   assert.equal(displayName({ display_name: "  ", username: "alice" }), "@alice");
   assert.equal(displayName({ display_name: "Alice A", username: "alice" }), "Alice A");
+});
+
+test("joinedLabel reads a month or a timestamp", () => {
+  assert.equal(joinedLabel("2026-10"), "Joined October 2026");
+  assert.equal(joinedLabel("2026-10-01T03:00:00+00:00")?.startsWith("Joined "), true);
+  assert.equal(joinedLabel(null), null);
+  assert.equal(joinedLabel("soon"), null);
+});
+
+test("trailBadgeHiked words the date, the undated hike and hidden dates", () => {
+  assert.equal(trailBadgeHiked("2026-11-09", false), "Hiked November 9, 2026");
+  assert.equal(trailBadgeHiked(null, false), "Hiked before Trekly");
+  assert.equal(trailBadgeHiked(null, true), null);
 });

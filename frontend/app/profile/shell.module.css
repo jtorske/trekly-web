@@ -293,52 +293,21 @@
 
 .home {
   display: flex;
-  width: 4.75rem;
   flex-shrink: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  text-align: center;
+}
+
+.homeTrigger {
+  width: 4rem;
+  transition: transform 120ms ease;
+}
+
+.homeTrigger:hover {
+  transform: translateY(-2px);
 }
 
 .homeBadge {
-  width: 3.25rem;
-}
-
-.homeText {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.homeLabel {
-  color: var(--muted);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.homeName {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* Without a rank to sit beside, it reads like the rank does. */
-.homeAlone {
-  width: auto;
-  flex-direction: row;
-  gap: 0.75rem;
-  text-align: left;
-}
-
-.homeAlone .homeBadge {
-  width: 3.5rem;
-}
-
-.homeAlone .homeName {
-  font-family: var(--display);
-  font-size: 1.05rem;
+  display: block;
+  width: 100%;
 }
 
 .rankEmblem {
@@ -427,34 +396,6 @@
   width: 100%;
 }
 
-/* The trail name, on hover and keyboard focus. */
-.badgeTip {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  left: 50%;
-  z-index: 5;
-  width: max-content;
-  max-width: 11rem;
-  border-radius: 0.5rem;
-  background: var(--color-dark-olive);
-  padding: 0.25rem 0.5rem;
-  color: var(--color-cream);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -0.25rem);
-  transition: opacity 120ms ease, transform 120ms ease;
-}
-
-.badgeSlot:hover .badgeTip,
-.badgeSlot:focus-within .badgeTip {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
 .badgesHint {
   margin-top: 0.5rem;
   font-size: 0.85rem;
@@ -498,8 +439,37 @@
   transition: background-color 120ms ease;
 }
 
+.stat:not(:disabled) {
+  cursor: pointer;
+}
+
 .stat:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-olive) 12%, transparent);
+}
+
+.stat:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 1px;
+}
+
+/* The row whose tab is open. */
+.stat[data-active] {
+  background: color-mix(in srgb, var(--color-olive) 18%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-olive);
+}
+
+.statChevron {
+  flex-shrink: 0;
+  margin-left: -0.35rem;
+  color: var(--muted);
+  opacity: 0.6;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.stat:hover .statChevron,
+.stat[data-active] .statChevron {
+  opacity: 1;
+  transform: translateX(2px);
 }
 
 .stat:disabled {
@@ -525,6 +495,19 @@
   width: 1.5rem;
   height: 1rem;
   border-radius: 0.25rem;
+}
+
+.joined {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.joined svg {
+  flex-shrink: 0;
 }
 
 .footer {
@@ -777,9 +760,8 @@
     width: 2.75rem;
   }
 
-  .homeBadge,
-  .homeAlone .homeBadge {
-    width: 2.75rem;
+  .homeTrigger {
+    width: 3.25rem;
   }
 
   .badges {
@@ -881,8 +863,14 @@
     text-align: center;
   }
 
-  .statIcon {
+  .statIcon,
+  .statChevron {
     display: none;
+  }
+
+  .stat[data-active] {
+    border-color: var(--color-olive);
+    box-shadow: none;
   }
 
   .statLabel {
@@ -912,7 +900,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .badgeLink,
-  .badgeTip,
+  .homeTrigger,
+  .statChevron,
   .indicator,
   .stat,
   .tab,

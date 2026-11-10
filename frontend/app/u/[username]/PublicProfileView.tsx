@@ -31,6 +31,7 @@ import { getProfileActivity } from "@/lib/activityApi";
 import shell from "@/app/profile/shell.module.css";
 import ui from "@/components/ui.module.css";
 import GearList from "@/app/gear/GearList";
+import { TrailThumb, TripThumb } from "@/app/profile/sections";
 import { slotForItem } from "@/app/gear/slots";
 import profileStyles from "@/app/profile/page.module.css";
 import { ApiError } from "@/lib/api";
@@ -44,7 +45,7 @@ import {
   type PublicJournalEntry,
   type PublicProfile,
 } from "@/lib/profilesApi";
-import { displayName, formatHikeDate, hiddenSections } from "@/lib/publicProfile";
+import { displayName, formatHikeDate, hiddenSections, joinedLabel } from "@/lib/publicProfile";
 import { formatStay } from "@/lib/stay";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
@@ -68,8 +69,8 @@ const badgeColour = (entry: PublicJournalEntry) => groupColour(`region:${entry.t
 /**
  * /u/[username]: the read-only public profile. Everyone gets the same API
  * response (the owner too), so the owner's extras here are only controls:
- * a banner saying what visitors don't see, and "Preview as visitor", which
- * shows the page with those controls removed.
+ * a banner saying what visitors don't see. "Preview as visitor" (from
+ * Settings → Privacy or /profile, ?preview=1) shows the page without it.
  */
 export default function PublicProfileView({ username }: { username: string }) {
   const router = useRouter();
@@ -203,16 +204,16 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   const stats: StatRow[] = [];
   if (profile.gear) {
-    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear") });
+    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear"), active: tab === "gear" });
   }
   if (profile.saved_trails) {
-    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails") });
+    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails"), active: tab === "trails" });
   }
   if (profile.trip_plans) {
-    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips") });
+    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips"), active: tab === "trips" });
   }
   if (profile.journal) {
-    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal") });
+    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal"), active: tab === "journal" });
   }
 
   const banner = (preview || showOwnerControls) && (
@@ -227,7 +228,7 @@ export default function PublicProfileView({ username }: { username: string }) {
           </button>
         </div>
       )}
-      {showOwnerControls && <OwnerBanner profile={profile} privacy={privacy} onPreview={() => setPreview(true)} />}
+      {showOwnerControls && <OwnerBanner profile={profile} privacy={privacy} />}
     </>
   );
 
@@ -238,10 +239,11 @@ export default function PublicProfileView({ username }: { username: string }) {
       username={profile.username}
       accountLabel={profile.label}
       bio={profile.bio}
+      joined={joinedLabel(profile.joined)}
       rank={profile.rank}
       province={profile.home_province}
       streak={profile.visit_streak}
-      badges={profile.featured_badges && <FeaturedBadgeSlots badges={profile.featured_badges} ownerName={name} mine={isOwner} />}
+      badges={profile.featured_badges && <FeaturedBadgeSlots badges={profile.featured_badges} ownerName={name} mine={isOwner} datesHidden={Boolean(profile.journal?.hide_dates)} />}
       social={
         <FollowCounts
           username={profile.username}
@@ -340,15 +342,7 @@ export default function PublicProfileView({ username }: { username: string }) {
   );
 }
 
-function OwnerBanner({
-  profile,
-  privacy,
-  onPreview,
-}: {
-  profile: PublicProfile;
-  privacy: PrivacySettings | null;
-  onPreview: () => void;
-}) {
+function OwnerBanner({ profile, privacy }: { profile: PublicProfile; privacy: PrivacySettings | null }) {
   const hidden = privacy ? hiddenSections(privacy) : [];
   return (
     <div className={`${ui.notice} ${styles.ownerBanner}`}>
@@ -364,9 +358,6 @@ function OwnerBanner({
         {privacy?.hide_hike_dates && !profile.is_private && " Hike dates are hidden."}
       </div>
       <div className={styles.ownerActions}>
-        <button type="button" className={ui.secondary} onClick={onPreview}>
-          Preview as visitor
-        </button>
         <Link href="/settings/privacy" className={ui.ghost}>
           Privacy settings
         </Link>
@@ -465,15 +456,18 @@ function SavedTrailsSection({ trails }: { trails: NonNullable<PublicProfile["sav
           {trails.map((trail) => (
             <li key={trail.id} className={profileStyles.trailRow}>
               <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={profileStyles.trailLink}>
-                <span className={profileStyles.trailName}>{trail.name}</span>
-                <span className={profileStyles.trailMeta}>
-                  {[
-                    trail.region,
-                    TERRAIN_LABELS[trail.terrain],
-                    trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
+                <TrailThumb photo={trail.photo} name={trail.name} />
+                <span className={profileStyles.trailText}>
+                  <span className={profileStyles.trailName}>{trail.name}</span>
+                  <span className={profileStyles.trailMeta}>
+                    {[
+                      trail.region,
+                      TERRAIN_LABELS[trail.terrain],
+                      trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
                 </span>
               </Link>
             </li>
@@ -494,9 +488,12 @@ function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_pl
           {plans.map((plan) => (
             <li key={plan.id}>
               <Link href={`/trails?id=${encodeURIComponent(plan.trail.id)}`} className={profileStyles.tripCard}>
-                <span className={profileStyles.tripTrail}>{plan.title ?? plan.trail.name}</span>
-                {plan.title && <span className={profileStyles.tripMeta}>{plan.trail.name}</span>}
-                <span className={profileStyles.tripMeta}>{formatStay(plan.start_date, plan.nights)}</span>
+                <TripThumb photo={plan.trail.photo} name={plan.trail.name} />
+                <span className={profileStyles.tripBody}>
+                  <span className={profileStyles.tripTrail}>{plan.title ?? plan.trail.name}</span>
+                  {plan.title && <span className={profileStyles.tripMeta}>{plan.trail.name}</span>}
+                  <span className={profileStyles.tripMeta}>{formatStay(plan.start_date, plan.nights)}</span>
+                </span>
               </Link>
             </li>
           ))}

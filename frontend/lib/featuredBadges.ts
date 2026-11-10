@@ -13,7 +13,8 @@ import type { TrailListItem } from "./trailsApi";
 export const MAX_FEATURED = 3;
 
 export type FeaturedBadge =
-  | { kind: "trail"; trail: TrailListItem; milestone?: null; badge?: null }
+  /** `hiked_on`: the latest dated hike; null for one from before Trekly, or while dates are hidden. */
+  | { kind: "trail"; trail: TrailListItem; hiked_on?: string | null; milestone?: null; badge?: null }
   /** `badge` is the milestone's name, tier and icon. */
   | { kind: "milestone"; milestone: string; badge: MilestoneBadgeInfo; trail?: null }
   /** The home province badge; only sent to viewers who may see the province. */
