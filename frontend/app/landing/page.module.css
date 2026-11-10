@@ -20,6 +20,31 @@
   filter: brightness(1.05) saturate(0.95);
 }
 
+/* Slideshow layers. The next photo loads invisibly underneath; on its turn it
+   moves to the top and fades in over the one leaving (HeroCarousel's FADE_MS
+   matches this duration). The server's pick paints opaque straight away. */
+.slide {
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.slideLeaving {
+  z-index: 1;
+  opacity: 1;
+}
+
+.slideShown {
+  z-index: 2;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+  }
+}
+
 /* Darkens the top for the nav, the middle for the headline and search, and
    the bottom hardest so the footer reads even over snow or bright water. */
 .scrim {
