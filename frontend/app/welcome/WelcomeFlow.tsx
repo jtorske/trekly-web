@@ -33,10 +33,12 @@ import { DEFAULT_AFTER_LOGIN, safeNextPath } from "@/lib/authLogic";
 import {
   EXPLORE_HREF,
   QUESTION_COUNT,
+  canContinue,
   isOptional,
-  nextStep,
   previousStep,
   resumeStep,
+  skipForNowTarget,
+  stepAfter,
   stepNumber,
   type Experience,
   type HikingStyle,
@@ -126,6 +128,7 @@ function VisualPanel({ step }: { step: StepKey }) {
 class StepProblem extends Error {}
 
 const CHOOSE_VISIBILITY = "Choose Public or Private to finish.";
+const CHOOSE_EXPERIENCE = "Pick one to continue.";
 
 const messageOf = (error: unknown) =>
   error instanceof Error && error.message ? error.message : "That didn't save. Check your connection and try again.";
@@ -228,6 +231,10 @@ function Flow({
   const [showHome, setShowHome] = useState(privacy.show_home_province);
   const [style, setStyle] = useState<HikingStyle | null>(prefs.hiking_style);
   const [experience, setExperience] = useState<Experience | null>(prefs.experience);
+  // What the API has, which finishing needs (and "Skip for now" checks).
+  const [savedExperience, setSavedExperience] = useState<Experience | null>(prefs.experience);
+  // After "Skip for now": answering experience goes straight to the privacy step.
+  const [skipping, setSkipping] = useState(false);
   const [regions, setRegions] = useState<string[]>(prefs.favourite_regions);
   // Picks on the two history steps, saved when they continue (not when they skip).
   const [pastPicks, setPastPicks] = useState<Set<string>>(() => new Set());
@@ -288,6 +295,7 @@ function Flow({
       case "style":
         return { hiking_style: style };
       case "experience":
+        if (experience === null) throw new StepProblem(CHOOSE_EXPERIENCE);
         return { experience };
       case "regions":
         return { favourite_regions: regions };
@@ -341,9 +349,22 @@ function Flow({
 
   /** Records the move (and any answers) so leaving and coming back resumes here. */
   const advance = async (answers: PreferencesUpdate) => {
-    const target = nextStep(step);
+    const target = stepAfter(step, skipping);
     const finishing = target === "done";
-    await updatePreferences({ ...answers, onboarding_step: target, ...(finishing ? { onboarding_status: "completed" } : {}) });
+    if (finishing && savedExperience === null) {
+      // Paused past the experience step before it was required: answer it first.
+      await updatePreferences({ onboarding_step: "experience" });
+      setSkipping(true);
+      go("experience", "back");
+      setError("One more thing before you finish: how much trail time do you have?");
+      return;
+    }
+    const saved = await updatePreferences({
+      ...answers,
+      onboarding_step: target,
+      ...(finishing ? { onboarding_status: "completed" } : {}),
+    });
+    setSavedExperience(saved.experience);
     if (finishing) announceProfile(await getProfile());
     go(target, "forward");
   };
@@ -382,15 +403,24 @@ function Flow({
     updatePreferences({ onboarding_step: previous }).catch(() => undefined);
   };
 
-  // "Skip for now" jumps to the one question everyone answers, the profile's
-  // visibility; finishing from there ends the flow.
+  // "Skip for now" jumps to the first required question still unanswered:
+  // experience, then the profile's visibility; finishing from there ends the flow.
   const onSkipAll = async () => {
     if (saving) return;
     setSaving("skipAll");
     setError(null);
     try {
-      await updatePreferences({ onboarding_step: "privacy" });
-      go("privacy", "forward");
+      // On the experience step, a pick made here counts as the answer.
+      const known = step === "experience" && experience !== null ? experience : savedExperience;
+      const target = skipForNowTarget(known);
+      if (target === step) throw new StepProblem(CHOOSE_EXPERIENCE);
+      const saved = await updatePreferences({
+        onboarding_step: target,
+        ...(known !== savedExperience ? { experience: known } : {}),
+      });
+      setSavedExperience(saved.experience);
+      setSkipping(true);
+      go(target, "forward");
     } catch (caught) {
       setError(messageOf(caught));
     } finally {
@@ -419,7 +449,9 @@ function Flow({
   const done = step === "done";
   // Not on the privacy step itself: that's where it leads.
   const canSkipAll = Boolean(profile.username) && !done && step !== "privacy";
-  const mustChoose = step === "privacy" && isPrivate === null;
+  // Experience and privacy start unanswered; Continue waits for a choice.
+  const mustChoose = !canContinue(step, { experience, isPrivate });
+  const chooseHint = step === "privacy" ? CHOOSE_VISIBILITY : CHOOSE_EXPERIENCE;
   const previous = previousStep(step);
   const firstName = (profile.display_name ?? displayName).trim().split(/\s+/)[0] || profile.username || "friend";
 
@@ -524,8 +556,8 @@ function Flow({
                 </p>
               )}
               {mustChoose && (
-                <p id="choose-visibility" className={`${ui.hint} ${styles.actionHint}`}>
-                  {CHOOSE_VISIBILITY}
+                <p id="choose-required" className={`${ui.hint} ${styles.actionHint}`}>
+                  {chooseHint}
                 </p>
               )}
               <div className={styles.actionRow}>
@@ -550,7 +582,7 @@ function Flow({
                   type="submit"
                   className={styles.continue}
                   disabled={saving !== null || mustChoose}
-                  aria-describedby={mustChoose ? "choose-visibility" : undefined}
+                  aria-describedby={mustChoose ? "choose-required" : undefined}
                 >
                   {saving === "continue"
                     ? "Saving…"
@@ -660,10 +692,10 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       />
     ),
   }),
-  regions: ({ regions, setRegions }) => ({
+  regions: ({ regions, setRegions, home, units }) => ({
     title: "Which places are on your radar?",
     lead: "Pick the parks you'd love to explore. They'll come first when you open Explore.",
-    body: <RegionPicker values={regions} onChange={setRegions} />,
+    body: <RegionPicker values={regions} onChange={setRegions} sortFrom={{ home, units }} />,
   }),
   hiked: ({ home, regions, pastPicks, togglePast }) => ({
     title: "Which of these have you hiked?",

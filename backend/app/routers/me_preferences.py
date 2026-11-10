@@ -71,7 +71,8 @@ class PreferencesUpdate(BaseModel):
     favourite_regions: list[str] | None = Field(default=None, max_length=len(REGION_SLUGS))
     onboarding_step: OnboardingStep | None = None
     # Finishing or "Skip for now". Once set it stays: the flow shows once.
-    # Either needs the profile visibility chosen first (see update_preferences).
+    # Either needs an experience level and the profile visibility chosen
+    # first (see update_preferences).
     onboarding_status: OnboardingOutcome | None = None
 
     _check_regions = field_validator("favourite_regions")(_unique_in(REGION_SLUGS, "region"))
@@ -131,6 +132,17 @@ def update_preferences(
 ):
     data = payload.model_dump(exclude_unset=True)
     status = data.pop("onboarding_status", None)
+    current = get_preferences_row(db, user.id)
+    if status and (current is None or current.onboarding_status is None):
+        # Everyone says how much trail time they have: it's what the trail
+        # picks lean on most. Only checked while the flow is open, so people
+        # who finished or skipped before it was required aren't held to it.
+        experience = data["experience"] if "experience" in data else (current.experience if current else None)
+        if experience is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Choose how much trail time you have before finishing.",
+            )
     if status:
         # Everyone chooses Public or Private: finishing the flow, or leaving it
         # with "Skip for now", needs that answer (it's the last question).

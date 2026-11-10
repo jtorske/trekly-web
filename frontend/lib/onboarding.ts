@@ -27,9 +27,40 @@ export const STEPS: StepKey[] = [
 /** The numbered questions ("Step 3 of 9"); the finish screen isn't one. */
 export const QUESTION_COUNT = STEPS.length - 1;
 
-/** The username and the profile's Public/Private choice can't be skipped. */
+/** The questions that can't be skipped: the username, trail experience and the profile's Public/Private choice. */
+export const REQUIRED_STEPS: readonly StepKey[] = ["name", "experience", "privacy"];
+
 export function isOptional(step: StepKey): boolean {
-  return step !== "name" && step !== "privacy" && step !== "done";
+  return step !== "done" && !REQUIRED_STEPS.includes(step);
+}
+
+/**
+ * Whether Continue can be pressed: the experience and privacy steps start
+ * with nothing chosen, and need a choice. (The name step checks its own
+ * fields when Continue is pressed, so it can say what's missing.)
+ */
+export function canContinue(step: StepKey, answers: { experience: Experience | null; isPrivate: boolean | null }): boolean {
+  if (step === "experience") return answers.experience !== null;
+  if (step === "privacy") return answers.isPrivate !== null;
+  return true;
+}
+
+/**
+ * Where "Skip for now" goes: the first required question still unanswered
+ * after the username. Experience first, unless it's saved already; then the
+ * Public/Private step, which every run of the flow ends on.
+ */
+export function skipForNowTarget(savedExperience: Experience | null): StepKey {
+  return savedExperience === null ? "experience" : "privacy";
+}
+
+/**
+ * The step after this one. After "Skip for now" (`skipping`), answering
+ * experience goes straight on to the privacy step rather than back through
+ * the optional ones.
+ */
+export function stepAfter(step: StepKey, skipping: boolean): StepKey {
+  return skipping && step === "experience" ? "privacy" : nextStep(step);
 }
 
 export function isStep(value: unknown): value is StepKey {
@@ -94,34 +125,39 @@ export interface Region {
   /** Matches trails.park_name exactly; Explore filters by it. */
   park: string;
   province: string;
+  /**
+   * The park's centre point, for sorting by distance: the middle of the box
+   * around its trailheads in the trail data (2026-11-09), to 2 decimals.
+   */
+  centre: { lat: number; lon: number };
 }
 
 export const REGIONS: Region[] = [
-  { slug: "banff", label: "Banff", park: "Banff National Park", province: "AB" },
-  { slug: "jasper", label: "Jasper", park: "Jasper National Park", province: "AB" },
-  { slug: "kananaskis", label: "Kananaskis", park: "Kananaskis Country", province: "AB" },
-  { slug: "waterton", label: "Waterton Lakes", park: "Waterton Lakes National Park", province: "AB" },
-  { slug: "yoho", label: "Yoho", park: "Yoho National Park", province: "BC" },
-  { slug: "kootenay", label: "Kootenay", park: "Kootenay National Park", province: "BC" },
-  { slug: "assiniboine", label: "Mount Assiniboine", park: "Mount Assiniboine Provincial Park", province: "BC" },
-  { slug: "robson", label: "Mount Robson", park: "Mount Robson Provincial Park", province: "BC" },
-  { slug: "garibaldi", label: "Garibaldi", park: "Garibaldi Provincial Park", province: "BC" },
-  { slug: "joffre", label: "Joffre Lakes", park: "Joffre Lakes Provincial Park", province: "BC" },
-  { slug: "kokanee", label: "Kokanee Glacier", park: "Kokanee Glacier Provincial Park", province: "BC" },
-  { slug: "cape-scott", label: "Cape Scott", park: "Cape Scott Provincial Park", province: "BC" },
-  { slug: "tombstone", label: "Tombstone", park: "Tombstone Territorial Park", province: "YT" },
-  { slug: "kluane", label: "Kluane", park: "Kluane National Park and Reserve", province: "YT" },
-  { slug: "prince-albert", label: "Prince Albert", park: "Prince Albert National Park", province: "SK" },
-  { slug: "whiteshell", label: "Whiteshell", park: "Whiteshell Provincial Park", province: "MB" },
-  { slug: "algonquin", label: "Algonquin", park: "Algonquin Provincial Park", province: "ON" },
-  { slug: "killarney", label: "Killarney", park: "Killarney Provincial Park", province: "ON" },
-  { slug: "bruce", label: "Bruce Peninsula", park: "Bruce Peninsula National Park", province: "ON" },
-  { slug: "lake-superior", label: "Lake Superior", park: "Lake Superior Provincial Park", province: "ON" },
-  { slug: "pukaskwa", label: "Pukaskwa", park: "Pukaskwa National Park", province: "ON" },
-  { slug: "gaspesie", label: "Gaspésie", park: "Parc national de la Gaspésie", province: "QC" },
-  { slug: "forillon", label: "Forillon", park: "Forillon National Park", province: "QC" },
-  { slug: "cape-breton", label: "Cape Breton Highlands", park: "Cape Breton Highlands National Park", province: "NS" },
-  { slug: "gros-morne", label: "Gros Morne", park: "Gros Morne National Park", province: "NL" },
+  { slug: "banff", label: "Banff", park: "Banff National Park", province: "AB", centre: { lat: 51.52, lon: -116.26 } },
+  { slug: "jasper", label: "Jasper", park: "Jasper National Park", province: "AB", centre: { lat: 52.84, lon: -117.68 } },
+  { slug: "kananaskis", label: "Kananaskis", park: "Kananaskis Country", province: "AB", centre: { lat: 50.73, lon: -115.10 } },
+  { slug: "waterton", label: "Waterton Lakes", park: "Waterton Lakes National Park", province: "AB", centre: { lat: 49.08, lon: -113.97 } },
+  { slug: "yoho", label: "Yoho", park: "Yoho National Park", province: "BC", centre: { lat: 51.43, lon: -116.43 } },
+  { slug: "kootenay", label: "Kootenay", park: "Kootenay National Park", province: "BC", centre: { lat: 51.13, lon: -116.11 } },
+  { slug: "assiniboine", label: "Mount Assiniboine", park: "Mount Assiniboine Provincial Park", province: "BC", centre: { lat: 51.09, lon: -115.76 } },
+  { slug: "robson", label: "Mount Robson", park: "Mount Robson Provincial Park", province: "BC", centre: { lat: 53.08, lon: -119.19 } },
+  { slug: "garibaldi", label: "Garibaldi", park: "Garibaldi Provincial Park", province: "BC", centre: { lat: 50.00, lon: -122.92 } },
+  { slug: "joffre", label: "Joffre Lakes", park: "Joffre Lakes Provincial Park", province: "BC", centre: { lat: 50.37, lon: -122.50 } },
+  { slug: "kokanee", label: "Kokanee Glacier", park: "Kokanee Glacier Provincial Park", province: "BC", centre: { lat: 49.72, lon: -117.16 } },
+  { slug: "cape-scott", label: "Cape Scott", park: "Cape Scott Provincial Park", province: "BC", centre: { lat: 50.79, lon: -128.36 } },
+  { slug: "tombstone", label: "Tombstone", park: "Tombstone Territorial Park", province: "YT", centre: { lat: 64.48, lon: -138.34 } },
+  { slug: "kluane", label: "Kluane", park: "Kluane National Park and Reserve", province: "YT", centre: { lat: 60.58, lon: -137.22 } },
+  { slug: "prince-albert", label: "Prince Albert", park: "Prince Albert National Park", province: "SK", centre: { lat: 54.09, lon: -106.45 } },
+  { slug: "whiteshell", label: "Whiteshell", park: "Whiteshell Provincial Park", province: "MB", centre: { lat: 50.08, lon: -95.35 } },
+  { slug: "algonquin", label: "Algonquin", park: "Algonquin Provincial Park", province: "ON", centre: { lat: 45.32, lon: -78.56 } },
+  { slug: "killarney", label: "Killarney", park: "Killarney Provincial Park", province: "ON", centre: { lat: 46.04, lon: -81.37 } },
+  { slug: "bruce", label: "Bruce Peninsula", park: "Bruce Peninsula National Park", province: "ON", centre: { lat: 45.23, lon: -81.53 } },
+  { slug: "lake-superior", label: "Lake Superior", park: "Lake Superior Provincial Park", province: "ON", centre: { lat: 47.34, lon: -84.64 } },
+  { slug: "pukaskwa", label: "Pukaskwa", park: "Pukaskwa National Park", province: "ON", centre: { lat: 48.59, lon: -86.28 } },
+  { slug: "gaspesie", label: "Gaspésie", park: "Parc national de la Gaspésie", province: "QC", centre: { lat: 48.97, lon: -66.04 } },
+  { slug: "forillon", label: "Forillon", park: "Forillon National Park", province: "QC", centre: { lat: 48.80, lon: -64.23 } },
+  { slug: "cape-breton", label: "Cape Breton Highlands", park: "Cape Breton Highlands National Park", province: "NS", centre: { lat: 46.74, lon: -60.70 } },
+  { slug: "gros-morne", label: "Gros Morne", park: "Gros Morne National Park", province: "NL", centre: { lat: 49.64, lon: -57.94 } },
 ];
 
 /** Accents and case folded, for searching "gaspesie" or "MOUNT". */

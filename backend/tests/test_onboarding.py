@@ -39,6 +39,18 @@ def pending(client, who) -> bool:
     return response.json()["onboarding_pending"]
 
 
+def choose_experience(client, who, experience="few_seasons"):
+    """The experience step's answer, which finishing or skipping the flow also needs."""
+    response = client.patch(PREFS, json={"experience": experience}, headers=who)
+    assert response.status_code == 200, response.text
+
+
+def answer_required(client, who):
+    """Both required questions after the username: experience, then Public or Private."""
+    choose_experience(client, who)
+    choose_visibility(client, who)
+
+
 def choose_visibility(client, who, is_private=False):
     """The privacy step's answer, which finishing or skipping the flow needs."""
     response = client.patch(PRIVACY, json={"is_private": is_private}, headers=who)
@@ -73,9 +85,9 @@ def test_the_username_step_cant_be_left_empty(client, people, username):
 
 
 def test_finishing_without_a_username_still_leaves_the_flow_pending(client, people):
-    """Every later step is optional, but the gate keeps asking until there's a username."""
+    """The gate keeps asking until there's a username."""
     _, alice = people["alice"]
-    choose_visibility(client, alice)
+    answer_required(client, alice)
     patch_prefs(client, alice, onboarding_status="completed")
     assert pending(client, alice) is True
     assert client.patch(PROFILE, json={"username": "alice", "display_name": "Alice"}, headers=alice).status_code == 200
@@ -147,7 +159,7 @@ def test_all_options_are_accepted(client, people):
 def test_skip_for_now_ends_the_flow_for_good(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
-    choose_visibility(client, alice)
+    answer_required(client, alice)
     saved = patch_prefs(client, alice, onboarding_step="home", onboarding_status="skipped")
     assert saved["onboarding"]["status"] == "skipped" and saved["onboarding"]["finished_at"]
     assert pending(client, alice) is False
@@ -162,7 +174,7 @@ def test_skipping_single_steps_saves_nothing_but_the_step(client, people):
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
     for step in ("home", "style", "experience", "regions", "hiked", "pack", "units", "privacy", "done"):
         patch_prefs(client, alice, onboarding_step=step)
-    choose_visibility(client, alice)
+    answer_required(client, alice)
     prefs = patch_prefs(client, alice, onboarding_status="completed")
     assert prefs["hiking_style"] is None and prefs["favourite_regions"] == []
     assert prefs["onboarding"]["status"] == "completed"
@@ -175,10 +187,73 @@ def test_existing_users_see_it_once(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "old_timer"}, headers=alice)
     assert pending(client, alice) is True
-    choose_visibility(client, alice)
+    answer_required(client, alice)
     patch_prefs(client, alice, onboarding_status="skipped")
     assert pending(client, alice) is False
     assert pending(client, alice) is False
+
+
+# ------------------------------------------------- experience is required
+
+
+@pytest.mark.parametrize("outcome", ["completed", "skipped"])
+def test_the_flow_cant_end_without_an_experience_level(client, people, outcome):
+    _, alice = people["alice"]
+    client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    choose_visibility(client, alice)
+    response = client.patch(PREFS, json={"onboarding_status": outcome}, headers=alice)
+    assert response.status_code == 409
+    assert "trail time" in response.json()["detail"]
+    # Nothing was saved: not the ending, not the step that came with it.
+    assert client.get(PREFS, headers=alice).json()["onboarding"]["status"] is None
+    assert pending(client, alice) is True
+    # Clearing it in the same request as finishing doesn't get round it.
+    choose_experience(client, alice)
+    response = client.patch(PREFS, json={"experience": None, "onboarding_status": outcome}, headers=alice)
+    assert response.status_code == 409
+    assert client.get(PREFS, headers=alice).json()["experience"] == "few_seasons"
+
+
+def test_experience_can_come_with_the_request_that_finishes(client, people):
+    _, alice = people["alice"]
+    client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    choose_visibility(client, alice)
+    saved = patch_prefs(client, alice, experience="new", onboarding_step="done", onboarding_status="completed")
+    assert saved["experience"] == "new" and saved["onboarding"]["status"] == "completed"
+    assert pending(client, alice) is False
+
+
+def test_experience_is_checked_before_visibility(client, people):
+    """"Skip for now" leads to experience first, then the privacy step; the API asks in that order too."""
+    _, alice = people["alice"]
+    response = client.patch(PREFS, json={"onboarding_status": "skipped"}, headers=alice)
+    assert response.status_code == 409 and "trail time" in response.json()["detail"]
+    choose_experience(client, alice)
+    response = client.patch(PREFS, json={"onboarding_status": "skipped"}, headers=alice)
+    assert response.status_code == 409 and "public or private" in response.json()["detail"]
+
+
+def test_people_who_finished_before_it_was_required_arent_sent_back(client, people, session_factory):
+    """Finished or skipped without an experience level: still done, and they can set it in Settings."""
+    from app.models.preferences import ProfilePreferences
+
+    for name, outcome in (("alice", "completed"), ("bob", "skipped")):
+        user_id, who = people[name]
+        client.patch(PROFILE, json={"username": name}, headers=who)
+        db = session_factory()
+        db.add(ProfilePreferences(user_id=user_id, favourite_regions=[], onboarding_status=outcome,
+                                  onboarding_finished_at=datetime.now(timezone.utc)))
+        db.commit()
+        db.close()
+        assert pending(client, who) is False
+        prefs = client.get(PREFS, headers=who).json()
+        assert prefs["experience"] is None and prefs["onboarding"]["status"] == outcome
+        # Settings → Trail preferences saves style, experience and regions together.
+        saved = patch_prefs(client, who, hiking_style="day", experience="seasoned", favourite_regions=["banff"])
+        assert saved["experience"] == "seasoned" and saved["onboarding"]["status"] == outcome
+        # Saving with it still empty is fine for them too.
+        assert patch_prefs(client, who, experience=None)["experience"] is None
+        assert pending(client, who) is False
 
 
 def test_preferences_are_only_your_own(client, people):
@@ -345,7 +420,7 @@ def test_the_flow_cant_end_until_public_or_private_is_chosen(client, people, out
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
     # Even with every other step done, and even via "Skip for now".
-    patch_prefs(client, alice, onboarding_step="privacy")
+    patch_prefs(client, alice, experience="new", onboarding_step="privacy")
     refused = client.patch(PREFS, json={"onboarding_status": outcome}, headers=alice)
     assert refused.status_code == 409
     assert "public or private" in refused.json()["detail"]
@@ -360,8 +435,10 @@ def test_the_flow_cant_end_until_public_or_private_is_chosen(client, people, out
 def test_other_privacy_switches_dont_count_as_the_choice(client, people):
     _, alice = people["alice"]
     client.patch(PROFILE, json={"username": "alice"}, headers=alice)
+    choose_experience(client, alice)
     assert client.patch(PRIVACY, json={"show_rank": False}, headers=alice).status_code == 200
-    assert client.patch(PREFS, json={"onboarding_status": "completed"}, headers=alice).status_code == 409
+    refused = client.patch(PREFS, json={"onboarding_status": "completed"}, headers=alice)
+    assert refused.status_code == 409 and "public or private" in refused.json()["detail"]
 
 
 def test_saving_progress_doesnt_need_the_choice(client, people):

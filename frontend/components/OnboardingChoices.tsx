@@ -1,9 +1,11 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
-import { Check, Search } from "lucide-react";
-import { EXPERIENCE_LEVELS, HIKING_STYLES, REGIONS, searchRegions, type Choice } from "@/lib/onboarding";
+import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
+import { Check, LocateFixed, Search } from "lucide-react";
+import { EXPERIENCE_LEVELS, HIKING_STYLES, REGIONS, type Choice } from "@/lib/onboarding";
 import { PROVINCE_NAMES } from "@/lib/exploreFilters";
+import { regionChips, sortOrigin, type Point, type RegionChip } from "@/lib/regionOrder";
+import { formatWholeDistance, type UnitSystem } from "@/lib/units";
 import styles from "./OnboardingChoices.module.css";
 
 /**
@@ -151,12 +153,90 @@ export function ExperienceCards({
   );
 }
 
-/** Parks and regions, with a search box; picks stay picked while searching. */
-export function RegionPicker({ values, onChange }: { values: string[]; onChange: (values: string[]) => void }) {
+type Located = { state: "idle" | "locating" | "denied" | "failed" } | { state: "found"; point: Point };
+
+/**
+ * The browser's location for sorting parks, kept in this component only:
+ * never sent to the server or saved. If the site already has permission it's
+ * read straight away; otherwise nothing is asked until `locate` is called
+ * (the "Use my exact location" button), so no prompt pops up on page load.
+ */
+function useSortLocation(enabled: boolean): { located: Located; locate: () => void } {
+  const [located, setLocated] = useState<Located>({ state: "idle" });
+
+  const locate = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setLocated({ state: "failed" });
+      return;
+    }
+    setLocated({ state: "locating" });
+    navigator.geolocation.getCurrentPosition(
+      (position) => setLocated({ state: "found", point: { lat: position.coords.latitude, lon: position.coords.longitude } }),
+      (error) => setLocated({ state: error.code === error.PERMISSION_DENIED ? "denied" : "failed" }),
+      { maximumAge: 10 * 60 * 1000, timeout: 10_000 },
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!enabled || !navigator.permissions?.query || !("geolocation" in navigator)) return;
+    let live = true;
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => {
+        if (!live) return;
+        if (status.state === "granted") locate();
+        else if (status.state === "denied") setLocated({ state: "denied" });
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [enabled, locate]);
+
+  return { located, locate };
+}
+
+/**
+ * Parks and regions, with a search box. Picks stay picked while searching,
+ * and show at the top once a search starts.
+ *
+ * With `sortFrom` (the /welcome flow), parks come nearest first: from the
+ * browser's location when allowed, else the centre of their home province,
+ * each chip showing how far away it is.
+ */
+export function RegionPicker({
+  values,
+  onChange,
+  sortFrom,
+}: {
+  values: string[];
+  onChange: (values: string[]) => void;
+  sortFrom?: { home: string | null; units: UnitSystem };
+}) {
   const [query, setQuery] = useState("");
+  // Picks as of the last search: they sit at the top. A chip tapped now stays
+  // where it is (no jumping under the finger) until the search changes.
+  const [pinned, setPinned] = useState<string[]>(values);
   const searchId = useId();
-  const shown = searchRegions(query, PROVINCE_NAMES);
+  const { located, locate } = useSortLocation(Boolean(sortFrom));
+  const origin = sortFrom ? sortOrigin(located.state === "found" ? located.point : null, sortFrom.home) : null;
+  const chips = regionChips({ query, pinned, origin, provinceNames: PROVINCE_NAMES });
   const picked = REGIONS.filter((region) => values.includes(region.slug));
+
+  const option = ({ region, km }: RegionChip) => ({
+    value: region.slug,
+    label: region.label,
+    sub: km === null || !sortFrom ? region.province : `${region.province} · ${formatWholeDistance(km, sortFrom.units)}`,
+  });
+
+  const canAsk = Boolean(sortFrom) && origin?.kind !== "here" && located.state !== "denied";
+  const sortNote =
+    origin?.kind === "here"
+      ? "Nearest to you first."
+      : origin?.kind === "home"
+        ? `Nearest to the middle of ${PROVINCE_NAMES[origin.province] ?? origin.province} first.`
+        : null;
+
   return (
     <div className={styles.regions}>
       <label className={styles.search} htmlFor={searchId}>
@@ -167,7 +247,10 @@ export function RegionPicker({ values, onChange }: { values: string[]; onChange:
           type="search"
           value={query}
           placeholder="Search parks, regions or provinces"
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setPinned(values);
+          }}
           // A search box filters; Enter here shouldn't move on to the next screen.
           onKeyDown={(event) => {
             if (event.key === "Enter") event.preventDefault();
@@ -176,6 +259,22 @@ export function RegionPicker({ values, onChange }: { values: string[]; onChange:
           aria-describedby={`${searchId}-count`}
         />
       </label>
+      {(sortNote || canAsk) && (
+        <div className={styles.sortRow}>
+          {sortNote && <p className={styles.sortNote}>{sortNote}</p>}
+          {canAsk && (
+            <button type="button" className={styles.locate} onClick={locate} disabled={located.state === "locating"}>
+              <LocateFixed size={16} aria-hidden="true" />
+              {located.state === "locating" ? "Finding you…" : "Use my exact location"}
+            </button>
+          )}
+          {located.state === "failed" && (
+            <p className={styles.sortNote} role="status">
+              We couldn&apos;t get your location just now.
+            </p>
+          )}
+        </div>
+      )}
       <p id={`${searchId}-count`} className={styles.count} aria-live="polite">
         {picked.length === 0
           ? "Nothing picked yet."
@@ -183,11 +282,15 @@ export function RegionPicker({ values, onChange }: { values: string[]; onChange:
       </p>
       <ChipChecks
         legend="Parks and regions"
-        options={shown.map((region) => ({ value: region.slug, label: region.label, sub: region.province }))}
+        options={[...chips.pinned, ...chips.others].map(option)}
         values={values}
         onToggle={(value) => onChange(toggleValue(values, value))}
-        empty={<p className={styles.empty}>No parks match &ldquo;{query.trim()}&rdquo;. Try a province, like Alberta.</p>}
       />
+      {chips.others.length === 0 && query.trim() && (
+        <p className={styles.empty}>
+          No {chips.pinned.length ? "other " : ""}parks match &ldquo;{query.trim()}&rdquo;. Try a province, like Alberta.
+        </p>
+      )}
     </div>
   );
 }

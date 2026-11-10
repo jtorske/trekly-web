@@ -264,6 +264,47 @@
   color: var(--color-muted-text);
 }
 
+.sortRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+
+.sortNote {
+  color: var(--color-muted-text);
+  font-size: 0.88rem;
+}
+
+.locate {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-dark-olive) 22%, transparent);
+  border-radius: 9999px;
+  background: white;
+  padding: 0.3rem 0.85rem;
+  color: var(--color-dark-olive);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.locate:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-dark-olive) 45%, transparent);
+}
+
+.locate:focus-visible {
+  outline: 3px solid var(--color-rust);
+  outline-offset: 1px;
+}
+
+.locate:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
   .chip {

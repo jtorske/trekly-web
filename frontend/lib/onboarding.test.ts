@@ -10,6 +10,7 @@ import {
   QUESTION_COUNT,
   REGIONS,
   STEPS,
+  canContinue,
   favouriteParks,
   isOptional,
   nextStep,
@@ -18,6 +19,8 @@ import {
   previousStep,
   resumeStep,
   searchRegions,
+  skipForNowTarget,
+  stepAfter,
   stepNumber,
   welcomeHref,
 } from "./onboarding.ts";
@@ -48,10 +51,37 @@ test("past hikes and the pack come right after the places on their radar", () =>
   assert.equal(isOptional("pack"), true);
 });
 
-test("only the username and privacy steps are required", () => {
+test("only the username, experience and privacy steps are required", () => {
   assert.equal(isOptional("name"), false);
+  assert.equal(isOptional("experience"), false);
   assert.equal(isOptional("privacy"), false);
-  for (const step of STEPS.filter((s) => !["name", "privacy", "done"].includes(s))) assert.equal(isOptional(step), true, step);
+  for (const step of STEPS.filter((s) => !["name", "experience", "privacy", "done"].includes(s))) {
+    assert.equal(isOptional(step), true, step);
+  }
+});
+
+test("the experience step has no Skip and waits for a pick to continue", () => {
+  assert.equal(isOptional("experience"), false);
+  assert.equal(canContinue("experience", { experience: null, isPrivate: null }), false);
+  for (const level of EXPERIENCE_LEVELS) {
+    assert.equal(canContinue("experience", { experience: level.value, isPrivate: null }), true, level.value);
+  }
+  // Privacy waits for its own answer; the optional steps never wait.
+  assert.equal(canContinue("privacy", { experience: "new", isPrivate: null }), false);
+  assert.equal(canContinue("privacy", { experience: null, isPrivate: true }), true);
+  assert.equal(canContinue("style", { experience: null, isPrivate: null }), true);
+});
+
+test("Skip for now lands on experience until it's answered, then on the privacy step", () => {
+  assert.equal(skipForNowTarget(null), "experience");
+  assert.equal(skipForNowTarget("few_seasons"), "privacy");
+});
+
+test("after Skip for now, answering experience goes straight to privacy", () => {
+  assert.equal(stepAfter("experience", true), "privacy");
+  assert.equal(stepAfter("experience", false), "regions");
+  assert.equal(stepAfter("privacy", true), "done");
+  assert.equal(stepAfter("home", false), "style");
 });
 
 test("next and back walk the steps in order and stop at the ends", () => {
