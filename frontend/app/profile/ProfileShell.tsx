@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import Link from "next/link";
 import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
+import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
 import ProvinceBadge from "@/components/ProvinceBadge";
 import RankEmblem from "@/components/RankEmblem";
 import StreakFlame from "@/components/StreakFlame";
@@ -264,16 +265,23 @@ export function BadgeArt({ badge, className }: { badge: FeaturedBadge; className
 
 /**
  * The identity card's three featured badge slots. A trail badge opens its
- * trail; the name shows on hover and focus. Owners also see empty slots,
+ * trail, its name showing on hover and focus; a milestone opens its details
+ * card (MilestoneBadgeCard). Owners also see empty slots,
  * the Edit button and, with no badges yet, how to earn one; visitors see
  * only filled slots, and nothing at all without any.
  */
 export function FeaturedBadgeSlots({
   badges,
+  ownerName,
+  mine = false,
   loading = false,
   onEdit,
 }: {
   badges: FeaturedBadge[];
+  /** The profile's display name, for milestone cards ("Earned by Ana"). */
+  ownerName: string;
+  /** The viewer is looking at their own badges. */
+  mine?: boolean;
   loading?: boolean;
   /** Present for the owner. */
   onEdit?: () => void;
@@ -307,14 +315,20 @@ export function FeaturedBadgeSlots({
                 <Link href={`/trails?id=${encodeURIComponent(badge.trail.id)}`} className={styles.badgeLink} aria-label={`${name}: open the trail`}>
                   {art}
                 </Link>
+              ) : badge.kind === "milestone" ? (
+                <MilestoneBadgeCard badge={badge.badge} owner={ownerName} mine={mine} className={styles.badgeLink}>
+                  {art}
+                </MilestoneBadgeCard>
               ) : (
                 <span className={styles.badgeLink} tabIndex={0}>
                   {art}
                 </span>
               )}
-              <span className={styles.badgeTip} aria-hidden="true">
-                {name}
-              </span>
+              {badge.kind !== "milestone" && (
+                <span className={styles.badgeTip} aria-hidden="true">
+                  {name}
+                </span>
+              )}
             </li>
           );
         })}

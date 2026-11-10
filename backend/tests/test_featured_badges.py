@@ -212,3 +212,19 @@ def test_visitors_never_see_a_pick_that_isnt_earned_any_more(client, alice_publi
     db.close()
     badges = client.get("/api/profiles/alice").json()["featured_badges"]
     assert [b.get("milestone") or b["trail"]["name"] for b in badges] == ["Lake Agnes"]
+
+
+def test_milestone_badges_carry_their_card_details(client, alice_public):
+    """A featured milestone says how it's earned and when, for its details card;
+    hidden dates hide the day."""
+    pick(client, alice_public, {"milestone": "first-overnight"})
+    badge = client.get("/api/profiles/alice").json()["featured_badges"][0]["badge"]
+    assert badge["title"] and badge["tier"] in ("bronze", "silver", "gold")
+    assert badge["detail"] and badge["secret"] is False
+    # Skyline (the only overnight trail) was hiked on 2026-07-14.
+    assert badge["earned_on"] == "2026-07-14" and badge["earned_with"] is None
+    assert client.get(URL, headers=alice_public).json()["badges"][0]["badge"]["earned_on"] == "2026-07-14"
+
+    set_privacy(client, alice_public, hide_hike_dates=True)
+    badge = client.get("/api/profiles/alice").json()["featured_badges"][0]["badge"]
+    assert badge["earned_on"] is None and badge["earned_with"] is None and badge["detail"]

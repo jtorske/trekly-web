@@ -611,8 +611,10 @@ def test_any_earned_milestone_can_be_featured(client, alice):  # noqa: F811
     assert pick(client, alice, {"milestone": "divide-crosser"}, {"milestone": "monthly-regular"}).status_code == 200
     body = client.get(FEATURED_URL, headers=alice).json()
     assert [b["milestone"] for b in body["badges"]] == ["divide-crosser", "monthly-regular"]
-    assert body["badges"][0]["badge"] == {"id": "divide-crosser", "category": "exploration",
-                                          "title": "Divide crosser", "tier": "bronze", "icon": "divide"}
+    badge = body["badges"][0]["badge"]
+    assert {key: badge[key] for key in ("id", "category", "title", "tier", "icon")} == {
+        "id": "divide-crosser", "category": "exploration", "title": "Divide crosser", "tier": "bronze", "icon": "divide"}
+    assert badge["detail"] and badge["earned_on"] is not None
 
 
 @pytest.mark.parametrize("milestone, message", [
@@ -639,8 +641,9 @@ def alice_public(client, alice):  # noqa: F811
 def test_visitors_see_earned_milestones_with_the_journal(client, alice_public):
     milestones = client.get("/api/profiles/alice").json()["journal"]["milestones"]
     assert [m["id"] for m in milestones] == ["first-hike", "first-overnight", "divide-crosser", "monthly-regular"]
-    assert milestones[0] == {"id": "first-hike", "category": "getting-out", "title": "First steps",
-                             "tier": "bronze", "icon": "first-hike"}
+    first = {key: milestones[0][key] for key in ("id", "category", "title", "tier", "icon")}
+    assert first == {"id": "first-hike", "category": "getting-out", "title": "First steps", "tier": "bronze",
+                     "icon": "first-hike"}
 
 
 def test_hidden_dates_hide_calendar_milestones(client, alice_public):

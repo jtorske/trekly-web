@@ -22,12 +22,13 @@ journal shows "Earned when you joined" for those from onboarding.
 
 from dataclasses import dataclass, replace
 from datetime import date
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.milestones import Facts, Result, check
+from app.milestones import Facts, Result, check, evaluate, gather
 from app.milestones_config import ACTIVE, Milestone
 from app.models.availability import AvailabilityAlert
 from app.models.trip_plan import TripPlan
@@ -146,3 +147,23 @@ def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[
     }
     dates = earned_dates(facts, results, **others)
     return EarnedDates(dates, past_hike_milestones(facts, dates, **others))
+
+
+class BadgeDates:
+    """When owners earned their badges, for the badges' cards on someone
+    else's screen (Activity posts, featured badges): the same days their own
+    journal shows. Worked out once per owner, since a feed page shows a few
+    people. A badge earned from undated past hikes has no day."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self._by_user: dict[UUID, EarnedDates] = {}
+
+    def __call__(self, user_id: UUID, milestone_id: str) -> tuple[date | None, Literal["past_hikes"] | None]:
+        if user_id not in self._by_user:
+            facts = gather(self.db, user_id)
+            self._by_user[user_id] = gather_earned_dates(self.db, user_id, facts, evaluate(facts))
+        dates = self._by_user[user_id]
+        if milestone_id in dates.from_past_hikes:
+            return None, "past_hikes"
+        return dates.dates.get(milestone_id), None

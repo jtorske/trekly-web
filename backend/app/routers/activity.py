@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.activity import MILESTONES, UNPOSTED_CATEGORIES, is_visible, province_where, visible_query
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
+from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out
 from app.models.account import Profile
 from app.models.activity import ActivityPost, ActivityReaction
@@ -128,7 +129,7 @@ def _rank(level: int) -> ActivityRank | None:
     return ActivityRank(level=level, title=RANKS[level - 1][1])
 
 
-def _out(post, profile, settings, log, counts, mine_ids, viewer) -> ActivityPostOut | None:
+def _out(post, profile, settings, log, counts, mine_ids, viewer, badge_dates=None) -> ActivityPostOut | None:
     hide_dates = bool(settings.hide_hike_dates)
     out = ActivityPostOut(
         id=post.id,
@@ -153,7 +154,11 @@ def _out(post, profile, settings, log, counts, mine_ids, viewer) -> ActivityPost
         # Retired from the milestone list, or a kind that's never posted.
         if milestone is None or milestone.category in UNPOSTED_CATEGORIES:
             return None
-        out.milestone = badge_out(milestone)
+        # When they earned it, as their journal says; none while they hide dates.
+        earned_on, earned_with = None, None
+        if not hide_dates and badge_dates is not None:
+            earned_on, earned_with = badge_dates(post.user_id, milestone.id)
+        out.milestone = badge_out(milestone, earned_on, earned_with)
     else:
         out.rank = _rank(post.rank_level)
         if out.rank is None:
@@ -196,8 +201,9 @@ def feed(
         select(ActivityReaction.post_id).where(ActivityReaction.user_id == viewer.id,
                                                ActivityReaction.post_id.in_(post_ids))
     )) if viewer and post_ids else set()
+    badge_dates = BadgeDates(db)
     items = [
-        item for item in (_out(post, profile, settings, log, counts, mine_ids, viewer)
+        item for item in (_out(post, profile, settings, log, counts, mine_ids, viewer, badge_dates)
                           for post, profile, settings, log in rows)
         if item is not None
     ]

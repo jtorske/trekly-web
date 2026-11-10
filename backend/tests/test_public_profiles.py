@@ -152,7 +152,8 @@ def test_public_payload_has_only_declared_fields(client, alice_profile, people):
                          "journal", "featured_badges", "gear", "saved_trails", "trip_plans"}
     assert set(body["featured_badges"][0]) == {"kind", "trail", "milestone", "badge", "province"}
     assert set(body["journal"]) == {"hide_dates", "entries", "milestones"}
-    assert set(body["journal"]["milestones"][0]) == {"id", "category", "title", "tier", "icon"}
+    assert set(body["journal"]["milestones"][0]) == {"id", "category", "title", "tier", "icon", "detail", "goal", "unit",
+                                                     "secret", "earned_on", "earned_with"}
     assert set(body["gear"]["items"][0]) == {"id", "kind", "display_name", "brand_name", "category", "product", "variant",
                                             "custom_brand", "custom_model", "quantity", "weight", "capacity"}
     assert set(body["trip_plans"][0]) == {"id", "trail", "title", "start_date", "nights"}

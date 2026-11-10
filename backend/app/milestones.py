@@ -395,13 +395,23 @@ CATEGORY_TITLES = dict(CATEGORIES)
 
 
 class MilestoneBadgeOut(BaseModel):
-    """An earned milestone as a badge: enough to draw and name it."""
+    """An earned milestone as a badge: enough to draw and name it, and for its
+    details card (frontend components/MilestoneBadgeCard.tsx). It's only ever
+    sent for an earned milestone, so a secret's requirement is no longer secret."""
 
     id: str
     category: str
     title: str
     tier: str
     icon: str
+    # How to earn it, as in MilestoneOut ("{goal}" stands for goal in unit).
+    detail: str = ""
+    goal: float | None = None
+    unit: str | None = None
+    secret: bool = False
+    # The day its owner earned it, when known and their dates aren't hidden.
+    earned_on: date | None = None
+    earned_with: Literal["joining", "past_hikes"] | None = None
 
 
 class ProgressOut(BaseModel):
@@ -441,9 +451,15 @@ class CategoryOut(BaseModel):
     title: str
 
 
-def badge_out(milestone: Milestone) -> MilestoneBadgeOut:
+def badge_out(
+    milestone: Milestone,
+    earned_on: date | None = None,
+    earned_with: Literal["joining", "past_hikes"] | None = None,
+) -> MilestoneBadgeOut:
     return MilestoneBadgeOut(
-        id=milestone.id, category=milestone.category, title=milestone.title, tier=milestone.tier, icon=milestone.icon
+        id=milestone.id, category=milestone.category, title=milestone.title, tier=milestone.tier, icon=milestone.icon,
+        detail=milestone.detail, goal=goal_of(milestone), unit=GOAL_UNITS.get(milestone.rule), secret=milestone.secret,
+        earned_on=earned_on, earned_with=earned_with,
     )
 
 

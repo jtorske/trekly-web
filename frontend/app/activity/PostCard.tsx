@@ -7,6 +7,7 @@ import Avatar from "@/components/Avatar";
 import Dialog from "@/components/Dialog";
 import HikePhoto from "@/components/HikePhoto";
 import MilestoneBadge from "@/components/MilestoneBadge";
+import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
 import RankEmblem from "@/components/RankEmblem";
 import ReportDialog from "@/components/ReportDialog";
 import TrailPhoto from "@/components/TrailPhoto";
@@ -148,18 +149,32 @@ export default function PostCard({
     return (
       <li className={`${styles.card} ${styles.compact}`}>
         <div className={styles.compactRow}>
-          <Link href={profileHref} className={styles.compactBadge} aria-hidden="true" tabIndex={-1} title={badgeLabel(post, name)}>
-            {post.milestone ? (
+          {post.milestone ? (
+            // The badge and its name both open the milestone's card.
+            <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} keyboard={false} className={styles.compactBadge}>
               <MilestoneBadge icon={post.milestone.icon} tier={post.milestone.tier} className={styles.badge} />
-            ) : (
+            </MilestoneBadgeCard>
+          ) : (
+            <Link href={profileHref} className={styles.compactBadge} aria-hidden="true" tabIndex={-1} title={badgeLabel(post, name)}>
               <RankEmblem level={post.rank?.level ?? 1} className={styles.badge} />
-            )}
-          </Link>
+            </Link>
+          )}
           <p className={styles.compactText}>
             <Link href={postHref(post)} className={styles.name}>
               {name}
             </Link>{" "}
-            {post.kind === "milestone" ? "earned" : "reached"} <strong>{post.milestone?.title ?? post.rank?.title}</strong>
+            {post.milestone ? (
+              <>
+                earned{" "}
+                <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} variant="text">
+                  {post.milestone.title}
+                </MilestoneBadgeCard>
+              </>
+            ) : (
+              <>
+                reached <strong>{post.rank?.title}</strong>
+              </>
+            )}
             {when && <span className={styles.meta}> · {when}</span>}
           </p>
         </div>

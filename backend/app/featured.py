@@ -25,6 +25,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out, earned_ids, gather
 from app.milestones_config import BY_ID
 from app.models.featured_badge import MAX_FEATURED, FeaturedBadge
@@ -80,6 +81,14 @@ def featured_badges(
         select(FeaturedBadge).where(FeaturedBadge.user_id == user_id).order_by(FeaturedBadge.position)
     ).all()
     if rows:
+        # When each featured milestone was earned, for its card; none while dates are hidden.
+        dates = BadgeDates(db)
+
+        def badge(milestone_id: str) -> MilestoneBadgeOut:
+            if hide_dates:
+                return badge_out(BY_ID[milestone_id])
+            return badge_out(BY_ID[milestone_id], *dates(user_id, milestone_id))
+
         shown = []
         for row in rows:
             if row.trail_id is not None and row.trail_id in by_trail:
@@ -89,7 +98,7 @@ def featured_badges(
                     shown.append(FeaturedBadgeOut(kind="province", province=province))
             elif row.milestone is not None and row.milestone in earned:
                 shown.append(
-                    FeaturedBadgeOut(kind="milestone", milestone=row.milestone, badge=badge_out(BY_ID[row.milestone]))
+                    FeaturedBadgeOut(kind="milestone", milestone=row.milestone, badge=badge(row.milestone))
                 )
         return True, shown
     if hide_dates:

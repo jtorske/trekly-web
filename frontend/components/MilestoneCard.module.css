@@ -1,7 +1,8 @@
 /*
- * A medal's details card (MilestoneCard.tsx). It's portalled to the body,
- * outside the journal's tokens, so its colours are spelled out: the journal
- * paper and ink, which stay cream in dark mode too.
+ * A medal's details card (MilestoneCard.tsx), in the journal, the Activity
+ * feed and on profiles. It's portalled to the body, outside the journal's
+ * tokens, so its colours are spelled out: the journal paper and ink, which
+ * stay cream in dark mode too.
  */
 
 .trigger {
@@ -21,6 +22,33 @@
 .trigger:focus-visible {
   outline: 2px solid var(--color-rust);
   outline-offset: 3px;
+}
+
+.textTrigger {
+  display: inline;
+  margin: 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-align: inherit;
+  text-decoration: underline dotted color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.textTrigger:hover,
+.textTrigger[aria-expanded="true"] {
+  text-decoration-style: solid;
+}
+
+.textTrigger:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
 }
 
 .card {
@@ -180,4 +208,65 @@
   flex: none;
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
+}
+
+/* Someone's badge: the medal beside whose it is and its name. */
+.badgeHead {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.badgeArt {
+  width: 3rem;
+  flex: none;
+}
+
+.badgeArt > * {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.badgeHeadText {
+  min-width: 0;
+}
+
+.badgeHeadText .status,
+.badgeHeadText .title {
+  display: flex;
+}
+
+.badgeHeadText .title {
+  margin-top: 0.15rem;
+}
+
+.badgeHead + .how {
+  margin-top: 0.5rem;
+}
+
+/* The viewer's own standing, and a way to their journal. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.2rem 0.75rem;
+  margin-top: 0.6rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 16%, transparent);
+  padding-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.footer a {
+  border-radius: 3px;
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer a:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
 }

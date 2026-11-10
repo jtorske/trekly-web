@@ -261,6 +261,22 @@ def test_hidden_dates_hide_the_date_and_seasonal_milestones(client, trails, pers
     assert all(item["posted_at"] is None for item in body["items"])
     milestones = [i["milestone"]["id"] for i in body["items"] if i["kind"] == "milestone"]
     assert "canada-day" not in milestones and "first-hike" in milestones
+    assert all(i["milestone"]["earned_on"] is None for i in body["items"] if i["kind"] == "milestone")
+
+
+def test_milestone_posts_carry_their_card_details(client, trails, person):
+    """How it's earned and the day, for the badge's details card."""
+    alice = person("alice")
+    log(client, alice, trails[0], hiked_on="2026-08-14")
+    post = next(i for i in feed(client)["items"] if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
+    badge = post["milestone"]
+    assert badge["detail"] and badge["tier"] == "bronze" and badge["secret"] is False
+    assert badge["earned_on"] == "2026-08-14" and badge["earned_with"] is None
+
+    # A hike logged later but dated earlier moves the day back, as in their journal.
+    log(client, alice, trails[1], hiked_on="2026-06-01", share=False)
+    post = next(i for i in feed(client)["items"] if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
+    assert post["milestone"]["earned_on"] == "2026-06-01"
 
 
 def test_an_undated_hike_shared_from_the_dialog_shows_no_date(client, trails, person):

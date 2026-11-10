@@ -49,13 +49,23 @@ export interface Milestones {
   tier_points: Record<Tier, number>;
 }
 
-/** An earned milestone as a badge (featured badges, public profiles). */
+/**
+ * An earned milestone as a badge (featured badges, Activity posts). The rest
+ * is for its details card: how it's earned (only ever sent once earned, so a
+ * secret's too) and when, unless its owner hides their dates.
+ */
 export interface MilestoneBadgeInfo {
   id: string;
   category: string;
   title: string;
   tier: Tier;
   icon: string;
+  detail?: string;
+  goal?: number | null;
+  unit?: Milestone["unit"];
+  secret?: boolean;
+  earned_on?: string | null;
+  earned_with?: "joining" | "past_hikes" | null;
 }
 
 export const TIER_NAMES: Record<Tier, string> = { bronze: "Bronze", silver: "Silver", gold: "Gold" };
@@ -235,4 +245,72 @@ export function earnedWhen(
   if (milestone.earned_with === "joining") return "Earned when you joined";
   if (milestone.earned_with === "past_hikes") return "Earned from your past hikes";
   return milestone.earned_on ? formatDate(milestone.earned_on) : null;
+}
+
+/** Someone's earned badge as a milestone, for its details card. */
+export function badgeMilestone(badge: MilestoneBadgeInfo): Milestone {
+  return {
+    id: badge.id,
+    category: badge.category,
+    title: badge.title,
+    detail: badge.detail ?? "",
+    goal: badge.goal ?? null,
+    unit: badge.unit ?? null,
+    tier: badge.tier,
+    icon: badge.icon,
+    secret: badge.secret ?? false,
+    earned: true,
+    earned_on: badge.earned_on ?? null,
+    earned_with: badge.earned_with ?? null,
+    progress: null,
+  };
+}
+
+/** When someone else earned a badge, for its card: a date, "from past hikes", or null (hidden or unknown). */
+export function theirEarnedWhen(
+  badge: Pick<MilestoneBadgeInfo, "earned_on" | "earned_with">,
+  formatDate: (day: string) => string,
+): string | null {
+  if (badge.earned_with) return "Earned from past hikes";
+  return badge.earned_on ? `Earned ${formatDate(badge.earned_on)}` : null;
+}
+
+/**
+ * The viewer's own standing on someone's badge: "You: earned it on Oct 30",
+ * "You: 1 of 2", "You: not earned yet". A secret the viewer hasn't earned
+ * stays a secret: their list has no id for it, so nothing about it shows.
+ */
+export function viewerStanding(
+  milestoneId: string,
+  mine: Milestones,
+  formatDate: (day: string) => string,
+  units: UnitSystem = "metric",
+): { text: string; secret: boolean } {
+  const own = mine.milestones.find((m) => m.id === milestoneId);
+  if (!own) return { text: "Secret milestone", secret: true };
+  if (own.earned) {
+    if (own.earned_with === "joining") return { text: "You: earned it when you joined", secret: false };
+    if (own.earned_with === "past_hikes") return { text: "You: earned it from your past hikes", secret: false };
+    return { text: own.earned_on ? `You: earned it on ${formatDate(own.earned_on)}` : "You: earned it", secret: false };
+  }
+  const progress = own.needs_data ? null : progressLabel(own, units);
+  return { text: progress ? `You: ${progress.replace(" / ", " of ")}` : "You: not earned yet", secret: false };
+}
+
+/** The journal section (?section=) whose spread shows this milestone's medal. */
+export function milestoneSlug(data: Milestones, milestoneId: string): string {
+  const spread = milestoneSpreads(data).find((s) =>
+    [s.left, s.right].some((page) => page.kind === "category" && page.milestones.some((m) => m.id === milestoneId)),
+  );
+  return spread?.slug ?? "milestones";
+}
+
+/** "Oct 30", with the year when it isn't this one ("Oct 30, 2025"). */
+export function shortDay(day: string, now: Date = new Date()): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(year, month - 1, date).toLocaleDateString("en-CA", {
+    month: "short",
+    day: "numeric",
+    ...(year === now.getFullYear() ? {} : { year: "numeric" }),
+  });
 }

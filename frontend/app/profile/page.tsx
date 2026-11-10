@@ -148,7 +148,7 @@ function ProfileContent() {
       streak={streak}
       streakGrew={streakGrew}
       badges={
-        <FeaturedBadgeSlots badges={featured?.badges ?? []} loading={!featured} onEdit={() => setPickingBadges(true)} />
+        <FeaturedBadgeSlots badges={featured?.badges ?? []} ownerName={name} mine loading={!featured} onEdit={() => setPickingBadges(true)} />
       }
       action={
         <Link href={sectionHref("edit-profile")} className={ui.secondary}>

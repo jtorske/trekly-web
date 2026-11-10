@@ -30,7 +30,7 @@ import { useRank } from "@/lib/useRank";
 import type { TrailListItem } from "@/lib/trailsApi";
 import type { View } from "./Book";
 import styles from "./journal.module.css";
-import MilestoneCard from "./MilestoneCard";
+import MilestoneCard from "@/components/MilestoneCard";
 
 export const formatHikeDate = (iso: string, month: "short" | "long" = "short") =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month, day: "numeric", year: "numeric" });
