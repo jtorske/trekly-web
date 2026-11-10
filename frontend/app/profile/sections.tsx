@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Backpack, Bookmark, Layers, Tent, type LucideIcon } from "lucide-react";
 import ui from "@/components/ui.module.css";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import TrailPhoto from "@/components/TrailPhoto";
+import type { TrailPhoto as Photo } from "@/lib/trailsApi";
 import GearList from "@/app/gear/GearList";
 import { summarize } from "@/app/gear/useMyGear";
 import { slotForItem, zoneCoverage } from "@/app/gear/slots";
@@ -84,6 +86,24 @@ export interface SavedData {
   reload: () => void;
 }
 
+/** A trail's photo (or the topo fallback) at the start of a profile list row. */
+export function TrailThumb({ photo, name }: { photo: Photo | null | undefined; name: string }) {
+  return (
+    <span className={styles.trailThumb} aria-hidden="true">
+      <TrailPhoto photo={photo} name={name} variant="thumb" mini />
+    </span>
+  );
+}
+
+/** The photo across the top of a trip card. */
+export function TripThumb({ photo, name }: { photo: Photo | null | undefined; name: string }) {
+  return (
+    <span className={styles.tripThumb} aria-hidden="true">
+      <TrailPhoto photo={photo} name={name} variant="thumb" />
+    </span>
+  );
+}
+
 function gainLabel(meters: number | null, units: UnitSystem): string | null {
   const gain = formatTrailElevation(meters, units);
   return gain ? `${gain} gain` : null;
@@ -106,18 +126,21 @@ export function SavedTrailList({ data, units, limit }: { data: SavedData; units:
       {shown.map(({ trail, saved_at }) => (
         <li key={trail.id} className={styles.trailRow}>
           <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.trailLink}>
-            <span className={styles.trailName}>{trail.name}</span>
-            <span className={styles.trailMeta}>
-              {[
-                trail.region,
-                TERRAIN_LABELS[trail.terrain],
-                trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
-                gainLabel(trail.elevation_gain_m, units),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
+            <TrailThumb photo={trail.photo} name={trail.name} />
+            <span className={styles.trailText}>
+              <span className={styles.trailName}>{trail.name}</span>
+              <span className={styles.trailMeta}>
+                {[
+                  trail.region,
+                  TERRAIN_LABELS[trail.terrain],
+                  trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
+                  gainLabel(trail.elevation_gain_m, units),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+              <span className={styles.trailSaved}>Saved {new Date(saved_at).toLocaleDateString()}</span>
             </span>
-            <span className={styles.trailSaved}>Saved {new Date(saved_at).toLocaleDateString()}</span>
           </Link>
           <SaveTrailButton
             trailId={trail.id}
@@ -168,11 +191,14 @@ function TripCard({ plan }: { plan: TripPlanSummary }) {
   return (
     <li>
       <Link href={`/plans?id=${encodeURIComponent(plan.id)}`} className={styles.tripCard}>
-        <span className={styles.tripTrail}>{plan.title ?? plan.trail.name}</span>
-        {plan.title && <span className={styles.tripMeta}>{plan.trail.name}</span>}
-        <span className={styles.tripMeta}>{formatStay(plan.start_date, plan.nights)}</span>
-        <span className={styles.tripBooked}>
-          {plan.booked_nights} of {plan.nights} {plan.nights === 1 ? "night" : "nights"} booked
+        <TripThumb photo={plan.trail.photo} name={plan.trail.name} />
+        <span className={styles.tripBody}>
+          <span className={styles.tripTrail}>{plan.title ?? plan.trail.name}</span>
+          {plan.title && <span className={styles.tripMeta}>{plan.trail.name}</span>}
+          <span className={styles.tripMeta}>{formatStay(plan.start_date, plan.nights)}</span>
+          <span className={styles.tripBooked}>
+            {plan.booked_nights} of {plan.nights} {plan.nights === 1 ? "night" : "nights"} booked
+          </span>
         </span>
       </Link>
     </li>

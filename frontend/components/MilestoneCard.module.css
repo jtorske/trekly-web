@@ -241,6 +241,17 @@
   margin-top: 0.15rem;
 }
 
+.badgeHeadText .title:first-child {
+  margin-top: 0;
+}
+
+.sub {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .badgeHead + .how {
   margin-top: 0.5rem;
 }

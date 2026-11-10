@@ -47,14 +47,21 @@
 }
 
 .trailRow {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   border: 1px solid var(--hair);
   border-radius: 0.9rem;
   background: color-mix(in srgb, white 72%, var(--paper));
-  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
   transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+/* The whole row opens the trail; the save button sits above the link. */
+.trailRow > :not(.trailLink) {
+  position: relative;
+  z-index: 1;
 }
 
 .trailRow:hover {
@@ -63,6 +70,37 @@
 }
 
 .trailLink {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.trailLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.trailRow:has(.trailLink:focus-visible) {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.trailLink:focus-visible {
+  outline: none;
+}
+
+.trailThumb {
+  display: block;
+  width: 5.5rem;
+  height: 4rem;
+  flex-shrink: 0;
+}
+
+.trailText {
   display: flex;
   min-width: 0;
   flex: 1;
@@ -154,11 +192,10 @@
   display: flex;
   height: 100%;
   flex-direction: column;
-  gap: 0.25rem;
   border: 1px solid var(--hair);
   border-radius: 1rem;
   background: color-mix(in srgb, white 72%, var(--paper));
-  padding: 1rem;
+  padding: 0.5rem;
   transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
 
@@ -166,6 +203,19 @@
   border-color: color-mix(in srgb, var(--ink) 30%, transparent);
   box-shadow: 0 8px 20px -12px rgba(40, 54, 24, 0.4);
   transform: translateY(-1px);
+}
+
+.tripThumb {
+  display: block;
+  aspect-ratio: 16 / 7;
+}
+
+.tripBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem 0.5rem 0.5rem;
 }
 
 .tripTrail {

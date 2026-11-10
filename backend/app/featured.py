@@ -18,6 +18,7 @@ rules live in one place:
 """
 
 from dataclasses import dataclass
+from datetime import date
 from typing import Literal
 from uuid import UUID
 
@@ -42,6 +43,9 @@ class FeaturedBadgeOut(BaseModel):
     badge: MilestoneBadgeOut | None = None
     # The two-letter code, for the province badge.
     province: str | None = None
+    # A trail badge's latest dated hike, for its card. None for a hike with
+    # no date (from before Trekly), and always None while dates are hidden.
+    hiked_on: date | None = None
 
 
 @dataclass(frozen=True)
@@ -75,8 +79,19 @@ def featured_badges(
     """(picked, badges): the user's own picks in order, or the stand-ins.
     `province` is the home province this viewer may see (None hides the badge)."""
     logs = _logs(db, user_id)
-    by_trail = {log.trail_id: log for log in logs}
+    # The logs come newest first, so the first one per trail is its latest hike.
+    by_trail: dict[UUID, HikeLog] = {}
+    for log in logs:
+        by_trail.setdefault(log.trail_id, log)
     earned = earned_ids(gather(db, user_id))
+
+    def trail_badge(log: HikeLog) -> FeaturedBadgeOut:
+        return FeaturedBadgeOut(
+            kind="trail",
+            trail=TrailListItemOut.model_validate(log.trail),
+            hiked_on=None if hide_dates else log.hiked_on,
+        )
+
     rows = db.scalars(
         select(FeaturedBadge).where(FeaturedBadge.user_id == user_id).order_by(FeaturedBadge.position)
     ).all()
@@ -92,7 +107,7 @@ def featured_badges(
         shown = []
         for row in rows:
             if row.trail_id is not None and row.trail_id in by_trail:
-                shown.append(FeaturedBadgeOut(kind="trail", trail=TrailListItemOut.model_validate(by_trail[row.trail_id].trail)))
+                shown.append(trail_badge(by_trail[row.trail_id]))
             elif row.milestone == PROVINCE_BADGE:
                 if province is not None:
                     shown.append(FeaturedBadgeOut(kind="province", province=province))
@@ -101,11 +116,10 @@ def featured_badges(
                     FeaturedBadgeOut(kind="milestone", milestone=row.milestone, badge=badge(row.milestone))
                 )
         return True, shown
+    latest = list(by_trail.values())
     if hide_dates:
-        logs = sorted(logs, key=lambda log: log.trail.name.lower())
-    return False, [
-        FeaturedBadgeOut(kind="trail", trail=TrailListItemOut.model_validate(log.trail)) for log in logs[:MAX_FEATURED]
-    ]
+        latest = sorted(latest, key=lambda log: log.trail.name.lower())
+    return False, [trail_badge(log) for log in latest[:MAX_FEATURED]]
 
 
 def set_featured(db: Session, user_id: UUID, picks: list[Pick], *, home_province: str | None = None) -> None:

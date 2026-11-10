@@ -99,6 +99,8 @@ export interface PublicProfile {
   follows_you: boolean;
   /** Each of these is null when the viewer can't see the profile or the section is hidden. */
   bio: string | null;
+  /** The sign-up month, "2026-10". */
+  joined: string | null;
   /** Only while the owner has "Home province" switched on. */
   home_province: HomeCode | null;
   rank: { level: number; title: string } | null;

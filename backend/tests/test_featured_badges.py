@@ -228,3 +228,15 @@ def test_milestone_badges_carry_their_card_details(client, alice_public):
     set_privacy(client, alice_public, hide_hike_dates=True)
     badge = client.get("/api/profiles/alice").json()["featured_badges"][0]["badge"]
     assert badge["earned_on"] is None and badge["earned_with"] is None and badge["detail"]
+
+
+def test_trail_badges_carry_their_hike_date_unless_dates_are_hidden(client, alice_public, trails):
+    """For the trail badge's card: "Hiked September 1, 2026"."""
+    pick(client, alice_public, {"trail_id": trails["garibaldi"]})
+    assert client.get(URL, headers=alice_public).json()["badges"][0]["hiked_on"] == "2026-09-01"
+    assert client.get("/api/profiles/alice").json()["featured_badges"][0]["hiked_on"] == "2026-09-01"
+
+    set_privacy(client, alice_public, hide_hike_dates=True)
+    assert client.get("/api/profiles/alice").json()["featured_badges"][0]["hiked_on"] is None
+    # The owner still sees their own date.
+    assert client.get(URL, headers=alice_public).json()["badges"][0]["hiked_on"] == "2026-09-01"

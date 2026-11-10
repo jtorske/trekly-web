@@ -4,16 +4,20 @@ import AccountBadge from "@/components/AccountBadge";
 import type { AccountLabel } from "@/lib/accountLabels";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
+import { CalendarDays, ChevronRight, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
+import { BadgeCardBody, CardLine, DetailCard } from "@/components/MilestoneCard";
 import ProvinceBadge from "@/components/ProvinceBadge";
 import RankEmblem from "@/components/RankEmblem";
 import StreakFlame from "@/components/StreakFlame";
 import TrailBadge from "@/components/TrailBadge";
 import ui from "@/components/ui.module.css";
 import { groupColour } from "@/lib/journal";
-import { homeLabel, province as findProvince } from "@/lib/provinces";
+import { homeLabel, province as findProvince, type Province } from "@/lib/provinces";
+import { trailBadgeHiked } from "@/lib/publicProfile";
+import { TERRAIN_LABELS } from "@/lib/terrain";
+import type { TrailListItem } from "@/lib/trailsApi";
 import type { Rank } from "@/lib/rank";
 import { bestLabel, showsStreak, streakLabel, type StreakCounts } from "@/lib/visitStreak";
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
@@ -69,7 +73,7 @@ export function ProfilePanel({ tab, children }: { tab: string; children: ReactNo
   }, [tab]);
 
   return (
-    <div ref={ref} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel}>
+    <div ref={ref} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel} data-profile-panel>
       <div className={styles.main}>{children}</div>
     </div>
   );
@@ -84,12 +88,21 @@ export interface StatRow {
   value: number | null;
   href?: string;
   onSelect?: () => void;
+  /** The row's tab is the one open. */
+  active?: boolean;
 }
 
-/** "Joined October 2026" from an ISO timestamp. */
-export function joinedLabel(memberSince: string | null | undefined): string | null {
-  if (!memberSince) return null;
-  return `Joined ${new Date(memberSince).toLocaleDateString(undefined, { month: "long", year: "numeric" })}`;
+/**
+ * After a stat row opens its tab: the tab content starts at the top, and on
+ * a phone or tablet (where the page itself scrolls) the tabs come into view.
+ */
+export function revealProfileTabs() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const panel = document.querySelector<HTMLElement>("[data-profile-panel]");
+  if (panel) panel.scrollTop = 0;
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    document.getElementById("profile-tabs")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }
 }
 
 export function IdentityCard({
@@ -155,6 +168,12 @@ export function IdentityCard({
               <AccountBadge label={accountLabel} />
             </p>
           )}
+          {joined && (
+            <p className={styles.joined}>
+              <CalendarDays size={14} aria-hidden="true" />
+              {joined}
+            </p>
+          )}
           {links && <div className={styles.links}>{links}</div>}
         </div>
       </div>
@@ -165,18 +184,12 @@ export function IdentityCard({
 
       {bio && <p className={styles.bio}>{bio}</p>}
 
-      {(region || joined || showsStreak(streak)) && (
+      {(region || showsStreak(streak)) && (
         <ul className={styles.meta}>
           {region && (
             <li>
               <MapPin size={16} aria-hidden="true" />
               {region}
-            </li>
-          )}
-          {joined && (
-            <li>
-              <CalendarDays size={16} aria-hidden="true" />
-              {joined}
             </li>
           )}
           {showsStreak(streak) && (
@@ -204,12 +217,10 @@ export function IdentityCard({
             </div>
           )}
           {home && (
-            <div className={`${styles.home} ${rank ? "" : styles.homeAlone}`}>
-              <ProvinceBadge province={home} decorative className={styles.homeBadge} />
-              <p className={styles.homeText}>
-                <span className={styles.homeLabel}>{homeLabel(home)}</span>
-                <span className={styles.homeName}>{home.name}</span>
-              </p>
+            <div className={styles.home}>
+              <ProvinceBadgeCard province={home} className={styles.homeTrigger}>
+                <ProvinceBadge province={home} decorative className={styles.homeBadge} />
+              </ProvinceBadgeCard>
             </div>
           )}
         </div>
@@ -249,6 +260,7 @@ function StatLink({ stat }: { stat: StatRow }) {
       ) : (
         <span className={styles.statValue}>{stat.value}</span>
       )}
+      <ChevronRight className={styles.statChevron} size={16} aria-hidden="true" />
     </>
   );
   if (stat.href) {
@@ -259,9 +271,82 @@ function StatLink({ stat }: { stat: StatRow }) {
     );
   }
   return (
-    <button type="button" className={styles.stat} onClick={stat.onSelect} disabled={!stat.onSelect}>
+    <button
+      type="button"
+      className={styles.stat}
+      onClick={() => {
+        stat.onSelect?.();
+        revealProfileTabs();
+      }}
+      disabled={!stat.onSelect}
+      aria-current={stat.active || undefined}
+      data-active={stat.active || undefined}
+    >
       {content}
     </button>
+  );
+}
+
+/** The home province badge's card: "Home province: Alberta". */
+function ProvinceBadgeCard({ province, className, children }: { province: Province; className?: string; children: ReactNode }) {
+  const title = `${homeLabel(province)}: ${province.name}`;
+  return (
+    <DetailCard
+      label={title}
+      className={className}
+      body={<BadgeCardBody art={<ProvinceBadge province={province} decorative />} title={title} />}
+    >
+      {children}
+    </DetailCard>
+  );
+}
+
+/**
+ * A trail stamp's card: the stamp, the trail's name and park, its difficulty
+ * and when it was hiked, with a link to the trail.
+ */
+function TrailBadgeCard({
+  trail,
+  hikedOn,
+  datesHidden,
+  owner,
+  mine,
+  className,
+  children,
+}: {
+  trail: TrailListItem;
+  hikedOn: string | null | undefined;
+  datesHidden: boolean;
+  owner: string;
+  mine: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  const hiked = trailBadgeHiked(hikedOn, datesHidden);
+  return (
+    <DetailCard
+      label={`${trail.name}: ${mine ? "your" : `${owner}'s`} trail badge details`}
+      dialogLabel={`${trail.name} badge details`}
+      earned
+      className={className}
+      body={
+        <BadgeCardBody
+          art={<TrailBadge name={trail.name} terrain={trail.terrain} colour={groupColour(`region:${trail.region}`)} hiked />}
+          status={mine ? "Trail badge" : `${owner}'s trail badge`}
+          title={trail.name}
+          sub={trail.park_name ?? trail.region}
+          earned
+        >
+          <CardLine muted>
+            <span>{TERRAIN_LABELS[trail.terrain]}</span>
+            {hiked && <span>{hiked}</span>}
+          </CardLine>
+        </BadgeCardBody>
+      }
+      footer={<Link href={`/trails?id=${encodeURIComponent(trail.id)}`}>Open the trail page</Link>}
+    >
+      {children}
+    </DetailCard>
   );
 }
 
@@ -290,9 +375,12 @@ export function FeaturedBadgeSlots({
   ownerName,
   mine = false,
   loading = false,
+  datesHidden = false,
   onEdit,
 }: {
   badges: FeaturedBadge[];
+  /** The owner hides their hike dates from this viewer. */
+  datesHidden?: boolean;
   /** The profile's display name, for milestone cards ("Earned by Ana"). */
   ownerName: string;
   /** The viewer is looking at their own badges. */
@@ -322,28 +410,29 @@ export function FeaturedBadgeSlots({
           const badge = badges[index];
           if (loading) return <li key={index} className={`${ui.skeleton} ${styles.badgeSkeleton}`} aria-hidden="true" />;
           if (!badge) return <li key={index} className={styles.badgeEmpty} aria-label="Empty badge slot" />;
-          const name = badgeName(badge);
           const art = <BadgeArt badge={badge} className={styles.badge} />;
           return (
             <li key={badgeKey(badge)} className={styles.badgeSlot}>
               {badge.kind === "trail" ? (
-                <Link href={`/trails?id=${encodeURIComponent(badge.trail.id)}`} className={styles.badgeLink} aria-label={`${name}: open the trail`}>
+                <TrailBadgeCard
+                  trail={badge.trail}
+                  hikedOn={badge.hiked_on}
+                  datesHidden={datesHidden}
+                  owner={ownerName}
+                  mine={mine}
+                  className={styles.badgeLink}
+                >
                   {art}
-                </Link>
+                </TrailBadgeCard>
               ) : badge.kind === "milestone" ? (
                 <MilestoneBadgeCard badge={badge.badge} owner={ownerName} mine={mine} className={styles.badgeLink}>
                   {art}
                 </MilestoneBadgeCard>
-              ) : (
-                <span className={styles.badgeLink} tabIndex={0}>
+              ) : findProvince(badge.province) ? (
+                <ProvinceBadgeCard province={findProvince(badge.province)!} className={styles.badgeLink}>
                   {art}
-                </span>
-              )}
-              {badge.kind !== "milestone" && (
-                <span className={styles.badgeTip} aria-hidden="true">
-                  {name}
-                </span>
-              )}
+                </ProvinceBadgeCard>
+              ) : null}
             </li>
           );
         })}
@@ -420,7 +509,7 @@ export function ProfileTabs<K extends string>({
   };
 
   return (
-    <div className={styles.tabBar} data-fade-start={fade.start || undefined} data-fade-end={fade.end || undefined}>
+    <div id="profile-tabs" className={styles.tabBar} data-fade-start={fade.start || undefined} data-fade-end={fade.end || undefined}>
       <div ref={listRef} className={styles.tabs} role="tablist" aria-label={label} onScroll={measure}>
         {tabs.map((item, index) => (
           <button

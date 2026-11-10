@@ -23,7 +23,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.auth import CurrentUser, get_current_user
@@ -158,6 +158,8 @@ class PublicProfileOut(BaseModel):
     follows_you: bool = False
     # Everything below is None when not viewable, or when that section is hidden.
     bio: str | None = None
+    # The month they joined, "2026-10" (never the day), for "Joined October 2026".
+    joined: str | None = None
     # Two-letter code; only with "Home province" switched on (off by default).
     home_province: str | None = None
     rank: PublicRank | None = None
@@ -285,6 +287,16 @@ def _trip_plans(db: Session, owner: UUID) -> list[PublicTripPlan]:
     ]
 
 
+def _joined_month(db: Session, profile: Profile) -> str | None:
+    """The sign-up month: from auth.users like the owner's own profile
+    (me_account._profile_out), falling back to the profile row's creation."""
+    joined = None
+    if db.get_bind().dialect.name == "postgresql":
+        joined = db.scalar(text("select created_at from auth.users where id = :id"), {"id": profile.id})
+    joined = joined or profile.created_at
+    return joined.strftime("%Y-%m") if joined else None
+
+
 def build_public_profile(
     db: Session, profile: Profile, seen: Visibility, today: date, viewer_id: UUID | None = None
 ) -> PublicProfileOut:
@@ -308,6 +320,7 @@ def build_public_profile(
     if not seen.opened:
         return out
     out.bio = profile.bio
+    out.joined = _joined_month(db, profile)
     province = profile.home_province if seen.shows("home_province") else None
     out.home_province = province
     if seen.shows("rank"):

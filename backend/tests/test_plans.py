@@ -281,3 +281,10 @@ def test_list_is_soonest_first(client, trail, fetch, owner):
     later = create(client, owner[1], plan_body(trail, start_date="2026-11-02"))
     sooner = create(client, owner[1], plan_body(trail, start_date="2026-10-16"))
     assert [p["id"] for p in client.get("/api/me/plans", headers=owner[1]).json()] == [sooner["id"], later["id"]]
+
+
+def test_list_carries_the_trail_photo_for_thumbnails(client, trail, fetch, owner):
+    create(client, owner[1], plan_body(trail))
+    [plan] = client.get("/api/me/plans", headers=owner[1]).json()
+    # No approved photo in the test world, so the profile shows the topo fallback.
+    assert "photo" in plan["trail"] and plan["trail"]["photo"] is None
