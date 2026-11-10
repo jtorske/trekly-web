@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { ActivityPage, ActivityScope, HighFivers, TrendingTrail } from "./activity";
+import type { ActivityPage, ActivityScope, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
 
 /** Signed in, the token is sent (for "high-fived", "yours" and the province); guests get the same posts. */
 export const getActivity = (scope: ActivityScope, cursor: string | null, signedIn: boolean, signal?: AbortSignal) => {
@@ -24,3 +24,28 @@ export const getHighFivers = (postId: string, signedIn: boolean, signal?: AbortS
 /** Most logged or saved this week, topped up with popular trails. */
 export const getTrending = (signal?: AbortSignal) =>
   apiFetch<{ trails: TrendingTrail[] }>("/api/activity/trending", { signal });
+
+const pageQuery = (cursor: string | null, limit?: number) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set("cursor", cursor);
+  if (limit) query.set("limit", String(limit));
+  const text = query.toString();
+  return text ? `?${text}` : "";
+};
+
+/** The signed-in user's own posts, all of them, shown to others or not. */
+export const getMyActivity = (cursor: string | null, limit?: number, signal?: AbortSignal) =>
+  apiFetch<ProfileActivityPage>(`/api/me/activity${pageQuery(cursor, limit)}`, { auth: true, signal });
+
+/** A profile's Activity tab as visitors see it; a 404 when it isn't open to them. */
+export const getProfileActivity = (
+  username: string,
+  cursor: string | null,
+  signedIn: boolean,
+  limit?: number,
+  signal?: AbortSignal,
+) =>
+  apiFetch<ProfileActivityPage>(`/api/profiles/${encodeURIComponent(username)}/activity${pageQuery(cursor, limit)}`, {
+    auth: signedIn,
+    signal,
+  });

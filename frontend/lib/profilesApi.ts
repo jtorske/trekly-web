@@ -94,6 +94,8 @@ export interface PublicProfile {
   gear: { items: PublicGearItem[]; setups: PublicSetup[] } | null;
   saved_trails: TrailListItem[] | null;
   trip_plans: PublicTripPlan[] | null;
+  /** Posts visitors can see; null when there's no Activity tab (private, or sharing off). */
+  activity_count: number | null;
 }
 
 export const REPORT_REASONS = [

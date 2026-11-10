@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Flag, Footprints, Tent } from "lucide-react";
@@ -23,6 +23,9 @@ import {
   type TabItem,
 } from "@/app/profile/ProfileShell";
 import JournalTab from "@/app/profile/JournalTab";
+import ActivityTab from "@/app/profile/ActivityTab";
+import { usePostPages } from "@/app/activity/usePostPages";
+import { getProfileActivity } from "@/lib/activityApi";
 import shell from "@/app/profile/shell.module.css";
 import ui from "@/components/ui.module.css";
 import GearList from "@/app/gear/GearList";
@@ -49,7 +52,7 @@ import VerifiedCheck from "@/components/VerifiedCheck";
 import { undatedLabel } from "@/lib/hikeDate";
 import styles from "./public.module.css";
 
-type PublicTab = "journal" | "gear" | "trails" | "trips";
+type PublicTab = "activity" | "journal" | "gear" | "trails" | "trips";
 
 type Load =
   | { status: "loading" }
@@ -68,7 +71,7 @@ const badgeColour = (entry: PublicJournalEntry) => groupColour(`region:${entry.t
 export default function PublicProfileView({ username }: { username: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, status } = useAuth();
   const { profile: me } = useProfile();
   const [units] = useUnits();
   const [state, setState] = useState<{ username: string; load: Load } | null>(null);
@@ -102,6 +105,14 @@ export default function PublicProfileView({ username }: { username: string }) {
   }, [isOwner]);
 
   const load: Load = state && state.username === handle ? state.load : { status: "loading" };
+  // The Activity tab, only when the API opens it to visitors (public, sharing on).
+  const signedIn = status === "signedIn";
+  const activityOpen = load.status === "ready" && load.profile.activity_count !== null;
+  const fetchActivity = useCallback(
+    (cursor: string | null, signal?: AbortSignal) => getProfileActivity(handle, cursor, signedIn, undefined, signal),
+    [handle, signedIn],
+  );
+  const activity = usePostPages(activityOpen && status !== "loading" ? `u:${handle}:${signedIn}` : null, fetchActivity);
   // Preview and the open tab both live in the query string; changing one keeps the other.
   const go = (changes: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -161,6 +172,9 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   // Only the sections the owner shares come back from the API (all null when private).
   const tabs: TabItem<PublicTab>[] = [];
+  if (profile.activity_count !== null) {
+    tabs.push({ key: "activity", label: "Activity", count: activity.total ?? profile.activity_count });
+  }
   if (profile.journal) tabs.push({ key: "journal", label: "Journal", count: profile.journal.entries.length });
   if (profile.gear) tabs.push({ key: "gear", label: "Gear", count: profile.gear.items.length });
   if (profile.saved_trails) tabs.push({ key: "trails", label: "Saved trails", count: profile.saved_trails.length });
@@ -235,6 +249,15 @@ export default function PublicProfileView({ username }: { username: string }) {
         <>
           <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label={`${name}'s profile sections`} />
           <ProfilePanel tab={tab}>
+            {tab === "activity" && (
+              <ActivityTab
+                pages={activity}
+                owner={false}
+                signedIn={signedIn}
+                viewer={me?.username ?? null}
+                name={name}
+              />
+            )}
             {tab === "journal" && profile.journal && (
               <>
                 <JournalTab

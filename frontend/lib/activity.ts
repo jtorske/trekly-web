@@ -71,6 +71,16 @@ export interface ActivityPage {
   province: string | null;
 }
 
+/** A profile's Activity tab, newest first. */
+export interface ProfileActivityPage {
+  items: ActivityPost[];
+  next_cursor: string | null;
+  /** All posts; on the first page only. */
+  total: number | null;
+  /** The owner's own view only: whether others can see their posts now. */
+  sharing: boolean | null;
+}
+
 export type ActivityScope = "everyone" | "province";
 
 /** Why posts can't show in the feed, or null when sharing works. */

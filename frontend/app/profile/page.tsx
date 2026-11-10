@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState, type ComponentProps } from "react";
+import { Suspense, useCallback, useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
@@ -11,6 +11,9 @@ import { useProfilePhoto } from "@/app/settings/ProfilePhoto";
 import { useMyGear } from "@/app/gear/useMyGear";
 import { useSetups } from "@/app/gear/useSetups";
 import type { Profile } from "@/lib/accountApi";
+import { getMyActivity } from "@/lib/activityApi";
+import { getPrivacy, type PrivacySettings } from "@/lib/profilesApi";
+import { usePostPages } from "@/app/activity/usePostPages";
 import { usePlans } from "@/lib/usePlans";
 import { undatedLabel } from "@/lib/hikeDate";
 import { useHikeLogs } from "@/lib/useHikeLogs";
@@ -38,6 +41,7 @@ import BadgePicker from "./BadgePicker";
 import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
 import VisitorsCard from "./VisitorsCard";
+import ActivityTab, { RecentActivityCard } from "./ActivityTab";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
 
@@ -50,7 +54,7 @@ function OwnerCard({
   return <IdentityCard {...card} avatar={photo.avatar} notice={photo.status} />;
 }
 
-const TAB_KEYS = ["overview", "gear", "trails", "trips", "journal"] as const;
+const TAB_KEYS = ["overview", "activity", "journal", "gear", "trails", "trips"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 function ProfileContent() {
@@ -68,6 +72,19 @@ function ProfileContent() {
   const { streak, grew: streakGrew } = useStreak();
   const [featured, setFeatured] = useState<FeaturedBadges | null>(null);
   const [pickingBadges, setPickingBadges] = useState(false);
+  // Their own posts, for the Activity tab and the Overview's Recent activity card.
+  const fetchActivity = useCallback(
+    (cursor: string | null, signal?: AbortSignal) => getMyActivity(cursor, undefined, signal),
+    [],
+  );
+  const activity = usePostPages(user ? `me:${user.id}` : null, fetchActivity);
+  const [privacy, setPrivacy] = useState<PrivacySettings | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    getPrivacy(controller.signal).then(setPrivacy).catch(() => undefined);
+    return () => controller.abort();
+  }, [user]);
   const hikeCount = hikes.loading || hikes.error ? null : hikes.logs.length;
 
   // Deleting a hike can remove a featured badge, so reload when the count changes.
@@ -121,10 +138,11 @@ function ProfileContent() {
 
   const tabs: TabItem<TabKey>[] = [
     { key: "overview", label: "Overview" },
+    { key: "activity", label: "Activity", count: activity.error ? undefined : activity.total },
+    { key: "journal", label: "Journal", count: hikeCount },
     { key: "gear", label: "My gear", count: gearCount },
     { key: "trails", label: "Saved trails", count: savedCount },
     { key: "trips", label: "Trips", count: tripCount },
-    { key: "journal", label: "Journal", count: hikeCount },
   ];
 
   const aside = (
@@ -183,6 +201,7 @@ function ProfileContent() {
               </div>
             )}
             <VisitorsCard />
+            <RecentActivityCard pages={activity} onSeeAll={() => setTab("activity")} />
             <SectionCard
               id="setups"
               title="My setups"
@@ -251,6 +270,18 @@ function ProfileContent() {
           <SectionCard id="trails" title="Saved trails" count={savedCount ?? undefined}>
             <SavedTrailList data={savedTrails} units={units} />
           </SectionCard>
+        )}
+
+        {tab === "activity" && (
+          <ActivityTab
+            pages={activity}
+            owner
+            signedIn
+            viewer={profile.username}
+            name={name}
+            privacy={privacy}
+            onPrivacy={setPrivacy}
+          />
         )}
 
         {tab === "journal" && <JournalTab

@@ -41,6 +41,7 @@ from app.models.visit_streak import VisitStreak
 from app.notify import Email, EmailSender, email_sender_from_env
 from app.points import user_rank
 from app.privacy import Visibility, visibility
+from app.routers.activity import profile_activity_count
 from app.routers.availability import get_today
 from app.routers.me_gear import _item_query
 from app.schemas.gear import CapacityOut, CategoryRef, ProductSummaryOut, VariantOut, WeightOut
@@ -151,6 +152,9 @@ class PublicProfileOut(BaseModel):
     gear: PublicGear | None = None
     saved_trails: list[TrailListItemOut] | None = None
     trip_plans: list[PublicTripPlan] | None = None
+    # How many Activity posts visitors can see; None when there's no Activity
+    # tab (private, or "Share my activity in the feed" off).
+    activity_count: int | None = None
 
 
 def find_listed(db: Session, username: str) -> tuple[Profile, Visibility]:
@@ -264,7 +268,7 @@ def _trip_plans(db: Session, owner: UUID) -> list[PublicTripPlan]:
     ]
 
 
-def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> PublicProfileOut:
+def build_public_profile(db: Session, profile: Profile, seen: Visibility, today: date) -> PublicProfileOut:
     out = PublicProfileOut(
         username=profile.username,
         display_name=profile.display_name,
@@ -292,14 +296,17 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility) -> Pub
         out.saved_trails = _saved_trails(db, profile.id)
     if seen.shows("trip_plans"):
         out.trip_plans = _trip_plans(db, profile.id)
+    out.activity_count = profile_activity_count(db, profile, seen, today)
     return out
 
 
 @router.get("/{username}", response_model=PublicProfileOut)
-def get_public_profile(username: str, response: Response, db: Session = Depends(get_db)):
+def get_public_profile(
+    username: str, response: Response, db: Session = Depends(get_db), today: date = Depends(get_today)
+):
     response.headers.update(NO_STORE)
     profile, seen = find_listed(db, username)
-    return build_public_profile(db, profile, seen)
+    return build_public_profile(db, profile, seen, today)
 
 
 # ----------------------------------------------------------------- reports

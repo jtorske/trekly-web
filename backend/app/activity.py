@@ -45,7 +45,7 @@ from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
 from app.points import rank_for, score
-from app.privacy import visibility
+from app.privacy import Visibility, visibility
 
 # A hike dated up to a day ahead is allowed (time zones), as in app/routers/me_hike_logs.py.
 FUTURE_SLACK = timedelta(days=1)
@@ -217,3 +217,10 @@ def province_where(province: str | None):
     if not province:
         return false()
     return and_(Profile.home_province == province, ProfileSettings.show_home_province)
+
+
+def activity_open(seen: Visibility) -> bool:
+    """Whether visitors get a profile's Activity tab: the profile is public
+    (approved followers will count too once follows exist) and its owner
+    shares their activity. Each post on it still follows visible_where."""
+    return seen.public and seen.settings is not None and bool(seen.settings.share_activity)

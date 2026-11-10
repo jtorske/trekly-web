@@ -28,7 +28,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, folded_where, is_visible, province_where, readable_query,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, is_visible, province_where,
+    readable_query,
 )
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
@@ -40,11 +41,15 @@ from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
 from app.models.trail import Trail
 from app.points_config import RANKS
+from app.privacy import Visibility, visibility
 from app.routers.availability import get_today
 from app.routers.trails import live_trails
 from app.schemas.trail import TrailListItemOut
 
 router = APIRouter(prefix="/api/activity", tags=["activity"])
+# A profile's Activity tab (/u/{username}), and the owner's own view of theirs (/profile).
+profile_router = APIRouter(prefix="/api/profiles", tags=["activity"])
+me_router = APIRouter(prefix="/api/me/activity", tags=["activity"])
 
 PAGE_SIZE = 20
 NO_STORE = {"Cache-Control": "no-store"}
@@ -99,6 +104,16 @@ class ActivityPostOut(BaseModel):
     high_fived: bool = False
     mine: bool = False
     only_you: bool = False
+
+
+class ProfileActivityPage(BaseModel):
+    items: list[ActivityPostOut]
+    # Pass back as `cursor` for the next page; None at the end.
+    next_cursor: str | None
+    # How many posts in all; on the first page only (None when a cursor is passed).
+    total: int | None = None
+    # The owner's view only: whether others can see their posts right now.
+    sharing: bool | None = None
 
 
 class ActivityPage(BaseModel):
@@ -274,28 +289,16 @@ def trending(db: Session = Depends(get_db), limit: int = Query(default=TRENDING_
     return TrendingOut(trails=out)
 
 
-@router.get("", response_model=ActivityPage)
-def feed(
-    response: Response,
-    scope: Literal["everyone", "province"] = "everyone",
-    cursor: str | None = Query(default=None, max_length=120),
-    limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
-    viewer: CurrentUser | None = Depends(optional_user),
-    db: Session = Depends(get_db),
-    today: date = Depends(get_today),
-):
-    response.headers.update(NO_STORE)
-    viewer_profile = db.get(Profile, viewer.id) if viewer else None
-    province = viewer_profile.home_province if viewer_profile else None
-    viewer_id = viewer.id if viewer else None
+def _cards(today: date, viewer_id: UUID | None):
+    """Posts as this reader sees them as cards: what anyone may see plus their
+    own, with milestones and ranks folded into the hike that earned them."""
+    return readable_query(today, viewer_id).where(~folded_where(today, viewer_id))
 
-    query = (
-        readable_query(today, viewer_id)
-        .where(~folded_where(today, viewer_id))
-        .options(joinedload(HikeLog.trail))
-    )
-    if scope == "province":
-        query = query.where(province_where(province))
+
+def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUser | None,
+          today: date) -> tuple[list[ActivityPostOut], str | None]:
+    """One page of cards, newest first, and the cursor for the next."""
+    query = query.options(joinedload(HikeLog.trail))
     if cursor:
         when, post_id = _parse_cursor(cursor)
         query = query.where(or_(
@@ -319,12 +322,35 @@ def feed(
         (item, row) for item, row in ((_out(*row, counts, mine_ids, viewer, badge_dates), row) for row in rows)
         if item is not None
     ]
-    _fold_earned(db, kept, today, viewer_id, badge_dates)
-    return ActivityPage(
-        items=[item for item, _ in kept],
-        next_cursor=_cursor(rows[-1][0]) if more else None,
-        province=province,
-    )
+    _fold_earned(db, kept, today, viewer.id if viewer else None, badge_dates)
+    return [item for item, _ in kept], (_cursor(rows[-1][0]) if more else None)
+
+
+def _count(db: Session, query) -> int:
+    """How many cards a listing query holds in all."""
+    return db.scalar(select(func.count()).select_from(query.with_only_columns(ActivityPost.id).subquery())) or 0
+
+
+@router.get("", response_model=ActivityPage)
+def feed(
+    response: Response,
+    scope: Literal["everyone", "province"] = "everyone",
+    cursor: str | None = Query(default=None, max_length=120),
+    limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
+    viewer: CurrentUser | None = Depends(optional_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    response.headers.update(NO_STORE)
+    viewer_profile = db.get(Profile, viewer.id) if viewer else None
+    province = viewer_profile.home_province if viewer_profile else None
+    viewer_id = viewer.id if viewer else None
+
+    query = _cards(today, viewer_id)
+    if scope == "province":
+        query = query.where(province_where(province))
+    items, next_cursor = _page(db, query, cursor, limit, viewer, today)
+    return ActivityPage(items=items, next_cursor=next_cursor, province=province)
 
 
 def _visible_or_404(db: Session, post_id: UUID, today: date) -> None:
@@ -423,3 +449,64 @@ def delete_post(post_id: UUID, user: CurrentUser = Depends(get_current_user), db
     db.delete(post)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ------------------------------------------------- a profile's Activity tab
+
+
+def _profile_cards(profile: Profile, today: date, viewer_id: UUID | None):
+    return _cards(today, viewer_id).where(ActivityPost.user_id == profile.id)
+
+
+def profile_activity_count(db: Session, profile: Profile, seen: Visibility, today: date) -> int | None:
+    """The Activity tab's count for visitors, or None when there's no tab for them."""
+    if not activity_open(seen):
+        return None
+    return _count(db, _profile_cards(profile, today, None))
+
+
+@profile_router.get("/{username}/activity", response_model=ProfileActivityPage)
+def profile_activity(
+    username: str,
+    response: Response,
+    cursor: str | None = Query(default=None, max_length=120),
+    limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
+    viewer: CurrentUser | None = Depends(optional_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    """The Activity tab on /u/{username}: their posts as the feed shows them,
+    by the feed's own rules. 404 unless the tab is open to visitors (a public
+    profile with sharing on; app/activity.py activity_open). The owner here
+    sees what the feed shows them: their posts, marked "only you" where so."""
+    response.headers.update(NO_STORE)
+    profile = db.scalar(select(Profile).where(Profile.username == username.strip().lower()))
+    seen = visibility(db, profile) if profile is not None else None
+    if seen is None or not seen.listed or not activity_open(seen):
+        raise HTTPException(status_code=404, detail="No activity to show")
+    query = _profile_cards(profile, today, viewer.id if viewer else None)
+    items, next_cursor = _page(db, query, cursor, limit, viewer, today)
+    total = None if cursor else _count(db, _profile_cards(profile, today, None))
+    return ProfileActivityPage(items=items, next_cursor=next_cursor, total=total)
+
+
+@me_router.get("", response_model=ProfileActivityPage)
+def my_activity(
+    response: Response,
+    cursor: str | None = Query(default=None, max_length=120),
+    limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
+    user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    """The owner's Activity tab on /profile: all their posts, shown to others
+    or not (those are marked only_you). `sharing`: whether others can see them."""
+    response.headers.update(NO_STORE)
+    query = _cards(today, user.id).where(ActivityPost.user_id == user.id)
+    items, next_cursor = _page(db, query, cursor, limit, user, today)
+    return ProfileActivityPage(
+        items=items,
+        next_cursor=next_cursor,
+        total=None if cursor else _count(db, query),
+        sharing=can_share(db, user.id),
+    )
