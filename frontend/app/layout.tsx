@@ -34,6 +34,9 @@ const sans = DM_Sans({
 export const metadata: Metadata = {
   title: "Trekly",
   description: "Discover hiking trails and adventures",
+  verification: {
+    google: "eJGo3TdpJRHqJkDda3P2iOGgFzMYuAyD1PL2CKOlvAQ",
+  },
 };
 
 export default function RootLayout({
