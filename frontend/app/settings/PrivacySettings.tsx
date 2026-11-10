@@ -5,6 +5,7 @@ import Link from "next/link";
 import ui from "@/components/ui.module.css";
 import { activityBlocker } from "@/lib/activity";
 import { communityBlocker } from "@/lib/hikedBy";
+import { summaryLine } from "@/lib/nudges";
 import { getPrivacy, publicProfilePath, updatePrivacy, type PrivacySettings, type PrivacyUpdate } from "@/lib/profilesApi";
 import { SECTION_LABELS, type SectionSetting } from "@/lib/publicProfile";
 import styles from "./settings.module.css";
@@ -128,6 +129,9 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
   const username = settings.username;
   return (
     <div className={styles.form}>
+      <p className={styles.privacySummary}>
+        {summaryLine(settings)}
+      </p>
       {settings.hidden_by_moderators && (
         <p className={ui.error} role="alert">
           Trekly&apos;s moderators have hidden your profile, so nobody else can see it, whatever these settings say.

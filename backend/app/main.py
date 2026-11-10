@@ -18,6 +18,7 @@ from app.routers import (
     me_hike_logs,
     me_milestones,
     me_plans,
+    me_nudges,
     me_preferences,
     me_privacy,
     me_rank,
@@ -84,6 +85,7 @@ app.include_router(me_rank.router)
 app.include_router(me_visit.router)
 app.include_router(admin_trail_photos.router)
 app.include_router(me_privacy.router)
+app.include_router(me_nudges.router)
 app.include_router(me_preferences.router)
 app.include_router(public_profiles.router)
 app.include_router(admin.router)

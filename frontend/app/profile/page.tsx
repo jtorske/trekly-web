@@ -37,6 +37,7 @@ import {
 import BadgePicker from "./BadgePicker";
 import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
+import VisitorsCard from "./VisitorsCard";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
 
@@ -181,6 +182,7 @@ function ProfileContent() {
                 , lay out the gear you own, and bookmark trails you want to hike.
               </div>
             )}
+            <VisitorsCard />
             <SectionCard
               id="setups"
               title="My setups"

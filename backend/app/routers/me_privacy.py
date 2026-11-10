@@ -15,6 +15,7 @@ from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile
 from app.models.privacy import ProfileModeration
+from app.nudges import dismiss_for_settings
 from app.privacy import ensure_settings
 
 router = APIRouter(prefix="/api/me/privacy", tags=["account"])
@@ -89,5 +90,8 @@ def update_privacy(
     # setup flow needs this before it can finish (app/routers/me_preferences.py).
     if "is_private" in changes:
         settings.visibility_chosen_at = datetime.now(timezone.utc)
+    # Turning a community setting on puts its nudges away for good
+    # (app/nudges.py), so turning it off later doesn't bring them back.
+    dismiss_for_settings(db, user.id, {field for field, value in changes.items() if value is True})
     db.commit()
     return _out(db, user)

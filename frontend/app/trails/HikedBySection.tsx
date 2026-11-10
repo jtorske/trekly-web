@@ -14,29 +14,42 @@ import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
 import { useProfile } from "@/lib/useProfile";
 import VerifiedCheck from "@/components/VerifiedCheck";
+import Nudge from "@/components/Nudge";
+import { useNudge } from "@/lib/useNudge";
 import styles from "./HikedBySection.module.css";
 
 /**
  * "Hiked by": opted-in hikers who logged this trail, newest first, and up
  * to three of their trip notes. The API decides who appears; the section
- * stays hidden until it has someone to show.
+ * stays hidden until it has someone to show, unless the viewer hiked this
+ * trail and could appear here: then a quiet line offers "Show me in
+ * community features" (one tap; put away for good on every trail).
  */
 export default function HikedBySection({
   trailId,
   trailName,
   refreshKey,
+  hikedByMe,
   className,
 }: {
   trailId: string;
   trailName: string;
   /** Changes when the viewer logs, edits or removes their own hike here. */
   refreshKey: string;
+  /** The viewer has this trail in their journal. */
+  hikedByMe: boolean;
   className?: string;
 }) {
   const [data, setData] = useState<{ trailId: string; hikers: TrailHikers } | null>(null);
   const [reporting, setReporting] = useState<CommunityNote | null>(null);
   const { user } = useAuth();
   const { profile: me } = useProfile();
+  const nudge = useNudge("hiked_by", hikedByMe);
+  // Bumped after they turn the setting on, so they appear straight away.
+  const [joined, setJoined] = useState(0);
+  const turnOn = async () => {
+    if (await nudge.turnOn()) setJoined((n) => n + 1);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,10 +58,27 @@ export default function HikedBySection({
       // A side section: if it fails, the page simply goes without it.
       .catch(() => undefined);
     return () => controller.abort();
-  }, [trailId, refreshKey]);
+  }, [trailId, refreshKey, joined]);
 
   const hikers = data?.trailId === trailId ? data.hikers : null;
-  if (!hikers || hikers.hikers.length === 0) return null;
+  if (!hikers) return null;
+  const offer = nudge.show && (
+    <Nudge action="Turn on community features" busy={nudge.busy} onTurnOn={() => void turnOn()} onDismiss={nudge.dismiss}>
+      Want to appear here?
+    </Nudge>
+  );
+  if (hikers.hikers.length === 0) {
+    if (!offer) return null;
+    return (
+      <section className={className} aria-labelledby="hiked-by-title">
+        <h2 id="hiked-by-title" className={styles.title}>
+          Hiked by
+        </h2>
+        <p className={styles.others}>Nobody&apos;s listed here yet.</p>
+        {offer}
+      </section>
+    );
+  }
 
   const others = othersLabel(hikers.others);
   // Reporting needs an account, and nobody reports themselves.
@@ -69,6 +99,7 @@ export default function HikedBySection({
         </ul>
         {others && <span className={styles.others}>{others}</span>}
       </div>
+      {offer}
 
       {hikers.notes.length > 0 && (
         <>

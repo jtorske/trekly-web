@@ -187,10 +187,8 @@
   color: var(--ink);
 }
 
-.shareNote {
-  padding-bottom: 0.4rem;
-  color: var(--soft-ink);
-  font-size: 0.85rem;
+.nudge {
+  margin-bottom: 1rem;
 }
 
 .inlineLink {

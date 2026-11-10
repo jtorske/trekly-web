@@ -153,3 +153,14 @@ def test_only_the_streak_switch_is_client_writable(conn):
     assert not conn.execute(text(
         "SELECT has_column_privilege('anon', 'public.profile_settings', 'show_visit_streak', 'UPDATE')"
     )).scalar_one()
+
+
+@pytest.mark.parametrize("role", ROLES)
+def test_nudge_dismissals_are_out_of_reach_of_clients(conn, role):
+    # Only the API puts nudges away (migration d2b6e8f4a1c9), so a browser
+    # can neither read them nor bring one back.
+    assert conn.execute(text("SELECT relrowsecurity FROM pg_class WHERE oid = 'public.nudge_dismissals'::regclass")).scalar_one()
+    act_as(conn, role)
+    assert refused(conn, "SELECT * FROM public.nudge_dismissals")
+    assert refused(conn, "INSERT INTO public.nudge_dismissals (user_id, nudge) VALUES (gen_random_uuid(), 'hiked_by')")
+    assert refused(conn, "DELETE FROM public.nudge_dismissals")

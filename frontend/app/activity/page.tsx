@@ -8,12 +8,13 @@ import ui from "@/components/ui.module.css";
 import { appendPage, deleteKey, type ActivityPost, type ActivityScope } from "@/lib/activity";
 import { getActivity } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
-import { getPrivacy, onPrivacyUpdated } from "@/lib/profilesApi";
 import { useHidden } from "@/lib/useHidden";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
-import { sectionHref } from "@/app/settings/settingsSections";
 import Composer, { type ComposerHandle } from "./Composer";
+import Nudge from "@/components/Nudge";
+import { toast } from "@/lib/toast";
+import { useNudge } from "@/lib/useNudge";
 import PostCard from "./PostCard";
 import { HikersYouMightKnow, ProfileCard, RecentlyEarned, TrendingTrails } from "./Sidebar";
 import styles from "./activity.module.css";
@@ -46,7 +47,6 @@ export default function ActivityPage() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sharing, setSharing] = useState<boolean | null>(null);
   const sentinel = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const composer = useRef<ComposerHandle>(null);
@@ -87,20 +87,12 @@ export default function ActivityPage() {
     return () => controller.abort();
   }, [status, load]);
 
-  // Is the viewer's own activity shared? A pointer to the setting if not, kept
-  // in step with changes made in another component (the composer's link).
-  useEffect(() => {
-    if (!signedIn) return;
-    const controller = new AbortController();
-    getPrivacy(controller.signal)
-      .then((settings) => setSharing(settings.share_activity))
-      .catch(() => undefined);
-    const stop = onPrivacyUpdated((settings) => setSharing(settings.share_activity));
-    return () => {
-      controller.abort();
-      stop();
-    };
-  }, [signedIn]);
+  // Not sharing yet? A small card offers the setting until they put it away
+  // or turn it on (the API decides; it never shows to guests).
+  const nudge = useNudge("activity_card");
+  const turnOnSharing = async () => {
+    if (await nudge.turnOn()) toast.success("Sharing is on. Tick “Share to Activity” when you log a hike.");
+  };
 
   // Infinite scroll: the next page once the end of the list is near. On wide
   // screens the feed column scrolls rather than the page, so watch inside it.
@@ -257,15 +249,20 @@ export default function ActivityPage() {
                   </button>
                 )}
               </div>
-              {signedIn && sharing === false && (
-                <p className={styles.shareNote}>
-                  Your activity isn&apos;t shared.{" "}
-                  <Link href={sectionHref("privacy")} className={styles.inlineLink}>
-                    Turn it on
-                  </Link>
-                </p>
-              )}
             </div>
+
+            {nudge.show && (
+              <Nudge
+                card
+                action="Turn on sharing"
+                busy={nudge.busy}
+                onTurnOn={() => void turnOnSharing()}
+                onDismiss={nudge.dismiss}
+                className={styles.nudge}
+              >
+                You&apos;re not sharing yet. Your hikes and badges could appear here.
+              </Nudge>
+            )}
 
             {body}
           </div>

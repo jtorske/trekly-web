@@ -20,6 +20,7 @@ from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
+from app.models.nudge import NudgeDismissal
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
@@ -296,6 +297,7 @@ def delete_account(
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))
+    db.execute(delete(NudgeDismissal).where(NudgeDismissal.user_id == user.id))
     db.execute(delete(ProfilePreferences).where(ProfilePreferences.user_id == user.id))
     db.execute(delete(Profile).where(Profile.id == user.id))
     if _is_postgres(db):

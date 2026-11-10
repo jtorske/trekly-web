@@ -247,6 +247,7 @@ function Flow({
   // No answer to start with: everyone chooses Public or Private themselves.
   const [isPrivate, setIsPrivate] = useState<boolean | null>(null);
   const [shareActivity, setShareActivity] = useState(privacy.share_activity);
+  const [inCommunity, setInCommunity] = useState(privacy.show_in_community);
   const [savedPrivacy, setSavedPrivacy] = useState(privacy);
 
   // Every new screen: its heading takes focus (read out first), from the top.
@@ -332,13 +333,15 @@ function Flow({
         return {};
       case "privacy": {
         if (isPrivate === null) throw new StepProblem(CHOOSE_VISIBILITY);
-        // A private profile shares nothing, so the switch saves as off with it.
+        // A private profile shares nothing, so the community options save as off with it.
         const share = shareActivity && !isPrivate;
+        const community = inCommunity && !isPrivate;
         // is_private is sent even when unchanged: the API records that they
         // chose (it won't let the flow finish otherwise).
         setSavedPrivacy(await updatePrivacy({
           is_private: isPrivate,
           ...(share !== savedPrivacy.share_activity ? { share_activity: share } : {}),
+          ...(community !== savedPrivacy.show_in_community ? { show_in_community: community } : {}),
         }));
         return {};
       }
@@ -507,6 +510,8 @@ function Flow({
     setIsPrivate,
     shareActivity,
     setShareActivity,
+    inCommunity,
+    setInCommunity,
     journalShown: savedPrivacy.show_journal,
   });
 
@@ -642,6 +647,8 @@ interface ScreenProps {
   setIsPrivate: (value: boolean) => void;
   shareActivity: boolean;
   setShareActivity: (value: boolean) => void;
+  inCommunity: boolean;
+  setInCommunity: (value: boolean) => void;
   /** The Trail Journal section is shown (Privacy settings), which sharing needs. */
   journalShown: boolean;
 }
@@ -731,7 +738,7 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       />
     ),
   }),
-  privacy: ({ isPrivate, setIsPrivate, shareActivity, setShareActivity, journalShown }) => ({
+  privacy: ({ isPrivate, setIsPrivate, shareActivity, setShareActivity, inCommunity, setInCommunity, journalShown }) => ({
     title: "Who can see your profile?",
     lead: "You can change this any time.",
     body: (
@@ -756,17 +763,16 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
             },
           ]}
         />
-        <ShareActivitySwitch
-          checked={shareActivity && isPrivate !== true}
-          disabledReason={
-            isPrivate === true
-              ? "A private profile shares nothing in the feed."
-              : journalShown
-                ? null
-                : "Your Trail Journal is hidden, so there's nothing to share. Change it in Privacy settings."
-          }
-          onChange={setShareActivity}
-        />
+        {/* Only for a public profile: a private one shares nothing. Both start unticked. */}
+        {isPrivate === false && (
+          <CommunityChoices
+            shareActivity={shareActivity}
+            setShareActivity={setShareActivity}
+            inCommunity={inCommunity}
+            setInCommunity={setInCommunity}
+            journalShown={journalShown}
+          />
+        )}
         <p className={styles.note}>
           Pick exactly which sections show in <Link href="/settings/privacy">Privacy settings</Link>.
         </p>
@@ -942,36 +948,55 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
 
 const MAX_SUMMARY_BADGES = 6;
 
-function ShareActivitySwitch({
-  checked,
-  disabledReason,
-  onChange,
+function CommunityChoices({
+  shareActivity,
+  setShareActivity,
+  inCommunity,
+  setInCommunity,
+  journalShown,
 }: {
-  checked: boolean;
-  disabledReason: string | null;
-  onChange: (value: boolean) => void;
+  shareActivity: boolean;
+  setShareActivity: (value: boolean) => void;
+  inCommunity: boolean;
+  setInCommunity: (value: boolean) => void;
+  journalShown: boolean;
 }) {
-  const switchId = useId();
+  const options = [
+    {
+      key: "community",
+      label: "Show me in community features",
+      hint: "Your photo and username appear under “Hiked by” on trails you've logged.",
+      checked: inCommunity,
+      onChange: setInCommunity,
+    },
+    {
+      key: "activity",
+      label: "Share my activity in the feed",
+      hint: "Hikes you choose to share, and the badges they earn, appear on the Activity page.",
+      checked: shareActivity,
+      onChange: setShareActivity,
+    },
+  ];
   return (
-    <label className={styles.switchRow} htmlFor={switchId} data-disabled={disabledReason ? true : undefined}>
-      <span className={styles.switchText}>
-        <span className={styles.switchLabel}>Share my activity in the feed</span>
-        <span className={ui.hint} id={`${switchId}-hint`}>
-          {disabledReason ??
-            "Hikes you choose to share, and the badges they earn, appear on the Activity page. Never trip plans or future dates. Off until you turn it on."}
-        </span>
-      </span>
-      <input
-        id={switchId}
-        type="checkbox"
-        role="switch"
-        className={styles.switch}
-        checked={checked}
-        disabled={disabledReason !== null}
-        onChange={(event) => onChange(event.target.checked)}
-        aria-describedby={`${switchId}-hint`}
-      />
-    </label>
+    <fieldset className={styles.community} disabled={!journalShown}>
+      <legend className={styles.communityLegend}>Community (optional)</legend>
+      {options.map((option) => (
+        <label key={option.key} className={styles.communityRow}>
+          <input
+            type="checkbox"
+            checked={option.checked && journalShown}
+            onChange={(event) => option.onChange(event.target.checked)}
+          />
+          <span className={styles.switchText}>
+            <span className={styles.switchLabel}>{option.label}</span>
+            <span className={ui.hint}>{option.hint}</span>
+          </span>
+        </label>
+      ))}
+      {!journalShown && (
+        <p className={ui.hint}>Your Trail Journal is hidden, so there&apos;s nothing to share. Change it in Privacy settings.</p>
+      )}
+    </fieldset>
   );
 }
 

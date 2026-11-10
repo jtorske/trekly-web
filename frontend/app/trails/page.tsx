@@ -175,6 +175,7 @@ function TrailView({
         trailId={trail.id}
         trailName={trail.name}
         refreshKey={hikeLogs.byTrail.get(trail.id)?.updated_at ?? "none"}
+        hikedByMe={hikeLogs.byTrail.has(trail.id)}
         className={styles.section}
       />
 

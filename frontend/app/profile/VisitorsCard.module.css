@@ -1,0 +1,147 @@
+.card {
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  border-radius: 0.5rem;
+  font: inherit;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.chevron {
+  transform: rotate(-90deg);
+  transition: transform 150ms ease;
+}
+
+.open {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .switch,
+  .switch::after {
+    transition: none;
+  }
+}
+
+.summary {
+  color: var(--color-muted-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0 1.25rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.9rem;
+  border-bottom: 1px solid var(--hair);
+  cursor: pointer;
+}
+
+.itemBlocked {
+  cursor: not-allowed;
+}
+
+.itemText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.itemLabel {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.visible,
+.hidden {
+  font-size: 0.78rem;
+}
+
+.visible {
+  color: var(--color-olive);
+}
+
+.hidden {
+  color: var(--color-muted-text);
+}
+
+.switch {
+  position: relative;
+  width: 2.2rem;
+  height: 1.3rem;
+  flex-shrink: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-dark-olive) 28%, transparent);
+  cursor: inherit;
+  transition: background 150ms ease;
+}
+
+.switch::after {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  content: "";
+  transition: transform 150ms ease;
+}
+
+.switch:checked {
+  background: var(--color-olive);
+}
+
+.switch:checked::after {
+  transform: translateX(0.9rem);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.switch:disabled {
+  opacity: 0.5;
+}
+
+.warning {
+  color: var(--color-rust-text);
+  font-size: 0.82rem;
+}

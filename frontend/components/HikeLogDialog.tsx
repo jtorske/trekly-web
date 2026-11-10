@@ -19,6 +19,8 @@ import { useHikePhoto } from "@/lib/useHikePhoto";
 import { activityBlocker, canShareHikes } from "@/lib/activity";
 import { getPrivacy, type PrivacySettings } from "@/lib/profilesApi";
 import { sectionHref } from "@/app/settings/settingsSections";
+import { useNudge } from "@/lib/useNudge";
+import Nudge from "./Nudge";
 import styles from "./HikeLogDialog.module.css";
 
 /**
@@ -69,6 +71,16 @@ export default function HikeLogDialog({
       .catch(() => undefined);
     return () => controller.abort();
   }, []);
+  // "Sharing is off" with a toggle, for a new hike while feed sharing is off.
+  // Shown until they put it away, turn sharing on, or save a hike with it showing.
+  const nudge = useNudge("hike_share", !entry);
+  const showNudge = nudge.show && privacy !== null && !privacy.share_activity;
+  const turnOnSharing = async () => {
+    const saved = await nudge.turnOn();
+    if (!saved) return;
+    setPrivacy(saved);
+    setShareChoice(true);
+  };
 
   const localPreview = useMemo(() => (photo instanceof File ? URL.createObjectURL(photo) : null), [photo]);
   useEffect(() => (localPreview ? () => URL.revokeObjectURL(localPreview) : undefined), [localPreview]);
@@ -95,6 +107,8 @@ export default function HikeLogDialog({
         // Only sent when it can take effect (or to take a post down).
         ...(shareAllowed || (entry?.shared && !share) ? { share } : {}),
       });
+      // They saw the offer and decided: it doesn't come back.
+      if (showNudge) nudge.dismiss();
       onClose();
     } catch (caught) {
       // Don't leave an orphaned upload behind if the entry didn't save.
@@ -258,23 +272,35 @@ export default function HikeLogDialog({
             />
             Share to Activity
           </label>
-          <span className={ui.hint}>
-            {privacy === null ? (
-              "Shows this hike, with your note and photo, on the Activity page."
-            ) : shareAllowed ? (
-              <>
-                Shows this hike, with your note and photo, on the Activity page
-                {privacy.hide_hike_dates ? ", without the date" : ""}. Badges it earns are shared too.
-              </>
-            ) : (
-              <>
-                {activityBlocker(privacy) ?? "Your activity isn't shared in the feed."}{" "}
-                <Link href={sectionHref("privacy")} className={styles.shareLink}>
-                  Privacy settings
-                </Link>
-              </>
-            )}
-          </span>
+          {showNudge ? (
+            <Nudge
+              control="switch"
+              action="Share my activity"
+              busy={nudge.busy}
+              onTurnOn={() => void turnOnSharing()}
+              onDismiss={nudge.dismiss}
+            >
+              Sharing is off. Turn it on to post this hike.
+            </Nudge>
+          ) : (
+            <span className={ui.hint}>
+              {privacy === null ? (
+                "Shows this hike, with your note and photo, on the Activity page."
+              ) : shareAllowed ? (
+                <>
+                  Shows this hike, with your note and photo, on the Activity page
+                  {privacy.hide_hike_dates ? ", without the date" : ""}. Badges it earns are shared too.
+                </>
+              ) : (
+                <>
+                  {activityBlocker(privacy) ?? "Your activity isn't shared in the feed."}{" "}
+                  <Link href={sectionHref("privacy")} className={styles.shareLink}>
+                    Privacy settings
+                  </Link>
+                </>
+              )}
+            </span>
+          )}
         </div>
 
         {error && (

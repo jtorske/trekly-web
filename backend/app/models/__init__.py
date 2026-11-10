@@ -17,6 +17,7 @@ from app.models.catalog import (
 )
 from app.models.featured_badge import FeaturedBadge
 from app.models.hike_log import HikeLog
+from app.models.nudge import NudgeDismissal
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
@@ -52,6 +53,7 @@ __all__ = [
     "GearSetupItem",
     "HikeLog",
     "JobLock",
+    "NudgeDismissal",
     "Profile",
     "ProfileModeration",
     "ProfilePreferences",
