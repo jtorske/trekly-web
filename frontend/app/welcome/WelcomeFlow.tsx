@@ -81,7 +81,7 @@ const VISUALS: Record<StepKey, Visual> = {
   name: { kind: "photo", src: "/images/IMG_8873.jpeg", position: "center 35%" },
   photo: { kind: "topo", tone: "olive" },
   home: { kind: "photo", src: "/images/IMG_9031.jpeg", position: "center 60%" },
-  style: { kind: "photo", src: "/images/IMG_9627.jpg", position: "center 55%" },
+  style: { kind: "photo", src: "/images/IMG_9832.webp", position: "center 55%" },
   experience: { kind: "topo", tone: "dusk" },
   regions: { kind: "photo", src: "/images/IMG_9336.jpeg", position: "center 55%" },
   hiked: { kind: "topo", tone: "olive" },

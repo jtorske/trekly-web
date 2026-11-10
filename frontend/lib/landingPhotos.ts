@@ -20,7 +20,8 @@ export const LANDING_PHOTOS: LandingPhoto[] = [
   { src: "/images/IMG_8873.jpeg" },
   { src: "/images/IMG_9332.jpeg" },
   { src: "/images/IMG_9336.jpeg" },
-  { src: "/images/IMG_9627.jpg" },
+  { src: "/images/IMG_9832.webp" },
+  { src: "/images/IMG_9878.webp" },
 ];
 
 /** Remembers the last hero photo so the next visit shows a different one. */
