@@ -267,7 +267,7 @@ export default function PostCard({
 
       <Link href={postHref(post)} className={styles.trail}>
         <span className={styles.trailThumb}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
         </span>
         <span className={styles.trailText}>
           <span className={styles.trailName}>{trail.name}</span>

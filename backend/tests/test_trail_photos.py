@@ -433,3 +433,131 @@ def test_approve_falls_back_to_the_original_when_the_thumbnail_fails(client, aut
                            json={"candidate_id": "commons:wide"}, headers=auth_headers(ADMIN))
     assert response.status_code == 200, response.text
     assert ["/thumb/" in url for url in tried] == [True, False]
+
+
+# ---------------------------------------------------------------- scope, stock sources, route maps
+
+def test_approving_a_park_candidate_marks_the_photo_as_park_level(client, auth_headers, setup, session_factory):
+    # An older search's "off_topic" (weak) match is park-level.
+    load(session_factory, {"generated": "2026-10-27", "trails": [
+        {"name": "Joffre Lakes", "province_code": "BC", "best_confidence": "off_topic", "default_choice": None,
+         "candidates": [candidate("commons:9", confidence="off_topic")]}]})
+    response = client.post(f"/api/admin/trail-photos/{setup['joffre']}/approve",
+                           json={"candidate_id": "commons:9"}, headers=auth_headers(ADMIN))
+    assert response.status_code == 200, response.text
+    assert response.json()["scope"] == "park"
+    client.post(f"/api/admin/trail-photos/{setup['agnes']}/approve", json={"candidate_id": "commons:1"},
+                headers=auth_headers(ADMIN))
+    assert client.get(f"/api/trails/{setup['agnes']}").json()["photo"]["scope"] == "trail"
+
+
+def test_own_uploads_have_no_scope(client, auth_headers, setup, session_factory):
+    add_profile(session_factory, ADMIN)
+    response = client.put(f"/api/admin/trail-photos/{setup['agnes']}/upload", content=jpeg(),
+                          headers={**auth_headers(ADMIN), "Content-Type": "image/jpeg"})
+    assert response.status_code == 200 and response.json()["scope"] is None
+
+
+@pytest.mark.parametrize("url,ok", [
+    ("https://images.pexels.com/photos/1/pexels-photo-1.jpeg?auto=compress&w=940&dpr=2", True),
+    ("https://test-project.supabase.co/storage/v1/object/public/trail-photos/candidates/pixabay-42.webp", True),
+    # Only the candidates/ folder of our own bucket, and nothing that climbs out of it.
+    ("https://test-project.supabase.co/storage/v1/object/public/trail-photos/abc/x-hero.webp", False),
+    ("https://test-project.supabase.co/storage/v1/object/public/trail-photos/candidates/../x.webp", False),
+    ("https://other.supabase.co/storage/v1/object/public/trail-photos/candidates/pixabay-42.webp", False),
+    ("https://pixabay.com/get/g123_1280.jpg", False),
+])
+def test_stock_and_copied_candidates_are_allowed_hosts(url, ok, monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://test-project.supabase.co")
+    assert allowed_fetch_url(url) is ok
+
+
+def pixabay_candidate(image_id="42", **overrides):
+    return candidate(f"pixabay:{image_id}", source="pixabay", origin="Pixabay", confidence="park",
+                     image_url=f"https://pixabay.com/get/g{image_id}_1280.jpg",
+                     preview_url=f"https://pixabay.com/get/g{image_id}_640.jpg", width=1280, height=853,
+                     photographer="someone", license="Pixabay Content License",
+                     license_url="https://pixabay.com/service/license-summary/",
+                     source_url=f"https://pixabay.com/photos/maligne-lake-{image_id}/", **overrides)
+
+
+def test_pixabay_candidates_are_copied_to_storage_before_loading(monkeypatch, trails, session_factory):
+    monkeypatch.setenv("SUPABASE_URL", "https://test-project.supabase.co")
+    monkeypatch.setenv("PIXABAY_API_KEY", "test-key")
+    storage = FakeStorage()
+    storage.upload = lambda path, data, upsert=False: storage.files.__setitem__(path, data)
+    monkeypatch.setattr(loader, "storage_from_env", lambda: storage)
+    lookups = []
+
+    def lookup(image_id, key):
+        lookups.append(image_id)
+        return None if image_id == "7" else {"largeImageURL": f"https://pixabay.com/get/fresh{image_id}_1280.jpg",
+                                             "webformatURL": f"https://pixabay.com/get/fresh{image_id}_640.jpg"}
+
+    monkeypatch.setattr(loader, "pixabay_lookup", lookup)
+    monkeypatch.setattr(loader, "_get", lambda url: jpeg(1280, 853, gps=False))
+    data = {"generated": "2026-11-10", "trails": [
+        {"name": "Joffre Lakes", "province_code": "BC", "best_confidence": "park", "default_choice": None,
+         "candidates": [pixabay_candidate("42"), pixabay_candidate("7")]},
+    ]}
+
+    # A dry run looks each image up but copies nothing.
+    copied, problems = loader.copy_pixabay(json_copy(data), write=False, log=lambda *_: None)
+    assert (copied, problems, storage.files) == (1, [], {})
+
+    copied, problems = loader.copy_pixabay(data, write=True, log=lambda *_: None)
+    assert (copied, problems) == (1, [])
+    assert set(storage.files) == {"candidates/pixabay-42.webp", "candidates/pixabay-42-preview.webp"}
+    assert all(Image.open(io.BytesIO(b)).format == "WEBP" for b in storage.files.values())
+    [kept] = data["trails"][0]["candidates"]  # the taken-down image (7) is dropped
+    base = "https://test-project.supabase.co/storage/v1/object/public/trail-photos/candidates/"
+    assert kept["image_url"] == base + "pixabay-42.webp" and kept["preview_url"] == base + "pixabay-42-preview.webp"
+    plan = load(session_factory, data)
+    assert plan.problems == [] and len(plan.rows) == 1
+
+
+def test_pixabay_candidates_need_the_key(monkeypatch):
+    monkeypatch.delenv("PIXABAY_API_KEY", raising=False)
+    data = {"trails": [{"name": "X", "candidates": [pixabay_candidate()]}]}
+    assert loader.copy_pixabay(data, write=False)[1] == ["PIXABAY_API_KEY isn't set: Pixabay candidates can't be copied"]
+
+
+def test_park_and_stock_candidates_pass_validation(trails, session_factory):
+    data = {"generated": "2026-11-10", "trails": [
+        {"name": "Joffre Lakes", "province_code": "BC", "best_confidence": "park", "default_choice": None,
+         "candidates": [candidate("commons:5", confidence="park"),
+                        candidate("pexels:3", source="pexels", origin="Pexels", license="Pexels License",
+                                  image_url="https://images.pexels.com/photos/3/p.jpeg?w=940&dpr=2",
+                                  preview_url="https://images.pexels.com/photos/3/p.jpeg?h=350",
+                                  source_url="https://www.pexels.com/photo/x-3/")]},
+    ]}
+    session = session_factory()
+    assert loader.plan_load(session, data).problems == []
+    session.close()
+
+
+def json_copy(value):
+    import json
+    return json.loads(json.dumps(value))
+
+
+def test_trails_carry_their_route_map(client, setup, session_factory):
+    from app.models.trail_photo import TrailRouteMap
+
+    session = session_factory()
+    session.add(TrailRouteMap(trail_id=uuid.UUID(setup["joffre"]),
+                              hero_path=f"{setup['joffre']}/route-map-0123456789ab-hero.webp",
+                              thumb_path=f"{setup['joffre']}/route-map-0123456789ab-thumb.webp",
+                              hero_width=1600, hero_height=1000, route_hash="0123456789ab"))
+    session.commit()
+    session.close()
+    trail = client.get(f"/api/trails/{setup['joffre']}").json()
+    assert trail["photo"] is None
+    assert trail["route_map"] == {
+        "hero_url": f"https://test-project.supabase.co/storage/v1/object/public/trail-photos/{setup['joffre']}/route-map-0123456789ab-hero.webp",
+        "thumb_url": f"https://test-project.supabase.co/storage/v1/object/public/trail-photos/{setup['joffre']}/route-map-0123456789ab-thumb.webp",
+        "width": 1600, "height": 1000,
+    }
+    listed = {t["id"]: t for t in client.get("/api/trails").json()}
+    assert listed[setup["joffre"]]["route_map"]["thumb_url"].endswith("-thumb.webp")
+    assert listed[setup["agnes"]]["route_map"] is None

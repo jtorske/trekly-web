@@ -22,6 +22,19 @@ export interface TrailPhoto {
   source_url: string | null;
   /** Where it was first published, e.g. "Flickr"; null for the owner's photos. */
   origin: string | null;
+  /**
+   * What it shows: the trail (or a landmark on it), somewhere nearby, or the
+   * park in general ("park": the credit names the park). Null for the owner's photos.
+   */
+  scope?: "trail" | "nearby" | "park" | null;
+}
+
+/** The trail's stored route drawn on the topo style; shown when it has no photo. */
+export interface TrailRouteMap {
+  hero_url: string;
+  thumb_url: string;
+  width: number;
+  height: number;
 }
 
 /** national = Parks Canada; provincial includes territorial parks, Quebec's
@@ -49,6 +62,8 @@ export interface TrailListItem extends TrailSummary {
   /** Set once a trail leaves the catalogue; bookmarks to it still resolve. */
   retired_at: string | null;
   photo?: TrailPhoto | null;
+  /** Null for trails without a stored route: they keep the plain topo. */
+  route_map?: TrailRouteMap | null;
 }
 
 /** "overnight" = backpacking trips (1+ typical nights), "day" = day hikes. */

@@ -8,6 +8,7 @@ import HikeLogButton from "@/components/HikeLogButton";
 import AlertsChip from "@/components/AlertsChip";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
+import { creditPlace } from "@/lib/trailPhoto";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
@@ -115,10 +116,10 @@ function TrailView({
   return (
     <article className={styles.article}>
       <figure className={styles.photo}>
-        <TrailPhoto photo={trail.photo} name={trail.name} variant="hero" />
-        {trail.photo && (
+        <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="hero" />
+        {(trail.photo || trail.route_map) && (
           <figcaption className={styles.photoCredit}>
-            <PhotoCredit photo={trail.photo} />
+            <PhotoCredit photo={trail.photo} routeMap={trail.route_map} place={creditPlace(trail)} />
           </figcaption>
         )}
       </figure>

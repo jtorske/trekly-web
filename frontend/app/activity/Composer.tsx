@@ -214,7 +214,7 @@ export default function Composer({
         {trail ? (
           <div className={styles.picked}>
             <span className={styles.pickedThumb}>
-              <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+              <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
             </span>
             <span className={styles.pickedText}>
               <span className={styles.trailName}>{trail.name}</span>
@@ -261,7 +261,7 @@ export default function Composer({
                   <li key={option.id} role="option" aria-selected={false}>
                     <button type="button" className={styles.result} onClick={() => pick(option)}>
                       <span className={styles.resultThumb}>
-                        <TrailPhoto photo={option.photo} name={option.name} variant="thumb" mini />
+                        <TrailPhoto photo={option.photo} routeMap={option.route_map} name={option.name} variant="thumb" mini />
                       </span>
                       <span className={styles.pickedText}>
                         <span className={styles.resultName}>{option.name}</span>

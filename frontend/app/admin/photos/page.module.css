@@ -161,18 +161,23 @@
   font-size: 0.85rem;
 }
 
-.high {
+.toneTrail {
   background: color-mix(in srgb, var(--color-olive) 28%, transparent);
 }
 
-.medium {
+.toneNearby {
   background: color-mix(in srgb, var(--color-olive) 14%, transparent);
 }
 
-.low,
-.off_topic {
+.tonePark {
   background: color-mix(in srgb, var(--color-tan) 32%, transparent);
   color: #6b4613;
+}
+
+/* Where the candidate was found: Commons, Openverse, Pixabay, Pexels. */
+.source {
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 22%, transparent);
+  font-weight: 500;
 }
 
 .actions {

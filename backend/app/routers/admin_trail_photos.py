@@ -27,7 +27,7 @@ from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.database import get_db
 from app.models.account import Profile
 from app.models.trail import Trail
-from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
+from app.models.trail_photo import SCOPE_BY_CONFIDENCE, TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
 from app.schemas.trail import TrailListItemOut, TrailPhotoOut
 from app.trail_photos import (
     MAX_SOURCE_BYTES,
@@ -274,6 +274,8 @@ def approve(
         "license": candidate["license"][:80],
         "license_url": candidate.get("license_url"),
         "source_url": candidate["source_url"],
+        # A park-level candidate is credited as a photo of the park.
+        "scope": SCOPE_BY_CONFIDENCE.get(candidate.get("confidence"), "park"),
     }
     return _publish(db, storage, trail, photo, credit, "approved", admin)
 
@@ -340,7 +342,7 @@ async def upload_own(
         except PhotoError as error:
             raise HTTPException(status_code=422, detail=str(error)) from error
         credit = {"source": "owner", "origin": None, "candidate_id": None, "photographer": name[:200],
-                  "license": None, "license_url": None, "source_url": None}
+                  "license": None, "license_url": None, "source_url": None, "scope": None}
         return _publish(db, storage, trail, photo, credit, "uploaded", admin)
 
     return await run_in_threadpool(work)

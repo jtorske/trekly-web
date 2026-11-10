@@ -11,14 +11,19 @@ from sqlalchemy.sql import func
 from app.database import Base
 from app.models.catalog import JsonType
 
-PHOTO_SOURCES = ("commons", "openverse", "owner")
+PHOTO_SOURCES = ("commons", "openverse", "pixabay", "pexels", "owner")
+# What an approved photo shows (from its candidate's confidence); null for the owner's own.
+PHOTO_SCOPES = ("trail", "nearby", "park")
+# Candidate confidence -> photo scope. Older searches stored park-level matches as low / off_topic.
+SCOPE_BY_CONFIDENCE = {"high": "trail", "medium": "nearby", "park": "park", "low": "park", "off_topic": "park"}
 REVIEW_DECISIONS = ("approved", "rejected", "uploaded")
 
 
 class TrailPhoto(Base):
     __tablename__ = "trail_photos"
     __table_args__ = (
-        CheckConstraint("source in ('commons','openverse','owner')", name="trail_photos_source_check"),
+        CheckConstraint("source in ('commons','openverse','pixabay','pexels','owner')", name="trail_photos_source_check"),
+        CheckConstraint("scope is null or scope in ('trail','nearby','park')", name="trail_photos_scope_check"),
         CheckConstraint(
             "source = 'owner' or (license is not null and source_url is not null)",
             name="trail_photos_credit_check",
@@ -26,8 +31,10 @@ class TrailPhoto(Base):
     )
 
     trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="RESTRICT"), primary_key=True)
-    # 'commons' / 'openverse' (a reviewed candidate) or 'owner' (uploaded by the site owner).
+    # 'commons' / 'openverse' / 'pixabay' / 'pexels' (a reviewed candidate) or 'owner' (uploaded by the site owner).
     source = Column(Text, nullable=False)
+    # 'trail' / 'nearby' / 'park': a 'park' photo's credit names the park (migration b9e4d2a7c1f6).
+    scope = Column(Text)
     # Where the photo was first published: "Wikimedia Commons", "Flickr", ...
     origin = Column(Text)
     candidate_id = Column(Text)
@@ -76,3 +83,20 @@ class TrailPhotoCandidates(Base):
     candidates = Column(JsonType, nullable=False)
     searched_on = Column(Date)
     loaded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class TrailRouteMap(Base):
+    """A generated picture of the trail's stored route on the topo style
+    (scripts/route_maps.py), shown when the trail has no photo."""
+
+    __tablename__ = "trail_route_maps"
+
+    trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="RESTRICT"), primary_key=True)
+    # `{trail_id}/route-map-{hash}-hero.webp` / `-thumb.webp` in the trail-photos bucket.
+    hero_path = Column(Text, nullable=False)
+    thumb_path = Column(Text, nullable=False)
+    hero_width = Column(Integer, nullable=False)
+    hero_height = Column(Integer, nullable=False)
+    # The route and drawing settings it was made from; unchanged means no redraw.
+    route_hash = Column(Text, nullable=False)
+    generated_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

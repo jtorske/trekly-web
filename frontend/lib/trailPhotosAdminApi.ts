@@ -6,11 +6,14 @@ import type { TrailListItem, TrailPhoto } from "./trailsApi";
  * Trail photo review (photo admins only). The backend checks
  * PHOTO_ADMIN_USER_IDS on every call; the page only hides itself.
  */
-export type Confidence = "high" | "medium" | "low" | "off_topic";
+/** Stored keys: high = trail, medium = nearby, park (older searches: low / off_topic). */
+export type Confidence = "high" | "medium" | "park" | "low" | "off_topic";
+
+export type CandidateSource = "commons" | "openverse" | "pixabay" | "pexels";
 
 export interface PhotoCandidate {
   id: string;
-  source: "commons" | "openverse";
+  source: CandidateSource;
   origin: string | null;
   confidence: Confidence;
   title: string;
@@ -82,13 +85,30 @@ export const trailPhotosAdminApi = {
 };
 
 /**
- * Strong: names the trail or a landmark on it, or taken within 1 km of the
- * route. Likely: within 3 km. Weak: park or region match only (and the
- * first search's Openverse keyword matches).
+ * Trail: shows the trail or a landmark on it (named, or taken within 1 km of
+ * the route). Nearby: within 3 km of the route. Park: representative of the
+ * park, not this trail (older searches' weak matches count here too).
  */
 export const CONFIDENCE_LABELS: Record<Confidence, string> = {
-  high: "Strong",
-  medium: "Likely",
-  low: "Weak",
-  off_topic: "Weak",
+  high: "Trail",
+  medium: "Nearby",
+  park: "Park",
+  low: "Park",
+  off_topic: "Park",
+};
+
+/** The class name for a label's colour: the three labels, whatever key stored them. */
+export const CONFIDENCE_TONE: Record<Confidence, "toneTrail" | "toneNearby" | "tonePark"> = {
+  high: "toneTrail",
+  medium: "toneNearby",
+  park: "tonePark",
+  low: "tonePark",
+  off_topic: "tonePark",
+};
+
+export const SOURCE_LABELS: Record<CandidateSource, string> = {
+  commons: "Commons",
+  openverse: "Openverse",
+  pixabay: "Pixabay",
+  pexels: "Pexels",
 };

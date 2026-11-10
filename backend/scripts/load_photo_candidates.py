@@ -15,30 +15,46 @@ Run from backend/ (DATABASE_URL picks the database; backend/.env is local):
 
 Writing anywhere but a local database also needs --confirm-host <hostname>,
 matching the DATABASE_URL host, so a hosted write is always deliberate.
+
+Pixabay's image links expire within a day and it doesn't allow permanent
+hotlinking, so before writing, each Pixabay candidate is looked up again by
+id (PIXABAY_API_KEY), downloaded, re-encoded as WebP and copied to the
+trail-photos bucket under candidates/ (SUPABASE_URL and
+SUPABASE_SERVICE_ROLE_KEY of the target); the candidate then points at the
+copy. A dry run only checks the lookups.
 """
 
 import argparse
+import io
 import json
 import os
 import re
 import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from sqlalchemy import inspect
+from sqlalchemy.orm import noload
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.config import TRAIL_CATALOG_COUNTRIES, TRAIL_CATALOG_LIMIT
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates
-from app.trail_photos import allowed_fetch_url
+from app.trail_photos import CANDIDATE_PREFIX, allowed_fetch_url, is_candidate_copy, public_photo_url, storage_from_env
 
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
-CONFIDENCES = {"high", "medium", "low", "off_topic"}
-SOURCES = {"commons", "openverse"}
+CONFIDENCES = {"high", "medium", "park", "low", "off_topic"}
+SOURCES = {"commons", "openverse", "pixabay", "pexels"}
+PIXABAY_API = "https://pixabay.com/api/"
+STOCK_CLIENT = "Trekly-photo-loader/1.0"
+COPY_QUALITY = 92  # the approve step re-encodes again, so keep this copy close to the source
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
 
 
@@ -67,7 +83,8 @@ def candidate_problem(c: dict) -> str | None:
         return f"image host not allowed: {urlsplit(c['image_url']).hostname}"
     if urlsplit(c["source_url"]).scheme != "https":
         return "source page is not https"
-    if urlsplit(c["preview_url"]).scheme != "https":
+    # Our own copies (candidates/ in the bucket) follow SUPABASE_URL, which is http locally.
+    if urlsplit(c["preview_url"]).scheme != "https" and not is_candidate_copy(c["preview_url"]):
         return "preview is not https"
     if EMAIL.search(c["photographer"]):
         return "photographer name is an email address"
@@ -76,9 +93,93 @@ def candidate_problem(c: dict) -> str | None:
     return None
 
 
+# ---------------------------------------------------------------- Pixabay copies
+
+def _get(url: str, timeout=60) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": STOCK_CLIENT})
+    for wait in (0, 10, 30):
+        time.sleep(wait or 0.7)  # Pixabay allows 100 requests a minute
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return response.read(20 * 1024 * 1024)
+        except urllib.error.HTTPError as error:
+            if error.code not in (429, 500, 502, 503):
+                raise RuntimeError(f"HTTP {error.code}") from None
+        except (urllib.error.URLError, TimeoutError):
+            pass
+    raise RuntimeError("no response")
+
+
+def pixabay_lookup(image_id: str, key: str) -> dict | None:
+    """Fresh links for one Pixabay image (they expire), or None if it's gone."""
+    query = urllib.parse.urlencode({"key": key, "id": image_id})
+    try:
+        hits = json.loads(_get(f"{PIXABAY_API}?{query}")).get("hits") or []
+    except RuntimeError as error:
+        # The message never includes the request URL (it holds the key).
+        raise RuntimeError(f"Pixabay lookup for {image_id} failed ({error})") from None
+    return hits[0] if hits else None
+
+
+def _webp(data: bytes) -> tuple[bytes, int, int]:
+    from PIL import Image
+
+    with Image.open(io.BytesIO(data)) as image:
+        image = image.convert("RGB")
+        out = io.BytesIO()
+        image.save(out, "WEBP", quality=COPY_QUALITY, method=6)
+        return out.getvalue(), image.width, image.height
+
+
+def copy_paths(image_id: str) -> tuple[str, str]:
+    return f"{CANDIDATE_PREFIX}pixabay-{image_id}.webp", f"{CANDIDATE_PREFIX}pixabay-{image_id}-preview.webp"
+
+
+def copy_pixabay(data: dict, write: bool, log=print) -> tuple[int, list[str]]:
+    """Point each Pixabay candidate at a copy in our bucket (made when `write`).
+    Returns (candidates copied or checked, problems). A Pixabay image that's
+    been taken down is dropped from its trail's candidates."""
+    candidates = [c for t in data.get("trails", []) for c in t.get("candidates", []) if c.get("source") == "pixabay"]
+    if not candidates:
+        return 0, []
+    key = (os.getenv("PIXABAY_API_KEY") or "").strip()
+    if not key:
+        return 0, ["PIXABAY_API_KEY isn't set: Pixabay candidates can't be copied"]
+    storage = storage_from_env() if write else None
+    if write and storage is None:
+        return 0, ["SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY aren't set: Pixabay candidates can't be copied"]
+    problems, done, gone = [], 0, set()
+    for c in candidates:
+        image_id = c["id"].split(":", 1)[1]
+        try:
+            hit = pixabay_lookup(image_id, key)
+            if hit is None or hit.get("isAiGenerated"):
+                gone.add(c["id"])
+                log(f"  Pixabay {image_id} is no longer available; dropped")
+                continue
+            hero_path, preview_path = copy_paths(image_id)
+            if write:
+                hero, width, height = _webp(_get(hit["largeImageURL"]))
+                preview, _, _ = _webp(_get(hit["webformatURL"]))
+                storage.upload(hero_path, hero, upsert=True)
+                storage.upload(preview_path, preview, upsert=True)
+                c["width"], c["height"] = width, height
+            c["image_url"], c["preview_url"] = public_photo_url(hero_path), public_photo_url(preview_path)
+            done += 1
+        except Exception as error:  # noqa: BLE001 - reported, nothing written
+            problems.append(f"pixabay {image_id}: {error}")
+    for trail in data.get("trails", []):
+        if any(c["id"] in gone for c in trail.get("candidates", [])):
+            trail["candidates"] = [c for c in trail["candidates"] if c["id"] not in gone]
+            if trail.get("default_choice") in gone:
+                trail["default_choice"] = None
+    return done, problems
+
+
 def plan_load(db, data: dict) -> LoadPlan:
     plan = LoadPlan()
-    trails = {(t.name, t.province_code): t for t in db.query(Trail).all()}
+    # Columns only: a dry run must work before the photo migrations have run there.
+    trails = {(t.name, t.province_code): t for t in db.query(Trail).options(noload("*")).all()}
     live = {
         key for key, t in trails.items()
         if t.retired_at is None and t.country_code in TRAIL_CATALOG_COUNTRIES
@@ -156,6 +257,14 @@ def main():
         sys.exit(f"Refusing to write to {host}: pass --confirm-host {host} to confirm.")
 
     data = json.loads(Path(args.candidates).read_text(encoding="utf-8"))
+    # A dry run checks each Pixabay image is still there; a write copies it first.
+    copied, copy_problems = copy_pixabay(data, write=not args.dry_run)
+    if copied or copy_problems:
+        print(f"Pixabay candidates {'copied to Storage' if not args.dry_run else 'still available (to copy)'}: {copied}")
+    for problem in copy_problems:
+        print(f"  - {problem}")
+    if copy_problems and not args.dry_run:
+        sys.exit("Some Pixabay copies failed; nothing written to the database. Rerun to retry.")
     db = SessionLocal()
     try:
         plan = plan_load(db, data)

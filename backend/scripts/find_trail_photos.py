@@ -1,6 +1,6 @@
 """Find candidate landscape photos for each catalogue trail.
 
-Two sources:
+Sources:
 
 - Wikimedia Commons: geosearch around the trail's coordinates, plus a text
   search for its destination, kept only when the file is geotagged near the
@@ -10,10 +10,19 @@ Two sources:
   original source (e.g. Flickr). It has no geotags, so a hit must name the
   trail or destination and the region, and it is always low confidence.
 
-Both keep licenses that allow commercial use and modification only (CC BY,
-CC BY-SA, CC0, Public Domain), apply the same size and subject filters, and
-keep the top --top candidates per trail with the image URL, photographer,
-license and source page URL.
+- Pixabay and Pexels (stock libraries, when PIXABAY_API_KEY / PEXELS_API_KEY
+  are set): keyword search by trail name, landmarks on the route, park name
+  and "park scenery". No geotags, so a hit must name the place and its park
+  or region, like an Openverse one. Both licences allow commercial use and
+  editing without attribution; we credit them anyway. AI-generated Pixabay
+  images are dropped. Pixabay's standard API serves 1280px at most, so its
+  candidates are always "Lower resolution", and its image links expire
+  within a day: the loader copies them to Storage (load_photo_candidates.py).
+
+All keep licenses that allow commercial use and modification only (CC BY,
+CC BY-SA, CC0, Public Domain, Pixabay and Pexels licences), apply the same
+size and subject filters, and keep the top --top candidates per trail with
+the image URL, photographer, license and source page URL.
 
 Trails with no candidate at 1600px are searched again at 1024px (Openverse
 serves Flickr at 1024px only); those candidates are flagged low_res.
@@ -26,13 +35,20 @@ within ROUTE_RADIUS_M, plus the trail's linked campgrounds) are searched by
 name on both sources. Trails without a route use their catalogue point.
 
 Every candidate gets a confidence (stored under the review page's keys):
-  strong  (high)       names the trail or a landmark on it, or taken within
-                       STRONG_M of the route
-  likely  (medium)     geotagged within LIKELY_M of the route
-  weak    (off_topic)  park or region match only
+  trail   (high)    names the trail or a landmark on it, or taken within
+                    STRONG_M of the route
+  nearby  (medium)  within LIKELY_M of the route
+  park    (park)    representative of the park or region only (older
+                    searches stored this as low / off_topic)
 and a `match` line saying why. The review page starts a trail on the topo
-fallback unless its best candidate is strong or likely. Image and preview
+fallback unless its best candidate is trail or nearby. Image and preview
 URLs are checked to still load before a candidate is kept.
+
+--park-wide widens the net for trails earlier passes found nothing for:
+landmarks anywhere within PARK_RADIUS_M of the route (not just on it), the
+park's own name, and geotags up to PARK_RADIUS_M away; those are "park"
+candidates. --merge folds an earlier search's candidates for the same
+trails into the result, so one load carries both.
 
 Nothing is downloaded or published: the output is a JSON file for the review
 page. Run from backend/:
@@ -70,8 +86,14 @@ COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 WIKIPEDIA_API = "https://{lang}.wikipedia.org/w/api.php"
 OPENVERSE_API = "https://api.openverse.org/v1"
 USER_AGENT = "Trekly-photo-search/1.0 (jtorske27@gmail.com)"
+PIXABAY_API = "https://pixabay.com/api/"
+PEXELS_API = "https://api.pexels.com/v1/search"
+# Stock APIs don't ask for contact details; a plain client name is enough.
+STOCK_CLIENT = "Trekly-photo-search/1.0"
 PAUSE_S = 0.5
 OPENVERSE_PAUSE_S = 3.2  # anonymous burst limit is 20/minute
+PIXABAY_PAUSE_S = 0.7    # 100 requests/minute
+PEXELS_PAUSE_S = 0.5     # 200/hour, 20,000/month; responses are cached anyway
 
 GEO_RADIUS_M = 10000          # Commons geosearch maximum
 TEXT_MATCH_RADIUS_M = 25000   # text-search hits must be geotagged this close
@@ -79,9 +101,10 @@ SAMPLE_KM = 3                 # geosearch spacing along a stored route
 ROUTE_RADIUS_M = 3000         # geosearch / landmark radius around each route point
 STRONG_M = 1000               # "strong": taken this close to the route
 LIKELY_M = 3000               # "likely": taken this close to the route
+PARK_RADIUS_M = 15000         # --park-wide: landmarks and geotags this far from the route
 MAX_LANDMARKS = 8             # landmark name searches per trail on Commons
 OPENVERSE_LANDMARKS = 1       # ... and on Openverse (200 requests/day anonymous)
-LABELS = {"high": "strong", "medium": "likely", "low": "weak", "off_topic": "weak"}
+LABELS = {"high": "trail", "medium": "nearby", "park": "park", "low": "park", "off_topic": "park"}
 # Wikipedia article titles that name a place a hiker sees from the trail.
 LANDMARK = re.compile(
     r"\b(lake|lakes|pass|mount|mountain|peak|glacier|falls|ridge|canyon|meadows?|cirque|tarn|basin|"
@@ -105,6 +128,14 @@ COMMONS_LICENSES = re.compile(r"^(cc0|cc[- ]by(-sa)?[- ][\d.]+.*|public domain|p
 # Openverse license codes; the API filters on these and they are checked again.
 OPENVERSE_LICENSES = {"by": "CC BY", "by-sa": "CC BY-SA", "cc0": "CC0", "pdm": "Public Domain Mark"}
 OPENVERSE_ORIGINS = {"flickr": "Flickr", "wikimedia": "Wikimedia Commons"}
+PIXABAY_LICENSE = ("Pixabay Content License", "https://pixabay.com/service/license-summary/")
+PEXELS_LICENSE = ("Pexels License", "https://www.pexels.com/license/")
+# Sources found by keyword only (no geotag): held to the name-and-region rule.
+KEYWORD_SOURCES = {"openverse", "pixabay", "pexels"}
+STOCK_SOURCES = {"pixabay", "pexels"}
+CANADA_WORDS = {"canada", "canadian", "alberta", "columbia", "yukon", "quebec", "ontario", "manitoba", "saskatchewan",
+                "newfoundland", "labrador", "brunswick", "scotia", "edward", "territories", "nunavut", "rockies"}
+PEXELS_WIDTH = 1880           # src.large2x: 940px at 2x
 
 # Titles, descriptions, categories or tags that mean "not a landscape photo".
 NOT_LANDSCAPE = re.compile(
@@ -144,7 +175,7 @@ PROVINCES = {
     "NS": "nova scotia", "NT": "northwest territories", "ON": "ontario", "PE": "prince edward island",
     "QC": "quebec", "SK": "saskatchewan", "YT": "yukon",
 }
-CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2, "off_topic": 3}
+CONFIDENCE_ORDER = {"high": 0, "medium": 1, "park": 2, "low": 3, "off_topic": 3}
 
 
 # ---------------------------------------------------------------- helpers
@@ -208,6 +239,36 @@ def mentions(text, terms):
     return any(all(w in words or w in squashed for w in term) for term in terms)
 
 
+def stock_fields(candidate):
+    """A stock photo's title, description, tags and page name, each on its own:
+    tags are a loose bag of words, so a place must be named within one field."""
+    return [fold(f) for f in [candidate["title"], candidate["description"], *candidate.get("_categories", [])] if f]
+
+
+def names_phrase(candidate, label, min_words=2):
+    """True if one field holds the label's distinctive words as a phrase, in
+    order ("rock lake", not "rock" in one tag and "lake" in another)."""
+    words = distinctive(label)
+    if len(words) < min_words:
+        return False
+    phrase = re.compile(r"\b" + r"\s+".join(map(re.escape, words)) + r"\b")
+    return any(phrase.search(field) for field in stock_fields(candidate))
+
+
+def classify_stock(candidate, named_terms, park_name):
+    """(confidence, match) for a stock photo, or None when it names nothing
+    on or near the trail, nor the park, as a phrase."""
+    for label, _term, on_route, *_ in named_terms:
+        if on_route and names_phrase(candidate, label):
+            return "high", f"Names {label}"
+    for label, _term, _on_route, *within in named_terms:
+        if (not within or within[0] <= LIKELY_M) and names_phrase(candidate, label):
+            return "medium", f"Names {label}, near the trail"
+    if park_name and names_phrase(candidate, park_name, min_words=1):
+        return "park", "Park: names the park"
+    return None
+
+
 def is_landscape(width, height, min_width=MIN_WIDTH):
     if not width or not height or width < min_width:
         return False
@@ -241,11 +302,18 @@ def _cache_path(cache_dir, key):
     return cache_dir / (hashlib.sha256(key.encode()).hexdigest()[:20] + ".json")
 
 
-def get_json(url, params, cache_dir, headers=None, pause=PAUSE_S, waits=(0, 10, 30, 60), timeout=60):
+def get_json(url, params, cache_dir, headers=None, pause=PAUSE_S, waits=(0, 10, 30, 60), timeout=60,
+             secret_params=None, client=None):
+    """secret_params (an API key) are sent but left out of the cache key.
+    client replaces the default client name for APIs that don't need contact details."""
     query = f"{url}?{urllib.parse.urlencode(sorted(params.items()))}"
     cached = _cache_path(cache_dir, query)
     if cached.exists():
         return json.loads(cached.read_text(encoding="utf-8"))
+    if secret_params:
+        query = f"{url}?{urllib.parse.urlencode(sorted({**params, **secret_params}.items()))}"
+    if client:
+        headers = {**(headers or {}), "User-Agent": client}
     request = urllib.request.Request(query, headers={"User-Agent": USER_AGENT, **(headers or {})})
     for wait in waits:
         time.sleep(wait or pause)
@@ -401,6 +469,120 @@ def openverse_candidates(data):
     return out
 
 
+# ---------------------------------------------------------------- stock libraries
+
+class StockSource:
+    """Pixabay or Pexels with its key, one request at a time (rate limits).
+    The key goes in the request only: never in the cache, output or logs."""
+
+    def __init__(self, name, key):
+        self.name, self._key, self.lock, self.failed = name, key, threading.Lock(), []
+
+    def __repr__(self):
+        return f"StockSource({self.name!r})"
+
+    def search(self, text, cache_dir):
+        with self.lock:
+            if self.name == "pixabay":
+                data = get_json(PIXABAY_API, {
+                    "q": text[:100], "image_type": "photo", "orientation": "horizontal", "safesearch": "true",
+                    "per_page": "30", "min_width": str(FALLBACK_MIN_WIDTH),
+                }, cache_dir, pause=PIXABAY_PAUSE_S, waits=(0, 30, 60), timeout=30,
+                    secret_params={"key": self._key}, client=STOCK_CLIENT)
+            else:
+                data = get_json(PEXELS_API, {"query": text, "orientation": "landscape", "per_page": "30"},
+                                cache_dir, {"Authorization": self._key}, pause=PEXELS_PAUSE_S, waits=(0, 30, 60),
+                                timeout=30, client=STOCK_CLIENT)
+        if data is None:
+            self.failed.append(text)
+        return pixabay_candidates(data) if self.name == "pixabay" else pexels_candidates(data)
+
+
+def stock_sources(names=("pixabay", "pexels")):
+    """The stock libraries whose keys are set (PIXABAY_API_KEY, PEXELS_API_KEY)."""
+    out = []
+    for name in names:
+        key = (os.environ.get(f"{name.upper()}_API_KEY") or "").strip()
+        if key:
+            out.append(StockSource(name, key))
+    return out
+
+
+def slug_words(url):
+    """"https://pixabay.com/photos/lake-agnes-banff-5819878/" -> "lake agnes banff"."""
+    path = urllib.parse.urlsplit(url or "").path.rstrip("/").split("/")[-1]
+    return re.sub(r"[-_]+", " ", re.sub(r"[-_]?\d+$", "", path)).strip()
+
+
+def fit(width, height, longest):
+    """An image's size scaled down so its longer side is at most `longest`."""
+    if not width or not height:
+        return 0, 0
+    k = min(1.0, longest / max(width, height))
+    return round(width * k), round(height * k)
+
+
+def pixabay_candidates(data):
+    out = []
+    for item in (data or {}).get("hits", []):
+        # No AI-generated or low-quality images: a trail photo must be a real place.
+        if item.get("type") != "photo" or item.get("isAiGenerated") or item.get("isLowQuality"):
+            continue
+        width, height = fit(item.get("imageWidth"), item.get("imageHeight"), 1280)
+        title = item.get("heading") or item.get("name") or slug_words(item.get("pageURL")).capitalize()
+        out.append({
+            "source": "pixabay",
+            "origin": "Pixabay",
+            "id": f"pixabay:{item['id']}",
+            "title": re.sub(r"\s+photo$", "", title.strip(), flags=re.I),
+            "description": (item.get("description") or "")[:300],
+            # Temporary links (pixabay.com/get/...): the loader copies them to Storage.
+            "image_url": item.get("largeImageURL") or "",
+            "preview_url": item.get("webformatURL") or "",
+            "width": width,
+            "height": height,
+            "photographer": (item.get("user") or "").strip() or None,
+            "license": PIXABAY_LICENSE[0],
+            "license_url": PIXABAY_LICENSE[1],
+            "source_url": item.get("pageURL"),
+            "taken": None,
+            "latitude": None,
+            "longitude": None,
+            "distance_m": None,
+            "_categories": [t.strip() for t in (item.get("tags") or "").split(",") if t.strip()]
+                           + [slug_words(item.get("pageURL"))],
+        })
+    return out
+
+
+def pexels_candidates(data):
+    out = []
+    for item in (data or {}).get("photos", []):
+        width, height = fit(item.get("width"), item.get("height"), PEXELS_WIDTH)
+        src = item.get("src") or {}
+        out.append({
+            "source": "pexels",
+            "origin": "Pexels",
+            "id": f"pexels:{item['id']}",
+            "title": (item.get("alt") or slug_words(item.get("url")).capitalize()).strip(),
+            "description": "",
+            "image_url": src.get("large2x") or "",
+            "preview_url": src.get("medium") or src.get("large") or "",
+            "width": width,
+            "height": height,
+            "photographer": (item.get("photographer") or "").strip() or None,
+            "license": PEXELS_LICENSE[0],
+            "license_url": PEXELS_LICENSE[1],
+            "source_url": item.get("url"),
+            "taken": None,
+            "latitude": None,
+            "longitude": None,
+            "distance_m": None,
+            "_categories": [slug_words(item.get("url"))],
+        })
+    return out
+
+
 def photo_keys(candidate):
     """Keys that identify one photo across sources. A Commons copy of a Flickr
     photo keeps the Flickr id in its title: "Lake Agnes Tea House (15464773570).jpg"."""
@@ -414,7 +596,8 @@ def photo_keys(candidate):
 
 # ---------------------------------------------------------------- filtering
 
-def rejection(candidate, from_text_search=False, dest="", min_width=MIN_WIDTH, terms=(), region=()):
+def rejection(candidate, from_text_search=False, dest="", min_width=MIN_WIDTH, terms=(), region=(),
+              max_distance=TEXT_MATCH_RADIUS_M):
     """Why a candidate is not a usable landscape photo, or None if it is."""
     if candidate["source"] == "commons" and not COMMONS_LICENSES.match(candidate["license"] or ""):
         return f"license {candidate['license'] or 'unknown'}"
@@ -423,11 +606,13 @@ def rejection(candidate, from_text_search=False, dest="", min_width=MIN_WIDTH, t
     # Some Flickr accounts use an email address as their name; we'd publish it in the credit line.
     if re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", candidate["photographer"]):
         return "photographer name is an email address"
-    if not is_landscape(candidate["width"], candidate["height"], min_width):
+    # Pixabay's API tops out at 1280px; those are always "Lower resolution".
+    width_floor = min(min_width, FALLBACK_MIN_WIDTH) if candidate["source"] == "pixabay" else min_width
+    if not is_landscape(candidate["width"], candidate["height"], width_floor):
         return "not a large landscape image"
     if candidate["distance_m"] is None and from_text_search:
         return "not geotagged"
-    if candidate["distance_m"] is not None and candidate["distance_m"] > TEXT_MATCH_RADIUS_M:
+    if candidate["distance_m"] is not None and candidate["distance_m"] > max_distance:
         return "too far from the trail"
     text = candidate_text(candidate)
     # Keyword hits have no location: they must name the trail and its region
@@ -435,7 +620,13 @@ def rejection(candidate, from_text_search=False, dest="", min_width=MIN_WIDTH, t
     # The title must name the trail; tags alone matched "Kokanee Glacier" beer.
     if candidate["source"] == "openverse" and not (mentions(candidate["title"], terms) and mentions(text, region)):
         return "keyword hit does not name the trail and region"
-    if candidate["source"] == "openverse" and ELSEWHERE.search(fold(text)):
+    # Stock photos have loose titles; their tags and page name must name the place and its park or region.
+    if candidate["source"] in STOCK_SOURCES and not (mentions(text, terms) and mentions(text, region)):
+        return "keyword hit does not name the trail and region"
+    # ... and say it's in Canada: stock tags reuse place names ("Emerald Lake", "Jasper").
+    if candidate["source"] in STOCK_SOURCES and not mentions(text, [frozenset({w}) for w in CANADA_WORDS]):
+        return "stock photo doesn't say it's in Canada"
+    if candidate["source"] in KEYWORD_SOURCES and ELSEWHERE.search(fold(text)):
         return "keyword hit is about somewhere or something else"
     # "BMSCsign.JPG", "Bear_crossing": split camel case and separators into words.
     words = re.sub(r"([a-z])([A-Z])", r"\1 \2", text).replace("_", " ")
@@ -528,10 +719,11 @@ def clean_place(title):
     return re.split(r",\s*", title)[0].strip()
 
 
-def wikipedia_geosearch(lat, lon, lang, cache_dir):
+def wikipedia_geosearch(lat, lon, lang, cache_dir, radius=ROUTE_RADIUS_M):
     data = get_json(WIKIPEDIA_API.format(lang=lang), {
         "action": "query", "format": "json", "formatversion": "2", "list": "geosearch",
-        "gscoord": f"{lat}|{lon}", "gsradius": str(ROUTE_RADIUS_M), "gslimit": "50", "gsnamespace": "0",
+        "gscoord": f"{lat}|{lon}", "gsradius": str(min(radius, GEO_RADIUS_M)), "gslimit": "100" if radius > ROUTE_RADIUS_M else "50",
+        "gsnamespace": "0",
     }, cache_dir)
     return ((data or {}).get("query") or {}).get("geosearch", [])
 
@@ -565,7 +757,7 @@ def campground_names(trail, links):
     return out
 
 
-def landmarks(trail, line, points, links, cache_dir):
+def landmarks(trail, line, points, links, cache_dir, radius=ROUTE_RADIUS_M):
     """[(name, metres from the route)] for named places, nearest first:
     Wikipedia articles geotagged within ROUTE_RADIUS_M of the route, the
     trail's campgrounds and lake/pass/peak names in its description (both
@@ -575,11 +767,11 @@ def landmarks(trail, line, points, links, cache_dir):
     found = {}
     for lat, lon in points:
         for lang in langs:
-            for hit in wikipedia_geosearch(lat, lon, lang, cache_dir):
+            for hit in wikipedia_geosearch(lat, lon, lang, cache_dir, radius):
                 name = clean_place(hit["title"])
                 if is_landmark(name, park_words):
                     d = distance_to_line((hit["lat"], hit["lon"]), line)
-                    if d <= ROUTE_RADIUS_M:
+                    if d <= radius:
                         found[name] = min(found.get(name, math.inf), d)
     for name in campground_names(trail, links):
         if is_campground_name(name, park_words):
@@ -607,7 +799,10 @@ def url_loads(url):
         return _URL_OK[url]
     ok = False
     for method, headers in (("HEAD", {}), ("GET", {"Range": "bytes=0-0"})):
-        request = urllib.request.Request(url, method=method, headers={"User-Agent": USER_AGENT, **headers})
+        host = urllib.parse.urlsplit(url).hostname or ""
+        stock = host.endswith("pixabay.com") or host.endswith("pexels.com")
+        client = {"User-Agent": STOCK_CLIENT} if stock else {}
+        request = urllib.request.Request(url, method=method, headers={"User-Agent": USER_AGENT, **client, **headers})
         for wait in (0, 5, 20):
             time.sleep(wait or 0.25)
             try:
@@ -627,7 +822,7 @@ def url_loads(url):
 
 # ---------------------------------------------------------------- search
 
-def classify(candidate, named_terms, distance_from):
+def classify(candidate, named_terms, distance_from, park_terms=()):
     """(stored confidence, match line) by the strong/likely/weak rules.
 
     named_terms is [(label, words, on_route)]. Naming the trail or a landmark
@@ -638,51 +833,91 @@ def classify(candidate, named_terms, distance_from):
     text = candidate_text(candidate)
     d = candidate["distance_m"]
     where = "the route" if distance_from == "route" else "the trail point"
-    for label, term, on_route in named_terms:
+    for label, term, on_route, *_ in named_terms:
         if on_route and mentions(text, [term]):
             return "high", f"Names {label}"
     if d is None:
-        for label, term, on_route in named_terms:
-            if mentions(text, [term]):
+        for label, term, on_route, *within in named_terms:
+            # Park-wide landmarks (more than LIKELY_M out) only say "the park".
+            if mentions(text, [term]) and (not within or within[0] <= LIKELY_M):
                 return "medium", f"Names {label}, near the trail"
     if d is not None and d <= STRONG_M:
         return "high", f"{d / 1000:.1f} km from {where}"
     if d is not None and d <= LIKELY_M:
         return "medium", f"{d / 1000:.1f} km from {where}"
     if d is not None:
-        return "off_topic", f"Regional: {d / 1000:.0f} km from {where}"
-    return "off_topic", "Park or region match only"
+        return "park", f"Park: {d / 1000:.0f} km from {where}"
+    for label, term, *_ in named_terms:
+        if mentions(text, [term]):
+            return "park", f"Park: names {label}"
+    if park_terms and mentions(text, park_terms):
+        return "park", "Park: names the park"
+    return "park", "Park or region match only"
 
 
-def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=None, exclude=()):
-    """openverse is None (Commons only) or the request headers to use."""
+def park_name_terms(trail):
+    """The park's distinctive words ({"jasper"}, {"fundy"}), or none for a trail in no park."""
+    words = distinctive(trail.get("park_name") or "", REGION_FILLER)
+    return [frozenset(words)] if words else []
+
+
+def stock_queries(trail, dest, places):
+    """Trail name, destination, nearest landmarks, the park and "park scenery"."""
+    park = trail.get("park_name") or trail["region"].split(",")[0]
+    queries = openverse_queries(trail, dest) + [f"{p} {park}" if fold(park) not in fold(p) else p for p in places[:3]]
+    queries += [park, f"{park} scenery"]
+    return list(dict.fromkeys(q.strip() for q in queries if q.strip()))
+
+
+def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=None, exclude=(), park_wide=False,
+               stock=()):
+    """openverse is None (Commons only) or the request headers to use; stock is
+    the stock libraries to search (StockSource). park_wide widens the landmark
+    and geotag radius to PARK_RADIUS_M and searches the park's name."""
     routes, links = routes or {}, links or {}
     line, points, distance_from = trail_geometry(trail, routes)
     dest = destination(trail)
     dest_words = distinctive(dest)
-    nearby = landmarks(trail, line, points, links, cache_dir)
+    radius = PARK_RADIUS_M if park_wide else ROUTE_RADIUS_M
+    nearby = landmarks(trail, line, points, links, cache_dir, radius)
     places = [name for name, _ in nearby]
     region = region_terms(trail)
+    park_terms = park_name_terms(trail)
+    if park_wide:
+        # A stock or keyword hit may name just the park ("Jasper National Park").
+        terms_region = region + park_terms
+    else:
+        terms_region = region
     # Labelled term sets: the trail and its destination, then each landmark.
     own_terms = [frozenset(distinctive(label)) for label in [dest, trail["name"], *name_parts(trail["name"])]
                  if distinctive(label)]
     named_terms = [(label, frozenset(distinctive(label)), True)
                    for label in [dest, trail["name"], *name_parts(trail["name"])] if distinctive(label)]
-    named_terms += [(name, frozenset(distinctive(name)), d <= STRONG_M) for name, d in nearby if distinctive(name)]
-    terms = [t for _, t, _ in named_terms]
+    named_terms += [(name, frozenset(distinctive(name)), d <= STRONG_M, d) for name, d in nearby if distinctive(name)]
+    terms = [t for _, t, *_ in named_terms]
+    # Park-wide keyword hits may name only the park.
+    keyword_terms = terms + (park_terms if park_wide else [])
     allowed = f"{dest} {trail['name']} {' '.join(places)}"
+    park_query = trail.get("park_name") if park_wide and trail.get("park_name") else None
 
     found = []
     for lat, lon in points:
         found += [(c, False) for c in commons_candidates(commons_geosearch(lat, lon, cache_dir), (lat, lon))]
-    for query in dict.fromkeys([dest, re.sub(r"\s*/\s*", " ", trail["name"]), *places[:MAX_LANDMARKS]]):
+    landmark_limit = MAX_LANDMARKS * 2 if park_wide else MAX_LANDMARKS
+    commons_queries = [dest, re.sub(r"\s*/\s*", " ", trail["name"]), *places[:landmark_limit], park_query]
+    for query in dict.fromkeys(q for q in commons_queries if q):
         found += [(c, True) for c in commons_candidates(commons_text_search(query, cache_dir), points[0])]
     if openverse is not None:
         park = " ".join(distinctive(trail.get("park_name") or trail["region"], REGION_FILLER)[:2])
-        queries = openverse_queries(trail, dest) + [f"{p} {park}".strip() for p in places[:OPENVERSE_LANDMARKS]]
+        queries = openverse_queries(trail, dest) + [f"{p} {park}".strip() for p in places[:OPENVERSE_LANDMARKS * (3 if park_wide else 1)]]
+        if park_query:
+            queries.append(park_query)
         for query in dict.fromkeys(queries):
             # Not held to the geotag rule: keyword hits are checked by name instead.
             found += [(c, False) for c in openverse_candidates(openverse_search(query, cache_dir, openverse))]
+    for source in stock:
+        for query in stock_queries(trail, dest, places):
+            found += [(c, False) for c in source.search(query, cache_dir)]
 
     # Commons comes first, so a photo found on both keeps its full-size
     # Commons copy and geotag.
@@ -699,12 +934,21 @@ def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=N
         # An untagged Commons hit is kept, like an Openverse one, when its title
         # names the trail or a landmark and its text names the region.
         untagged_named = (from_text and candidate["distance_m"] is None
-                          and mentions(candidate["title"], terms) and mentions(candidate_text(candidate), region))
-        reason = rejection(candidate, from_text and not untagged_named, allowed, min_width, terms, region)
+                          and mentions(candidate["title"], keyword_terms) and mentions(candidate_text(candidate), terms_region))
+        reason = rejection(candidate, from_text and not untagged_named, allowed, min_width, keyword_terms, terms_region,
+                           PARK_RADIUS_M if park_wide else TEXT_MATCH_RADIUS_M)
         if reason:
             rejected[reason] = rejected.get(reason, 0) + 1
             continue
-        candidate["confidence"], candidate["match"] = classify(candidate, named_terms, distance_from)
+        if candidate["source"] in STOCK_SOURCES:
+            stock_class = classify_stock(candidate, named_terms, trail.get("park_name"))
+            if stock_class is None:
+                rejected["stock photo doesn't name the place as a phrase"] = rejected.get(
+                    "stock photo doesn't name the place as a phrase", 0) + 1
+                continue
+            candidate["confidence"], candidate["match"] = stock_class
+        else:
+            candidate["confidence"], candidate["match"] = classify(candidate, named_terms, distance_from, park_terms)
         candidate["distance_from"] = distance_from
         # Naming the trail itself outranks naming a landmark on it.
         candidate["score"] = score(candidate, dest_words) + (2 if mentions(candidate_text(candidate), own_terms) else 0)
@@ -721,20 +965,12 @@ def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=N
                 photographers.add(candidate["photographer"])
                 ordered.append(candidate)
         ordered += [c for c in tier if c not in ordered]
-    picked, broken = [], 0
-    for candidate in ordered:
-        if len(picked) == top:
-            break
-        if url_loads(candidate["image_url"]) and url_loads(candidate["preview_url"]):
-            picked.append(candidate)
-        else:
-            broken += 1
+    picked, broken = pick_loading(ordered, top)
     if broken:
         rejected["image no longer loads"] = broken
     for candidate in picked:
         candidate.pop("_categories", None)
     best = picked[0]["confidence"] if picked else None
-    counts = {label: sum(1 for c in picked if LABELS[c["confidence"]] == label) for label in ("strong", "likely", "weak")}
     return {
         "rank": trail["rank"],
         "name": trail["name"],
@@ -747,14 +983,70 @@ def search_one(trail, cache_dir, top, openverse, min_width, routes=None, links=N
         "search_points": len(points),
         "landmarks": [{"name": n, "route_m": d} for n, d in nearby],
         "best_confidence": best,
-        # The review page starts here; a weak best falls back to topo.
+        # The review page starts here; a park-level best falls back to topo.
         "default_choice": picked[0]["id"] if best in ("high", "medium") else None,
-        "counts": counts,
+        "counts": label_counts(picked),
+        "park_wide": park_wide,
         "considered": len(found),
         "usable": len(kept),
         "rejected": rejected,
         "candidates": picked,
     }
+
+
+def pick_loading(ordered, top):
+    """The first `top` candidates whose image and preview still load."""
+    picked, broken = [], 0
+    for candidate in ordered:
+        if len(picked) == top:
+            break
+        if url_loads(candidate["image_url"]) and url_loads(candidate["preview_url"]):
+            picked.append(candidate)
+        else:
+            broken += 1
+    return picked, broken
+
+
+def label_counts(candidates):
+    return {label: sum(1 for c in candidates if LABELS[c["confidence"]] == label) for label in ("trail", "nearby", "park")}
+
+
+def by_source(candidates):
+    out = {}
+    for c in candidates:
+        out[c["source"]] = out.get(c["source"], 0) + 1
+    return out
+
+
+def merge_earlier(result, earlier, top, min_width):
+    """Fold an earlier search's candidates for this trail into result: one
+    list, deduplicated across sources, best first, each checked to load.
+    Earlier weak matches ("low"/"off_topic") count as park-level."""
+    seen, pool = set(), []
+    for candidate in result["candidates"] + [dict(c) for c in earlier.get("candidates", [])]:
+        keys = photo_keys(candidate)
+        if keys & seen:
+            continue
+        seen |= keys
+        if candidate["confidence"] in ("low", "off_topic"):
+            candidate["confidence"] = "park"
+        candidate.setdefault("score", 0)
+        candidate.setdefault("low_res", candidate["width"] < min_width)
+        pool.append(candidate)
+    pool.sort(key=lambda c: (CONFIDENCE_ORDER[c["confidence"]], c["low_res"], -c["score"]))
+    picked, broken = pick_loading(pool, top)
+    best = picked[0]["confidence"] if picked else None
+    result.update({
+        "candidates": picked,
+        "best_confidence": best,
+        "default_choice": picked[0]["id"] if best in ("high", "medium") else None,
+        "counts": label_counts(picked),
+        "merged_earlier": len(earlier.get("candidates", [])),
+        "low_res": bool(picked) and all(c["low_res"] for c in picked),
+    })
+    if broken:
+        result["rejected"]["image no longer loads"] = result["rejected"].get("image no longer loads", 0) + broken
+    return result
 
 
 def search_with_fallback(trail, cache_dir, top, openverse, min_width, fallback_width, **context):
@@ -784,6 +1076,10 @@ def main():
     parser.add_argument("--min-width", type=int, default=MIN_WIDTH, help="smallest usable image width (px)")
     parser.add_argument("--fallback-min-width", type=int, default=FALLBACK_MIN_WIDTH,
                         help="for trails with nothing at --min-width; 0 turns the fallback off")
+    parser.add_argument("--park-wide", action="store_true",
+                        help=f"landmarks and geotags up to {PARK_RADIUS_M // 1000} km from the route, and the park's name")
+    parser.add_argument("--no-stock", action="store_true", help="skip Pixabay and Pexels even when their keys are set")
+    parser.add_argument("--merge", help="an earlier search's output: fold its candidates for these trails in")
     args = parser.parse_args()
 
     trails = json.loads(CATALOG.read_text(encoding="utf-8"))["trails"]
@@ -801,17 +1097,24 @@ def main():
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     openverse = None if args.commons_only else openverse_headers()
-    if openverse is not None:
-        print(f"Sources: Commons + Openverse ({'registered key' if openverse else 'anonymous'})")
-    else:
-        print("Sources: Commons only")
+    stock = [] if args.no_stock or args.commons_only else stock_sources()
+    names = ["Commons"] + ([f"Openverse ({'registered key' if openverse else 'anonymous'})"] if openverse is not None else [])
+    names += [s.name.capitalize() for s in stock]
+    print(f"Sources: {' + '.join(names)}{' (park-wide)' if args.park_wide else ''}")
+    if not args.no_stock and not args.commons_only and "pexels" not in {s.name for s in stock}:
+        print("Pexels skipped: PEXELS_API_KEY is not set.")
+    earlier = {}
+    if args.merge:
+        earlier = {(t["name"], t["province_code"]): t
+                   for t in json.loads(Path(args.merge).read_text(encoding="utf-8"))["trails"]}
 
     state = {"openverse": openverse}
     results, skipped = [], []
     widths = (args.min_width, args.fallback_min_width)
 
     def run(trail):
-        context = {"routes": routes, "links": links, "exclude": excludes.get((trail["name"], trail["province_code"]), set())}
+        context = {"routes": routes, "links": links, "exclude": excludes.get((trail["name"], trail["province_code"]), set()),
+                   "park_wide": args.park_wide, "stock": stock}
         try:
             result = search_with_fallback(trail, cache_dir, args.top, state["openverse"], *widths, **context)
         except RateLimited as limit:
@@ -821,6 +1124,9 @@ def main():
             result = search_with_fallback(trail, cache_dir, args.top, None, *widths, **context)
         if state["openverse"] is None and not args.commons_only:
             skipped.append(trail["name"])
+        previous = earlier.get((trail["name"], trail["province_code"]))
+        if previous:
+            result = merge_earlier(result, previous, args.top, args.min_width)
         return result
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
@@ -828,16 +1134,18 @@ def main():
         for future in as_completed(futures):
             result = future.result()
             results.append(result)
-            sources = "/".join(sorted({c["source"] for c in result["candidates"]})) or "-"
+            sources = " ".join(f"{k} {v}" for k, v in sorted(by_source(result["candidates"]).items())) or "-"
             c = result["counts"]
-            print(f"{result['rank']:>3} {result['name'][:40]:<40} strong {c['strong']} likely {c['likely']} weak {c['weak']}  "
+            print(f"{result['rank']:>3} {result['name'][:40]:<40} trail {c['trail']} nearby {c['nearby']} park {c['park']}  "
                   f"({result['usable']} usable, {result['search_points']} pts, {len(result['landmarks'])} landmarks) "
                   f"[{sources}]{' low-res' if result['low_res'] else ''}", flush=True)
     results.sort(key=lambda r: r["rank"])
 
     Path(args.out).write_text(json.dumps({
         "generated": date.today().isoformat(),
-        "sources": ["commons", *([] if args.commons_only else ["openverse"])],
+        "sources": ["commons", *([] if args.commons_only else ["openverse"]), *(s.name for s in stock)],
+        "park_wide": args.park_wide,
+        "merged": args.merge and Path(args.merge).name,
         "min_width": args.min_width,
         "fallback_min_width": args.fallback_min_width,
         "openverse_skipped": skipped,
@@ -845,7 +1153,7 @@ def main():
     }, indent=1, ensure_ascii=False), encoding="utf-8")
 
     levels = {label: sum(1 for r in results if r["best_confidence"] and LABELS[r["best_confidence"]] == label)
-              for label in ("strong", "likely", "weak")}
+              for label in ("trail", "nearby", "park")}
     print("\nBest candidate per trail: " + ", ".join(f"{k} {v}" for k, v in levels.items())
           + f", none {sum(1 for r in results if not r['candidates'])}")
     print(f"Low-resolution fallback ({args.fallback_min_width}px) used for "
@@ -853,6 +1161,9 @@ def main():
     print(f"Photo by default: {sum(1 for r in results if r['default_choice'])}/{len(results)} (rest start on topo)")
     if skipped:
         print(f"Openverse not searched for {len(skipped)} trails (rate limit): {', '.join(skipped)}")
+    for source in stock:
+        if source.failed:
+            print(f"{source.name.capitalize()} failed for {len(source.failed)} queries; rerun to retry them.")
     if OPENVERSE_FAILED:
         print(f"Openverse failed (5xx/timeout) for {len(OPENVERSE_FAILED)} queries; rerun to retry them (Commons is cached).")
     print(f"Wrote {args.out}. Nothing was downloaded or published.")

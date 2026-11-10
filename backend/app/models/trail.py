@@ -81,3 +81,5 @@ class Trail(Base):
     # The credited hero photo, if one has been approved (null means the topo
     # fallback). Loaded with each trail so lists don't query per row.
     photo = relationship("TrailPhoto", uselist=False, lazy="selectin", viewonly=True)
+    # The generated route map, shown instead of the plain topo when there's no photo.
+    route_map = relationship("TrailRouteMap", uselist=False, lazy="selectin", viewonly=True)

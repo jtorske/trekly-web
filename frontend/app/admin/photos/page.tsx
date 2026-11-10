@@ -3,6 +3,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
+import { creditPlace } from "@/lib/trailPhoto";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
 import { pageOf } from "@/lib/paging";
@@ -13,6 +14,8 @@ import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO, photoProblemMessage } from "
 import { preparePhoto, TRAIL_PHOTO_EDGE } from "@/lib/preparePhoto";
 import {
   CONFIDENCE_LABELS,
+  CONFIDENCE_TONE,
+  SOURCE_LABELS,
   trailPhotosAdminApi as api,
   type PhotoCandidate,
   type ReviewTrail,
@@ -29,6 +32,13 @@ type Filter = "todo" | "none" | "all";
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : "That didn't work. Try again.";
+}
+
+/** "Park: 12 km from the route" -> "Park photo" (the distance shows below); "Park: names X" -> "Park photo · names X". */
+function matchLine(match: string): string {
+  if (!match.startsWith("Park")) return match.replace(/: .*$/, "");
+  const named = /^Park: (names .*)$/.exec(match);
+  return named ? `Park photo · ${named[1]}` : "Park photo";
 }
 
 function CandidateOption({
@@ -49,8 +59,8 @@ function CandidateOption({
   return (
     <label className={`${styles.option} ${checked ? styles.optionChecked : ""}`}>
       <input type="radio" name={name} checked={checked} onChange={onSelect} className={ui.srOnly} />
-      {/* Previews are hotlinked from the source; only approved photos are copied to Storage.
-          Lazy and async: a page of ten trails holds up to fifty of them. */}
+      {/* Previews are hotlinked from the source (Pixabay's are copies in Storage: its links
+          expire). Lazy and async: a page of ten trails holds up to fifty of them. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         className={styles.preview}
@@ -68,18 +78,24 @@ function CandidateOption({
             {number}
           </kbd>
         )}
-        <span className={`${styles.confidence} ${styles[candidate.confidence]}`}>{CONFIDENCE_LABELS[candidate.confidence]}</span>
+        <span className={`${styles.confidence} ${styles[CONFIDENCE_TONE[candidate.confidence]]}`}>
+          {CONFIDENCE_LABELS[candidate.confidence]}
+        </span>
+        <span className={`${styles.confidence} ${styles.source}`} title={candidate.origin ? `Found on ${candidate.origin}` : undefined}>
+          {SOURCE_LABELS[candidate.source] ?? candidate.source}
+        </span>
         {candidate.low_res && (
           <span className={`${styles.confidence} ${styles.lowRes}`} title="Below the 1600px minimum; the hero will be softer">
             Lower resolution
           </span>
         )}
       </span>
-      {/* "Names Brazeau Lake" / "Regional"; distances show below in the viewer's units. */}
-      {candidate.match && !/^\d/.test(candidate.match) && <span className={styles.match}>{candidate.match.replace(/: .*$/, "")}</span>}
+      {/* "Names Brazeau Lake" / "Park: names Mount Edith Cavell"; distances show below in the viewer's units. */}
+      {candidate.match && !/^\d/.test(candidate.match) && <span className={styles.match}>{matchLine(candidate.match)}</span>}
       <span className={styles.optionTitle}>{candidate.title}</span>
       <span className={styles.optionMeta}>
-        {candidate.photographer} · {candidate.license} · {candidate.origin ?? candidate.source}
+        {candidate.photographer} · {candidate.license}
+        {candidate.source === "openverse" && candidate.origin && ` · via ${candidate.origin}`}
       </span>
       <span className={styles.optionMeta}>
         {candidate.width}×{candidate.height}px
@@ -189,8 +205,8 @@ const TrailReview = forwardRef<
       onFocus={onActivate}
     >
       <div className={styles.current}>
-        <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
-        <PhotoCredit photo={trail.photo} />
+        <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" />
+        <PhotoCredit photo={trail.photo} place={creditPlace(trail)} />
       </div>
       <div className={styles.body}>
         <h2 className={styles.trailName}>
@@ -222,14 +238,16 @@ const TrailReview = forwardRef<
               </kbd>{" "}
               No photo
             </span>
-            <span className={styles.optionMeta}>Reject these and show the topo background.</span>
+            <span className={styles.optionMeta}>
+              {trail.route_map ? "Reject these and show the route map." : "Reject these and show the topo background."}
+            </span>
           </label>
         </fieldset>
         {item.candidates.length === 0 && <p className={ui.hint}>The search found no usable candidates for this trail.</p>}
 
         <div className={styles.actions}>
           <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy}>
-            {busy ? "Saving…" : choice === TOPO ? "Use topo" : "Approve photo"}
+            {busy ? "Saving…" : choice === TOPO ? (trail.route_map ? "Use route map" : "Use topo") : "Approve photo"}
           </button>
           <label className={ui.secondary} title={PHOTO_HINT}>
             {preparing ? PREPARING_PHOTO : "Upload my own"}
@@ -403,11 +421,12 @@ function PhotoReview() {
         {state.status === "ready" && (
           <>
             <p className={admin.muted}>
-              Pick the best photo for each trail, or reject them all to keep the topo background.{" "}
-              <strong>Strong</strong> names the trail or a landmark on it, or was taken within {formatDistance(1, units)} of the route;{" "}
-              <strong>Likely</strong> within {formatDistance(3, units)};{" "}
-              <strong>Weak</strong>{" "}is a park or region match only. Trails whose
-              best candidate is weak start on &ldquo;No photo&rdquo;.
+              Pick the best photo for each trail, or reject them all to show its route map (or the topo
+              background, for trails without a stored route).{" "}
+              <strong>Trail</strong> shows the trail or a landmark on it (named, or taken within {formatDistance(1, units)} of the
+              route); <strong>Nearby</strong> is within {formatDistance(3, units)};{" "}
+              <strong>Park</strong>{" "}represents the park, and its credit on the trail page will say so. Trails whose best
+              candidate is a park photo start on &ldquo;No photo&rdquo;.
             </p>
             <p className={styles.shortcuts}>
               Keys: <kbd className={styles.key}>1</kbd>–<kbd className={styles.key}>5</kbd> pick ·{" "}

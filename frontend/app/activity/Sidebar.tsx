@@ -158,7 +158,7 @@ export function TrendingTrails() {
             <li key={trail.id}>
               <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.trendingRow}>
                 <span className={styles.trendingThumb}>
-                  <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+                  <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
                 </span>
                 <span className={styles.pickedText}>
                   <span className={styles.trendingName}>{trail.name}</span>

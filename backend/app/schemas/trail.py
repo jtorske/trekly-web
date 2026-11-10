@@ -39,6 +39,9 @@ class TrailPhotoOut(BaseModel):
     source_url: str | None = None
     # Where it was first published ("Flickr", "Wikimedia Commons"); null for the owner's photos.
     origin: str | None = None
+    # What it shows: 'trail', 'nearby' or 'park' (a photo of the park, not this
+    # trail: the credit names the park). Null for the owner's own photos.
+    scope: str | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -54,6 +57,28 @@ class TrailPhotoOut(BaseModel):
                 "license_url": value.license_url,
                 "source_url": value.source_url,
                 "origin": value.origin,
+                "scope": value.scope,
+            }
+        return value
+
+
+class TrailRouteMapOut(BaseModel):
+    """The trail's route drawn on the topo style; shown when it has no photo."""
+
+    hero_url: str
+    thumb_url: str
+    width: int
+    height: int
+
+    @model_validator(mode="before")
+    @classmethod
+    def _from_row(cls, value):
+        if hasattr(value, "hero_path"):
+            return {
+                "hero_url": public_photo_url(value.hero_path),
+                "thumb_url": public_photo_url(value.thumb_path),
+                "width": value.hero_width,
+                "height": value.hero_height,
             }
         return value
 
@@ -75,8 +100,10 @@ class TrailListItemOut(TrailOut):
     # Set when the trail has left the catalogue; it still resolves for
     # bookmarks but no longer appears in search.
     retired_at: datetime | None = None
-    # The approved hero photo; null means show the topo fallback.
+    # The approved hero photo; null means show the route map, or the topo fallback.
     photo: TrailPhotoOut | None = None
+    # The trail's route drawn on the topo style (trails with a stored route).
+    route_map: TrailRouteMapOut | None = None
 
 
 class BookedThroughOut(BaseModel):

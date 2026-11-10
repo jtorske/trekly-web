@@ -1368,6 +1368,7 @@ function FinishStep({ next }: { next: string }) {
                 >
                   <TrailPhoto
                     photo={trail.photo}
+                    routeMap={trail.route_map}
                     name={trail.name}
                     variant="thumb"
                   />

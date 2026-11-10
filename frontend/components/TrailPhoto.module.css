@@ -32,6 +32,16 @@
   padding: 1rem 1.25rem;
 }
 
+/* The trail name over a route map: a soft paper wash at the bottom keeps it
+   readable over contour lines (the map leaves that corner clear of the route). */
+.mapLabel {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-cream) 72%, transparent),
+    transparent 45%
+  );
+}
+
 .contours {
   position: absolute;
   inset: 0;

@@ -151,7 +151,7 @@ export default function PastHikesPicker({
           onClick={() => onToggle(trail.id)}
         >
           <span className={styles.photo}>
-            <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+            <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" />
             <span className={styles.tick} aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />

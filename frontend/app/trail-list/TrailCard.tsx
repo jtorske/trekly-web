@@ -167,7 +167,7 @@ export default function TrailCard({
           button and the photo credit sit above it. */}
       <div className={styles.card}>
         <div className={styles.cardPhoto}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" />
           {trail.photo && <PhotoInfo photo={trail.photo} />}
         </div>
         <div className={styles.cardBody}>

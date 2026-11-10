@@ -39,7 +39,7 @@ GEAR_TABLES = [
                 "backcountry_parks", "backcountry_sites", "trail_campgrounds", "trail_booking_systems",
                 "availability_alerts", "availability_cache", "provider_request_budget", "job_locks",
                 "trip_plans", "trip_plan_nights", "hike_logs", "featured_badges", "trail_photos", "trail_photo_reviews",
-                "trail_photo_candidates", "profile_settings", "profile_preferences", "profile_moderation", "profile_reports",
+                "trail_photo_candidates", "trail_route_maps", "profile_settings", "profile_preferences", "profile_moderation", "profile_reports",
                 "admin_audit_log", "visit_streaks", "signup_email_requests", "activity_posts", "activity_reactions", "nudge_dismissals", "account_labels",
                 "follows", "notifications", "notification_preferences")
 ]

@@ -39,10 +39,13 @@ MAX_SOURCE_BYTES = 40 * 1024 * 1024
 MAX_SOURCE_PIXELS = 80_000_000
 WEBP_QUALITY = 80
 ACCEPTED_FORMATS = {"JPEG", "PNG", "WEBP", "MPO"}
-# Candidate images are only fetched from these hosts (Commons originals and
-# the Flickr copies Openverse links to), so an approve request can't make the
-# server fetch an arbitrary URL.
-FETCH_HOSTS = ("upload.wikimedia.org", "live.staticflickr.com", ".staticflickr.com")
+# Candidate images are only fetched from these hosts (Commons originals, the
+# Flickr copies Openverse links to, Pexels' image CDN), or from our own
+# bucket's candidates/ folder (Pixabay copies: its links expire), so an
+# approve request can't make the server fetch an arbitrary URL.
+FETCH_HOSTS = ("upload.wikimedia.org", "live.staticflickr.com", ".staticflickr.com", "images.pexels.com")
+# Where load_photo_candidates.py keeps copies of candidates whose source links expire.
+CANDIDATE_PREFIX = "candidates/"
 # Wikimedia's User-Agent policy: tool name/version, a way to reach us, the library.
 USER_AGENT = (
     "TreklyPhotoPublisher/1.0 (https://trekly-web.vercel.app; jtorske27@gmail.com) "
@@ -177,9 +180,17 @@ def new_post_photo_path() -> str:
 
 # ---------------------------------------------------------------- fetching
 
+def is_candidate_copy(url: str) -> bool:
+    """A candidate copy in our own bucket (candidates/...), under SUPABASE_URL."""
+    base = public_photo_url(CANDIDATE_PREFIX)
+    return bool(os.getenv("SUPABASE_URL")) and url.startswith(base) and ".." not in url and "?" not in url
+
+
 def allowed_fetch_url(url: str) -> bool:
     parts = urllib.parse.urlsplit(url)
     host = (parts.hostname or "").lower()
+    if is_candidate_copy(url):
+        return True
     return parts.scheme == "https" and any(host == h or (h.startswith(".") and host.endswith(h)) for h in FETCH_HOSTS)
 
 
@@ -204,7 +215,7 @@ def fetch_image(url: str, sleep=time.sleep) -> bytes:
     SourceBusy so the admin sees when to try again (the server never waits).
     """
     if not allowed_fetch_url(url):
-        raise PhotoError("That image isn't hosted on Wikimedia Commons or Flickr.")
+        raise PhotoError("That image isn't hosted on Wikimedia Commons, Flickr, Pexels or our own storage.")
     opener = urllib.request.build_opener(_AllowlistRedirects)
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     for attempt in (1, 2):
@@ -285,9 +296,10 @@ class PhotoStorage:
             pass
         raise StorageError(f"Storage request failed ({f'HTTP {status}' if status else 'no response'}).") from None
 
-    def upload(self, path: str, data: bytes) -> None:
+    def upload(self, path: str, data: bytes, upsert: bool = False) -> None:
         self._send(f"{self.base}/{self.bucket}/{path}", data, "POST",
-                   {"Content-Type": "image/webp", "x-upsert": "false", "cache-control": "max-age=31536000"})
+                   {"Content-Type": "image/webp", "x-upsert": "true" if upsert else "false",
+                    "cache-control": "max-age=31536000"})
 
     def delete(self, paths: list[str]) -> None:
         if not paths:

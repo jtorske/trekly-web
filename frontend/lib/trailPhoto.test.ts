@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { photoCredit } from "./trailPhoto.ts";
+import { creditPlace, photoCredit } from "./trailPhoto.ts";
 import type { TrailPhoto } from "./trailsApi";
 
 const PHOTO: TrailPhoto = {
@@ -31,4 +31,21 @@ test("the owner's own photo is credited by name only, with no link", () => {
 test("never links to a non-web URL", () => {
   assert.equal(photoCredit({ ...PHOTO, source_url: "javascript:alert(1)" }).href, null);
   assert.equal(photoCredit({ ...PHOTO, source_url: "not a url" }).href, null);
+});
+
+test("a park photo names the park before the photographer", () => {
+  assert.equal(
+    photoCredit({ ...PHOTO, scope: "park" }, "Jasper National Park").text,
+    "Photo: Jasper National Park · Wilson Hui, CC BY-SA 4.0",
+  );
+  // Trail and nearby photos, and a park photo with no place to name, stay as they were.
+  assert.equal(photoCredit({ ...PHOTO, scope: "trail" }, "Jasper National Park").text, "Photo: Wilson Hui, CC BY-SA 4.0");
+  assert.equal(photoCredit({ ...PHOTO, scope: "nearby" }, "Jasper National Park").text, "Photo: Wilson Hui, CC BY-SA 4.0");
+  assert.equal(photoCredit({ ...PHOTO, scope: "park" }, "  ").text, "Photo: Wilson Hui, CC BY-SA 4.0");
+});
+
+test("the credit's place is the park, else the region", () => {
+  assert.equal(creditPlace({ park_name: "Fundy National Park", region: "Fundy National Park, NB" }), "Fundy National Park");
+  assert.equal(creditPlace({ park_name: null, region: "Kananaskis, AB" }), "Kananaskis, AB");
+  assert.equal(creditPlace({}), null);
 });

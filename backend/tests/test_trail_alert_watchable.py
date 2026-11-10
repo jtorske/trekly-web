@@ -168,6 +168,6 @@ def test_one_query_per_fact_not_per_trail(client, trails, engine):
     finally:
         event.remove(engine, "before_cursor_execute", listener)
     queries = [s for s in statements if s.lstrip().upper().startswith("SELECT")]
-    # The trails (and their photos), then watchable, permits and booking systems
-    # for all of them at once: never one per trail.
-    assert len(queries) <= 5, queries
+    # The trails (with their photos and route maps), then watchable, permits and
+    # booking systems for all of them at once: never one per trail.
+    assert len(queries) <= 6, queries
