@@ -125,7 +125,7 @@ function OverviewBody() {
   }
   const [overview, audit] = state.data;
   const tiles: { label: string; value: number; note?: string; href?: string }[] = [
-    { label: "Users", value: overview.users_total, href: "/admin/users" },
+    { label: "Users", value: overview.users_total, note: "Not counting @trekly or demo accounts", href: "/admin/users" },
     {
       label: "New this week",
       value: overview.signups_by_week[overview.signups_by_week.length - 1]?.count ?? 0,

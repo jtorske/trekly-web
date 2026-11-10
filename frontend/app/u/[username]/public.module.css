@@ -161,3 +161,31 @@
 .followAction > :first-child {
   flex: 1;
 }
+
+/* Above a demo hiker's profile: it's made up. */
+.demoNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--color-tan) 20%, white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-rust) 35%, transparent);
+  padding: 0.75rem 0.9rem;
+  color: var(--color-dark-olive);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.demoNotice svg {
+  flex: none;
+  margin-top: 0.15rem;
+  color: var(--color-rust-text);
+}
+
+.demoNotice a {
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -19,7 +19,9 @@ same rule, private.activity_post_visible in migration a8c3f1d5e7b2):
 - a seasonal milestone: they don't hide their hike dates;
 - a hike post: the hike isn't dated in the future (a browser can edit its
   own hike_logs row, so this is checked on every read);
-- no admin has hidden the post.
+- no admin has hidden the post;
+- an announcement: its author is the official @trekly account
+  (app/account_labels.py); nobody else's would ever show.
 Nothing is cached, so turning a setting off hides the posts at once.
 
 The owner also sees their own posts while others can't (sharing turned off
@@ -38,6 +40,7 @@ from uuid import UUID
 from sqlalchemy import and_, case, exists, false, or_, select
 from sqlalchemy.orm import Session, aliased
 
+from app.account_labels import is_label
 from app.milestones import earned_ids, gather
 from app.milestones_config import ACTIVE
 from app.models.account import Profile
@@ -155,7 +158,12 @@ def visible_where(today: date):
         ~settings.is_private,
         settings.share_activity,
         ~exists().where(ProfileModeration.user_id == ActivityPost.user_id),
-        case((ActivityPost.kind == "rank", settings.show_rank), else_=settings.show_journal),
+        case(
+            (ActivityPost.kind == "rank", settings.show_rank),
+            # Only the official account's announcements ever show.
+            (ActivityPost.kind == "announcement", is_label(ActivityPost.user_id, "official")),
+            else_=settings.show_journal,
+        ),
         or_(~ActivityPost.reveals_date, ~settings.hide_hike_dates),
         _not_future(today),
     )

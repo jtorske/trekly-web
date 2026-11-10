@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import { appendPage, defaultScope, deleteKey, type ActivityPost, type ActivityScope } from "@/lib/activity";
-import { getActivity } from "@/lib/activityApi";
+import {
+  appendPage, defaultScope, deleteKey, withPicks, type ActivityPost, type ActivityScope, type FeedPicks,
+} from "@/lib/activity";
+import { getActivity, getPicks } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { useHidden } from "@/lib/useHidden";
 import { useHikeLogs } from "@/lib/useHikeLogs";
@@ -15,6 +17,7 @@ import Composer, { type ComposerHandle } from "./Composer";
 import Nudge from "@/components/Nudge";
 import { toast } from "@/lib/toast";
 import { useNudge } from "@/lib/useNudge";
+import PickCard from "./PickCard";
 import PostCard from "./PostCard";
 import { HikersYouMightKnow, ProfileCard, RecentlyEarned, TrendingTrails } from "./Sidebar";
 import styles from "./activity.module.css";
@@ -57,6 +60,14 @@ export default function ActivityPage() {
   const requestKey = `${status}:${scope}`;
   const current = feed?.key === requestKey ? feed : null;
   const province = profile?.home_province ?? null;
+  // "Trekly picks" between posts while real activity is quiet (Everyone only).
+  const [picks, setPicks] = useState<FeedPicks | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    getPicks(controller.signal).then(setPicks, () => undefined);
+    return () => controller.abort();
+  }, []);
+  const shownPicks = scope === "everyone" ? picks : null;
 
   const load = useCallback(
     async (cursor: string | null, signal?: AbortSignal) => {
@@ -184,22 +195,33 @@ export default function ActivityPage() {
             Explore trails
           </Link>
         </div>
+        {shownPicks?.sparse && shownPicks.picks.length > 0 && (
+          <ul className={`${styles.list} ${styles.emptyPicks}`} aria-label="Trekly picks">
+            {shownPicks.picks.map((pick) => (
+              <PickCard key={`${pick.kind}:${pick.trail.id}`} pick={pick} />
+            ))}
+          </ul>
+        )}
       </div>
     );
   } else {
     body = (
       <>
         <ul className={styles.list}>
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              signedIn={signedIn}
-              signInHref={signInHref}
-              viewer={profile?.username ?? null}
-              onChange={update}
-            />
-          ))}
+          {withPicks(posts, shownPicks).map((item) =>
+            "pick" in item ? (
+              <PickCard key={`pick:${item.pick.kind}:${item.pick.trail.id}`} pick={item.pick} />
+            ) : (
+              <PostCard
+                key={item.post.id}
+                post={item.post}
+                signedIn={signedIn}
+                signInHref={signInHref}
+                viewer={profile?.username ?? null}
+                onChange={update}
+              />
+            ),
+          )}
         </ul>
         <div ref={sentinel} className={styles.sentinel} aria-hidden="true" />
         {loading && <p className={styles.more} role="status">Loading more…</p>}

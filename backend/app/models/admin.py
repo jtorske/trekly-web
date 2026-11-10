@@ -30,6 +30,8 @@ AUDIT_ACTIONS = (
     "reopen_report",
     "hide_post",
     "unhide_post",
+    "official_post",
+    "delete_official_post",
 )
 
 

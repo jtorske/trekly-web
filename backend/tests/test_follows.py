@@ -211,7 +211,7 @@ def test_lists_show_people_and_your_state_toward_them(client, ana, ben, cam):
     page = people(client, ana, "followers", ben)
     assert names(page) == ["cam", "ben"]  # newest first
     assert {item["username"]: item["follow"] for item in page["items"]} == {"cam": "following", "ben": None}
-    assert set(page["items"][0]) == {"username", "display_name", "avatar_path", "is_private", "follow"}
+    assert set(page["items"][0]) == {"username", "display_name", "avatar_path", "label", "is_private", "follow"}
     assert names(people(client, ben, "following")) == ["cam", "ana"]
 
 

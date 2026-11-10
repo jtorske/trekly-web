@@ -1,3 +1,4 @@
+import type { AccountLabel } from "./accountLabels";
 import { apiFetch } from "./api";
 import type { FeaturedBadge } from "./featuredBadges";
 import type { FollowState } from "./follows";
@@ -83,6 +84,8 @@ export interface PublicProfile {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** "official" (Trekly team) or "demo" (Demo account): show the badge. */
+  label?: AccountLabel | null;
   is_private: boolean;
   allow_indexing: boolean;
   /** This viewer sees the sections: the profile is public, or they're an approved follower. */

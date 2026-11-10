@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import Dialog from "@/components/Dialog";
 import FollowButton from "@/components/FollowButton";
@@ -189,7 +190,9 @@ export default function FollowListDialog({
                 <Link href={publicProfilePath(person.username)} className={styles.who} onClick={onClose}>
                   <Avatar path={person.avatar_path} name={person.display_name ?? person.username} email={null} size={40} />
                   <span className={styles.text}>
-                    <span className={styles.name}>{displayName(person)}</span>
+                    <span className={styles.name}>
+                      {displayName(person)} <AccountBadge label={person.label} compact />
+                    </span>
                     <span className={styles.handle}>@{person.username}</span>
                   </span>
                 </Link>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { EyeOff, Flag, Hand, Trash2 } from "lucide-react";
+import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
 import HikePhoto from "@/components/HikePhoto";
@@ -100,6 +101,7 @@ export default function PostCard({
             {name}
           </Link>
           {post.hike?.verified && <VerifiedCheck />}
+          <AccountBadge label={post.author.label} compact />
         </span>
         <span className={styles.meta}>
           @{post.author.username}
@@ -142,7 +144,7 @@ export default function PostCard({
           Delete
         </button>
       ) : (
-        signedIn && (
+        signedIn && post.author.label !== "official" && (
           <button type="button" className={styles.iconAction} onClick={() => setReporting(true)}>
             <Flag size={15} aria-hidden="true" />
             Report
@@ -166,6 +168,42 @@ export default function PostCard({
       </span>
     </p>
   );
+
+  if (post.kind === "announcement" && post.announcement) {
+    const { announcement } = post;
+    const trail = announcement.trail;
+    return (
+      <li className={`${styles.card} ${styles.cardOfficial}`}>
+        {head}
+        <p className={styles.announcement}>{announcement.body}</p>
+        {announcement.photo_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={announcement.photo_url} alt="" className={styles.photo} loading="lazy" />
+        )}
+        {trail?.photo && !announcement.photo_url && (
+          <Link href={postHref(post)} className={styles.featureLink} aria-label={`Open ${trail.name}`}>
+            <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+          </Link>
+        )}
+        {trail && (
+          <Link href={postHref(post)} className={styles.trail}>
+            <span className={styles.trailThumb}>
+              <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
+            </span>
+            <span className={styles.trailText}>
+              <span className={styles.trailName}>{trail.name}</span>
+              <span className={styles.trailMeta}>
+                {trail.park_name ?? trail.region}
+                {" · "}
+                {TERRAIN_LABELS[trail.terrain]}
+              </span>
+            </span>
+          </Link>
+        )}
+        {actions}
+      </li>
+    );
+  }
 
   if (post.kind !== "hike" || !post.hike) {
     return (

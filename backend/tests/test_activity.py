@@ -149,7 +149,8 @@ def test_a_shared_hike_posts_with_its_milestones(client, trails, person):
     hikes = hike_posts(body)
     assert len(hikes) == 1
     post = hikes[0]
-    assert post["author"] == {"username": "alice", "display_name": "Alice", "avatar_path": None, "follow": None}
+    assert post["author"] == {"username": "alice", "display_name": "Alice", "avatar_path": None, "follow": None,
+                              "label": None}
     assert post["hike"]["trail"]["name"] == "Skyline Trail"
     assert post["hike"]["hiked_on"] == "2026-08-14"
     assert post["hike"]["note"] == "Larches!"
@@ -656,7 +657,7 @@ def test_who_high_fived_lists_public_profiles_only(client, trails, person):
     assert response.status_code == 200 and response.headers["cache-control"] == "no-store"
     body = response.json()
     assert body["high_fives"] == 2 and body["others"] == 1
-    assert body["hikers"] == [{"username": "bob", "display_name": "Bob", "avatar_path": None}]
+    assert body["hikers"] == [{"username": "bob", "display_name": "Bob", "avatar_path": None, "label": None}]
     assert str(carol["id"]) not in response.text and "@example.com" not in response.text
     assert client.get(f"/api/activity/{uuid.uuid4()}/high-fives").status_code == 404
 

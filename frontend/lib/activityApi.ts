@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { ActivityPage, ActivityScope, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
+import type { ActivityPage, ActivityScope, FeedPicks, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
 
 /** Signed in, the token is sent (for "high-fived", "yours" and the province); guests get the same posts. */
 export const getActivity = (scope: ActivityScope, cursor: string | null, signedIn: boolean, signal?: AbortSignal) => {
@@ -22,6 +22,9 @@ export const getHighFivers = (postId: string, signedIn: boolean, signal?: AbortS
   apiFetch<HighFivers>(`/api/activity/${encodeURIComponent(postId)}/high-fives`, { auth: signedIn, signal });
 
 /** Most logged or saved this week, topped up with popular trails. */
+/** "Trekly picks" while the feed is quiet; `sparse` false once it isn't. */
+export const getPicks = (signal?: AbortSignal) => apiFetch<FeedPicks>("/api/activity/picks", { signal });
+
 export const getTrending = (signal?: AbortSignal) =>
   apiFetch<{ trails: TrendingTrail[] }>("/api/activity/trending", { signal });
 

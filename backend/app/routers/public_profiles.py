@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.auth import CurrentUser, get_current_user
 from app.catalog.presenters import effective_weight, gear_item_out
+from app.account_labels import AccountLabelName, label_of
 from app.database import get_db
 from app.featured import FeaturedBadgeOut, featured_badges
 from app.milestones import MilestoneBadgeOut, badge_out, evaluate, gather
@@ -141,6 +142,8 @@ class PublicProfileOut(BaseModel):
     username: str
     display_name: str | None
     avatar_path: str | None
+    # "official": the Trekly account; "demo": a demo hiker. Each gets its badge.
+    label: AccountLabelName | None = None
     is_private: bool
     allow_indexing: bool
     # This viewer sees the sections below: the profile is public, or they're an approved follower.
@@ -286,12 +289,15 @@ def build_public_profile(
     db: Session, profile: Profile, seen: Visibility, today: date, viewer_id: UUID | None = None
 ) -> PublicProfileOut:
     other = viewer_id is not None and viewer_id != profile.id
+    label = label_of(db, profile.id)
     out = PublicProfileOut(
         username=profile.username,
+        label=label,
         display_name=profile.display_name,
         avatar_path=profile.avatar_path,
         is_private=not seen.public,
-        allow_indexing=seen.indexable,
+        # Demo profiles stay out of search engines, whatever the setting says.
+        allow_indexing=seen.indexable and label != "demo",
         can_view=seen.opened,
         followers_count=follows.follower_count(db, profile.id),
         following_count=follows.following_count(db, profile.id),

@@ -38,7 +38,7 @@ class NotificationActor(BaseModel):
 
 class NotificationPost(BaseModel):
     id: UUID
-    kind: Literal["hike", "milestone", "rank"]
+    kind: Literal["hike", "milestone", "rank", "announcement"]
     # What it's about: a trail, a badge or a rank name.
     title: str
     # A hike post's trail, to link to.
@@ -101,6 +101,8 @@ def _post_title(post: ActivityPost) -> str:
     if post.kind == "milestone":
         milestone = MILESTONES.get(post.milestone)
         return milestone.title if milestone else "a badge"
+    if post.kind == "announcement":
+        return "a Trekly post"
     return RANKS[post.rank_level - 1][1] if 1 <= post.rank_level <= len(RANKS) else "a new rank"
 
 

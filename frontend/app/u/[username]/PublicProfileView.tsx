@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Backpack, Bookmark, Flag, Footprints, Tent } from "lucide-react";
+import { Backpack, Bookmark, Flag, FlaskConical, Footprints, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import GearThumb from "@/components/GearThumb";
@@ -236,6 +236,7 @@ export default function PublicProfileView({ username }: { username: string }) {
       avatar={<Avatar path={avatarPath} name={profile.display_name} email={null} size={120} alt={`${name}'s profile photo`} />}
       name={name}
       username={profile.username}
+      accountLabel={profile.label}
       bio={profile.bio}
       rank={profile.rank}
       province={profile.home_province}
@@ -282,6 +283,15 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   return (
     <ProfileLayout banner={banner} aside={aside}>
+      {profile.label === "demo" && (
+        <p className={styles.demoNotice}>
+          <FlaskConical size={16} aria-hidden="true" />
+          <span>
+            <strong>{name} isn&apos;t a real person.</strong> This is a demo account, filled in to show what a
+            Trekly profile looks like. <Link href="/signup">Make your own</Link>.
+          </span>
+        </p>
+      )}
       {!profile.can_view ? (
         <div className={styles.messageCard}>
           <h2 className={styles.messageTitle}>This profile is private</h2>

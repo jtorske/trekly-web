@@ -29,7 +29,9 @@ from app.admin_access import audit, is_admin, require_admin
 from app.alert_poller import JOB_NAME as POLLER_JOB
 from app.auth import CurrentUser
 from app.database import get_db
+from app.account_labels import AccountLabelName, real_user
 from app.models.account import Profile
+from app.models.account_label import AccountLabel
 from app.models.activity import ActivityPost
 from app.models.admin import AUTH_USERS, AdminAuditLog
 from app.models.availability import AvailabilityAlert, JobLock
@@ -83,6 +85,7 @@ def _count(model, *where) -> Any:
 hikes_expr = _count(HikeLog, HikeLog.user_id == AUTH_USERS.c.id)
 gear_expr = _count(UserGearItem, UserGearItem.user_id == AUTH_USERS.c.id)
 alerts_expr = _count(AvailabilityAlert, AvailabilityAlert.user_id == AUTH_USERS.c.id)
+label_expr = select(AccountLabel.label).where(AccountLabel.user_id == AUTH_USERS.c.id).scalar_subquery()
 visibility_expr = case(
     (hidden_expr, "hidden"),
     (Profile.username.is_(None), "no_username"),
@@ -120,6 +123,7 @@ def _users_query():
             gear_expr.label("gear"),
             alerts_expr.label("alerts"),
             visibility_expr.label("visibility"),
+            label_expr.label("label"),
         )
         .select_from(AUTH_USERS)
         .outerjoin(Profile, Profile.id == AUTH_USERS.c.id)
@@ -145,6 +149,8 @@ class UserRow(BaseModel):
     visibility: Literal["public", "private", "hidden", "no_username"]
     banned: bool
     is_admin: bool
+    # "official" (the Trekly account) or "demo"; left out of the overview's numbers.
+    label: AccountLabelName | None = None
 
 
 class UserPage(BaseModel):
@@ -180,6 +186,7 @@ def _row(row, now: datetime) -> UserRow:
         visibility=row.visibility,
         banned=banned_until is not None and banned_until > now,
         is_admin=is_admin(row.id),
+        label=row.label,
     )
 
 
@@ -455,6 +462,7 @@ def overview(db: Session = Depends(get_db)):
     first_week = this_week - timedelta(weeks=SIGNUP_WEEKS - 1)
     joined = db.scalars(
         select(AUTH_USERS.c.created_at).where(
+            real_user(AUTH_USERS.c.id),
             AUTH_USERS.c.created_at >= datetime.combine(first_week, datetime.min.time(), tzinfo=timezone.utc)
         )
     ).all()
@@ -476,11 +484,13 @@ def overview(db: Session = Depends(get_db)):
             running=locked_until is not None and locked_until > now,
         )
     return OverviewOut(
-        users_total=db.scalar(select(func.count()).select_from(AUTH_USERS)) or 0,
+        users_total=db.scalar(select(func.count()).select_from(AUTH_USERS).where(real_user(AUTH_USERS.c.id))) or 0,
         signups_by_week=[WeekCount(week_start=w, count=c) for w, c in sorted(weeks.items())],
-        hikes_total=db.scalar(select(func.count()).select_from(HikeLog)) or 0,
+        hikes_total=db.scalar(select(func.count()).select_from(HikeLog).where(real_user(HikeLog.user_id))) or 0,
         active_alerts=db.scalar(
-            select(func.count()).select_from(AvailabilityAlert).where(AvailabilityAlert.status == "active")
+            select(func.count()).select_from(AvailabilityAlert).where(
+                AvailabilityAlert.status == "active", real_user(AvailabilityAlert.user_id)
+            )
         ) or 0,
         open_reports=db.scalar(
             select(func.count()).select_from(ProfileReport).where(ProfileReport.status == "open")

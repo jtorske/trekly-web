@@ -1,3 +1,4 @@
+import type { AccountLabel } from "./accountLabels";
 /**
  * Following. A public profile is followed at once; a private one gets a
  * request its owner approves or declines. Approved followers of a private
@@ -12,6 +13,8 @@ export interface Person {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** "official" or "demo": show the badge. */
+  label?: AccountLabel | null;
   is_private: boolean;
   follow: FollowState | null;
 }

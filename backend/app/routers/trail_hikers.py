@@ -2,7 +2,8 @@
 
 Someone is listed only while app.privacy.in_community holds for them (a
 public profile with the Trail Journal shown, and "Show me in community
-features" on). Row-level security applies the same rule to direct Supabase
+features" on), and only if they're a real hiker: demo accounts never count
+as having hiked a trail (app/account_labels.py). Row-level security applies the same rule to direct Supabase
 access (migration 9d4f2a6c8e13). Nothing is cached, so turning a setting
 off removes them from the very next response.
 
@@ -27,6 +28,7 @@ from app.models.account import Profile
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileSettings
 from app.models.trail import Trail
+from app.account_labels import real_user
 from app.privacy import in_community
 from app.routers.activity import optional_user
 
@@ -68,7 +70,7 @@ def _listed(trail_id: UUID):
         select(HikeLog, Profile, hide)
         .join(Profile, Profile.id == HikeLog.user_id)
         .join(ProfileSettings, ProfileSettings.user_id == HikeLog.user_id)
-        .where(HikeLog.trail_id == trail_id, in_community(HikeLog.user_id))
+        .where(HikeLog.trail_id == trail_id, in_community(HikeLog.user_id), real_user(HikeLog.user_id))
         .order_by(
             hide,
             case((hide, None), else_=HikeLog.hiked_on).desc().nulls_last(),
@@ -97,7 +99,9 @@ def trail_hikers(
         raise HTTPException(status_code=404, detail="Trail not found")
 
     total = db.scalar(
-        select(func.count()).select_from(HikeLog).where(HikeLog.trail_id == trail_id, in_community(HikeLog.user_id))
+        select(func.count()).select_from(HikeLog).where(
+            HikeLog.trail_id == trail_id, in_community(HikeLog.user_id), real_user(HikeLog.user_id)
+        )
     ) or 0
     viewer_id = viewer.id if viewer else None
     hiker_rows = db.execute(_listed(trail_id).limit(MAX_HIKERS)).all()

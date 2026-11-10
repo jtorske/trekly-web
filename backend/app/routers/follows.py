@@ -15,6 +15,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app import follows
+from app.account_labels import AccountLabelName, labels_for, may_interact
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.follows import FollowState
@@ -34,6 +35,8 @@ class PersonOut(BaseModel):
     username: str
     display_name: str | None
     avatar_path: str | None
+    # "official" / "demo" badge (app/account_labels.py); None for everyone else.
+    label: AccountLabelName | None = None
     is_private: bool
     # The viewer's follow state toward them; None for a guest, or for the viewer themselves.
     follow: FollowState | None = None
@@ -100,11 +103,13 @@ def people_out(db: Session, viewer_id: UUID | None, profiles: list[Profile]) -> 
     )) if ids else set()
     known = set(db.scalars(select(ProfileSettings.user_id).where(ProfileSettings.user_id.in_(ids)))) if ids else set()
     viewer_states = follows.states(db, viewer_id, ids)
+    labels = labels_for(db, ids)
     return [
         PersonOut(
             username=p.username,
             display_name=p.display_name,
             avatar_path=p.avatar_path,
+            label=labels.get(p.id),
             # Missing settings count as private, as everywhere else.
             is_private=p.id in private or p.id not in known,
             follow=None if viewer_id is None or p.id == viewer_id else viewer_states.get(p.id, "none"),
@@ -146,6 +151,8 @@ def follow_profile(username: str, user: CurrentUser = Depends(get_current_user),
     owner, seen = find_listed(db, username)
     if owner.id == user.id:
         raise HTTPException(status_code=422, detail="You can't follow yourself.")
+    if not may_interact(db, user.id, owner.id):
+        raise HTTPException(status_code=403, detail="Demo accounts only interact with other demo accounts.")
     new_state, _ = follows.follow(db, user.id, owner, seen)
     db.commit()
     return FollowOut(follow=new_state, followers_count=follows.follower_count(db, owner.id))

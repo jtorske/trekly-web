@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.account_label import AccountLabel
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.admin import AdminAuditLog
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
@@ -32,6 +33,7 @@ from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
 
 __all__ = [
+    "AccountLabel",
     "ActivityPost",
     "ActivityReaction",
     "AdminAuditLog",
