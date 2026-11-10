@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ChangeEmail, ChangePassword, DeleteAccount, SignOut, UnitsSetting } from "./AccountSettings";
 import EditProfileSection from "./EditProfileSection";
+import NotificationSettings from "./NotificationSettings";
 import PrivacySettingsForm from "./PrivacySettings";
 import TrailPreferences from "./TrailPreferences";
 import { useSettingsProfile } from "./SettingsShell";
@@ -25,6 +26,7 @@ const DESCRIPTIONS: Record<string, string> = {
   privacy: "Your profile can be seen by anyone at its public address. Choose what's on it.",
   "trail-preferences":
     "Private to you: Trekly uses these only to pick trails for you, and never shows them on your profile.",
+  notifications: "What Trekly tells you about, under the bell. In the app only: no emails or push notifications.",
   units: "Distances, elevations, gear weights and weather across Trekly.",
   "sign-out": "Ends your session in this browser. Your data stays saved to your account.",
 };
@@ -45,6 +47,13 @@ export default function SettingsSection({ slug }: { slug: string }) {
       body = (
         <Card>
           <PrivacySettingsForm onEditProfile={() => router.push(sectionHref("edit-profile"))} />
+        </Card>
+      );
+      break;
+    case "notifications":
+      body = (
+        <Card>
+          <NotificationSettings />
         </Card>
       );
       break;

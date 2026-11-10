@@ -38,6 +38,7 @@ from app.database import get_db
 from app.follows import FollowState
 from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out
+from app.notifications import notify, retract
 from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.hike_log import HikeLog
@@ -432,6 +433,8 @@ def high_five(
     if db.get(ActivityReaction, (post_id, user.id)) is None:
         db.add(ActivityReaction(post_id=post_id, user_id=user.id, created_at=datetime.now().astimezone()))
         try:
+            db.flush()
+            notify(db, db.get(ActivityPost, post_id).user_id, user.id, "high_five", post_id)
             db.commit()
         except IntegrityError:
             db.rollback()  # a concurrent request got there first
@@ -449,6 +452,7 @@ def undo_high_five(
     row = db.get(ActivityReaction, (post_id, user.id))
     if row is not None:
         db.delete(row)
+        retract(db, db.get(ActivityPost, post_id).user_id, user.id, "high_five", post_id)
         db.commit()
     return _high_five_out(db, post_id, user.id)
 

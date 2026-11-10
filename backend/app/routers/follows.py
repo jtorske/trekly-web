@@ -234,9 +234,7 @@ def approve_request(username: str, user: CurrentUser = Depends(get_current_user)
 def decline_request(username: str, user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
     """Decline quietly: they see "Follow" again, nothing more."""
     follower = _by_username(db, username)
-    row = db.get(Follow, (follower.id, user.id))
-    if row is not None and row.status == "pending":
-        db.delete(row)
+    if follows.decline(db, user.id, follower.id):
         db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

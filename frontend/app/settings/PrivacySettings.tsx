@@ -24,7 +24,7 @@ const SECTION_WARNINGS: Partial<Record<SectionSetting, string>> = {
   show_trip_plans: "Public trip plans show where and when you'll be on the trail.",
 };
 
-function Switch({
+export function Switch({
   id,
   label,
   hint,

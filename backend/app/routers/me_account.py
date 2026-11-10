@@ -25,7 +25,7 @@ from app.models.nudge import NudgeDismissal
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
-from app.models.social import Follow
+from app.models.social import Follow, Notification, NotificationPreferences
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
@@ -303,8 +303,10 @@ def delete_account(
     db.execute(delete(ProfileReport).where(
         (ProfileReport.reporter_id == user.id) | (ProfileReport.profile_id == user.id)
     ))
-    # Follows both ways, and requests sent or received.
+    # Follows both ways, and requests sent or received; notifications to and from them.
     db.execute(delete(Follow).where((Follow.follower_id == user.id) | (Follow.followee_id == user.id)))
+    db.execute(delete(Notification).where((Notification.user_id == user.id) | (Notification.actor_id == user.id)))
+    db.execute(delete(NotificationPreferences).where(NotificationPreferences.user_id == user.id))
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))

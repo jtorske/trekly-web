@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Backpack, Bell, BookOpen, LogOut, Settings, Shield, Tent, type LucideIcon } from "lucide-react";
+import { Backpack, BookOpen, CalendarSearch, LogOut, Settings, Shield, Tent, type LucideIcon } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Avatar from "./Avatar";
 import RankEmblem from "./RankEmblem";
@@ -20,7 +20,8 @@ export const ROW_ICONS: Record<string, LucideIcon> = {
   "/journal": BookOpen,
   "/gear": Backpack,
   "/profile?tab=trips": Tent,
-  "/alerts": Bell,
+  // Campsite availability alerts; the bell is for notifications.
+  "/alerts": CalendarSearch,
   "/settings": Settings,
   [ADMIN_LINK.href]: Shield,
 };

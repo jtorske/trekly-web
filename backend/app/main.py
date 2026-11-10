@@ -25,6 +25,7 @@ from app.routers import (
     me_rank,
     me_setups,
     me_visit,
+    notifications,
     public_profiles,
     signup_email,
     trail_hikers,
@@ -74,6 +75,7 @@ app.include_router(activity.router)
 app.include_router(activity.profile_router)
 app.include_router(activity.me_router)
 app.include_router(follows.router)
+app.include_router(notifications.router)
 app.include_router(availability.router)
 app.include_router(gear.router)
 app.include_router(me_gear_import.router)

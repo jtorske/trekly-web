@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   Activity,
+  Bell,
   Compass,
   LogIn,
   UserPlus,
@@ -59,6 +60,7 @@ export default function MobileMenu({
   search,
   returnTo,
   returnFocusTo,
+  unread = null,
   onClose,
 }: {
   /** The signed-in account, or null when signed out. */
@@ -69,6 +71,8 @@ export default function MobileMenu({
   /** `?next=` for Sign in and Sign up. */
   returnTo: string;
   returnFocusTo: RefObject<HTMLElement | null>;
+  /** Signed in: unread notifications, for the Notifications row. */
+  unread?: number | null;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -237,6 +241,23 @@ export default function MobileMenu({
               {link.label}
             </Link>
           ))}
+          {identity && (
+            <Link
+              href="/notifications"
+              className={row}
+              {...currentProps("/notifications")}
+              aria-label={unread ? `Notifications, ${unread} unread` : undefined}
+              onClick={requestClose}
+            >
+              <RowIcon icon={Bell} />
+              Notifications
+              {unread ? (
+                <span className={styles.count} aria-hidden="true">
+                  {unread > 9 ? "9+" : unread}
+                </span>
+              ) : null}
+            </Link>
+          )}
         </nav>
 
         {identity ? (

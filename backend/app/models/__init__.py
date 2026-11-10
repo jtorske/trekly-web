@@ -22,7 +22,7 @@ from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.signup_email import SignupEmailRequest
-from app.models.social import Follow
+from app.models.social import Follow, Notification, NotificationPreferences
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
 from app.models.trail_campground import TrailBookingSystem, TrailCampground
@@ -55,6 +55,8 @@ __all__ = [
     "GearSetupItem",
     "HikeLog",
     "JobLock",
+    "Notification",
+    "NotificationPreferences",
     "NudgeDismissal",
     "Profile",
     "ProfileModeration",

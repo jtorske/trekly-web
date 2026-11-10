@@ -41,7 +41,7 @@ GEAR_TABLES = [
                 "trip_plans", "trip_plan_nights", "hike_logs", "featured_badges", "trail_photos", "trail_photo_reviews",
                 "trail_photo_candidates", "profile_settings", "profile_preferences", "profile_moderation", "profile_reports",
                 "admin_audit_log", "visit_streaks", "signup_email_requests", "activity_posts", "activity_reactions", "nudge_dismissals",
-                "follows")
+                "follows", "notifications", "notification_preferences")
 ]
 
 

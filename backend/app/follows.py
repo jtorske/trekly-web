@@ -13,7 +13,9 @@ The rules (row-level security has the same ones, migration b3d7f2a9c4e1):
   username and aren't hidden by an admin), so a hidden account never shows
   up by way of someone else's list.
 
-Only the API writes follows; nothing here is cached.
+Each change notifies the person it concerns (app/notifications.py), and
+undoing it takes the notification back. Only the API writes follows;
+nothing here is cached.
 """
 
 from datetime import datetime, timezone
@@ -27,6 +29,7 @@ from sqlalchemy.orm import Session, aliased
 from app.models.account import Profile
 from app.models.privacy import ProfileModeration
 from app.models.social import Follow
+from app.notifications import notify, retract
 from app.privacy import Visibility
 
 FollowState = Literal["none", "requested", "following"]
@@ -120,6 +123,7 @@ def follow(db: Session, follower_id: UUID, owner: Profile, seen: Visibility) -> 
     except IntegrityError:
         db.rollback()  # a concurrent request got there first
         return state_of(db, follower_id, owner.id), False
+    notify(db, owner.id, follower_id, "new_follower" if accepted else "follow_request")
     return ("following" if accepted else "requested"), True
 
 
@@ -128,8 +132,20 @@ def unfollow(db: Session, follower_id: UUID, followee_id: UUID) -> Follow | None
     row = db.get(Follow, (follower_id, followee_id))
     if row is not None:
         db.delete(row)
+        retract(db, followee_id, follower_id, "new_follower")
+        retract(db, followee_id, follower_id, "follow_request")
         db.flush()
     return row
+
+
+def decline(db: Session, owner_id: UUID, follower_id: UUID) -> bool:
+    row = db.get(Follow, (follower_id, owner_id))
+    if row is None or row.status != "pending":
+        return False
+    db.delete(row)
+    retract(db, owner_id, follower_id, "follow_request")
+    db.flush()
+    return True
 
 
 def approve(db: Session, owner_id: UUID, follower_id: UUID) -> bool:
@@ -137,6 +153,8 @@ def approve(db: Session, owner_id: UUID, follower_id: UUID) -> bool:
     if row is None or row.status != "pending":
         return False
     row.status, row.accepted_at = "accepted", _now()
+    retract(db, owner_id, follower_id, "follow_request")
+    notify(db, follower_id, owner_id, "request_approved")
     db.flush()
     return True
 
@@ -152,5 +170,8 @@ def approve_all_pending(db: Session, owner_id: UUID) -> list[UUID]:
             .where(Follow.followee_id == owner_id, Follow.status == "pending")
             .values(status="accepted", accepted_at=_now())
         )
+        for follower_id in followers:
+            retract(db, owner_id, follower_id, "follow_request")
+            notify(db, follower_id, owner_id, "request_approved")
         db.flush()
     return followers

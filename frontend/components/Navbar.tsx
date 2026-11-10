@@ -7,9 +7,13 @@ import { useAuth } from "./AuthProvider";
 import AccountMenu from "./AccountMenu";
 import Avatar from "./Avatar";
 import MobileMenu from "./MobileMenu";
+import NotificationBell from "./social/NotificationBell";
+import bellStyles from "./social/NotificationBell.module.css";
 import { NAV_LINKS, isNavCurrent } from "@/lib/accountMenu";
 import { nextQuery } from "@/lib/authLogic";
+import { badgeText } from "@/lib/notifications";
 import { isFullPage } from "@/lib/onboarding";
+import { useUnreadNotifications } from "@/lib/useUnreadNotifications";
 import { useProfile } from "@/lib/useProfile";
 import styles from "./Navbar.module.css";
 
@@ -26,6 +30,8 @@ export default function Navbar() {
   const { status, user } = useAuth();
   const { profile } = useProfile();
   const pathname = usePathname();
+  const unread = useUnreadNotifications(status === "signedIn");
+  const unreadBadge = badgeText(unread ?? 0);
   const isAuthPage = /^\/(login|signup|forgot-password|reset-password|auth)/.test(pathname);
   // Only the landing hero (a dark photo) keeps the see-through cream bar;
   // everywhere else the header is paper, blending into the topo background.
@@ -72,7 +78,10 @@ export default function Navbar() {
 
   const account =
     status === "signedIn" ? (
-      <AccountMenu identity={identity} triggerClassName={styles.avatarLink} />
+      <>
+        <NotificationBell unread={unread} />
+        <AccountMenu identity={identity} triggerClassName={styles.avatarLink} />
+      </>
     ) : status === "loading" ? (
       // Reserve the space while the session restores so buttons don't flash.
       <span className={styles.avatarPlaceholder} aria-hidden="true" />
@@ -123,13 +132,18 @@ export default function Navbar() {
             ref={menuTriggerRef}
             type="button"
             className={`${styles.menuAvatar} ${styles.avatarLink}`}
-            aria-label={`Open menu${displayName ? ` for ${displayName}` : ""}`}
+            aria-label={`Open menu${displayName ? ` for ${displayName}` : ""}${unreadBadge ? `, ${unread} unread notifications` : ""}`}
             aria-haspopup="dialog"
             aria-expanded={isMenuOpen}
             aria-controls={isMenuOpen ? "mobile-navigation" : undefined}
             onClick={openMenu}
           >
             <Avatar path={identity.avatarPath} name={displayName} email={email} size={34} />
+            {unreadBadge && (
+              <span className={`${bellStyles.badge} ${bellStyles.avatarBadge}`} aria-hidden="true">
+                {unreadBadge}
+              </span>
+            )}
           </button>
         ) : status === "loading" ? (
           <span className={styles.avatarPlaceholder} aria-hidden="true" />
@@ -158,6 +172,7 @@ export default function Navbar() {
           search={menuSearch}
           returnTo={returnTo}
           returnFocusTo={menuTriggerRef}
+          unread={unread}
           onClose={closeMenu}
         />
       )}
