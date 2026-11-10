@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,9 +31,19 @@ import ProvinceBadge from "@/components/ProvinceBadge";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto from "@/components/TrailPhoto";
 import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
-import { ChoiceCards, ExperienceCards, HikingStyleCards, RegionPicker } from "@/components/OnboardingChoices";
+import {
+  ChoiceCards,
+  ExperienceCards,
+  HikingStyleCards,
+  RegionPicker,
+} from "@/components/OnboardingChoices";
 import ui from "@/components/ui.module.css";
-import { getProfile, updateProfile, type Profile, type ProfileUpdate } from "@/lib/accountApi";
+import {
+  getProfile,
+  updateProfile,
+  type Profile,
+  type ProfileUpdate,
+} from "@/lib/accountApi";
 import { bigThreeDone, productsToAdd } from "@/lib/bigThree";
 import { addMyGear, listMyGear, type ProductSummary } from "@/lib/gearApi";
 import { addPastHikes } from "@/lib/hikeLogsApi";
@@ -52,11 +70,27 @@ import {
   type Preferences,
   type PreferencesUpdate,
 } from "@/lib/preferencesApi";
-import { getPrivacy, updatePrivacy, type PrivacySettings } from "@/lib/profilesApi";
-import { PROVINCES, homeLabel, province as provinceByCode, OUTSIDE, type HomeCode, type ProvinceCode } from "@/lib/provinces";
+import {
+  getPrivacy,
+  updatePrivacy,
+  type PrivacySettings,
+} from "@/lib/profilesApi";
+import {
+  PROVINCES,
+  homeLabel,
+  province as provinceByCode,
+  OUTSIDE,
+  type HomeCode,
+  type ProvinceCode,
+} from "@/lib/provinces";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import type { TrailListItem } from "@/lib/trailsApi";
-import { formatDistance, formatElevation, formatTrailDistance, type UnitSystem } from "@/lib/units";
+import {
+  formatDistance,
+  formatElevation,
+  formatTrailDistance,
+  type UnitSystem,
+} from "@/lib/units";
 import { refreshAfterHikesAdded } from "@/lib/hikesAdded";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useMilestones } from "@/lib/useMilestones";
@@ -64,7 +98,11 @@ import { announceProfile, useProfile } from "@/lib/useProfile";
 import { useRank } from "@/lib/useRank";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import MilestoneBadge from "@/components/MilestoneBadge";
-import { normalizeUsername, suggestionHint, usernameReady } from "@/lib/usernames";
+import {
+  normalizeUsername,
+  suggestionHint,
+  usernameReady,
+} from "@/lib/usernames";
 import { useProfilePhoto } from "../settings/ProfilePhoto";
 import { PHOTO_HINT } from "@/lib/photoPrep";
 import { pickedCount } from "@/lib/pastHikes";
@@ -74,16 +112,26 @@ import styles from "./welcome.module.css";
 
 // ---------------------------------------------------------------- visuals
 
-type Visual = { kind: "photo"; src: string; position?: string } | { kind: "topo"; tone: "olive" | "dusk" | "rust" | "sand" };
+type Visual =
+  | { kind: "photo"; src: string; position?: string }
+  | { kind: "topo"; tone: "olive" | "dusk" | "rust" | "sand" };
 
 /** A different landing photo or topo panel behind every screen. */
 const VISUALS: Record<StepKey, Visual> = {
   name: { kind: "photo", src: "/images/IMG_8873.jpeg", position: "center 35%" },
   photo: { kind: "topo", tone: "olive" },
   home: { kind: "photo", src: "/images/IMG_9031.jpeg", position: "center 60%" },
-  style: { kind: "photo", src: "/images/IMG_9832.webp", position: "center 55%" },
+  style: {
+    kind: "photo",
+    src: "/images/IMG_9832.jpeg",
+    position: "center 55%",
+  },
   experience: { kind: "topo", tone: "dusk" },
-  regions: { kind: "photo", src: "/images/IMG_9336.jpeg", position: "center 55%" },
+  regions: {
+    kind: "photo",
+    src: "/images/IMG_9336.jpeg",
+    position: "center 55%",
+  },
   hiked: { kind: "topo", tone: "olive" },
   pack: { kind: "topo", tone: "sand" },
   units: { kind: "topo", tone: "rust" },
@@ -99,7 +147,11 @@ function VisualPanel({ step }: { step: StepKey }) {
         const visual = VISUALS[key];
         const active = key === step;
         return (
-          <div key={key} className={styles.visualLayer} data-active={active || undefined}>
+          <div
+            key={key}
+            className={styles.visualLayer}
+            data-active={active || undefined}
+          >
             {visual.kind === "photo" ? (
               <Image
                 src={visual.src}
@@ -131,7 +183,9 @@ const CHOOSE_VISIBILITY = "Choose Public or Private to finish.";
 const CHOOSE_EXPERIENCE = "Pick one to continue.";
 
 const messageOf = (error: unknown) =>
-  error instanceof Error && error.message ? error.message : "That didn't save. Check your connection and try again.";
+  error instanceof Error && error.message
+    ? error.message
+    : "That didn't save. Check your connection and try again.";
 
 /**
  * /welcome: loads what the flow needs (profile, saved answers, privacy), then
@@ -144,7 +198,11 @@ export default function WelcomeFlow() {
   const next = safeNextPath(searchParams.get("next"));
   const { status, user } = useAuth();
   const { profile, error: profileError } = useProfile();
-  const [loaded, setLoaded] = useState<{ userId: string; prefs: Preferences; privacy: PrivacySettings } | null>(null);
+  const [loaded, setLoaded] = useState<{
+    userId: string;
+    prefs: Preferences;
+    privacy: PrivacySettings;
+  } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   // Set once the flow is on screen, so finishing it doesn't bounce away mid-celebration.
@@ -158,7 +216,10 @@ export default function WelcomeFlow() {
   useEffect(() => {
     if (!userId) return;
     const controller = new AbortController();
-    Promise.all([getPreferences(controller.signal), getPrivacy(controller.signal)])
+    Promise.all([
+      getPreferences(controller.signal),
+      getPrivacy(controller.signal),
+    ])
       .then(([prefs, privacy]) => {
         setLoaded({ userId, prefs, privacy });
         setLoadError(null);
@@ -171,7 +232,9 @@ export default function WelcomeFlow() {
   }, [userId, attempt]);
 
   const ready = profile && loaded && loaded.userId === profile.id;
-  const alreadyDone = Boolean(ready && profile.username && !profile.onboarding_pending);
+  const alreadyDone = Boolean(
+    ready && profile.username && !profile.onboarding_pending,
+  );
 
   useEffect(() => {
     if (alreadyDone && !started) router.replace(next);
@@ -183,7 +246,11 @@ export default function WelcomeFlow() {
     return (
       <div className={styles.loading}>
         <p role="alert">{loadError ?? profileError}</p>
-        <button type="button" className={ui.primary} onClick={() => setAttempt((n) => n + 1)}>
+        <button
+          type="button"
+          className={ui.primary}
+          onClick={() => setAttempt((n) => n + 1)}
+        >
           Try again
         </button>
       </div>
@@ -197,7 +264,15 @@ export default function WelcomeFlow() {
       </div>
     );
   }
-  return <Flow profile={profile} prefs={loaded.prefs} privacy={loaded.privacy} next={next} email={user?.email ?? null} />;
+  return (
+    <Flow
+      profile={profile}
+      prefs={loaded.prefs}
+      privacy={loaded.privacy}
+      next={next}
+      email={user?.email ?? null}
+    />
+  );
 }
 
 // ---------------------------------------------------------------- the flow
@@ -215,9 +290,13 @@ function Flow({
   next: string;
   email: string | null;
 }) {
-  const [step, setStep] = useState<StepKey>(() => resumeStep(profile.username, prefs.onboarding.step));
+  const [step, setStep] = useState<StepKey>(() =>
+    resumeStep(profile.username, prefs.onboarding.step),
+  );
   const [direction, setDirection] = useState<"forward" | "back">("forward");
-  const [saving, setSaving] = useState<"continue" | "skip" | "skipAll" | null>(null);
+  const [saving, setSaving] = useState<"continue" | "skip" | "skipAll" | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -227,12 +306,18 @@ function Flow({
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
   const usernameStatus = useUsernameStatus(username, profile.username);
-  const [home, setHome] = useState<HomeCode | "none" | null>(profile.home_province ?? (prefs.onboarding.step ? "none" : null));
+  const [home, setHome] = useState<HomeCode | "none" | null>(
+    profile.home_province ?? (prefs.onboarding.step ? "none" : null),
+  );
   const [showHome, setShowHome] = useState(privacy.show_home_province);
   const [style, setStyle] = useState<HikingStyle | null>(prefs.hiking_style);
-  const [experience, setExperience] = useState<Experience | null>(prefs.experience);
+  const [experience, setExperience] = useState<Experience | null>(
+    prefs.experience,
+  );
   // What the API has, which finishing needs (and "Skip for now" checks).
-  const [savedExperience, setSavedExperience] = useState<Experience | null>(prefs.experience);
+  const [savedExperience, setSavedExperience] = useState<Experience | null>(
+    prefs.experience,
+  );
   // After "Skip for now": answering experience goes straight to the privacy step.
   const [skipping, setSkipping] = useState(false);
   const [regions, setRegions] = useState<string[]>(prefs.favourite_regions);
@@ -240,7 +325,9 @@ function Flow({
   const [pastPicks, setPastPicks] = useState<Set<string>>(() => new Set());
   // The Big Three picks, and any extras from "Add more gear".
   const [packChoices, setPackChoices] = useState<PackChoices>({});
-  const [packPicks, setPackPicks] = useState<Map<string, ProductSummary>>(() => new Map());
+  const [packPicks, setPackPicks] = useState<Map<string, ProductSummary>>(
+    () => new Map(),
+  );
   // One request id per product for the flow's life, so a retried Continue adds nothing twice.
   const packRequestIds = useRef(new Map<string, string>());
   const [units, setUnits] = useState<UnitSystem>(profile.units ?? "metric");
@@ -276,21 +363,26 @@ function Flow({
         if (!name) throw new StepProblem("Add the name you'd like to go by.");
         if (!usernameReady(usernameStatus)) {
           throw new StepProblem(
-            usernameStatus.state === "checking" ? "Still checking that username. Try again in a moment." : usernameStatus.message,
+            usernameStatus.state === "checking"
+              ? "Still checking that username. Try again in a moment."
+              : usernameStatus.message,
           );
         }
         const update: ProfileUpdate = {};
         if (name !== profile.display_name) update.display_name = name;
         const chosen = normalizeUsername(username);
         if (chosen !== profile.username) update.username = chosen;
-        if (Object.keys(update).length) announceProfile(await updateProfile(update));
+        if (Object.keys(update).length)
+          announceProfile(await updateProfile(update));
         return {};
       }
       case "home": {
         const code = home === "none" ? null : home;
-        if (home !== null && code !== profile.home_province) announceProfile(await updateProfile({ home_province: code }));
+        if (home !== null && code !== profile.home_province)
+          announceProfile(await updateProfile({ home_province: code }));
         const show = code ? showHome : false;
-        if (show !== savedPrivacy.show_home_province) setSavedPrivacy(await updatePrivacy({ show_home_province: show }));
+        if (show !== savedPrivacy.show_home_province)
+          setSavedPrivacy(await updatePrivacy({ show_home_province: show }));
         return {};
       }
       case "style":
@@ -313,7 +405,11 @@ function Flow({
         const wanted = productsToAdd(packChoices, packPicks.values());
         if (wanted.length === 0) return {};
         // A Big Three pick can be something they already own; don't add it twice.
-        const owned = new Set((await listMyGear()).items.flatMap((item) => (item.product ? [item.product.id] : [])));
+        const owned = new Set(
+          (await listMyGear()).items.flatMap((item) =>
+            item.product ? [item.product.id] : [],
+          ),
+        );
         for (const product of wanted) {
           if (owned.has(product.id)) continue;
           let requestId = packRequestIds.current.get(product.id);
@@ -322,14 +418,18 @@ function Flow({
             packRequestIds.current.set(product.id, requestId);
           }
           // Retrying after a failure re-sends the same request ids, so nothing is added twice.
-          await addMyGear({ product_id: product.id, client_request_id: requestId });
+          await addMyGear({
+            product_id: product.id,
+            client_request_id: requestId,
+          });
         }
         setPackChoices({});
         setPackPicks(new Map());
         return {};
       }
       case "units":
-        if (units !== profile.units) announceProfile(await updateProfile({ units }));
+        if (units !== profile.units)
+          announceProfile(await updateProfile({ units }));
         return {};
       case "privacy": {
         if (isPrivate === null) throw new StepProblem(CHOOSE_VISIBILITY);
@@ -338,11 +438,17 @@ function Flow({
         const community = inCommunity && !isPrivate;
         // is_private is sent even when unchanged: the API records that they
         // chose (it won't let the flow finish otherwise).
-        setSavedPrivacy(await updatePrivacy({
-          is_private: isPrivate,
-          ...(share !== savedPrivacy.share_activity ? { share_activity: share } : {}),
-          ...(community !== savedPrivacy.show_in_community ? { show_in_community: community } : {}),
-        }));
+        setSavedPrivacy(
+          await updatePrivacy({
+            is_private: isPrivate,
+            ...(share !== savedPrivacy.share_activity
+              ? { share_activity: share }
+              : {}),
+            ...(community !== savedPrivacy.show_in_community
+              ? { show_in_community: community }
+              : {}),
+          }),
+        );
         return {};
       }
       default:
@@ -359,7 +465,9 @@ function Flow({
       await updatePreferences({ onboarding_step: "experience" });
       setSkipping(true);
       go("experience", "back");
-      setError("One more thing before you finish: how much trail time do you have?");
+      setError(
+        "One more thing before you finish: how much trail time do you have?",
+      );
       return;
     }
     const saved = await updatePreferences({
@@ -414,7 +522,10 @@ function Flow({
     setError(null);
     try {
       // On the experience step, a pick made here counts as the answer.
-      const known = step === "experience" && experience !== null ? experience : savedExperience;
+      const known =
+        step === "experience" && experience !== null
+          ? experience
+          : savedExperience;
       const target = skipForNowTarget(known);
       if (target === step) throw new StepProblem(CHOOSE_EXPERIENCE);
       const saved = await updatePreferences({
@@ -456,7 +567,10 @@ function Flow({
   const mustChoose = !canContinue(step, { experience, isPrivate });
   const chooseHint = step === "privacy" ? CHOOSE_VISIBILITY : CHOOSE_EXPERIENCE;
   const previous = previousStep(step);
-  const firstName = (profile.display_name ?? displayName).trim().split(/\s+/)[0] || profile.username || "friend";
+  const firstName =
+    (profile.display_name ?? displayName).trim().split(/\s+/)[0] ||
+    profile.username ||
+    "friend";
 
   const screen = SCREENS[step]({
     firstName,
@@ -524,9 +638,16 @@ function Flow({
         aria-valuemin={0}
         aria-valuemax={QUESTION_COUNT}
         aria-valuenow={done ? QUESTION_COUNT : number}
-        aria-valuetext={done ? "All steps done" : `Step ${number} of ${QUESTION_COUNT}`}
+        aria-valuetext={
+          done ? "All steps done" : `Step ${number} of ${QUESTION_COUNT}`
+        }
       >
-        <div className={styles.progressFill} style={{ width: `${((done ? QUESTION_COUNT : number) / QUESTION_COUNT) * 100}%` }} />
+        <div
+          className={styles.progressFill}
+          style={{
+            width: `${((done ? QUESTION_COUNT : number) / QUESTION_COUNT) * 100}%`,
+          }}
+        />
       </div>
 
       <VisualPanel step={step} />
@@ -538,15 +659,31 @@ function Flow({
             {done ? "All done" : `Step ${number} of ${QUESTION_COUNT}`}
           </p>
           {canSkipAll && (
-            <button type="button" className={styles.skipAll} onClick={onSkipAll} disabled={saving !== null}>
+            <button
+              type="button"
+              className={styles.skipAll}
+              onClick={onSkipAll}
+              disabled={saving !== null}
+            >
               {saving === "skipAll" ? "Leaving…" : "Skip for now"}
             </button>
           )}
         </header>
 
-        <form className={styles.form} onSubmit={onSubmit} onKeyDown={onKeyDown} noValidate aria-labelledby="welcome-heading">
+        <form
+          className={styles.form}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+          noValidate
+          aria-labelledby="welcome-heading"
+        >
           <div key={step} className={styles.screen} data-direction={direction}>
-            <h1 id="welcome-heading" ref={headingRef} tabIndex={-1} className={styles.heading}>
+            <h1
+              id="welcome-heading"
+              ref={headingRef}
+              tabIndex={-1}
+              className={styles.heading}
+            >
               {screen.title}
             </h1>
             {screen.lead && <p className={styles.lead}>{screen.lead}</p>}
@@ -561,13 +698,21 @@ function Flow({
                 </p>
               )}
               {mustChoose && (
-                <p id="choose-required" className={`${ui.hint} ${styles.actionHint}`}>
+                <p
+                  id="choose-required"
+                  className={`${ui.hint} ${styles.actionHint}`}
+                >
                   {chooseHint}
                 </p>
               )}
               <div className={styles.actionRow}>
                 {previous && (
-                  <button type="button" className={styles.back} onClick={onBack} disabled={saving !== null}>
+                  <button
+                    type="button"
+                    className={styles.back}
+                    onClick={onBack}
+                    disabled={saving !== null}
+                  >
                     <ArrowLeft size={18} aria-hidden="true" />
                     Back
                   </button>
@@ -579,7 +724,12 @@ function Flow({
                 )}
                 <span className={styles.spacer} />
                 {isOptional(step) && (
-                  <button type="button" className={styles.skip} onClick={onSkip} disabled={saving !== null}>
+                  <button
+                    type="button"
+                    className={styles.skip}
+                    onClick={onSkip}
+                    disabled={saving !== null}
+                  >
                     {saving === "skip" ? "Skipping…" : "Skip"}
                   </button>
                 )}
@@ -684,7 +834,11 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       <HikingStyleCards
         value={style}
         onChange={setStyle}
-        icons={{ day: <Sun size={22} />, overnight: <Tent size={22} />, both: <Backpack size={22} /> }}
+        icons={{
+          day: <Sun size={22} />,
+          overnight: <Tent size={22} />,
+          both: <Backpack size={22} />,
+        }}
       />
     ),
   }),
@@ -695,25 +849,49 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
       <ExperienceCards
         value={experience}
         onChange={setExperience}
-        icons={{ new: <Sprout size={22} />, few_seasons: <Footprints size={22} />, seasoned: <Mountain size={22} /> }}
+        icons={{
+          new: <Sprout size={22} />,
+          few_seasons: <Footprints size={22} />,
+          seasoned: <Mountain size={22} />,
+        }}
       />
     ),
   }),
   regions: ({ regions, setRegions, home, units }) => ({
     title: "Which places are on your radar?",
     lead: "Pick the parks you'd love to explore. They'll come first when you open Explore.",
-    body: <RegionPicker values={regions} onChange={setRegions} sortFrom={{ home, units }} />,
+    body: (
+      <RegionPicker
+        values={regions}
+        onChange={setRegions}
+        sortFrom={{ home, units }}
+      />
+    ),
   }),
   hiked: ({ home, regions, pastPicks, togglePast }) => ({
     title: "Which of these have you hiked?",
     lead: "Tap any you've done. They go in your Trail Journal, and you can add dates later.",
-    body: <HikedStep home={home} regions={regions} selected={pastPicks} onToggle={togglePast} />,
+    body: (
+      <HikedStep
+        home={home}
+        regions={regions}
+        selected={pastPicks}
+        onToggle={togglePast}
+      />
+    ),
     status: pickedCount(pastPicks.size),
   }),
   pack: ({ packChoices, setPackChoices, packPicks, togglePack }) => ({
     title: "What's in your pack?",
     lead: "Start with the Big Three. One tap each, and you can skip this and add gear any time.",
-    body: <PackStep choices={packChoices} onChoices={setPackChoices} extras={packPicks} onToggleExtra={togglePack} />,
+    body: (
+      <PackStep
+        choices={packChoices}
+        onChoices={setPackChoices}
+        extras={packPicks}
+        onToggleExtra={togglePack}
+      />
+    ),
   }),
   units: ({ units, setUnits }) => ({
     title: "Metric or imperial?",
@@ -727,18 +905,30 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
         options={(["metric", "imperial"] as const).map((system) => ({
           value: system,
           label: system === "metric" ? "Metric" : "Imperial",
-          hint: system === "metric" ? "Kilometres, metres and kilograms." : "Miles, feet and pounds.",
+          hint:
+            system === "metric"
+              ? "Kilometres, metres and kilograms."
+              : "Miles, feet and pounds.",
           icon: <Ruler size={22} />,
           extra: (
             <span className={styles.sample}>
-              e.g. {formatDistance(12.4, system)} · {formatElevation(850, system)} gain
+              e.g. {formatDistance(12.4, system)} ·{" "}
+              {formatElevation(850, system)} gain
             </span>
           ),
         }))}
       />
     ),
   }),
-  privacy: ({ isPrivate, setIsPrivate, shareActivity, setShareActivity, inCommunity, setInCommunity, journalShown }) => ({
+  privacy: ({
+    isPrivate,
+    setIsPrivate,
+    shareActivity,
+    setShareActivity,
+    inCommunity,
+    setInCommunity,
+    journalShown,
+  }) => ({
     title: "Who can see your profile?",
     lead: "You can change this any time.",
     body: (
@@ -774,7 +964,8 @@ const SCREENS: Record<StepKey, (props: ScreenProps) => Screen> = {
           />
         )}
         <p className={styles.note}>
-          Pick exactly which sections show in <Link href="/settings/privacy">Privacy settings</Link>.
+          Pick exactly which sections show in{" "}
+          <Link href="/settings/privacy">Privacy settings</Link>.
         </p>
       </>
     ),
@@ -815,8 +1006,13 @@ function NameStep({
           aria-invalid={missingName}
           aria-describedby={`${nameId}-hint`}
         />
-        <span id={`${nameId}-hint`} className={missingName ? ui.fieldError : ui.hint}>
-          {missingName ? "Add the name you'd like to go by." : "Your first name is fine, or a trail name."}
+        <span
+          id={`${nameId}-hint`}
+          className={missingName ? ui.fieldError : ui.hint}
+        >
+          {missingName
+            ? "Add the name you'd like to go by."
+            : "Your first name is fine, or a trail name."}
         </span>
       </label>
       <UsernameField
@@ -833,11 +1029,19 @@ function NameStep({
 }
 
 function PhotoStep({ profile }: { profile: Profile }) {
-  const photo = useProfilePhoto(profile, { size: 160, alt: "Your profile photo" });
+  const photo = useProfilePhoto(profile, {
+    size: 160,
+    alt: "Your profile photo",
+  });
   return (
     <div className={styles.photoStep}>
       {photo.avatar}
-      <button type="button" className={ui.secondary} onClick={photo.open} disabled={photo.busy}>
+      <button
+        type="button"
+        className={ui.secondary}
+        onClick={photo.open}
+        disabled={photo.busy}
+      >
         {photo.hasPhoto ? "Change photo" : "Upload a photo"}
       </button>
       <span className={ui.hint}>{PHOTO_HINT}.</span>
@@ -846,20 +1050,45 @@ function PhotoStep({ profile }: { profile: Profile }) {
   );
 }
 
-const PROVINCE_ORDER: ProvinceCode[] = ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL", "YT", "NT", "NU"];
+const PROVINCE_ORDER: ProvinceCode[] = [
+  "BC",
+  "AB",
+  "SK",
+  "MB",
+  "ON",
+  "QC",
+  "NB",
+  "NS",
+  "PE",
+  "NL",
+  "YT",
+  "NT",
+  "NU",
+];
 
-function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeStep"]) {
+function HomeStep({
+  home,
+  setHome,
+  showHome,
+  setShowHome,
+}: ScreenProps["homeStep"]) {
   const name = useId();
   const switchId = useId();
   const picked = home && home !== "none" ? provinceByCode(home) : null;
-  const options = PROVINCE_ORDER.map((code) => PROVINCES.find((p) => p.code === code)!);
+  const options = PROVINCE_ORDER.map(
+    (code) => PROVINCES.find((p) => p.code === code)!,
+  );
   return (
     <div className={styles.home}>
       <fieldset className={styles.provinceSet}>
         <legend className={ui.srOnly}>Province or territory</legend>
         <div className={styles.provinces}>
           {options.map((p) => (
-            <label key={p.code} className={styles.province} data-checked={home === p.code || undefined}>
+            <label
+              key={p.code}
+              className={styles.province}
+              data-checked={home === p.code || undefined}
+            >
               <input
                 type="radio"
                 name={name}
@@ -868,14 +1097,21 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
                 onChange={() => setHome(p.code)}
                 className={styles.hiddenInput}
               />
-              <ProvinceBadge province={p} decorative className={styles.provinceBadge} />
+              <ProvinceBadge
+                province={p}
+                decorative
+                className={styles.provinceBadge}
+              />
               <span className={styles.provinceName}>{p.name}</span>
             </label>
           ))}
         </div>
         {/* Outside Canada on a row of its own, after the 13. */}
         <div className={styles.provincesExtra}>
-          <label className={styles.province} data-checked={home === OUTSIDE.code || undefined}>
+          <label
+            className={styles.province}
+            data-checked={home === OUTSIDE.code || undefined}
+          >
             <input
               type="radio"
               name={name}
@@ -884,10 +1120,17 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
               onChange={() => setHome(OUTSIDE.code)}
               className={styles.hiddenInput}
             />
-            <ProvinceBadge province={OUTSIDE} decorative className={styles.provinceBadge} />
+            <ProvinceBadge
+              province={OUTSIDE}
+              decorative
+              className={styles.provinceBadge}
+            />
             <span className={styles.provinceName}>{OUTSIDE.name}</span>
           </label>
-          <label className={`${styles.province} ${styles.provinceNone}`} data-checked={home === "none" || undefined}>
+          <label
+            className={`${styles.province} ${styles.provinceNone}`}
+            data-checked={home === "none" || undefined}
+          >
             <input
               type="radio"
               name={name}
@@ -907,7 +1150,11 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
             <ProvinceBadge province={picked} className={styles.earnBadge} />
             <div className={styles.earnText}>
               <p className={styles.earnTitle}>
-                You&apos;ll earn the {picked.kind === "outside" ? `“${picked.badgeName}”` : picked.name} badge
+                You&apos;ll earn the{" "}
+                {picked.kind === "outside"
+                  ? `“${picked.badgeName}”`
+                  : picked.name}{" "}
+                badge
               </p>
               <p className={ui.hint}>
                 {picked.kind === "outside"
@@ -918,17 +1165,26 @@ function HomeStep({ home, setHome, showHome, setShowHome }: ScreenProps["homeSte
           </>
         ) : (
           <p className={ui.hint}>
-            {home === "none" ? "No problem. You can add it later in Settings." : "Pick one above to see the badge you'll earn."}
+            {home === "none"
+              ? "No problem. You can add it later in Settings."
+              : "Pick one above to see the badge you'll earn."}
           </p>
         )}
       </div>
 
-      <label className={styles.switchRow} htmlFor={switchId} data-disabled={!picked || undefined}>
+      <label
+        className={styles.switchRow}
+        htmlFor={switchId}
+        data-disabled={!picked || undefined}
+      >
         <span className={styles.switchText}>
           <span className={styles.switchLabel}>Show on my profile</span>
           <span className={ui.hint} id={`${switchId}-hint`}>
-            Off by default: only you see {picked?.kind === "outside" ? "where you're from" : `your home ${picked?.kind ?? "province"}`} until
-            you turn this on.
+            Off by default: only you see{" "}
+            {picked?.kind === "outside"
+              ? "where you're from"
+              : `your home ${picked?.kind ?? "province"}`}{" "}
+            until you turn this on.
           </span>
         </span>
         <input
@@ -994,7 +1250,10 @@ function CommunityChoices({
         </label>
       ))}
       {!journalShown && (
-        <p className={ui.hint}>Your Trail Journal is hidden, so there&apos;s nothing to share. Change it in Privacy settings.</p>
+        <p className={ui.hint}>
+          Your Trail Journal is hidden, so there&apos;s nothing to share. Change
+          it in Privacy settings.
+        </p>
       )}
     </fieldset>
   );
@@ -1018,7 +1277,11 @@ function FinishStep({ next }: { next: string }) {
   const earned = milestones?.milestones.filter((m) => m.earned && m.id) ?? [];
   const summary =
     rank && milestones && !journal.loading
-      ? finishSummary({ stamps: journal.logs.length, milestones: earned.length, rank: rank.rank.title })
+      ? finishSummary({
+          stamps: journal.logs.length,
+          milestones: earned.length,
+          rank: rank.rank.title,
+        })
       : null;
 
   useEffect(() => {
@@ -1031,7 +1294,10 @@ function FinishStep({ next }: { next: string }) {
     return () => controller.abort();
   }, []);
 
-  const back = next !== DEFAULT_AFTER_LOGIN ? { href: next, label: "Back to where you were" } : { href: "/profile", label: "Go to my profile" };
+  const back =
+    next !== DEFAULT_AFTER_LOGIN
+      ? { href: next, label: "Back to where you were" }
+      : { href: "/profile", label: "Go to my profile" };
 
   return (
     <div className={styles.finish}>
@@ -1048,11 +1314,18 @@ function FinishStep({ next }: { next: string }) {
             <ul className={styles.summaryBadges}>
               {earned.slice(0, MAX_SUMMARY_BADGES).map((m, index) => (
                 <li key={m.id} style={{ "--i": index } as React.CSSProperties}>
-                  <MilestoneBadge icon={m.icon} tier={m.tier} title={m.title} stamp />
+                  <MilestoneBadge
+                    icon={m.icon}
+                    tier={m.tier}
+                    title={m.title}
+                    stamp
+                  />
                 </li>
               ))}
               {earned.length > MAX_SUMMARY_BADGES && (
-                <li className={styles.summaryMore}>+{earned.length - MAX_SUMMARY_BADGES}</li>
+                <li className={styles.summaryMore}>
+                  +{earned.length - MAX_SUMMARY_BADGES}
+                </li>
               )}
             </ul>
           )}
@@ -1063,25 +1336,51 @@ function FinishStep({ next }: { next: string }) {
       )}
 
       {picks === null && !failed && (
-        <ul className={styles.picks} aria-busy="true" aria-label="Loading trail picks">
+        <ul
+          className={styles.picks}
+          aria-busy="true"
+          aria-label="Loading trail picks"
+        >
           {[0, 1, 2].map((key) => (
             <li key={key} className={`${styles.pick} ${ui.skeleton}`} />
           ))}
         </ul>
       )}
-      {failed && <p className={ui.hint}>We couldn&apos;t load your picks just now, but Explore has every trail.</p>}
+      {failed && (
+        <p className={ui.hint}>
+          We couldn&apos;t load your picks just now, but Explore has every
+          trail.
+        </p>
+      )}
       {picks && picks.length > 0 && (
         <ul className={styles.picks} aria-label="Trails picked for you">
           {picks.map((trail) => {
-            const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
+            const distance = formatTrailDistance(
+              trail.distance_km,
+              trail.route_type,
+              units,
+            );
             return (
               <li key={trail.id} className={styles.pick}>
-                <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.pickLink}>
-                  <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+                <Link
+                  href={`/trails?id=${encodeURIComponent(trail.id)}`}
+                  className={styles.pickLink}
+                >
+                  <TrailPhoto
+                    photo={trail.photo}
+                    name={trail.name}
+                    variant="thumb"
+                  />
                   <span className={styles.pickText}>
                     <span className={styles.pickName}>{trail.name}</span>
                     <span className={styles.pickMeta}>
-                      {[trail.park_name ?? trail.region, TERRAIN_LABELS[trail.terrain], distance].filter(Boolean).join(" · ")}
+                      {[
+                        trail.park_name ?? trail.region,
+                        TERRAIN_LABELS[trail.terrain],
+                        distance,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </span>
                   </span>
                 </Link>
@@ -1109,7 +1408,9 @@ function FinishStep({ next }: { next: string }) {
           {back.label}
         </Link>
       </div>
-      <p className={styles.note}>You can change any of your answers later in Settings.</p>
+      <p className={styles.note}>
+        You can change any of your answers later in Settings.
+      </p>
     </div>
   );
 }
