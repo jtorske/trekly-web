@@ -142,3 +142,22 @@
     aspect-ratio: 4 / 3;
   }
 }
+
+.followAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.followsYou {
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.followAction > :first-child {
+  flex: 1;
+}

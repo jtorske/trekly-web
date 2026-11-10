@@ -1,8 +1,9 @@
 """The Activity page: a feed of what hikers have recently done.
 
 GET /api/activity is open to guests. Signed in, each post also says whether
-you high-fived it and whether it's yours, and "From my province" works once
-you've set a home province. Posts come and go by the rules in
+you high-fived it, whether it's yours and whether you follow its author;
+"Following" shows posts from people you follow (by the same rules as
+everyone's), and "From my province" works once you've set a home province. Posts come and go by the rules in
 app/activity.py; nothing is cached, so a privacy change applies to the
 next request. Your own posts that others can't see come back to you alone,
 flagged only_you. The milestones and rank a hike earned ride inside that
@@ -23,16 +24,18 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from sqlalchemy import and_, exists, func, or_, select, true, union_all
+from sqlalchemy import and_, exists, false, func, or_, select, true, union_all
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app import follows
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, is_visible, province_where,
-    readable_query,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, following_where, is_visible,
+    province_where, readable_query,
 )
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
+from app.follows import FollowState
 from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out
 from app.models.account import Profile, SavedTrail
@@ -58,10 +61,15 @@ TRENDING_SIZE = 5
 HIGH_FIVERS_SHOWN = 20
 
 
-class ActivityAuthor(BaseModel):
+class ActivityHiker(BaseModel):
     username: str
     display_name: str | None
     avatar_path: str | None
+
+
+class ActivityAuthor(ActivityHiker):
+    # Signed in, and not your own post: whether you follow them.
+    follow: FollowState | None = None
 
 
 class ActivityHike(BaseModel):
@@ -122,6 +130,8 @@ class ActivityPage(BaseModel):
     next_cursor: str | None
     # Signed in with a home province: "From my province" can be offered.
     province: str | None = None
+    # Signed in and following someone: "Following" is the default tab.
+    follows_anyone: bool = False
 
 
 class HighFiveOut(BaseModel):
@@ -132,7 +142,7 @@ class HighFiveOut(BaseModel):
 class HighFiversOut(BaseModel):
     high_fives: int
     # Newest first; only hikers whose profile is public.
-    hikers: list[ActivityAuthor]
+    hikers: list[ActivityHiker]
     # The rest: private profiles, and anyone past the list's length.
     others: int
 
@@ -323,6 +333,12 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
         if item is not None
     ]
     _fold_earned(db, kept, today, viewer.id if viewer else None, badge_dates)
+    # Signed in: whether you follow each author (not on your own posts).
+    if viewer is not None:
+        states = follows.states(db, viewer.id, {row[0].user_id for _, row in kept})
+        for item, row in kept:
+            if not item.mine:
+                item.author.follow = states.get(row[0].user_id, "none")
     return [item for item, _ in kept], (_cursor(rows[-1][0]) if more else None)
 
 
@@ -334,7 +350,7 @@ def _count(db: Session, query) -> int:
 @router.get("", response_model=ActivityPage)
 def feed(
     response: Response,
-    scope: Literal["everyone", "province"] = "everyone",
+    scope: Literal["everyone", "following", "province"] = "everyone",
     cursor: str | None = Query(default=None, max_length=120),
     limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
     viewer: CurrentUser | None = Depends(optional_user),
@@ -349,8 +365,14 @@ def feed(
     query = _cards(today, viewer_id)
     if scope == "province":
         query = query.where(province_where(province))
+    elif scope == "following":
+        # Guests follow nobody.
+        query = query.where(following_where(viewer_id) if viewer_id else false())
     items, next_cursor = _page(db, query, cursor, limit, viewer, today)
-    return ActivityPage(items=items, next_cursor=next_cursor, province=province)
+    return ActivityPage(
+        items=items, next_cursor=next_cursor, province=province,
+        follows_anyone=follows.follows_anyone(db, viewer_id) if viewer_id else False,
+    )
 
 
 def _visible_or_404(db: Session, post_id: UUID, today: date) -> None:

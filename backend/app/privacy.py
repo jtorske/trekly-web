@@ -7,6 +7,11 @@ so bypasses RLS. Both use the same rows and the same rule:
     a section is visible to visitors when the owner has a username, isn't
     hidden by an admin, isn't private, and has that section switched on.
 
+An approved follower of a private profile sees it as a visitor sees a
+public one: the bio and the sections its owner has switched on (migration
+b3d7f2a9c4e1). Everything that's public to all (community features, the
+Activity feed, search indexing) still needs the profile to be public.
+
 Community features ("Hiked by" on trail pages) count as one more section:
 the Trail Journal switch and "Show me in community features" must both be
 on (migration 9d4f2a6c8e13).
@@ -24,6 +29,7 @@ from sqlalchemy.orm import Session
 
 from app.models.account import Profile
 from app.models.privacy import SECTION_COLUMNS, ProfileModeration, ProfileSettings
+from app.models.social import Follow
 
 
 @dataclass(frozen=True)
@@ -31,11 +37,14 @@ class Visibility:
     listed: bool
     """The profile exists for visitors at all (has a username, not hidden)."""
     public: bool
-    """Listed and not private: bio and the switched-on sections show."""
+    """Listed and not private."""
     settings: ProfileSettings | None
+    opened: bool = False
+    """This viewer may see the bio and the switched-on sections: the profile
+    is public, or they're an approved follower. Without a viewer, == public."""
 
     def shows(self, section: str) -> bool:
-        if not self.public or self.settings is None:
+        if not self.opened or self.settings is None:
             return False
         return bool(getattr(self.settings, SECTION_COLUMNS[section]))
 
@@ -50,15 +59,24 @@ class Visibility:
 
     @property
     def in_community(self) -> bool:
-        return self.shows("journal") and bool(self.settings.show_in_community)
+        return self.public and self.shows("journal") and bool(self.settings.show_in_community)
 
 
-def visibility(db: Session, profile: Profile) -> Visibility:
+def is_approved_follower(db: Session, viewer_id: UUID | None, owner_id: UUID) -> bool:
+    if viewer_id is None or viewer_id == owner_id:
+        return False
+    row = db.get(Follow, (viewer_id, owner_id))
+    return row is not None and row.status == "accepted"
+
+
+def visibility(db: Session, profile: Profile, viewer_id: UUID | None = None) -> Visibility:
+    """How `profile` looks to `viewer_id` (None: a guest, or the rule for everyone)."""
     hidden = db.get(ProfileModeration, profile.id) is not None
     listed = profile.username is not None and not hidden
     settings = db.get(ProfileSettings, profile.id)
     public = listed and settings is not None and not settings.is_private
-    return Visibility(listed=listed, public=public, settings=settings)
+    opened = public or (listed and settings is not None and is_approved_follower(db, viewer_id, profile.id))
+    return Visibility(listed=listed, public=public, settings=settings, opened=opened)
 
 
 def in_community(user_id: ColumnElement) -> ColumnElement[bool]:

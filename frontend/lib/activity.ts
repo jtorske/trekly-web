@@ -1,3 +1,4 @@
+import type { FollowState } from "./follows";
 import type { Milestone, MilestoneBadgeInfo } from "./milestones";
 import type { PrivacySettings } from "./profilesApi";
 import type { TrailListItem } from "./trailsApi";
@@ -14,6 +15,8 @@ export interface ActivityAuthor {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** Signed in, and not your own post: whether you follow them. */
+  follow: FollowState | null;
 }
 
 /** A milestone or rank a hike earned, shown inside that hike's post. */
@@ -69,6 +72,8 @@ export interface ActivityPage {
   next_cursor: string | null;
   /** The viewer's home province, when signed in with one. */
   province: string | null;
+  /** Signed in and following someone. */
+  follows_anyone: boolean;
 }
 
 /** A profile's Activity tab, newest first. */
@@ -81,7 +86,12 @@ export interface ProfileActivityPage {
   sharing: boolean | null;
 }
 
-export type ActivityScope = "everyone" | "province";
+export type ActivityScope = "following" | "everyone" | "province";
+
+/** Following is the default once you follow anyone; Everyone otherwise (and for guests). */
+export function defaultScope(signedIn: boolean, followingCount: number | null | undefined): ActivityScope {
+  return signedIn && (followingCount ?? 0) > 0 ? "following" : "everyone";
+}
 
 /** Why posts can't show in the feed, or null when sharing works. */
 export function activityBlocker(

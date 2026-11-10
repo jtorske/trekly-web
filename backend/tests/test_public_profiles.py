@@ -149,7 +149,8 @@ def test_public_payload_has_only_declared_fields(client, alice_profile, people):
     set_privacy(client, alice, show_trip_plans=True)
     body = public(client).json()
     assert set(body) == {"username", "display_name", "avatar_path", "is_private", "allow_indexing", "bio", "home_province", "rank", "visit_streak",
-                         "journal", "featured_badges", "gear", "saved_trails", "trip_plans", "activity_count"}
+                         "journal", "featured_badges", "gear", "saved_trails", "trip_plans", "activity_count", "can_view",
+                         "followers_count", "following_count", "lists_open", "follow", "follows_you"}
     assert set(body["featured_badges"][0]) == {"kind", "trail", "milestone", "badge", "province"}
     assert set(body["journal"]) == {"hide_dates", "entries", "milestones"}
     assert set(body["journal"]["milestones"][0]) == {"id", "category", "title", "tier", "icon", "detail", "goal", "unit",
@@ -173,9 +174,16 @@ def test_gear_photos_stay_with_the_owner(client, alice_profile, people):
         assert '"image_path"' not in body
 
 
+def _without_follow_state(body: dict) -> dict:
+    """The viewer's own follow state is the one thing that differs between viewers."""
+    return {key: value for key, value in body.items() if key not in ("follow", "follows_you")}
+
+
 def test_signed_in_visitors_see_exactly_what_guests_see(client, alice_profile, people):
     _, bob = people["bob"]
-    assert public(client, headers=bob).json() == public(client).json()
+    as_bob = public(client, headers=bob).json()
+    assert as_bob["follow"] == "none" and as_bob["follows_you"] is False
+    assert _without_follow_state(as_bob) == _without_follow_state(public(client).json())
 
 
 def test_owner_gets_the_visitor_view_too(client, alice_profile, people):
@@ -214,7 +222,8 @@ def test_private_profile_shows_only_name_and_photo(client, alice_profile, people
     assert body == {"username": "alice", "display_name": "Alice A", "avatar_path": None, "is_private": True,
                     "allow_indexing": False, "bio": None, "home_province": None, "rank": None, "visit_streak": None, "journal": None,
                     "featured_badges": None, "gear": None, "saved_trails": None, "trip_plans": None,
-                    "activity_count": None}
+                    "activity_count": None, "can_view": False, "followers_count": 0, "following_count": 0,
+                    "lists_open": False, "follow": None, "follows_you": False}
     set_privacy(client, alice, is_private=False)
     assert public(client).json()["bio"] == "Hiker."
 

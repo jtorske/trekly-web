@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import { appendPage, deleteKey, type ActivityPost, type ActivityScope } from "@/lib/activity";
+import { appendPage, defaultScope, deleteKey, type ActivityPost, type ActivityScope } from "@/lib/activity";
 import { getActivity } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { useHidden } from "@/lib/useHidden";
@@ -43,7 +43,10 @@ export default function ActivityPage() {
   const hikeLogs = useHikeLogs();
   const pathname = usePathname();
   const signedIn = status === "signedIn";
-  const [scope, setScope] = useState<ActivityScope>("everyone");
+  const [chosen, setScope] = useState<ActivityScope | null>(null);
+  // Until they pick a tab: Following once they follow anyone, Everyone otherwise.
+  const scope: ActivityScope = chosen ?? defaultScope(signedIn, profile?.counts?.following);
+  const decided = status !== "loading" && (!signedIn || chosen !== null || profile !== null);
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,13 +82,13 @@ export default function ActivityPage() {
 
   // First page whenever the filter or sign-in changes (and after posting, below).
   useEffect(() => {
-    if (status === "loading") return;
+    if (!decided) return;
     const controller = new AbortController();
     queueMicrotask(() => {
       if (!controller.signal.aborted) void load(null, controller.signal);
     });
     return () => controller.abort();
-  }, [status, load]);
+  }, [decided, load]);
 
   // Not sharing yet? A small card offers the setting until they put it away
   // or turn it on (the API decides; it never shows to guests).
@@ -123,6 +126,21 @@ export default function ActivityPage() {
 
   const signInHref = `/login${nextQuery(pathname)}`;
   const openComposer = () => composer.current?.open();
+  const followsSomeone = (profile?.counts?.following ?? 0) > 0;
+  const emptyTitle =
+    scope === "province"
+      ? "Nothing from your province yet"
+      : scope === "following"
+        ? followsSomeone
+          ? "Nothing new from the hikers you follow"
+          : "Follow hikers to see their hikes here"
+        : "The trail's quiet right now";
+  const emptyText =
+    scope === "province"
+      ? "Hikers from your province appear here once they share their activity and show their home province."
+      : scope === "following"
+        ? "Posts from people you follow show up here. Find hikers on Everyone, or in a trail's “Hiked by”."
+        : "When hikers share a hike or earn a badge, it shows up here. Log a hike and be the first.";
   const posts = current?.posts.filter((post) => !isHidden(deleteKey(post.id))) ?? null;
 
   let body;
@@ -146,16 +164,14 @@ export default function ActivityPage() {
   } else if (posts.length === 0) {
     body = (
       <div className={styles.empty}>
-        <p className={styles.emptyTitle}>
-          {scope === "province" ? "Nothing from your province yet" : "The trail's quiet right now"}
-        </p>
-        <p className={styles.emptyText}>
-          {scope === "province"
-            ? "Hikers from your province appear here once they share their activity and show their home province."
-            : "When hikers share a hike or earn a badge, it shows up here. Log a hike and be the first."}
-        </p>
+        <p className={styles.emptyTitle}>{emptyTitle}</p>
+        <p className={styles.emptyText}>{emptyText}</p>
         <div className={styles.emptyActions}>
-          {signedIn ? (
+          {scope === "following" ? (
+            <button type="button" className={ui.primary} onClick={() => setScope("everyone")}>
+              See everyone
+            </button>
+          ) : signedIn ? (
             <button type="button" className={ui.primary} onClick={openComposer}>
               Log a hike
             </button>
@@ -230,6 +246,16 @@ export default function ActivityPage() {
 
             <div className={styles.toolbar}>
               <div className={styles.tabs} role="group" aria-label="Show activity from">
+                {signedIn && (
+                  <button
+                    type="button"
+                    className={styles.tab}
+                    aria-pressed={scope === "following"}
+                    onClick={() => setScope("following")}
+                  >
+                    Following
+                  </button>
+                )}
                 <button
                   type="button"
                   className={styles.tab}

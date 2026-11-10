@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.admin_access import is_admin
+from app import follows
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
 from app.models.account import Profile, SavedTrail
@@ -24,6 +25,7 @@ from app.models.nudge import NudgeDismissal
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup
+from app.models.social import Follow
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
@@ -45,6 +47,10 @@ UnitSystem = Literal["metric", "imperial"]
 class ProfileCounts(BaseModel):
     saved_trails: int
     gear_items: int
+    followers: int = 0
+    following: int = 0
+    # Waiting for their approval (private profiles).
+    follow_requests: int = 0
 
 
 class ProfileOut(BaseModel):
@@ -156,6 +162,9 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
             select(func.count()).select_from(UserGearItem).where(UserGearItem.user_id == user.id)
         )
         or 0,
+        followers=follows.follower_count(db, user.id),
+        following=follows.following_count(db, user.id),
+        follow_requests=follows.request_count(db, user.id),
     )
     return ProfileOut(
         id=profile.id,
@@ -294,6 +303,8 @@ def delete_account(
     db.execute(delete(ProfileReport).where(
         (ProfileReport.reporter_id == user.id) | (ProfileReport.profile_id == user.id)
     ))
+    # Follows both ways, and requests sent or received.
+    db.execute(delete(Follow).where((Follow.follower_id == user.id) | (Follow.followee_id == user.id)))
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))

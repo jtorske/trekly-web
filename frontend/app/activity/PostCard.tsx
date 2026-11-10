@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { EyeOff, Flag, Hand, Trash2 } from "lucide-react";
 import Avatar from "@/components/Avatar";
+import FollowButton from "@/components/FollowButton";
 import HikePhoto from "@/components/HikePhoto";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
@@ -76,6 +77,18 @@ export default function PostCard({
     </time>
   );
 
+  // Signed in and someone else's post. Feed authors always have public profiles.
+  const follow = post.author.follow !== null && post.author.follow !== undefined && !post.mine && (
+    <FollowButton
+      username={post.author.username}
+      name={name}
+      state={post.author.follow}
+      isPrivate={false}
+      size="sm"
+      onChange={(state) => onChange(post.id, { author: { ...post.author, follow: state } })}
+    />
+  );
+
   const head = (
     <div className={styles.head}>
       <Link href={profileHref} className={styles.avatarLink} aria-label={`${name}'s profile`}>
@@ -93,6 +106,7 @@ export default function PostCard({
           {when && <> · {when}</>}
         </span>
       </div>
+      {follow}
     </div>
   );
 

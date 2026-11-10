@@ -1,3 +1,4 @@
+import type { FollowState } from "./follows";
 import type { PrivacySettings } from "./profilesApi";
 
 /**
@@ -11,6 +12,8 @@ export interface CommunityHiker {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** Signed in: whether you follow them (null for yourself, and for guests). */
+  follow: FollowState | null;
 }
 
 export interface CommunityNote extends CommunityHiker {

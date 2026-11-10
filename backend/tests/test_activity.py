@@ -137,7 +137,7 @@ def test_sharing_is_off_by_default(client, make_token):
 
 
 def test_the_feed_starts_empty_for_guests(client):
-    assert feed(client) == {"items": [], "next_cursor": None, "province": None}
+    assert feed(client) == {"items": [], "next_cursor": None, "province": None, "follows_anyone": False}
 
 
 def test_a_shared_hike_posts_with_its_milestones(client, trails, person):
@@ -149,7 +149,7 @@ def test_a_shared_hike_posts_with_its_milestones(client, trails, person):
     hikes = hike_posts(body)
     assert len(hikes) == 1
     post = hikes[0]
-    assert post["author"] == {"username": "alice", "display_name": "Alice", "avatar_path": None}
+    assert post["author"] == {"username": "alice", "display_name": "Alice", "avatar_path": None, "follow": None}
     assert post["hike"]["trail"]["name"] == "Skyline Trail"
     assert post["hike"]["hiked_on"] == "2026-08-14"
     assert post["hike"]["note"] == "Larches!"

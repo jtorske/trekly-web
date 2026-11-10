@@ -4,6 +4,7 @@ import {
   activityBlocker,
   appendPage,
   canShareHikes,
+  defaultScope,
   earnedPhrases,
   highFiversLine,
   joinWords,
@@ -100,4 +101,11 @@ test("the most recently earned milestone", () => {
   assert.equal(latestEarned([]), null);
   assert.equal(latestEarned([m("a", null), m("b", "2026-11-01", false)]), null);
   assert.equal(latestEarned([m("a", "2026-10-01"), m("b", "2026-11-02"), m("c", "2026-11-02")])?.id, "b");
+});
+
+test("Following is the default tab once you follow anyone", () => {
+  assert.equal(defaultScope(false, 3), "everyone");
+  assert.equal(defaultScope(true, 0), "everyone");
+  assert.equal(defaultScope(true, null), "everyone");
+  assert.equal(defaultScope(true, 1), "following");
 });

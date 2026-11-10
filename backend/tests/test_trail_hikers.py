@@ -74,19 +74,27 @@ def test_nobody_is_listed_without_opting_in(client, world, hiker):  # noqa: F811
 def test_an_opted_in_hiker_is_listed_with_their_note(client, world, hiker):  # noqa: F811
     alice = hiker("alice")
     body = hikers(client, world)
-    assert body["hikers"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None}]
+    assert body["hikers"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None, "follow": None}]
     assert body["others"] == 0
-    assert body["notes"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None, "note": "Larches!",
+    assert body["notes"] == [{"username": "alice", "display_name": "Alice", "avatar_path": None, "follow": None, "note": "Larches!",
                               "hiked_on": "2026-08-14", "verified": False, "photo_path": alice["photo"]}]
     # Only declared fields: no user id or email.
     text = str(body)
     assert str(alice["id"]) not in text.replace(alice["photo"], "") and "@example.com" not in text
 
 
+def _without_follow(body):
+    return {key: [{k: v for k, v in item.items() if k != "follow"} for item in value] if isinstance(value, list)
+            else value for key, value in body.items()}
+
+
 def test_guests_and_signed_in_users_get_the_same_answer(client, world, hiker, make_token):  # noqa: F811
+    """Apart from the signed-in viewer's own follow state toward each hiker."""
     hiker("alice")
     bob = {"Authorization": f"Bearer {make_token(uuid.uuid4())}"}
-    assert hikers(client, world) == hikers(client, world, bob)
+    as_bob = hikers(client, world, bob)
+    assert [h["follow"] for h in as_bob["hikers"]] == ["none"]
+    assert _without_follow(hikers(client, world)) == _without_follow(as_bob)
 
 
 def test_unknown_trail_is_404(client):

@@ -9,6 +9,7 @@ from app.routers import (
     admin_profiles,
     admin_trail_photos,
     availability,
+    follows,
     gear,
     me_account,
     me_alerts,
@@ -72,6 +73,7 @@ app.include_router(trail_hikers.router)
 app.include_router(activity.router)
 app.include_router(activity.profile_router)
 app.include_router(activity.me_router)
+app.include_router(follows.router)
 app.include_router(availability.router)
 app.include_router(gear.router)
 app.include_router(me_gear_import.router)

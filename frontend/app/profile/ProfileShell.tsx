@@ -95,6 +95,7 @@ export function IdentityCard({
   name,
   username,
   links,
+  social,
   notice,
   bio,
   region,
@@ -114,6 +115,8 @@ export function IdentityCard({
   username: string | null;
   /** "View public profile" and similar, under the username. */
   links?: ReactNode;
+  /** Follower and following counts, under the name. */
+  social?: ReactNode;
   /** Under the name, e.g. photo upload progress and errors. */
   notice?: ReactNode;
   bio?: string | null;
@@ -145,6 +148,8 @@ export function IdentityCard({
           {links && <div className={styles.links}>{links}</div>}
         </div>
       </div>
+
+      {social}
 
       {notice}
 

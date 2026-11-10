@@ -44,6 +44,7 @@ from app.models.account import Profile
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
+from app.models.social import Follow
 from app.points import rank_for, score
 from app.privacy import Visibility, visibility
 
@@ -64,7 +65,7 @@ def can_share(db: Session, user_id: UUID) -> bool:
     if profile is None:
         return False
     seen = visibility(db, profile)
-    return seen.shows("journal") and bool(seen.settings.share_activity)
+    return seen.public and seen.shows("journal") and bool(seen.settings.share_activity)
 
 
 # ------------------------------------------------------------------ posting
@@ -210,6 +211,13 @@ def readable_query(today: date, viewer_id: UUID | None):
 
 def is_visible(db: Session, post_id: UUID, today: date) -> bool:
     return db.scalar(select(exists(visible_query(today).where(ActivityPost.id == post_id)))) or False
+
+
+def following_where(viewer_id: UUID):
+    """Posts by people the viewer follows (approved follows only)."""
+    return ActivityPost.user_id.in_(
+        select(Follow.followee_id).where(Follow.follower_id == viewer_id, Follow.status == "accepted")
+    )
 
 
 def province_where(province: str | None):

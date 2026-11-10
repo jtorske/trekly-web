@@ -1,0 +1,18 @@
+/* Follow / Following / Requested. "sm" sits in feed posts, lists and "Hiked by". */
+
+.button {
+  min-width: 6.5rem;
+}
+
+.sm {
+  min-height: 2rem;
+  min-width: 5.5rem;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+/* Following and Requested read as a settled state; Follow is the call to act. */
+.on {
+  background: color-mix(in srgb, var(--color-dark-olive) 8%, transparent);
+  border-color: color-mix(in srgb, var(--color-dark-olive) 35%, transparent);
+}

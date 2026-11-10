@@ -5,9 +5,11 @@ leaves the API if it's declared here: never an email, home region, alert,
 home province (unless its switch is on),
 gear or plan note, gear photo, party size, booking, or anything from a hidden section.
 The answer is the same for every viewer, including the owner (whose page
-adds its own controls on the client), so there's nothing a signed-in
-visitor can see that a guest can't. Responses are never cached, so a
-privacy change applies to the next request.
+adds its own controls on the client), with two exceptions: an approved
+follower of a private profile sees what a visitor sees of a public one
+(app/privacy.py), and a signed-in viewer is told their own follow state.
+Responses are never cached, so a privacy change applies to the next
+request.
 
 Direct Supabase access is guarded separately by row-level security with
 the same rule (app/privacy.py, migration 214aa07bf743).
@@ -29,7 +31,9 @@ from app.catalog.presenters import effective_weight, gear_item_out
 from app.database import get_db
 from app.featured import FeaturedBadgeOut, featured_badges
 from app.milestones import MilestoneBadgeOut, badge_out, evaluate, gather
+from app import follows
 from app.activity import is_visible
+from app.follows import FollowState
 from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
@@ -41,7 +45,7 @@ from app.models.visit_streak import VisitStreak
 from app.notify import Email, EmailSender, email_sender_from_env
 from app.points import user_rank
 from app.privacy import Visibility, visibility
-from app.routers.activity import profile_activity_count
+from app.routers.activity import optional_user, profile_activity_count
 from app.routers.availability import get_today
 from app.routers.me_gear import _item_query
 from app.schemas.gear import CapacityOut, CategoryRef, ProductSummaryOut, VariantOut, WeightOut
@@ -139,7 +143,17 @@ class PublicProfileOut(BaseModel):
     avatar_path: str | None
     is_private: bool
     allow_indexing: bool
-    # Everything below is None when private, or when that section is hidden.
+    # This viewer sees the sections below: the profile is public, or they're an approved follower.
+    can_view: bool
+    # Approved follows only. Shown even while the lists are hidden.
+    followers_count: int = 0
+    following_count: int = 0
+    # This viewer may open the followers and following lists.
+    lists_open: bool = False
+    # Signed in and not the owner: their follow state, and whether the owner follows them.
+    follow: FollowState | None = None
+    follows_you: bool = False
+    # Everything below is None when not viewable, or when that section is hidden.
     bio: str | None = None
     # Two-letter code; only with "Home province" switched on (off by default).
     home_province: str | None = None
@@ -157,12 +171,12 @@ class PublicProfileOut(BaseModel):
     activity_count: int | None = None
 
 
-def find_listed(db: Session, username: str) -> tuple[Profile, Visibility]:
-    """The profile behind a username, or 404 if there's none or it's hidden."""
+def find_listed(db: Session, username: str, viewer_id: UUID | None = None) -> tuple[Profile, Visibility]:
+    """The profile behind a username as `viewer_id` sees it, or 404 if there's none or it's hidden."""
     profile = db.scalar(select(Profile).where(Profile.username == username.strip().lower()))
     if profile is None:
         raise HTTPException(status_code=404, detail="Profile not found")
-    seen = visibility(db, profile)
+    seen = visibility(db, profile, viewer_id)
     if not seen.listed:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile, seen
@@ -268,15 +282,24 @@ def _trip_plans(db: Session, owner: UUID) -> list[PublicTripPlan]:
     ]
 
 
-def build_public_profile(db: Session, profile: Profile, seen: Visibility, today: date) -> PublicProfileOut:
+def build_public_profile(
+    db: Session, profile: Profile, seen: Visibility, today: date, viewer_id: UUID | None = None
+) -> PublicProfileOut:
+    other = viewer_id is not None and viewer_id != profile.id
     out = PublicProfileOut(
         username=profile.username,
         display_name=profile.display_name,
         avatar_path=profile.avatar_path,
         is_private=not seen.public,
         allow_indexing=seen.indexable,
+        can_view=seen.opened,
+        followers_count=follows.follower_count(db, profile.id),
+        following_count=follows.following_count(db, profile.id),
+        lists_open=follows.lists_open(viewer_id, profile, seen),
+        follow=follows.state_of(db, viewer_id, profile.id) if other else None,
+        follows_you=other and follows.state_of(db, profile.id, viewer_id) == "following",
     )
-    if not seen.public:
+    if not seen.opened:
         return out
     out.bio = profile.bio
     province = profile.home_province if seen.shows("home_province") else None
@@ -302,11 +325,16 @@ def build_public_profile(db: Session, profile: Profile, seen: Visibility, today:
 
 @router.get("/{username}", response_model=PublicProfileOut)
 def get_public_profile(
-    username: str, response: Response, db: Session = Depends(get_db), today: date = Depends(get_today)
+    username: str,
+    response: Response,
+    viewer: CurrentUser | None = Depends(optional_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
 ):
     response.headers.update(NO_STORE)
-    profile, seen = find_listed(db, username)
-    return build_public_profile(db, profile, seen, today)
+    viewer_id = viewer.id if viewer else None
+    profile, seen = find_listed(db, username, viewer_id)
+    return build_public_profile(db, profile, seen, today, viewer_id)
 
 
 # ----------------------------------------------------------------- reports
