@@ -60,6 +60,9 @@ class ProfileSettings(Base):
     # profile is public (migration a8c3f1d5e7b2). Turning it off hides every
     # post they've made.
     share_activity = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Hide my followers and following lists": the counts still show, the
+    # lists open only for them (migration b3d7f2a9c4e1).
+    hide_follow_lists = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     # When they last chose Public or Private themselves; the setup flow can't
     # finish or be skipped without it (migration c7e3a9f1d5b2). API-only.

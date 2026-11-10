@@ -55,6 +55,7 @@ export const isNavCurrent = (pathname: string, link: NavLink) =>
 export function currentMobileHref(pathname: string, search: string): string | null {
   const account = currentAccountHref(pathname, search);
   if (account) return account;
+  if (pathname === "/notifications") return "/notifications";
   return NAV_LINKS.find((link) => isNavCurrent(pathname, link))?.href ?? null;
 }
 

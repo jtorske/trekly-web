@@ -1,0 +1,170 @@
+.as {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.as > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.asName {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.body {
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.count {
+  margin: -0.5rem 0 0;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.over {
+  color: var(--color-rust-text);
+  font-weight: 700;
+}
+
+.picker {
+  position: relative;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.searchBox input {
+  flex: 1;
+  min-width: 0;
+}
+
+.results {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 15%, transparent);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.result {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  border: 0;
+  background: none;
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.result:hover,
+.result:focus-visible {
+  background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+}
+
+.trailThumb {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.chosenTrail {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-olive) 8%, transparent);
+  padding: 0.45rem 0.6rem;
+}
+
+.trailName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.photoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.photoRow button,
+.photoPreview button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.photoPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.photoPreview img {
+  display: block;
+  width: 100%;
+  max-height: 20rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+  padding: 0.8rem 0;
+}
+
+.postText {
+  flex: 1;
+  min-width: 0;
+}
+
+.postBody {
+  margin: 0 0 0.25rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

@@ -44,7 +44,8 @@ def test_profile_is_created_on_first_read_with_sensible_defaults(client, headers
     assert body["id"] == str(alice)
     assert body["email"] == "alice@example.com"
     assert body["display_name"] is None and body["username"] is None
-    assert body["counts"] == {"saved_trails": 0, "gear_items": 0}
+    assert body["counts"] == {"saved_trails": 0, "gear_items": 0, "followers": 0, "following": 0,
+                              "follow_requests": 0}
     assert body["visibility"] == "private"
     assert body["units"] is None  # never chosen: the app shows metric
     assert body["member_since"]

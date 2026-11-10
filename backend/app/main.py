@@ -6,9 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import (
     activity,
     admin,
+    admin_official_posts,
     admin_profiles,
     admin_trail_photos,
     availability,
+    follows,
     gear,
     me_account,
     me_alerts,
@@ -24,6 +26,7 @@ from app.routers import (
     me_rank,
     me_setups,
     me_visit,
+    notifications,
     public_profiles,
     signup_email,
     trail_hikers,
@@ -72,6 +75,8 @@ app.include_router(trail_hikers.router)
 app.include_router(activity.router)
 app.include_router(activity.profile_router)
 app.include_router(activity.me_router)
+app.include_router(follows.router)
+app.include_router(notifications.router)
 app.include_router(availability.router)
 app.include_router(gear.router)
 app.include_router(me_gear_import.router)
@@ -92,6 +97,7 @@ app.include_router(me_preferences.router)
 app.include_router(public_profiles.router)
 app.include_router(admin.router)
 app.include_router(admin_profiles.router)
+app.include_router(admin_official_posts.router)
 app.include_router(usernames.router)
 
 

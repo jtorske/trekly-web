@@ -1,0 +1,31 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.4rem;
+  font-size: 0.9rem;
+}
+
+.count {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 3px;
+}
+
+.count:hover {
+  color: var(--color-rust-text);
+  text-decoration-color: currentColor;
+}
+
+.plain {
+  font-weight: 600;
+}
+
+.dot {
+  color: var(--color-muted-text);
+}
+
+.requests {
+  color: var(--color-rust-text);
+}

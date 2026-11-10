@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: November 9, 2026</p>
+        <p className={styles.updated}>Last updated: November 10, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -112,7 +112,10 @@ export default function PrivacyPage() {
             Shown even when your profile is private: your username, display name, and profile
             picture.
           </li>
-          <li>Shown whenever your profile is public: your bio.</li>
+          <li>
+            Shown whenever your profile is public, and to followers you&apos;ve approved while
+            it&apos;s private: your bio.
+          </li>
           <li>
             Public by default, and you can hide each one: your Trail Journal and badges, rank, gear
             and loadouts, and saved trails.
@@ -136,12 +139,31 @@ export default function PrivacyPage() {
           stays private until you change your settings.
         </p>
         <p>
+          Other signed-in users can follow you. If your profile is public, they follow you right
+          away. If it&apos;s private, they send a request, and only followers you approve can see
+          your bio and the sections you&apos;ve chosen to show; everything else stays private. Your
+          follower and following counts appear on your profile. Anyone who can see your profile can
+          also see who follows you and who you follow (username, display name and profile picture
+          only), unless you turn on Hide my followers and following lists (off by default). You can
+          remove a follower at any time, and they aren&apos;t told. If you make a private profile
+          public, any waiting requests are approved.
+        </p>
+        <p>
           If you turn on Share my activity in the feed (off by default), hikes you choose to share,
           and the milestones and ranks they earn, appear on the Activity page with your username,
           display name and profile picture, plus the note and photo on that hike, without dates if
           you&apos;ve chosen to hide them. Trip plans, alerts and future dates are never shared.
           Turning it off hides your posts right away, and you can delete any post. Other users can
           give a post a high five or report it; a report includes the post.
+        </p>
+        <p>
+          Trekly shows you notifications in the app when someone follows you, asks to follow you,
+          approves your request to follow them, or gives one of your posts a high five. A
+          notification shows the other person&apos;s username, display name and profile picture,
+          and only you can see your notifications. If someone takes back what they did, for example
+          by unfollowing you or taking back a high five, its notification is removed. You can turn
+          off each type in Settings → Notifications. We don&apos;t send notifications by email or
+          push. They&apos;re kept for 180 days, and deleted with your account.
         </p>
         <p>
           Other signed-in users can report a profile they believe breaks our Terms of Use. A report

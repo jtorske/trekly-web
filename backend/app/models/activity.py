@@ -1,11 +1,14 @@
 """The Activity feed: posts made from real activity, and their high fives.
 
-A post is never free-form text. It's one of:
+A hiker's post is never free-form text. It's one of:
 - "hike": a Trail Journal entry the owner chose to share. Its trail, date,
   note and photo are read live from the hike log, so editing the hike edits
   the post, and deleting the hike deletes the post (ON DELETE CASCADE).
 - "milestone": a milestone the owner earned by logging a shared hike.
 - "rank": a rank the owner reached by logging a shared hike.
+- "announcement": a short text post from the official @trekly account only
+  (app/account_labels.py), written by an admin, with an optional linked trail
+  and photo. The only kind with free text, and nobody else can make one.
 
 Milestone and rank posts keep the hike that earned them (hike_log_id), so
 removing that hike removes them too. Trip plans, alerts, saved trails and
@@ -29,19 +32,26 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 
-POST_KINDS = ("hike", "milestone", "rank")
+POST_KINDS = ("hike", "milestone", "rank", "announcement")
 MAX_HIDE_REASON = 500
+MAX_ANNOUNCEMENT = 500
 
 
 class ActivityPost(Base):
     __tablename__ = "activity_posts"
     __table_args__ = (
-        CheckConstraint("kind in ('hike', 'milestone', 'rank')", name="activity_posts_kind_check"),
+        CheckConstraint("kind in ('hike', 'milestone', 'rank', 'announcement')", name="activity_posts_kind_check"),
         CheckConstraint(
             "(kind = 'hike' and hike_log_id is not null and milestone is null and rank_level is null)"
             " or (kind = 'milestone' and milestone is not null and rank_level is null)"
-            " or (kind = 'rank' and rank_level is not null and milestone is null)",
+            " or (kind = 'rank' and rank_level is not null and milestone is null)"
+            " or (kind = 'announcement' and body is not null and hike_log_id is null and milestone is null"
+            " and rank_level is null)",
             name="activity_posts_shape_check",
+        ),
+        CheckConstraint(
+            f"body is null or length(body) between 1 and {MAX_ANNOUNCEMENT}",
+            name="activity_posts_body_length_check",
         ),
         CheckConstraint(
             f"hidden_reason is null or length(hidden_reason) <= {MAX_HIDE_REASON}",
@@ -71,6 +81,11 @@ class ActivityPost(Base):
     # A seasonal milestone: it hints at when they hiked, so it's left out
     # while they hide their hike dates.
     reveals_date = Column(Boolean, nullable=False, default=False, server_default=false())
+    # An announcement's text, linked trail and photo (`posts/{uuid}.webp` in
+    # the public trail-photos bucket).
+    body = Column(Text)
+    trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="SET NULL"))
+    photo_path = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     # Set by an admin (audited); a hidden post shows to nobody.
     hidden_at = Column(DateTime(timezone=True))
@@ -78,6 +93,7 @@ class ActivityPost(Base):
     hidden_reason = Column(Text)
 
     hike_log = relationship("HikeLog")
+    trail = relationship("Trail")
 
 
 class ActivityReaction(Base):

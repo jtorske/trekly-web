@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flag, Image as ImageIcon, LayoutDashboard, Users, type LucideIcon } from "lucide-react";
+import { Flag, Image as ImageIcon, LayoutDashboard, Megaphone, Users, type LucideIcon } from "lucide-react";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
@@ -15,6 +15,7 @@ const TABS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[]
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/reports", label: "Reports", icon: Flag },
   { href: "/admin/photos", label: "Trail photos", icon: ImageIcon },
+  { href: "/admin/posts", label: "Trekly posts", icon: Megaphone },
 ];
 
 /**

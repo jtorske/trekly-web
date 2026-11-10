@@ -1,0 +1,35 @@
+.page {
+  flex: 1;
+  padding: 6.5rem 1rem 4rem;
+}
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, white 55%, var(--color-cream));
+}
+
+.skeleton {
+  height: 12rem;
+}
+
+@media (max-width: 899px) {
+  .page {
+    padding-top: 5.5rem;
+  }
+}

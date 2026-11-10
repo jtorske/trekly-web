@@ -88,6 +88,21 @@ class SupabaseAdmin:
             raise SupabaseAdminError("Supabase didn't return a reset token.")
         return token_hash
 
+    def create_user(self, email: str, password: str, display_name: str) -> UUID:
+        """A confirmed account with no email sent (the labeled-account scripts)."""
+        payload = self._send("POST", f"{self.base}/admin/users", {
+            "email": email, "password": password, "email_confirm": True,
+            "user_metadata": {"display_name": display_name},
+        })
+        try:
+            return UUID(str(payload.get("id") or (payload.get("user") or {}).get("id")))
+        except ValueError:
+            raise SupabaseAdminError("Supabase didn't return the new account's id.") from None
+
+    def delete_user(self, user_id: UUID) -> None:
+        """Deletes the account; its rows go with it (ON DELETE CASCADE)."""
+        self._send("DELETE", f"{self.base}/admin/users/{user_id}", {})
+
     def resend_signup_confirmation(self, email: str, redirect_to: str) -> None:
         """Supabase's own "Confirm your email" email, sent again."""
         query = urllib.parse.urlencode({"redirect_to": redirect_to})

@@ -24,7 +24,7 @@ const SECTION_WARNINGS: Partial<Record<SectionSetting, string>> = {
   show_trip_plans: "Public trip plans show where and when you'll be on the trail.",
 };
 
-function Switch({
+export function Switch({
   id,
   label,
   hint,
@@ -159,14 +159,14 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
       <Switch
         id="privacy-private"
         label="Private profile"
-        hint="Visitors see only “This profile is private”, your name, username and photo."
+        hint="Visitors see only “This profile is private”, your name, username and photo. People ask to follow you, and those you approve see the sections below."
         checked={settings.is_private}
         onChange={(value) => change("is_private", value)}
       />
 
-      <fieldset className={styles.switchGroup} disabled={settings.is_private}>
+      <fieldset className={styles.switchGroup}>
         <legend className={styles.switchLegend}>
-          What visitors see{settings.is_private && " (turn off Private profile to choose)"}
+          {settings.is_private ? "What approved followers see" : "What visitors see"}
         </legend>
         {(Object.keys(SECTION_LABELS) as SectionSetting[]).map((key) => (
           <Switch
@@ -176,7 +176,6 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
             hint={SECTION_HINTS[key]}
             warning={SECTION_WARNINGS[key]}
             checked={settings[key]}
-            disabled={settings.is_private}
             onChange={(value) => change(key, value)}
           />
         ))}
@@ -185,7 +184,6 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
           label="Home province"
           hint="Your home province or territory and its badge, from Edit profile. Off until you turn it on."
           checked={settings.show_home_province}
-          disabled={settings.is_private}
           onChange={(value) => change("show_home_province", value)}
         />
         <Switch
@@ -193,7 +191,6 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
           label="Visit streak"
           hint="How many days in a row you've visited Trekly, and your best streak. Off until you turn it on."
           checked={settings.show_visit_streak}
-          disabled={settings.is_private}
           onChange={(value) => change("show_visit_streak", value)}
         />
       </fieldset>
@@ -218,6 +215,17 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
           // Always possible to turn off; turning on needs a public profile and journal.
           disabled={activityBlocker(settings) !== null && !settings.share_activity}
           onChange={(value) => change("share_activity", value)}
+        />
+      </fieldset>
+
+      <fieldset className={styles.switchGroup}>
+        <legend className={styles.switchLegend}>Followers</legend>
+        <Switch
+          id="privacy-follow-lists"
+          label="Hide my followers and following lists"
+          hint="Others still see how many followers you have and how many people you follow, but not who. You can always see your own lists."
+          checked={settings.hide_follow_lists}
+          onChange={(value) => change("hide_follow_lists", value)}
         />
       </fieldset>
 

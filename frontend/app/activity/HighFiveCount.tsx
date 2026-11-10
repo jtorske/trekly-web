@@ -5,6 +5,7 @@ import Avatar from "@/components/Avatar";
 import { highFiversLine, type ActivityPost, type HighFivers } from "@/lib/activity";
 import { getHighFivers } from "@/lib/activityApi";
 import { displayName } from "@/lib/publicProfile";
+import { labeledName } from "@/lib/accountLabels";
 import styles from "./activity.module.css";
 
 /**
@@ -102,7 +103,9 @@ export default function HighFiveCount({
                   ))}
                 </span>
               )}
-              <span>{highFiversLine(fresh, (hiker) => (hiker.username === viewer ? "You" : displayName(hiker)))}</span>
+              <span>{highFiversLine(fresh, (hiker) =>
+                  hiker.username === viewer ? "You" : labeledName(displayName(hiker), hiker.label),
+                )}</span>
             </>
           ) : failed ? (
             "Couldn't load who high-fived."

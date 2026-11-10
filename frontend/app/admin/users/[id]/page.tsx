@@ -1,5 +1,6 @@
 "use client";
 
+import AccountBadge from "@/components/AccountBadge";
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -103,6 +104,7 @@ function Detail({ user, reload }: { user: AdminUserDetail; reload: () => void })
             <span className={user.visibility === "hidden" ? styles.pillWarn : styles.pill}>{VISIBILITY_LABELS[user.visibility]}</span>
             {user.banned && <span className={styles.pillWarn}>Banned</span>}
             {user.is_admin && <span className={styles.pillDark}>Admin</span>}
+            <AccountBadge label={user.label} />
           </span>
         </div>
         {user.bio && <p className={`${styles.quote} ${styles.spaced}`}>{user.bio}</p>}

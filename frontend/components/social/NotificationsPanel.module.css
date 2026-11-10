@@ -1,0 +1,161 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* In the bell's dropdown: a fixed-width card whose list scrolls. */
+.dropdown {
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: min(34rem, calc(100vh - 6rem));
+}
+
+.dropdown .scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+.markAll {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.scroll {
+  min-height: 0;
+  flex: 1;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0.5rem;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.65rem 1.4rem 0.65rem 0.5rem;
+}
+
+.item:hover {
+  background: color-mix(in srgb, var(--color-olive) 7%, transparent);
+}
+
+.unread {
+  background: color-mix(in srgb, var(--color-tan) 14%, transparent);
+}
+
+.avatars {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: 2.75rem;
+}
+
+/* Two people: the second overlaps the first. */
+.avatars > :nth-child(2) {
+  margin-left: -0.9rem;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px var(--color-cream);
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.text {
+  color: inherit;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.text:hover strong,
+.text:focus-visible strong {
+  text-decoration: underline;
+}
+
+.when {
+  color: var(--color-muted-text);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.small {
+  min-height: 2rem;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.dot {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-rust-fill);
+  transform: translateY(-50%);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-dark-olive) 10%, transparent);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1.25rem;
+  color: var(--color-muted-text);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-olive);
+}
+
+.emptyTitle {
+  margin: 0;
+  color: var(--color-dark-olive);
+  font-weight: 600;
+}
+
+.skeletonRow {
+  height: 3.5rem;
+  margin: 0.35rem 0.75rem;
+  border-radius: 0.75rem;
+}

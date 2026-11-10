@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Backpack, Bookmark, Flag, Footprints, Tent } from "lucide-react";
+import { Backpack, Bookmark, Flag, FlaskConical, Footprints, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import GearThumb from "@/components/GearThumb";
 import HikePhoto from "@/components/HikePhoto";
+import FollowButton from "@/components/FollowButton";
 import ReportDialog from "@/components/ReportDialog";
+import FollowCounts from "@/components/social/FollowCounts";
 import { matImage } from "@/lib/gearImage";
 import TrailBadge from "@/components/TrailBadge";
 import {
@@ -32,6 +34,7 @@ import GearList from "@/app/gear/GearList";
 import { slotForItem } from "@/app/gear/slots";
 import profileStyles from "@/app/profile/page.module.css";
 import { ApiError } from "@/lib/api";
+import type { FollowState } from "@/lib/follows";
 import { groupColour } from "@/lib/journal";
 import {
   asGearItem,
@@ -72,6 +75,7 @@ export default function PublicProfileView({ username }: { username: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, status } = useAuth();
+  const signedIn = status === "signedIn";
   const { profile: me } = useProfile();
   const [units] = useUnits();
   const [state, setState] = useState<{ username: string; load: Load } | null>(null);
@@ -83,8 +87,9 @@ export default function PublicProfileView({ username }: { username: string }) {
   const preview = isOwner && searchParams.get("preview") === "1";
 
   useEffect(() => {
+    if (status === "loading") return;
     const controller = new AbortController();
-    getPublicProfile(handle, controller.signal)
+    getPublicProfile(handle, signedIn, controller.signal)
       .then((profile) => setState({ username: handle, load: { status: "ready", profile } }))
       .catch((error: unknown) => {
         if ((error as { name?: string }).name === "AbortError") return;
@@ -95,7 +100,7 @@ export default function PublicProfileView({ username }: { username: string }) {
         setState({ username: handle, load });
       });
     return () => controller.abort();
-  }, [handle]);
+  }, [handle, status, signedIn]);
 
   useEffect(() => {
     if (!isOwner) return;
@@ -106,7 +111,6 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   const load: Load = state && state.username === handle ? state.load : { status: "loading" };
   // The Activity tab, only when the API opens it to visitors (public, sharing on).
-  const signedIn = status === "signedIn";
   const activityOpen = load.status === "ready" && load.profile.activity_count !== null;
   const fetchActivity = useCallback(
     (cursor: string | null, signal?: AbortSignal) => getProfileActivity(handle, cursor, signedIn, undefined, signal),
@@ -165,6 +169,21 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   const profile = load.profile;
   const name = displayName(profile);
+  // A follow or unfollow here moves the count, and an approved follow changes what they see,
+  // so the profile is fetched again (the API decides what shows).
+  const onFollowChange = (follow: FollowState, followers: number) => {
+    setState({ username: handle, load: { status: "ready", profile: { ...profile, follow, followers_count: followers } } });
+    if (follow !== "requested") {
+      void getPublicProfile(handle, signedIn)
+        .then((fresh) => setState({ username: handle, load: { status: "ready", profile: fresh } }))
+        .catch(() => undefined);
+    }
+  };
+  const moveCounts = (change: { followers?: number }) =>
+    setState({
+      username: handle,
+      load: { status: "ready", profile: { ...profile, followers_count: Math.max(profile.followers_count + (change.followers ?? 0), 0) } },
+    });
   const showOwnerControls = isOwner && !preview;
   const canReport = Boolean(user) && !isOwner;
   // An owner who changes their photo elsewhere sees it here at once (useProfile hears every change).
@@ -217,11 +236,39 @@ export default function PublicProfileView({ username }: { username: string }) {
       avatar={<Avatar path={avatarPath} name={profile.display_name} email={null} size={120} alt={`${name}'s profile photo`} />}
       name={name}
       username={profile.username}
+      accountLabel={profile.label}
       bio={profile.bio}
       rank={profile.rank}
       province={profile.home_province}
       streak={profile.visit_streak}
       badges={profile.featured_badges && <FeaturedBadgeSlots badges={profile.featured_badges} ownerName={name} mine={isOwner} />}
+      social={
+        <FollowCounts
+          username={profile.username}
+          name={name}
+          followers={profile.followers_count}
+          following={profile.following_count}
+          open={profile.lists_open && !preview}
+          owner={isOwner && !preview}
+          signedIn={signedIn}
+          requests={isOwner && !preview ? me?.counts?.follow_requests ?? 0 : 0}
+          onCountsChange={moveCounts}
+        />
+      }
+      action={
+        !isOwner && (
+          <div className={styles.followAction}>
+            <FollowButton
+              username={profile.username}
+              name={name}
+              state={signedIn ? profile.follow : null}
+              isPrivate={profile.is_private}
+              onChange={onFollowChange}
+            />
+            {profile.follows_you && <span className={styles.followsYou}>Follows you</span>}
+          </div>
+        )
+      }
       stats={stats}
       footer={
         canReport && (
@@ -236,10 +283,23 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   return (
     <ProfileLayout banner={banner} aside={aside}>
-      {profile.is_private ? (
+      {profile.label === "demo" && (
+        <p className={styles.demoNotice}>
+          <FlaskConical size={16} aria-hidden="true" />
+          <span>
+            <strong>{name} isn&apos;t a real person.</strong> This is a demo account, filled in to show what a
+            Trekly profile looks like. <Link href="/signup">Make your own</Link>.
+          </span>
+        </p>
+      )}
+      {!profile.can_view ? (
         <div className={styles.messageCard}>
           <h2 className={styles.messageTitle}>This profile is private</h2>
-          <p>{name} keeps their hikes, gear and trails to themselves.</p>
+          <p>
+            {profile.follow === "requested"
+              ? `Your request is waiting. Once ${name} approves it, you'll see what they share with followers.`
+              : `${name} shares their hikes, gear and trails with approved followers only.`}
+          </p>
         </div>
       ) : tab === null ? (
         <div className={styles.messageCard}>
@@ -295,7 +355,9 @@ function OwnerBanner({
       <div>
         <strong>This is your public profile.</strong>{" "}
         {profile.is_private
-          ? "It's private: visitors see only your name, username and photo."
+          ? hidden.length > 0
+            ? `It's private: visitors see only your name, username and photo. Approved followers don't see: ${hidden.join(", ")}.`
+            : "It's private: visitors see only your name, username and photo. Approved followers see every section below."
           : hidden.length > 0
             ? `Hidden from visitors: ${hidden.join(", ")}.`
             : "Visitors see every section below."}

@@ -1,8 +1,9 @@
 """The Activity page: a feed of what hikers have recently done.
 
 GET /api/activity is open to guests. Signed in, each post also says whether
-you high-fived it and whether it's yours, and "From my province" works once
-you've set a home province. Posts come and go by the rules in
+you high-fived it, whether it's yours and whether you follow its author;
+"Following" shows posts from people you follow (by the same rules as
+everyone's), and "From my province" works once you've set a home province. Posts come and go by the rules in
 app/activity.py; nothing is cached, so a privacy change applies to the
 next request. Your own posts that others can't see come back to you alone,
 flagged only_you. The milestones and rank a hike earned ride inside that
@@ -23,18 +24,24 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from sqlalchemy import and_, exists, func, or_, select, true, union_all
+from sqlalchemy import and_, exists, false, func, or_, select, true, union_all
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app import follows
+from app.account_labels import AccountLabelName, labels_for, may_interact, real_user
+from app.picks import SPARSE_BELOW, PickKind, picks, real_posts_this_week
+from app.trail_photos import public_photo_url
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, is_visible, province_where,
-    readable_query,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, following_where, is_visible,
+    province_where, readable_query,
 )
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
+from app.follows import FollowState
 from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out
+from app.notifications import notify, retract
 from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.hike_log import HikeLog
@@ -58,10 +65,18 @@ TRENDING_SIZE = 5
 HIGH_FIVERS_SHOWN = 20
 
 
-class ActivityAuthor(BaseModel):
+class ActivityHiker(BaseModel):
     username: str
     display_name: str | None
     avatar_path: str | None
+    # "official": the Trekly account ("Trekly team" badge); "demo": a demo
+    # hiker ("Demo account" badge). None for everyone else.
+    label: AccountLabelName | None = None
+
+
+class ActivityAuthor(ActivityHiker):
+    # Signed in, and not your own post: whether you follow them.
+    follow: FollowState | None = None
 
 
 class ActivityHike(BaseModel):
@@ -87,13 +102,23 @@ class ActivityEarned(BaseModel):
     rank: ActivityRank | None = None
 
 
+class ActivityAnnouncement(BaseModel):
+    """A post from the official Trekly account."""
+
+    body: str
+    trail: TrailListItemOut | None = None
+    # Public URL in the trail-photos bucket.
+    photo_url: str | None = None
+
+
 class ActivityPostOut(BaseModel):
     id: UUID
-    kind: Literal["hike", "milestone", "rank"]
+    kind: Literal["hike", "milestone", "rank", "announcement"]
     author: ActivityAuthor
     # When it was posted; None when the owner hides their hike dates.
     posted_at: datetime | None
     hike: ActivityHike | None = None
+    announcement: ActivityAnnouncement | None = None
     milestone: MilestoneBadgeOut | None = None
     rank: ActivityRank | None = None
     # A hike post: the milestones, then the rank, that hike earned.
@@ -122,6 +147,8 @@ class ActivityPage(BaseModel):
     next_cursor: str | None
     # Signed in with a home province: "From my province" can be offered.
     province: str | None = None
+    # Signed in and following someone: "Following" is the default tab.
+    follows_anyone: bool = False
 
 
 class HighFiveOut(BaseModel):
@@ -132,7 +159,7 @@ class HighFiveOut(BaseModel):
 class HighFiversOut(BaseModel):
     high_fives: int
     # Newest first; only hikers whose profile is public.
-    hikers: list[ActivityAuthor]
+    hikers: list[ActivityHiker]
     # The rest: private profiles, and anyone past the list's length.
     others: int
 
@@ -233,6 +260,15 @@ def _out(post, profile, settings, log, public, counts, mine_ids, viewer, badge_d
             photo_path=log.photo_path,
             verified=bool(log.verified),
         )
+    elif post.kind == "announcement":
+        if not post.body:
+            return None
+        live = post.trail is not None and post.trail.retired_at is None
+        out.announcement = ActivityAnnouncement(
+            body=post.body,
+            trail=TrailListItemOut.model_validate(post.trail) if live else None,
+            photo_url=public_photo_url(post.photo_path) if post.photo_path else None,
+        )
     elif post.kind == "milestone":
         out.milestone = _milestone(post, hide_dates, badge_dates)
         if out.milestone is None:
@@ -267,11 +303,17 @@ def _fold_earned(db: Session, kept: list, today: date, viewer_id: UUID | None, b
 @router.get("/trending", response_model=TrendingOut)
 def trending(db: Session = Depends(get_db), limit: int = Query(default=TRENDING_SIZE, ge=1, le=10)):
     """Trails most logged or saved in the last week (each log or save counts
-    once), topped up with the most popular trails when the week was quiet."""
+    once), topped up with the most popular trails when the week was quiet.
+    Only real hikers count: demo and official accounts are left out."""
+    return TrendingOut(trails=trending_trails(db, limit))
+
+
+def trending_trails(db: Session, limit: int) -> list[TrendingTrailOut]:
     since = datetime.now().astimezone() - timedelta(days=TRENDING_DAYS)
     recent = union_all(
-        select(HikeLog.trail_id.label("trail_id")).where(HikeLog.created_at >= since),
-        select(SavedTrail.trail_id.label("trail_id")).where(SavedTrail.created_at >= since),
+        select(HikeLog.trail_id.label("trail_id")).where(HikeLog.created_at >= since, real_user(HikeLog.user_id)),
+        select(SavedTrail.trail_id.label("trail_id")).where(SavedTrail.created_at >= since,
+                                                            real_user(SavedTrail.user_id)),
     ).subquery()
     counts = select(recent.c.trail_id, func.count().label("n")).group_by(recent.c.trail_id).subquery()
     hot = db.scalars(
@@ -286,7 +328,33 @@ def trending(db: Session = Depends(get_db), limit: int = Query(default=TRENDING_
             .order_by(Trail.popularity_rank, Trail.name).limit(limit - len(out))
         ).all()
         out += [TrendingTrailOut(trail=TrailListItemOut.model_validate(trail), this_week=False) for trail in fill]
-    return TrendingOut(trails=out)
+    return out
+
+
+class PickOut(BaseModel):
+    kind: PickKind
+    title: str
+    text: str
+    trail: TrailListItemOut
+
+
+class PicksOut(BaseModel):
+    # True while real hikers shared fewer than ~10 posts this week: show the picks.
+    sparse: bool
+    picks: list[PickOut]
+
+
+@router.get("/picks", response_model=PicksOut)
+def feed_picks(response: Response, db: Session = Depends(get_db), today: date = Depends(get_today)):
+    """"Trekly picks" for a quiet feed (app/picks.py). Empty once it isn't quiet."""
+    response.headers.update(NO_STORE)
+    if real_posts_this_week(db, today) >= SPARSE_BELOW:
+        return PicksOut(sparse=False, picks=[])
+    chosen = picks(db, today, trending_trails(db, 1), live_trails())
+    return PicksOut(sparse=True, picks=[
+        PickOut(kind=p.kind, title=p.title, text=p.text, trail=TrailListItemOut.model_validate(p.trail))
+        for p in chosen
+    ])
 
 
 def _cards(today: date, viewer_id: UUID | None):
@@ -298,7 +366,7 @@ def _cards(today: date, viewer_id: UUID | None):
 def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUser | None,
           today: date) -> tuple[list[ActivityPostOut], str | None]:
     """One page of cards, newest first, and the cursor for the next."""
-    query = query.options(joinedload(HikeLog.trail))
+    query = query.options(joinedload(HikeLog.trail), joinedload(ActivityPost.trail))
     if cursor:
         when, post_id = _parse_cursor(cursor)
         query = query.where(or_(
@@ -323,6 +391,15 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
         if item is not None
     ]
     _fold_earned(db, kept, today, viewer.id if viewer else None, badge_dates)
+    labels = labels_for(db, (row[0].user_id for _, row in kept))
+    for item, row in kept:
+        item.author.label = labels.get(row[0].user_id)
+    # Signed in: whether you follow each author (not on your own posts).
+    if viewer is not None:
+        states = follows.states(db, viewer.id, {row[0].user_id for _, row in kept})
+        for item, row in kept:
+            if not item.mine:
+                item.author.follow = states.get(row[0].user_id, "none")
     return [item for item, _ in kept], (_cursor(rows[-1][0]) if more else None)
 
 
@@ -334,7 +411,7 @@ def _count(db: Session, query) -> int:
 @router.get("", response_model=ActivityPage)
 def feed(
     response: Response,
-    scope: Literal["everyone", "province"] = "everyone",
+    scope: Literal["everyone", "following", "province"] = "everyone",
     cursor: str | None = Query(default=None, max_length=120),
     limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
     viewer: CurrentUser | None = Depends(optional_user),
@@ -349,8 +426,14 @@ def feed(
     query = _cards(today, viewer_id)
     if scope == "province":
         query = query.where(province_where(province))
+    elif scope == "following":
+        # Guests follow nobody.
+        query = query.where(following_where(viewer_id) if viewer_id else false())
     items, next_cursor = _page(db, query, cursor, limit, viewer, today)
-    return ActivityPage(items=items, next_cursor=next_cursor, province=province)
+    return ActivityPage(
+        items=items, next_cursor=next_cursor, province=province,
+        follows_anyone=follows.follows_anyone(db, viewer_id) if viewer_id else False,
+    )
 
 
 def _visible_or_404(db: Session, post_id: UUID, today: date) -> None:
@@ -395,7 +478,10 @@ def high_fivers(
         .order_by(ActivityReaction.created_at.desc(), Profile.username)
         .limit(HIGH_FIVERS_SHOWN)
     ).all()
-    return HighFiversOut(high_fives=total, hikers=[_author(p) for p in hikers], others=total - len(hikers))
+    labels = labels_for(db, (p.id for p in hikers))
+    out = [ActivityHiker(**_author(p).model_dump(include={"username", "display_name", "avatar_path"}),
+                         label=labels.get(p.id)) for p in hikers]
+    return HighFiversOut(high_fives=total, hikers=out, others=total - len(hikers))
 
 
 @router.put("/{post_id}/high-five", response_model=HighFiveOut)
@@ -405,11 +491,16 @@ def high_five(
     db: Session = Depends(get_db),
     today: date = Depends(get_today),
 ):
-    """Idempotent: a second high five from the same person changes nothing."""
+    """Idempotent: a second high five from the same person changes nothing.
+    A demo account may high-five only another demo account's post."""
     _visible_or_404(db, post_id, today)
+    if not may_interact(db, user.id, db.get(ActivityPost, post_id).user_id):
+        raise HTTPException(status_code=403, detail="Demo accounts only interact with other demo accounts.")
     if db.get(ActivityReaction, (post_id, user.id)) is None:
         db.add(ActivityReaction(post_id=post_id, user_id=user.id, created_at=datetime.now().astimezone()))
         try:
+            db.flush()
+            notify(db, db.get(ActivityPost, post_id).user_id, user.id, "high_five", post_id)
             db.commit()
         except IntegrityError:
             db.rollback()  # a concurrent request got there first
@@ -427,6 +518,7 @@ def undo_high_five(
     row = db.get(ActivityReaction, (post_id, user.id))
     if row is not None:
         db.delete(row)
+        retract(db, db.get(ActivityPost, post_id).user_id, user.id, "high_five", post_id)
         db.commit()
     return _high_five_out(db, post_id, user.id)
 

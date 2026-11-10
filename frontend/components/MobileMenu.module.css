@@ -172,3 +172,17 @@
   border-top: 0;
   padding-top: 0;
 }
+
+/* Unread notifications on the Notifications row. */
+.count {
+  margin-left: auto;
+  min-width: 1.4rem;
+  border-radius: 9999px;
+  padding: 0.05rem 0.45rem;
+  background: var(--color-rust-fill);
+  color: var(--color-cream);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

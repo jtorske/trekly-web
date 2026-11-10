@@ -16,7 +16,7 @@ export interface Profile {
   /** Display units; null until the user picks, which reads as metric. */
   units: UnitSystem | null;
   member_since: string | null;
-  counts: { saved_trails: number; gear_items: number };
+  counts: { saved_trails: number; gear_items: number; followers: number; following: number; follow_requests: number };
   /** "public" once there's a username and the profile isn't set to private. */
   visibility: "public" | "private";
   /** In ADMIN_USER_IDS: shows the Admin menu link. The API checks again on every admin call. */

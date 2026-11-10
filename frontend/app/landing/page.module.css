@@ -20,6 +20,31 @@
   filter: brightness(1.05) saturate(0.95);
 }
 
+/* Slideshow layers. The next photo loads invisibly underneath; on its turn it
+   moves to the top and fades in over the one leaving (HeroCarousel's FADE_MS
+   matches this duration). The server's pick paints opaque straight away. */
+.slide {
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.slideLeaving {
+  z-index: 1;
+  opacity: 1;
+}
+
+.slideShown {
+  z-index: 2;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: none;
+  }
+}
+
 /* Darkens the top for the nav, the middle for the headline and search, and
    the bottom hardest so the footer reads even over snow or bright water. */
 .scrim {
@@ -308,4 +333,30 @@
     white-space: nowrap;
     padding: 0.7rem 1rem;
   }
+}
+
+/* "Just looking? See a demo profile", under the search. */
+.demo {
+  position: relative;
+  z-index: 1;
+  margin: 1.1rem 0 0;
+  color: color-mix(in srgb, var(--color-cream) 85%, transparent);
+  font-size: 0.95rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.demoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-cream);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-cream) 50%, transparent);
+  text-underline-offset: 3px;
+}
+
+.demoLink:hover,
+.demoLink:focus-visible {
+  text-decoration-color: var(--color-cream);
 }

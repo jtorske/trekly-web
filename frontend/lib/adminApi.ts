@@ -1,4 +1,7 @@
-import { apiFetch } from "./api";
+import type { AccountLabel } from "./accountLabels";
+import { API_BASE, ApiError, apiFetch } from "./api";
+import { getSupabaseClient } from "./supabaseClient";
+import type { TrailListItem } from "./trailsApi";
 
 /**
  * The admin area's API (/api/admin/...). The backend checks ADMIN_USER_IDS on
@@ -29,6 +32,8 @@ export interface AdminUser {
   visibility: Visibility;
   banned: boolean;
   is_admin: boolean;
+  /** "official" (the Trekly account) or "demo"; left out of the overview's numbers. */
+  label?: AccountLabel | null;
 }
 
 export interface Page<T> {
@@ -176,4 +181,60 @@ export const adminApi = {
     ),
   audit: (page: number, perPage: number, signal?: AbortSignal) =>
     apiFetch<Page<AuditEntry>>(`${BASE}/audit?${query({ page, per_page: perPage })}`, { auth: true, signal }),
+};
+
+/** Posting as the official @trekly account (/admin/posts). */
+export interface OfficialPost {
+  id: string;
+  body: string;
+  trail: TrailListItem | null;
+  photo_url: string | null;
+  created_at: string;
+  hidden: boolean;
+}
+
+export interface OfficialPosts {
+  /** null until backend/scripts/official_account.py has made the account. */
+  account: { username: string; display_name: string | null; avatar_path: string | null } | null;
+  posts: OfficialPost[];
+}
+
+export interface OfficialPhoto {
+  photo_path: string;
+  photo_url: string;
+  width: number;
+  height: number;
+}
+
+const OFFICIAL = "/api/admin/official-posts";
+
+export const officialPostsApi = {
+  list: (signal?: AbortSignal) => apiFetch<OfficialPosts>(OFFICIAL, { auth: true, signal }),
+  create: (body: { body: string; trail_id: string | null; photo_path: string | null }) =>
+    apiFetch<OfficialPost>(OFFICIAL, { method: "POST", auth: true, body }),
+  remove: (id: string) => apiFetch<void>(`${OFFICIAL}/${encodeURIComponent(id)}`, { method: "DELETE", auth: true }),
+  discardPhoto: (path: string) =>
+    apiFetch<void>(`${OFFICIAL}/photo?${new URLSearchParams({ path })}`, { method: "DELETE", auth: true }),
+  /** The photo as the raw request body; the server re-encodes it (no metadata) and stores it. */
+  async uploadPhoto(file: File): Promise<OfficialPhoto> {
+    const { data } = await getSupabaseClient().auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new ApiError("Sign in to continue.", 401);
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE}${OFFICIAL}/photo`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": file.type },
+        body: file,
+      });
+    } catch {
+      throw new ApiError("We couldn't reach Trekly. Check your connection and try again.", 0);
+    }
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      const detail = (payload as { detail?: unknown } | null)?.detail;
+      throw new ApiError(typeof detail === "string" ? detail : "The upload didn't work. Try again.", response.status);
+    }
+    return payload as OfficialPhoto;
+  },
 };

@@ -4,7 +4,7 @@
  * Icons are named here and drawn by SettingsShell.
  */
 
-export type SettingsIconName = "profile" | "privacy" | "units" | "trails" | "email" | "signOut" | "delete";
+export type SettingsIconName = "profile" | "privacy" | "notifications" | "units" | "trails" | "email" | "signOut" | "delete";
 
 export interface SettingsSection {
   slug: string;
@@ -27,6 +27,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     heading: "Preferences",
     sections: [
+      { slug: "notifications", label: "Notifications", icon: "notifications" },
       { slug: "trail-preferences", label: "Trail preferences", icon: "trails" },
       { slug: "units", label: "Units", icon: "units" },
     ],

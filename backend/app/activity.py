@@ -19,7 +19,9 @@ same rule, private.activity_post_visible in migration a8c3f1d5e7b2):
 - a seasonal milestone: they don't hide their hike dates;
 - a hike post: the hike isn't dated in the future (a browser can edit its
   own hike_logs row, so this is checked on every read);
-- no admin has hidden the post.
+- no admin has hidden the post;
+- an announcement: its author is the official @trekly account
+  (app/account_labels.py); nobody else's would ever show.
 Nothing is cached, so turning a setting off hides the posts at once.
 
 The owner also sees their own posts while others can't (sharing turned off
@@ -38,12 +40,14 @@ from uuid import UUID
 from sqlalchemy import and_, case, exists, false, or_, select
 from sqlalchemy.orm import Session, aliased
 
+from app.account_labels import is_label
 from app.milestones import earned_ids, gather
 from app.milestones_config import ACTIVE
 from app.models.account import Profile
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
+from app.models.social import Follow
 from app.points import rank_for, score
 from app.privacy import Visibility, visibility
 
@@ -64,7 +68,7 @@ def can_share(db: Session, user_id: UUID) -> bool:
     if profile is None:
         return False
     seen = visibility(db, profile)
-    return seen.shows("journal") and bool(seen.settings.share_activity)
+    return seen.public and seen.shows("journal") and bool(seen.settings.share_activity)
 
 
 # ------------------------------------------------------------------ posting
@@ -154,7 +158,12 @@ def visible_where(today: date):
         ~settings.is_private,
         settings.share_activity,
         ~exists().where(ProfileModeration.user_id == ActivityPost.user_id),
-        case((ActivityPost.kind == "rank", settings.show_rank), else_=settings.show_journal),
+        case(
+            (ActivityPost.kind == "rank", settings.show_rank),
+            # Only the official account's announcements ever show.
+            (ActivityPost.kind == "announcement", is_label(ActivityPost.user_id, "official")),
+            else_=settings.show_journal,
+        ),
         or_(~ActivityPost.reveals_date, ~settings.hide_hike_dates),
         _not_future(today),
     )
@@ -210,6 +219,13 @@ def readable_query(today: date, viewer_id: UUID | None):
 
 def is_visible(db: Session, post_id: UUID, today: date) -> bool:
     return db.scalar(select(exists(visible_query(today).where(ActivityPost.id == post_id)))) or False
+
+
+def following_where(viewer_id: UUID):
+    """Posts by people the viewer follows (approved follows only)."""
+    return ActivityPost.user_id.in_(
+        select(Follow.followee_id).where(Follow.follower_id == viewer_id, Follow.status == "accepted")
+    )
 
 
 def province_where(province: str | None):

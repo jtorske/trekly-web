@@ -1,5 +1,7 @@
 "use client";
 
+import AccountBadge from "@/components/AccountBadge";
+import type { AccountLabel } from "@/lib/accountLabels";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { CalendarDays, MapPin, Pencil, type LucideIcon } from "lucide-react";
@@ -94,7 +96,9 @@ export function IdentityCard({
   avatar,
   name,
   username,
+  accountLabel,
   links,
+  social,
   notice,
   bio,
   region,
@@ -112,8 +116,12 @@ export function IdentityCard({
   avatar: ReactNode;
   name: string;
   username: string | null;
+  /** The "Trekly team" or "Demo account" badge, under the name. */
+  accountLabel?: AccountLabel | null;
   /** "View public profile" and similar, under the username. */
   links?: ReactNode;
+  /** Follower and following counts, under the name. */
+  social?: ReactNode;
   /** Under the name, e.g. photo upload progress and errors. */
   notice?: ReactNode;
   bio?: string | null;
@@ -142,9 +150,16 @@ export function IdentityCard({
         <div className={styles.identityText}>
           <h1 className={styles.name}>{name}</h1>
           {username && <p className={styles.username}>@{username}</p>}
+          {accountLabel && (
+            <p className={styles.accountLabel}>
+              <AccountBadge label={accountLabel} />
+            </p>
+          )}
           {links && <div className={styles.links}>{links}</div>}
         </div>
       </div>
+
+      {social}
 
       {notice}
 

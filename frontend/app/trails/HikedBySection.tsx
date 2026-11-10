@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Flag } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
+import FollowButton from "@/components/FollowButton";
 import HikePhoto from "@/components/HikePhoto";
 import ReportDialog from "@/components/ReportDialog";
 import ui from "@/components/ui.module.css";
@@ -42,7 +43,8 @@ export default function HikedBySection({
 }) {
   const [data, setData] = useState<{ trailId: string; hikers: TrailHikers } | null>(null);
   const [reporting, setReporting] = useState<CommunityNote | null>(null);
-  const { user } = useAuth();
+  const { user, status } = useAuth();
+  const signedIn = status === "signedIn";
   const { profile: me } = useProfile();
   const nudge = useNudge("hiked_by", hikedByMe);
   // Bumped after they turn the setting on, so they appear straight away.
@@ -52,13 +54,14 @@ export default function HikedBySection({
   };
 
   useEffect(() => {
+    if (status === "loading") return;
     const controller = new AbortController();
-    getTrailHikers(trailId, controller.signal)
+    getTrailHikers(trailId, signedIn, controller.signal)
       .then((hikers) => setData({ trailId, hikers }))
       // A side section: if it fails, the page simply goes without it.
       .catch(() => undefined);
     return () => controller.abort();
-  }, [trailId, refreshKey, joined]);
+  }, [trailId, refreshKey, joined, status, signedIn]);
 
   const hikers = data?.trailId === trailId ? data.hikers : null;
   if (!hikers) return null;
@@ -167,6 +170,9 @@ function TripNote({ note, trailName, onReport }: { note: CommunityNote; trailNam
             </span>
           )}
         </div>
+        {note.follow !== null && (
+          <FollowButton username={note.username} name={displayName(note)} state={note.follow} isPrivate={false} size="sm" />
+        )}
         {onReport && (
           <button
             type="button"

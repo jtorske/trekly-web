@@ -75,6 +75,7 @@ test("Journal and Gear are account rows, not header links, and nothing is listed
 test("the mobile menu highlights the current page", () => {
   assert.equal(currentMobileHref("/trail-list", ""), "/trail-list");
   assert.equal(currentMobileHref("/trails/lake-agnes", ""), "/trail-list");
+  assert.equal(currentMobileHref("/notifications", ""), "/notifications");
   assert.equal(currentMobileHref("/journal", ""), "/journal");
   assert.equal(currentMobileHref("/gear", ""), "/gear");
   assert.equal(currentMobileHref("/profile", "?tab=gear"), "/gear");

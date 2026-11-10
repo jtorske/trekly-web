@@ -1,4 +1,5 @@
 from app.models.account import Profile, SavedTrail
+from app.models.account_label import AccountLabel
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.admin import AdminAuditLog
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
@@ -22,6 +23,7 @@ from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.signup_email import SignupEmailRequest
+from app.models.social import Follow, Notification, NotificationPreferences
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview
 from app.models.trail_campground import TrailBookingSystem, TrailCampground
@@ -31,6 +33,7 @@ from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
 
 __all__ = [
+    "AccountLabel",
     "ActivityPost",
     "ActivityReaction",
     "AdminAuditLog",
@@ -49,10 +52,13 @@ __all__ = [
     "CatalogProductVariant",
     "CatalogSource",
     "FeaturedBadge",
+    "Follow",
     "GearSetup",
     "GearSetupItem",
     "HikeLog",
     "JobLock",
+    "Notification",
+    "NotificationPreferences",
     "NudgeDismissal",
     "Profile",
     "ProfileModeration",

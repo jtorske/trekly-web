@@ -1,5 +1,7 @@
+import type { AccountLabel } from "./accountLabels";
 import { apiFetch } from "./api";
 import type { FeaturedBadge } from "./featuredBadges";
+import type { FollowState } from "./follows";
 import type { GearItem } from "./gearApi";
 import type { TrailListItem } from "./trailsApi";
 import type { MilestoneBadgeInfo } from "./milestones";
@@ -8,7 +10,9 @@ import type { HomeCode } from "./provinces";
 /**
  * Public profiles (/u/[username]) and the owner's privacy settings.
  *
- * The API returns the same visitor view to everyone, the owner included, and
+ * The API returns the same visitor view to everyone, the owner included,
+ * except that an approved follower of a private profile sees its shown
+ * sections, and a signed-in viewer is told their own follow state. It
  * leaves out every hidden section: nothing here is hidden by the client. Row-
  * level security applies the same settings to direct Supabase access (photo
  * signed URLs), so a visitor can only sign photos from public sections.
@@ -31,6 +35,8 @@ export interface PrivacySettings {
   show_visit_streak: boolean;
   /** "Share my activity in the feed": hikes and badges on the Activity page. Off until turned on. */
   share_activity: boolean;
+  /** "Hide my followers and following lists": counts still show. */
+  hide_follow_lists: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;
@@ -78,9 +84,20 @@ export interface PublicProfile {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** "official" (Trekly team) or "demo" (Demo account): show the badge. */
+  label?: AccountLabel | null;
   is_private: boolean;
   allow_indexing: boolean;
-  /** Each of these is null when the profile is private or the section is hidden. */
+  /** This viewer sees the sections: the profile is public, or they're an approved follower. */
+  can_view: boolean;
+  followers_count: number;
+  following_count: number;
+  /** This viewer may open the followers and following lists. */
+  lists_open: boolean;
+  /** Signed in and not the owner: the viewer's follow state, and whether the owner follows them. */
+  follow: FollowState | null;
+  follows_you: boolean;
+  /** Each of these is null when the viewer can't see the profile or the section is hidden. */
   bio: string | null;
   /** Only while the owner has "Home province" switched on. */
   home_province: HomeCode | null;
@@ -127,8 +144,9 @@ export function onPrivacyUpdated(listener: (settings: PrivacySettings) => void):
   return () => window.removeEventListener(PRIVACY_EVENT, handler);
 }
 
-export const getPublicProfile = (username: string, signal?: AbortSignal) =>
-  apiFetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`, { signal });
+/** Signed in, the token is sent: for the follow state, and an approved follower's view of a private profile. */
+export const getPublicProfile = (username: string, signedIn: boolean, signal?: AbortSignal) =>
+  apiFetch<PublicProfile>(`/api/profiles/${encodeURIComponent(username)}`, { auth: signedIn, signal });
 
 /** Reports a profile; with `trailId`, their trip note on that trail; with `postId`, one of their Activity posts. */
 export const reportProfile = (

@@ -37,6 +37,7 @@ import {
   joinedLabel,
   type TabItem,
 } from "./ProfileShell";
+import FollowCounts from "@/components/social/FollowCounts";
 import BadgePicker from "./BadgePicker";
 import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
@@ -155,6 +156,21 @@ function ProfileContent() {
             <Link href={publicProfilePath(profile.username)}>View public profile</Link>
             {profile.visibility === "private" && <span className={ui.hint}>(private)</span>}
           </>
+        )
+      }
+      social={
+        profile.username && (
+          <FollowCounts
+            username={profile.username}
+            name={name}
+            followers={profile.counts.followers}
+            following={profile.counts.following}
+            open
+            owner
+            signedIn
+            requests={profile.counts.follow_requests}
+            onCountsChange={() => void reload()}
+          />
         )
       }
       bio={profile.bio}

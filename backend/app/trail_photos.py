@@ -142,6 +142,39 @@ def process_image(data: bytes) -> ProcessedPhoto:
     )
 
 
+POST_PHOTO_MIN_WIDTH = 600
+POST_PHOTO_PREFIX = "posts/"
+
+
+def process_post_photo(data: bytes) -> tuple[bytes, int, int]:
+    """A photo for a Trekly post: the same checks and re-encoding as a trail
+    photo (no metadata survives), any orientation, at most HERO_WIDTH wide.
+    Returns the WebP bytes and its size."""
+    if len(data) > MAX_SOURCE_BYTES:
+        raise PhotoError("That image is over 40 MB.")
+    try:
+        with Image.open(io.BytesIO(data)) as probe:
+            if probe.format not in ACCEPTED_FORMATS:
+                raise PhotoError("Use a JPEG, PNG or WebP image.")
+            if probe.width * probe.height > MAX_SOURCE_PIXELS:
+                raise PhotoError("That image has too many pixels to process.")
+            probe.verify()
+        with Image.open(io.BytesIO(data)) as image:
+            image.draft("RGB", (HERO_WIDTH * 2, HERO_WIDTH * 2))
+            image.load()
+            image = _to_srgb(ImageOps.exif_transpose(image))
+    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, SyntaxError) as error:
+        raise PhotoError("That file isn't an image we can read.") from error
+    if image.width < POST_PHOTO_MIN_WIDTH:
+        raise PhotoError(f"The image is {image.width}px wide; post photos need at least {POST_PHOTO_MIN_WIDTH}px.")
+    out = _resized(image, HERO_WIDTH)
+    return _webp(out), out.width, out.height
+
+
+def new_post_photo_path() -> str:
+    return f"{POST_PHOTO_PREFIX}{uuid.uuid4()}.webp"
+
+
 # ---------------------------------------------------------------- fetching
 
 def allowed_fetch_url(url: str) -> bool:
@@ -229,8 +262,10 @@ class PhotoStorage:
     request headers in its error body.
     """
 
-    def __init__(self, supabase_url: str, service_key: str):
+    def __init__(self, supabase_url: str, service_key: str, bucket: str = BUCKET):
         self.base = f"{supabase_url.rstrip('/')}/storage/v1/object"
+        # trail-photos, except for the labeled-account scripts' avatars.
+        self.bucket = bucket
         # A closure, not an attribute: dumping the object (vars(), an error
         # tracker capturing locals) shows a function, never the key.
         self._auth_headers = lambda: {"Authorization": f"Bearer {service_key}", "apikey": service_key}
@@ -251,16 +286,16 @@ class PhotoStorage:
         raise StorageError(f"Storage request failed ({f'HTTP {status}' if status else 'no response'}).") from None
 
     def upload(self, path: str, data: bytes) -> None:
-        self._send(f"{self.base}/{BUCKET}/{path}", data, "POST",
+        self._send(f"{self.base}/{self.bucket}/{path}", data, "POST",
                    {"Content-Type": "image/webp", "x-upsert": "false", "cache-control": "max-age=31536000"})
 
     def delete(self, paths: list[str]) -> None:
         if not paths:
             return
-        self._send(f"{self.base}/{BUCKET}", json.dumps({"prefixes": paths}).encode(), "DELETE",
+        self._send(f"{self.base}/{self.bucket}", json.dumps({"prefixes": paths}).encode(), "DELETE",
                    {"Content-Type": "application/json"})
 
 
-def storage_from_env() -> PhotoStorage | None:
+def storage_from_env(bucket: str = BUCKET) -> PhotoStorage | None:
     url, key = os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    return PhotoStorage(url, key) if url and key else None
+    return PhotoStorage(url, key, bucket) if url and key else None

@@ -1,10 +1,13 @@
+import type { AccountLabel } from "./accountLabels";
+import type { FollowState } from "./follows";
 import type { Milestone, MilestoneBadgeInfo } from "./milestones";
 import type { PrivacySettings } from "./profilesApi";
 import type { TrailListItem } from "./trailsApi";
 
 /**
  * The Activity feed: posts made from real activity (a shared hike, a
- * milestone, a new rank), never free-form. The API decides who appears:
+ * milestone, a new rank), never free-form, plus announcements from the
+ * official @trekly account (written by admins). The API decides who appears:
  * only people with a public profile who turned on "Share my activity in the
  * feed", following their section switches and hidden dates. Trip plans,
  * alerts and future dates are never posted.
@@ -14,6 +17,10 @@ export interface ActivityAuthor {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+  /** "official" (Trekly team) or "demo" (Demo account): show the badge. */
+  label?: AccountLabel | null;
+  /** Signed in, and not your own post: whether you follow them. */
+  follow: FollowState | null;
 }
 
 /** A milestone or rank a hike earned, shown inside that hike's post. */
@@ -25,7 +32,7 @@ export interface ActivityEarned {
 
 export interface ActivityPost {
   id: string;
-  kind: "hike" | "milestone" | "rank";
+  kind: "hike" | "milestone" | "rank" | "announcement";
   author: ActivityAuthor;
   /** null when the author hides their hike dates. */
   posted_at: string | null;
@@ -36,6 +43,13 @@ export interface ActivityPost {
     note: string | null;
     photo_path: string | null;
     verified: boolean;
+  } | null;
+  /** A post from the official Trekly account. */
+  announcement?: {
+    body: string;
+    trail: TrailListItem | null;
+    /** Public URL of the post's own photo. */
+    photo_url: string | null;
   } | null;
   milestone: MilestoneBadgeInfo | null;
   rank: { level: number; title: string } | null;
@@ -56,6 +70,38 @@ export interface HighFivers {
   others: number;
 }
 
+/** A "Trekly pick" shown between posts while the feed is quiet. */
+export interface FeedPick {
+  kind: "trending" | "new_photos" | "seasonal";
+  title: string;
+  text: string;
+  trail: TrailListItem;
+}
+
+export interface FeedPicks {
+  /** Fewer than ~10 real posts this week: mix the picks in. */
+  sparse: boolean;
+  picks: FeedPick[];
+}
+
+/** Every how many posts a pick goes in. */
+export const PICK_EVERY = 4;
+
+/**
+ * Posts with picks between them: one after every PICK_EVERY posts, and one
+ * at the end of a shorter list, until the picks run out. Only while sparse.
+ */
+export function withPicks<P>(posts: P[], picks: FeedPicks | null): ({ post: P } | { pick: FeedPick })[] {
+  const out: ({ post: P } | { pick: FeedPick })[] = [];
+  const queue = picks?.sparse ? [...picks.picks] : [];
+  posts.forEach((post, index) => {
+    out.push({ post });
+    if ((index + 1) % PICK_EVERY === 0 && queue.length) out.push({ pick: queue.shift()! });
+  });
+  if (queue.length && posts.length % PICK_EVERY !== 0) out.push({ pick: queue.shift()! });
+  return out;
+}
+
 export interface TrendingTrail {
   trail: TrailListItem;
   /** false: a popular trail topping up a quiet week. */
@@ -69,6 +115,8 @@ export interface ActivityPage {
   next_cursor: string | null;
   /** The viewer's home province, when signed in with one. */
   province: string | null;
+  /** Signed in and following someone. */
+  follows_anyone: boolean;
 }
 
 /** A profile's Activity tab, newest first. */
@@ -81,7 +129,12 @@ export interface ProfileActivityPage {
   sharing: boolean | null;
 }
 
-export type ActivityScope = "everyone" | "province";
+export type ActivityScope = "following" | "everyone" | "province";
+
+/** Following is the default once you follow anyone; Everyone otherwise (and for guests). */
+export function defaultScope(signedIn: boolean, followingCount: number | null | undefined): ActivityScope {
+  return signedIn && (followingCount ?? 0) > 0 ? "following" : "everyone";
+}
 
 /** Why posts can't show in the feed, or null when sharing works. */
 export function activityBlocker(
@@ -103,8 +156,11 @@ export function canShareHikes(
 }
 
 /** Where tapping a post goes: the trail for a hike, the author's profile otherwise. */
-export function postHref(post: Pick<ActivityPost, "kind" | "hike" | "author">): string {
+export function postHref(post: Pick<ActivityPost, "kind" | "hike" | "author" | "announcement">): string {
   if (post.kind === "hike" && post.hike) return `/trails?id=${encodeURIComponent(post.hike.trail.id)}`;
+  if (post.kind === "announcement" && post.announcement?.trail) {
+    return `/trails?id=${encodeURIComponent(post.announcement.trail.id)}`;
+  }
   return `/u/${encodeURIComponent(post.author.username)}`;
 }
 

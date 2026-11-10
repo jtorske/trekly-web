@@ -542,3 +542,11 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* A switch list that opens its card (Notifications): no rule above the first. */
+.switchList {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+}
