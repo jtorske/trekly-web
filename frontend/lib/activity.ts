@@ -1,4 +1,4 @@
-import type { MilestoneBadgeInfo } from "./milestones";
+import type { Milestone, MilestoneBadgeInfo } from "./milestones";
 import type { PrivacySettings } from "./profilesApi";
 import type { TrailListItem } from "./trailsApi";
 
@@ -14,6 +14,13 @@ export interface ActivityAuthor {
   username: string;
   display_name: string | null;
   avatar_path: string | null;
+}
+
+/** A milestone or rank a hike earned, shown inside that hike's post. */
+export interface ActivityEarned {
+  kind: "milestone" | "rank";
+  milestone: MilestoneBadgeInfo | null;
+  rank: { level: number; title: string } | null;
 }
 
 export interface ActivityPost {
@@ -32,10 +39,30 @@ export interface ActivityPost {
   } | null;
   milestone: MilestoneBadgeInfo | null;
   rank: { level: number; title: string } | null;
+  /** A hike post: what that hike earned (milestones, then the rank). */
+  earned: ActivityEarned[];
   high_fives: number;
   high_fived: boolean;
   mine: boolean;
+  /** Your own post that nobody else can see (sharing off, private profile…). */
+  only_you: boolean;
 }
+
+export interface HighFivers {
+  high_fives: number;
+  /** Newest first; only hikers with a public profile. */
+  hikers: ActivityAuthor[];
+  /** Private profiles, and anyone past the list. */
+  others: number;
+}
+
+export interface TrendingTrail {
+  trail: TrailListItem;
+  /** false: a popular trail topping up a quiet week. */
+  this_week: boolean;
+}
+
+export const ONLY_YOU_LABEL = "Only you can see this. Turn on sharing to post it.";
 
 export interface ActivityPage {
   items: ActivityPost[];
@@ -100,3 +127,42 @@ export function appendPage(current: ActivityPost[], next: ActivityPost[]): Activ
   const seen = new Set(current.map((post) => post.id));
   return [...current, ...next.filter((post) => !seen.has(post.id))];
 }
+
+/** "A", "A and B", "A, B and C". */
+export function joinWords(words: string[]): string {
+  if (words.length <= 1) return words[0] ?? "";
+  return `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+}
+
+/** What a hike earned, as phrases after "Hiked <trail>": ["earned X and Y", "reached Z"]. */
+export function earnedPhrases(earned: ActivityEarned[]): string[] {
+  const milestones = earned.flatMap((e) => (e.kind === "milestone" && e.milestone ? [e.milestone.title] : []));
+  const ranks = earned.flatMap((e) => (e.kind === "rank" && e.rank ? [e.rank.title] : []));
+  return [
+    ...(milestones.length ? [`earned ${joinWords(milestones)}`] : []),
+    ...(ranks.length ? [`reached ${joinWords(ranks)}`] : []),
+  ];
+}
+
+/** "Ben, @ana and 2 others high-fived this", for the high-five popover. */
+export function highFiversLine(
+  fivers: Pick<HighFivers, "hikers" | "others">,
+  nameOf: (author: ActivityAuthor) => string,
+): string {
+  const names = fivers.hikers.map(nameOf);
+  if (fivers.others > 0) names.push(fivers.others === 1 ? "1 other" : `${fivers.others} others`);
+  return names.length ? `${joinWords(names)} high-fived this` : "No high fives yet";
+}
+
+/** The most recently earned milestone (by day earned, then journal order); null if none have a date. */
+export function latestEarned(milestones: Milestone[]): Milestone | null {
+  let best: Milestone | null = null;
+  for (const milestone of milestones) {
+    if (!milestone.earned || !milestone.earned_on || !milestone.id) continue;
+    if (!best || milestone.earned_on > (best.earned_on ?? "")) best = milestone;
+  }
+  return best;
+}
+
+/** The Undo key for deleting a post (lists hide it while its toast is up). */
+export const deleteKey = (postId: string) => `activity:${postId}`;

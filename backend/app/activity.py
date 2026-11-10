@@ -21,6 +21,14 @@ same rule, private.activity_post_visible in migration a8c3f1d5e7b2):
   own hike_logs row, so this is checked on every read);
 - no admin has hidden the post.
 Nothing is cached, so turning a setting off hides the posts at once.
+
+The owner also sees their own posts while others can't (sharing turned off
+later, say), marked "only you" by the API, so the page can say so. Admin-hidden
+posts and future-dated hikes stay hidden from them too.
+
+A milestone or rank earned by a hike folds into that hike's post (its
+`earned` list) whenever the reader can see the hike post; it stands alone
+only when they can't, e.g. after the hike post was deleted or unshared.
 """
 
 from dataclasses import dataclass
@@ -28,7 +36,7 @@ from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import and_, case, exists, false, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from app.milestones import earned_ids, gather
 from app.milestones_config import ACTIVE
@@ -128,6 +136,14 @@ def after_hike_saved(
 # ------------------------------------------------------------------ reading
 
 
+def _not_future(today: date):
+    return or_(
+        ActivityPost.kind != "hike",
+        HikeLog.hiked_on.is_(None),
+        HikeLog.hiked_on <= today + FUTURE_SLACK,
+    )
+
+
 def visible_where(today: date):
     """The read rule as SQL, for a query joining ActivityPost, Profile,
     ProfileSettings and (outer) HikeLog on the post's hike."""
@@ -140,23 +156,56 @@ def visible_where(today: date):
         ~exists().where(ProfileModeration.user_id == ActivityPost.user_id),
         case((ActivityPost.kind == "rank", settings.show_rank), else_=settings.show_journal),
         or_(~ActivityPost.reveals_date, ~settings.hide_hike_dates),
-        or_(
-            ActivityPost.kind != "hike",
-            HikeLog.hiked_on.is_(None),
-            HikeLog.hiked_on <= today + FUTURE_SLACK,
-        ),
+        _not_future(today),
+    )
+
+
+def readable_where(today: date, viewer_id: UUID | None):
+    """visible_where, plus the viewer's own posts that only they can see."""
+    if viewer_id is None:
+        return visible_where(today)
+    return or_(
+        visible_where(today),
+        and_(ActivityPost.user_id == viewer_id, ActivityPost.hidden_at.is_(None), _not_future(today)),
+    )
+
+
+def folded_where(today: date, viewer_id: UUID | None):
+    """A milestone or rank post this reader sees inside its hike's post instead.
+    The hike post shares the author (so their settings) and the hike log, so it's
+    readable when it isn't admin-hidden, the journal shows (or it's the reader's
+    own), and the hike isn't future-dated."""
+    hike = aliased(ActivityPost)
+    journal = ProfileSettings.show_journal
+    if viewer_id is not None:
+        journal = or_(journal, ActivityPost.user_id == viewer_id)
+    return and_(
+        ActivityPost.kind != "hike",
+        ActivityPost.hike_log_id.is_not(None),
+        exists().where(hike.kind == "hike", hike.hike_log_id == ActivityPost.hike_log_id, hike.hidden_at.is_(None)),
+        journal,
+        or_(HikeLog.hiked_on.is_(None), HikeLog.hiked_on <= today + FUTURE_SLACK),
+    )
+
+
+def _joined(*columns):
+    return (
+        select(ActivityPost, Profile, ProfileSettings, HikeLog, *columns)
+        .join(Profile, Profile.id == ActivityPost.user_id)
+        .join(ProfileSettings, ProfileSettings.user_id == ActivityPost.user_id)
+        .outerjoin(HikeLog, HikeLog.id == ActivityPost.hike_log_id)
     )
 
 
 def visible_query(today: date):
     """Rows of (post, author profile, author settings, hike log or None) that may show."""
-    return (
-        select(ActivityPost, Profile, ProfileSettings, HikeLog)
-        .join(Profile, Profile.id == ActivityPost.user_id)
-        .join(ProfileSettings, ProfileSettings.user_id == ActivityPost.user_id)
-        .outerjoin(HikeLog, HikeLog.id == ActivityPost.hike_log_id)
-        .where(visible_where(today))
-    )
+    return _joined().where(visible_where(today))
+
+
+def readable_query(today: date, viewer_id: UUID | None):
+    """visible_query plus the viewer's own posts, with a last column saying
+    whether everyone can see the post (False: only the viewer can)."""
+    return _joined(visible_where(today).label("public")).where(readable_where(today, viewer_id))
 
 
 def is_visible(db: Session, post_id: UUID, today: date) -> bool:

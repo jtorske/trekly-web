@@ -5,13 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
-import { appendPage, type ActivityPost, type ActivityScope } from "@/lib/activity";
+import { appendPage, deleteKey, type ActivityPost, type ActivityScope } from "@/lib/activity";
 import { getActivity } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
-import { getPrivacy } from "@/lib/profilesApi";
+import { getPrivacy, onPrivacyUpdated } from "@/lib/profilesApi";
+import { useHidden } from "@/lib/useHidden";
+import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
 import { sectionHref } from "@/app/settings/settingsSections";
+import Composer, { type ComposerHandle } from "./Composer";
 import PostCard from "./PostCard";
+import { HikersYouMightKnow, ProfileCard, RecentlyEarned, TrendingTrails } from "./Sidebar";
 import styles from "./activity.module.css";
 
 interface Feed {
@@ -23,12 +27,19 @@ interface Feed {
 
 /**
  * The Activity page: what hikers have recently done, newest first, loading
- * more as you scroll. Anyone can read it; high fives and reports need an
- * account. The API decides who appears (app/activity.py on the backend).
+ * more as you scroll. Anyone can read it; logging, high fives and reports
+ * need an account. The API decides who appears (app/activity.py).
+ *
+ * From 1280px it's three columns in a one-screen shell, as on the profile:
+ * your card on the left, the feed (with "Log a hike" on top) in the middle,
+ * trending trails and your latest milestone on the right; only the feed
+ * scrolls. From 1024px the card moves to the top of the right column; below
+ * that it's one column with the composer folded into a bar.
  */
 export default function ActivityPage() {
   const { status } = useAuth();
   const { profile } = useProfile();
+  const hikeLogs = useHikeLogs();
   const pathname = usePathname();
   const signedIn = status === "signedIn";
   const [scope, setScope] = useState<ActivityScope>("everyone");
@@ -37,6 +48,9 @@ export default function ActivityPage() {
   const [error, setError] = useState<string | null>(null);
   const [sharing, setSharing] = useState<boolean | null>(null);
   const sentinel = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const composer = useRef<ComposerHandle>(null);
+  const isHidden = useHidden();
   const requestKey = `${status}:${scope}`;
   const current = feed?.key === requestKey ? feed : null;
   const province = profile?.home_province ?? null;
@@ -63,7 +77,7 @@ export default function ActivityPage() {
     [scope, signedIn, requestKey],
   );
 
-  // First page whenever the filter or sign-in changes.
+  // First page whenever the filter or sign-in changes (and after posting, below).
   useEffect(() => {
     if (status === "loading") return;
     const controller = new AbortController();
@@ -73,25 +87,33 @@ export default function ActivityPage() {
     return () => controller.abort();
   }, [status, load]);
 
-  // Is the viewer's own activity shared? A gentle pointer to the setting if not.
+  // Is the viewer's own activity shared? A pointer to the setting if not, kept
+  // in step with changes made in another component (the composer's link).
   useEffect(() => {
     if (!signedIn) return;
     const controller = new AbortController();
     getPrivacy(controller.signal)
       .then((settings) => setSharing(settings.share_activity))
       .catch(() => undefined);
-    return () => controller.abort();
+    const stop = onPrivacyUpdated((settings) => setSharing(settings.share_activity));
+    return () => {
+      controller.abort();
+      stop();
+    };
   }, [signedIn]);
 
-  // Infinite scroll: the next page once the end of the list is near.
+  // Infinite scroll: the next page once the end of the list is near. On wide
+  // screens the feed column scrolls rather than the page, so watch inside it.
   useEffect(() => {
     const node = sentinel.current;
     if (!node || !current || current.done || loading || error) return;
+    const column = scroller.current;
+    const root = column && getComputedStyle(column).overflowY === "auto" ? column : null;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) void load(current.cursor);
       },
-      { rootMargin: "600px 0px" },
+      { root, rootMargin: "600px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -108,6 +130,8 @@ export default function ActivityPage() {
     );
 
   const signInHref = `/login${nextQuery(pathname)}`;
+  const openComposer = () => composer.current?.open();
+  const posts = current?.posts.filter((post) => !isHidden(deleteKey(post.id))) ?? null;
 
   let body;
   if (!current && error) {
@@ -119,7 +143,7 @@ export default function ActivityPage() {
         </button>
       </div>
     );
-  } else if (!current) {
+  } else if (!current || !posts) {
     body = (
       <ul className={styles.list} aria-busy="true" aria-label="Loading the feed">
         {[0, 1, 2].map((n) => (
@@ -127,7 +151,7 @@ export default function ActivityPage() {
         ))}
       </ul>
     );
-  } else if (current.posts.length === 0) {
+  } else if (posts.length === 0) {
     body = (
       <div className={styles.empty}>
         <p className={styles.emptyTitle}>
@@ -139,9 +163,15 @@ export default function ActivityPage() {
             : "When hikers share a hike or earn a badge, it shows up here. Log a hike and be the first."}
         </p>
         <div className={styles.emptyActions}>
-          <Link href={signedIn ? "/journal" : signInHref} className={ui.primary}>
-            Log a hike
-          </Link>
+          {signedIn ? (
+            <button type="button" className={ui.primary} onClick={openComposer}>
+              Log a hike
+            </button>
+          ) : (
+            <Link href={signInHref} className={ui.primary}>
+              Log a hike
+            </Link>
+          )}
           <Link href="/trail-list" className={ui.secondary}>
             Explore trails
           </Link>
@@ -152,8 +182,15 @@ export default function ActivityPage() {
     body = (
       <>
         <ul className={styles.list}>
-          {current.posts.map((post) => (
-            <PostCard key={post.id} post={post} signedIn={signedIn} signInHref={signInHref} onChange={update} />
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              signedIn={signedIn}
+              signInHref={signInHref}
+              viewer={profile?.username ?? null}
+              onChange={update}
+            />
           ))}
         </ul>
         <div ref={sentinel} className={styles.sentinel} aria-hidden="true" />
@@ -166,52 +203,80 @@ export default function ActivityPage() {
             </button>
           </p>
         )}
-        {current.done && current.posts.length > 5 && <p className={styles.more}>You&apos;re all caught up.</p>}
+        {current.done && posts.length > 5 && <p className={styles.more}>You&apos;re all caught up.</p>}
       </>
     );
   }
 
+  const card = (
+    <ProfileCard
+      profile={profile}
+      trailsHiked={signedIn && !hikeLogs.loading ? hikeLogs.logs.length : null}
+      signedIn={signedIn}
+      signInHref={signInHref}
+      onLogHike={openComposer}
+    />
+  );
+
   return (
     <main className={styles.page}>
-      <div className={styles.wrap}>
-        <header className={styles.header}>
-          <p className={styles.eyebrow}>Activity</p>
-          <h1 className={styles.title}>Out on the trail</h1>
-          <p className={styles.lead}>Recent hikes, badges and ranks from hikers who share their activity.</p>
-        </header>
+      <div className={styles.columns}>
+        <aside className={styles.left} aria-label="You">
+          {card}
+        </aside>
 
-        <div className={styles.toolbar}>
-          {province && (
-            <div className={ui.chips} role="group" aria-label="Show activity from">
-              <button
-                type="button"
-                className={ui.chip}
-                aria-pressed={scope === "everyone"}
-                onClick={() => setScope("everyone")}
-              >
-                Everyone
-              </button>
-              <button
-                type="button"
-                className={ui.chip}
-                aria-pressed={scope === "province"}
-                onClick={() => setScope("province")}
-              >
-                From my province
-              </button>
+        <div ref={scroller} className={styles.feedColumn}>
+          <div className={styles.feedInner}>
+            <h1 className={styles.title}>Activity</h1>
+            <Composer
+              handle={composer}
+              logs={hikeLogs.byTrail}
+              save={hikeLogs.save}
+              onPosted={() => void load(null)}
+              signInHref={signInHref}
+            />
+
+            <div className={styles.toolbar}>
+              <div className={styles.tabs} role="group" aria-label="Show activity from">
+                <button
+                  type="button"
+                  className={styles.tab}
+                  aria-pressed={scope === "everyone"}
+                  onClick={() => setScope("everyone")}
+                >
+                  Everyone
+                </button>
+                {province && (
+                  <button
+                    type="button"
+                    className={styles.tab}
+                    aria-pressed={scope === "province"}
+                    onClick={() => setScope("province")}
+                  >
+                    From my province
+                  </button>
+                )}
+              </div>
+              {signedIn && sharing === false && (
+                <p className={styles.shareNote}>
+                  Your activity isn&apos;t shared.{" "}
+                  <Link href={sectionHref("privacy")} className={styles.inlineLink}>
+                    Turn it on
+                  </Link>
+                </p>
+              )}
             </div>
-          )}
-          {signedIn && sharing === false && (
-            <p className={styles.shareNote}>
-              Your own activity isn&apos;t shared.{" "}
-              <Link href={sectionHref("privacy")} className={styles.inlineLink}>
-                Turn it on in Privacy settings
-              </Link>
-            </p>
-          )}
+
+            {body}
+          </div>
         </div>
 
-        {body}
+        <aside className={styles.right} aria-label="Around Trekly">
+          <div className={styles.rightCard}>{card}</div>
+          <TrendingTrails />
+          {signedIn && <RecentlyEarned />}
+          <HikersYouMightKnow />
+        </aside>
       </div>
     </main>
   );

@@ -19,10 +19,13 @@ export default function TrailPhoto({
   photo,
   name,
   variant,
+  mini = false,
 }: {
   photo: Photo | null | undefined;
   name: string;
   variant: "hero" | "thumb";
+  /** A very small thumb: the topo fallback leaves out the trail name, which wouldn't fit. */
+  mini?: boolean;
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const url = photo ? (variant === "hero" ? photo.hero_url : photo.thumb_url) : null;
@@ -47,7 +50,7 @@ export default function TrailPhoto({
       ) : (
         <div className={styles.fallback} style={TOPO_STYLE} aria-hidden="true">
           <div className={styles.contours} />
-          <span className={styles.fallbackName}>{name}</span>
+          {!mini && <span className={styles.fallbackName}>{name}</span>}
         </div>
       )}
     </div>

@@ -36,12 +36,14 @@ export default function SiteFooter() {
   const gearShell = pathname === "/gear";
   // Explore is one screen beside its map too, and in its phone map view.
   const explore = pathname === "/trail-list";
+  // Activity is one screen from 1024px, with only the feed scrolling.
+  const activity = pathname === "/activity";
 
   return (
     <FooterNotice
       className={`${styles.footer} ${shell ? styles.shellPage : ""} ${gearShell ? styles.gearShell : ""} ${
         explore ? styles.explorePage : ""
-      }`}
+      } ${activity ? styles.activityShell : ""}`}
     />
   );
 }

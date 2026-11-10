@@ -96,9 +96,28 @@ def feed(client, headers=None, **params):
     return response.json()
 
 
+def flat(body):
+    """Every post, with the milestones and ranks folded into hike posts as
+    posts of their own (same author), for checks that don't care which."""
+    out = []
+    for item in body["items"]:
+        out.append(item)
+        for earned in item.get("earned", []):
+            out.append({**earned, "author": item["author"], "folded": True})
+    return out
+
+
 def kinds(body, username=None):
-    return [(item["author"]["username"], item["kind"]) for item in body["items"]
+    return [(item["author"]["username"], item["kind"]) for item in flat(body)
             if username is None or item["author"]["username"] == username]
+
+
+def milestone_ids(body):
+    return [item["milestone"]["id"] for item in flat(body) if item["kind"] == "milestone"]
+
+
+def ranks(body):
+    return [item["rank"] for item in flat(body) if item["kind"] == "rank"]
 
 
 def hike_posts(body):
@@ -138,7 +157,7 @@ def test_a_shared_hike_posts_with_its_milestones(client, trails, person):
     assert post["posted_at"] is not None
     assert post["high_fives"] == 0 and post["high_fived"] is False and post["mine"] is False
     # The first hike earns "First steps", posted alongside it.
-    milestones = [item["milestone"]["id"] for item in body["items"] if item["kind"] == "milestone"]
+    milestones = milestone_ids(body)
     assert "first-hike" in milestones
     # Only declared fields: no user id or email anywhere.
     text = str(body).replace(saved["photo_path"], "")
@@ -149,9 +168,9 @@ def test_a_rank_post_when_a_hike_reaches_a_new_rank(client, trails, person):
     alice = person("alice")
     for trail_id in trails:
         log(client, alice, trail_id)
-    ranks = [item["rank"] for item in feed(client)["items"] if item["kind"] == "rank"]
-    assert ranks and all(rank["level"] > 1 for rank in ranks)
-    assert len({rank["level"] for rank in ranks}) == len(ranks)  # one post per rank
+    reached = ranks(feed(client))
+    assert reached and all(rank["level"] > 1 for rank in reached)
+    assert len({rank["level"] for rank in reached}) == len(reached)  # one post per rank
 
 
 def test_unticked_hikes_dont_post(client, trails, person):
@@ -188,9 +207,9 @@ def test_onboarding_hikes_and_what_they_earned_never_post(client, trails, person
     log(client, alice, trails[0], hiked_on="2026-07-01")
     body = feed(client)
     assert [item["hike"]["trail"]["name"] for item in hike_posts(body)] == ["Skyline Trail"]
-    posted = {item["milestone"]["id"] for item in body["items"] if item["kind"] == "milestone"}
+    posted = set(milestone_ids(body))
     assert posted and not posted & earned.milestones  # e.g. Canada Day, never First steps
-    assert all(item["rank"]["level"] > earned.rank_level for item in body["items"] if item["kind"] == "rank")
+    assert all(rank["level"] > earned.rank_level for rank in ranks(body))
 
 
 def test_nothing_posts_while_they_cant_share(client, trails, person):
@@ -253,29 +272,29 @@ def test_hidden_dates_hide_the_date_and_seasonal_milestones(client, trails, pers
     alice = person("alice")
     log(client, alice, trails[0], hiked_on="2026-07-01")  # Canada Day
     body = feed(client)
-    assert "canada-day" in [i["milestone"]["id"] for i in body["items"] if i["kind"] == "milestone"]
+    assert "canada-day" in milestone_ids(body)
 
     set_privacy(client, alice, hide_hike_dates=True)
     body = feed(client)
     assert hike_posts(body)[0]["hike"]["hiked_on"] is None
     assert all(item["posted_at"] is None for item in body["items"])
-    milestones = [i["milestone"]["id"] for i in body["items"] if i["kind"] == "milestone"]
+    milestones = milestone_ids(body)
     assert "canada-day" not in milestones and "first-hike" in milestones
-    assert all(i["milestone"]["earned_on"] is None for i in body["items"] if i["kind"] == "milestone")
+    assert all(i["milestone"]["earned_on"] is None for i in flat(body) if i["kind"] == "milestone")
 
 
 def test_milestone_posts_carry_their_card_details(client, trails, person):
     """How it's earned and the day, for the badge's details card."""
     alice = person("alice")
     log(client, alice, trails[0], hiked_on="2026-08-14")
-    post = next(i for i in feed(client)["items"] if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
+    post = next(i for i in flat(feed(client)) if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
     badge = post["milestone"]
     assert badge["detail"] and badge["tier"] == "bronze" and badge["secret"] is False
     assert badge["earned_on"] == "2026-08-14" and badge["earned_with"] is None
 
     # A hike logged later but dated earlier moves the day back, as in their journal.
     log(client, alice, trails[1], hiked_on="2026-06-01", share=False)
-    post = next(i for i in feed(client)["items"] if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
+    post = next(i for i in flat(feed(client)) if i["kind"] == "milestone" and i["milestone"]["id"] == "first-hike")
     assert post["milestone"]["earned_on"] == "2026-06-01"
 
 
@@ -314,7 +333,7 @@ def test_trip_plans_never_appear(client, trails, person, world, fetch):  # noqa:
     assert "Skyline with Sam" not in text and "2026-10-20" not in text and "gate code" not in text
     assert {item["kind"] for item in body["items"]} <= {"hike", "milestone", "rank"}
     assert all(item["milestone"]["category"] not in ("planning", "gear")
-               for item in body["items"] if item["kind"] == "milestone")
+               for item in flat(body) if item["kind"] == "milestone")
 
 
 def test_planning_milestones_are_never_shown(client, trails, person, session_factory):
@@ -499,7 +518,7 @@ def test_newest_first_with_a_cursor(client, trails, person):
     for trail_id in trails:
         log(client, alice, trail_id, share=True)
     everything = [item["id"] for item in feed(client, limit=50)["items"]]
-    assert len(everything) > 6
+    assert len(everything) == 6  # one card per hike; what each earned is folded in
 
     seen, cursor = [], None
     while True:
@@ -515,3 +534,159 @@ def test_newest_first_with_a_cursor(client, trails, person):
 
 def test_a_bad_cursor_is_422(client):
     assert client.get("/api/activity", params={"cursor": "nope"}).status_code == 422
+
+
+# ------------------------------------------- folding, only-you, high-fivers
+
+
+def test_what_a_hike_earned_folds_into_its_post(client, trails, person):
+    alice = person("alice")
+    log(client, alice, trails[0])
+    body = feed(client)
+    assert [item["kind"] for item in body["items"]] == ["hike"]
+    earned = body["items"][0]["earned"]
+    assert {"kind": "milestone"}.items() <= earned[0].items()
+    assert "first-hike" in [e["milestone"]["id"] for e in earned if e["kind"] == "milestone"]
+
+
+def test_ranks_fold_in_after_the_milestones(client, trails, person):
+    alice = person("alice")
+    for trail_id in trails:
+        log(client, alice, trail_id)
+    for item in feed(client, limit=50)["items"]:
+        assert item["kind"] == "hike"
+        kinds_in = [e["kind"] for e in item["earned"]]
+        assert kinds_in == sorted(kinds_in, key=lambda k: k == "rank")
+
+
+def test_earned_stands_alone_once_the_hike_post_is_unshared(client, trails, person):
+    alice = person("alice")
+    log(client, alice, trails[0])
+    log(client, alice, trails[0], share=False)  # the hike leaves the feed; the badge stays earned
+    body = feed(client)
+    assert body["items"] and {i["kind"] for i in body["items"]} <= {"milestone", "rank"}
+    assert all(item["earned"] == [] for item in body["items"])
+
+
+def test_a_hidden_journal_leaves_the_rank_standing_alone(client, trails, person):
+    alice = person("alice")
+    for trail_id in trails:
+        log(client, alice, trail_id)
+    set_privacy(client, alice, show_journal=False)
+    items = feed(client, limit=50)["items"]
+    assert items and all(item["kind"] == "rank" for item in items)
+
+
+def test_a_hidden_rank_stays_out_of_the_folded_list(client, trails, person):
+    alice = person("alice")
+    for trail_id in trails:
+        log(client, alice, trail_id)
+    set_privacy(client, alice, show_rank=False)
+    assert ranks(feed(client, limit=50)) == []
+
+
+def test_deleting_a_hike_post_takes_its_badges_along(client, trails, person, session_factory):
+    alice = person("alice")
+    log(client, alice, trails[0])
+    post = feed(client)["items"][0]
+    assert post["earned"]
+    assert client.delete(f"/api/activity/{post['id']}", headers=alice["headers"]).status_code == 204
+    assert feed(client)["items"] == []
+    db = session_factory()
+    assert db.scalars(select(ActivityPost)).all() == []
+    db.close()
+    # The milestones themselves stay earned.
+    earned = client.get("/api/me/milestones", headers=alice["headers"]).json()["milestones"]
+    assert any(m["id"] == "first-hike" and m["earned"] for m in earned)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [{"share_activity": False}, {"is_private": True}, {"show_journal": False}],
+    ids=["share-off", "private", "journal-hidden"],
+)
+def test_your_unshared_posts_show_only_to_you(client, trails, person, change):
+    """The privacy check: with sharing off, a guest and another signed-in user
+    see nothing of alice's; alice sees her own, marked only_you."""
+    alice, bob = person("alice"), person("bob")
+    log(client, alice, trails[0])
+    set_privacy(client, alice, **change)
+
+    # A hidden journal leaves rank posts to the rank switch, as before.
+    def public(body):
+        return [k for _, k in kinds(body) if "show_journal" not in change or k != "rank"]
+    assert public(feed(client)) == []
+    assert public(feed(client, bob["headers"])) == []
+    own = feed(client, alice["headers"])["items"]
+    assert [item["kind"] for item in own] == ["hike"]
+    assert own[0]["mine"] is True and own[0]["only_you"] is True
+    assert own[0]["earned"]  # still folded in for her
+    # Nobody can high five it or list its high fives.
+    assert high_five(client, bob, own[0]["id"]).status_code == 404
+    assert client.get(f"/api/activity/{own[0]['id']}/high-fives", headers=bob["headers"]).status_code == 404
+    assert client.get(f"/api/activity/{own[0]['id']}/high-fives", headers=alice["headers"]).status_code == 200
+
+    set_privacy(client, alice, **{key: not value for key, value in change.items()})
+    shown = feed(client, alice["headers"])["items"]
+    assert shown[0]["only_you"] is False and shown[0]["mine"] is True
+
+
+def test_admin_hidden_posts_stay_hidden_from_their_owner_too(client, trails, person, session_factory):
+    from datetime import datetime, timezone
+    alice = person("alice")
+    log(client, alice, trails[0])
+    db = session_factory()
+    for post in db.scalars(select(ActivityPost)):
+        post.hidden_at = datetime.now(timezone.utc)
+    db.commit()
+    db.close()
+    assert feed(client, alice["headers"])["items"] == []
+
+
+def test_who_high_fived_lists_public_profiles_only(client, trails, person):
+    alice = person("alice")
+    bob = person("bob", share=False)
+    carol = person("carol", share=False, is_private=True)
+    log(client, alice, trails[0])
+    post_id = hike_posts(feed(client))[0]["id"]
+    for who in (bob, carol):
+        assert high_five(client, who, post_id).status_code == 200
+
+    response = client.get(f"/api/activity/{post_id}/high-fives")
+    assert response.status_code == 200 and response.headers["cache-control"] == "no-store"
+    body = response.json()
+    assert body["high_fives"] == 2 and body["others"] == 1
+    assert body["hikers"] == [{"username": "bob", "display_name": "Bob", "avatar_path": None}]
+    assert str(carol["id"]) not in response.text and "@example.com" not in response.text
+    assert client.get(f"/api/activity/{uuid.uuid4()}/high-fives").status_code == 404
+
+
+def test_trending_counts_this_weeks_logs_and_saves(client, trails, person, session_factory):
+    from datetime import datetime, timedelta, timezone
+    from app.models.account import SavedTrail
+    db = session_factory()
+    for n, trail_id in enumerate(trails):
+        trail = db.get(Trail, trail_id)
+        trail.popularity_rank = n + 1
+    old = datetime.now(timezone.utc) - timedelta(days=30)
+    a, b = uuid.uuid4(), uuid.uuid4()
+    db.add_all([
+        SavedTrail(user_id=a, trail_id=trails[3]),
+        SavedTrail(user_id=b, trail_id=trails[3]),
+        SavedTrail(user_id=a, trail_id=trails[5]),
+        SavedTrail(user_id=b, trail_id=trails[1], created_at=old),  # last month: doesn't count
+    ])
+    db.commit()
+    db.close()
+    alice = person("alice", share=False)
+    log(client, alice, trails[5], hiked_on="2026-10-01")
+
+    response = client.get("/api/activity/trending")
+    assert response.status_code == 200
+    rows = response.json()["trails"]
+    assert len(rows) == 5
+    week = [row["trail"]["id"] for row in rows if row["this_week"]]
+    assert week == [str(trails[3]), str(trails[5])]  # two saves; a save and a log, then by popularity
+    # Topped up with the most popular trails, never repeating one.
+    assert [row["trail"]["id"] for row in rows if not row["this_week"]] == [str(t) for t in trails[:3]]
+    assert "alice" not in response.text

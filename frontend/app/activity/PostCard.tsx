@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Flag, Hand, Trash2 } from "lucide-react";
+import { EyeOff, Flag, Hand, Trash2 } from "lucide-react";
 import Avatar from "@/components/Avatar";
-import Dialog from "@/components/Dialog";
 import HikePhoto from "@/components/HikePhoto";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
@@ -13,37 +12,40 @@ import ReportDialog from "@/components/ReportDialog";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
-import { postAction, postHref, shortAgo, type ActivityPost } from "@/lib/activity";
-
-/** The screen-reader name for a compact post's badge link. */
-const badgeLabel = (post: ActivityPost, name: string) => `${name} ${postAction(post)}`;
+import { ONLY_YOU_LABEL, deleteKey, earnedPhrases, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
 import { deleteActivityPost, setHighFive } from "@/lib/activityApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { toast } from "@/lib/toast";
+import { removeWithUndo } from "@/lib/undo";
+import { sectionHref } from "@/app/settings/settingsSections";
+import HighFiveCount from "./HighFiveCount";
 import styles from "./activity.module.css";
 
 /**
- * One post. A hike is a card with the trail (tap to open it), the date
- * (unless the hiker hides dates), and their note and photo. A milestone or
- * rank is one compact line with its badge (tap to open their profile).
+ * One post: who (avatar, name, @username, when), then what they did. A hike
+ * says "Hiked <trail>", with whatever that hike earned folded into the same
+ * line and shown as small badges, then their note, photo and the trail. A
+ * milestone or rank that no shared hike explains is a post of its own.
+ * Your own posts offer Delete (with Undo); others' offer Report.
  */
 export default function PostCard({
   post,
   signedIn,
   signInHref,
+  viewer,
   onChange,
 }: {
   post: ActivityPost;
   signedIn: boolean;
+  /** The signed-in viewer's username, so their own high five reads "You". */
+  viewer: string | null;
   signInHref: string;
   /** null removes the post from the list. */
   onChange: (id: string, change: Partial<ActivityPost> | null) => void;
 }) {
   const [reporting, setReporting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const name = displayName(post.author);
   const profileHref = publicProfilePath(post.author.username);
 
@@ -59,18 +61,14 @@ export default function PostCard({
     }
   };
 
-  const remove = async () => {
-    setDeleting(true);
-    try {
-      await deleteActivityPost(post.id);
-      onChange(post.id, null);
-      toast.success("Post deleted. Your journal is unchanged.");
-    } catch (caught) {
-      toast.failure("delete the post", caught);
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
+  const remove = () =>
+    removeWithUndo({
+      key: deleteKey(post.id),
+      message: "Post deleted. Your hike and badges stay in your journal.",
+      commit: () => deleteActivityPost(post.id),
+      what: "delete the post",
+      onCommitted: () => onChange(post.id, null),
+    });
 
   const when = post.posted_at && (
     <time dateTime={post.posted_at} title={new Date(post.posted_at).toLocaleString("en-CA")}>
@@ -78,108 +76,111 @@ export default function PostCard({
     </time>
   );
 
+  const head = (
+    <div className={styles.head}>
+      <Link href={profileHref} className={styles.avatarLink} aria-label={`${name}'s profile`}>
+        <Avatar path={post.author.avatar_path} name={post.author.display_name ?? post.author.username} email={null} size={44} />
+      </Link>
+      <div className={styles.who}>
+        <span className={styles.nameRow}>
+          <Link href={profileHref} className={styles.name}>
+            {name}
+          </Link>
+          {post.hike?.verified && <VerifiedCheck />}
+        </span>
+        <span className={styles.meta}>
+          @{post.author.username}
+          {when && <> · {when}</>}
+        </span>
+      </div>
+    </div>
+  );
+
+  const highFiveLabel = (
+    <>
+      <Hand size={17} aria-hidden="true" />
+      <span>{post.high_fived ? "High-fived" : "High five"}</span>
+    </>
+  );
+
   const actions = (
     <div className={styles.actions}>
-      {signedIn ? (
+      {post.only_you ? null : signedIn && !post.mine ? (
         <button
           type="button"
           className={styles.highFive}
           aria-pressed={post.high_fived}
           onClick={() => void toggleHighFive()}
-          aria-label={`High five${post.high_fived ? " (given)" : ""}, ${post.high_fives}`}
         >
-          <Hand size={16} aria-hidden="true" />
-          <span>High five</span>
-          {post.high_fives > 0 && <span className={styles.count}>{post.high_fives}</span>}
+          {highFiveLabel}
         </button>
-      ) : (
-        <Link href={signInHref} className={styles.highFive} aria-label={`Sign in to high five, ${post.high_fives}`}>
-          <Hand size={16} aria-hidden="true" />
-          <span>High five</span>
-          {post.high_fives > 0 && <span className={styles.count}>{post.high_fives}</span>}
+      ) : !signedIn ? (
+        <Link href={signInHref} className={styles.highFive}>
+          {highFiveLabel}
+          <span className={ui.srOnly}> (sign in)</span>
         </Link>
-      )}
+      ) : null}
+      {!post.only_you && <HighFiveCount post={post} signedIn={signedIn} viewer={viewer} />}
       <span className={styles.spacer} />
       {post.mine ? (
-        <button type="button" className={styles.iconAction} onClick={() => setConfirmDelete(true)}>
-          <Trash2 size={14} aria-hidden="true" />
+        <button type="button" className={styles.iconAction} onClick={remove}>
+          <Trash2 size={15} aria-hidden="true" />
           Delete
         </button>
       ) : (
         signedIn && (
           <button type="button" className={styles.iconAction} onClick={() => setReporting(true)}>
-            <Flag size={14} aria-hidden="true" />
+            <Flag size={15} aria-hidden="true" />
             Report
           </button>
         )
       )}
-    </div>
-  );
-
-  const dialogs = (
-    <>
       {reporting && (
         <ReportDialog username={post.author.username} name={name} postId={post.id} onClose={() => setReporting(false)} />
       )}
-      {confirmDelete && (
-        <Dialog
-          title="Delete this post?"
-          subtitle="It leaves the Activity feed. Your hike, badges and journal stay as they are."
-          onClose={() => setConfirmDelete(false)}
-          busy={deleting}
-          size="sm"
-          footer={
-            <>
-              <button type="button" className={ui.ghost} onClick={() => setConfirmDelete(false)} disabled={deleting}>
-                Keep it
-              </button>
-              <button type="button" className={ui.danger} onClick={() => void remove()} disabled={deleting}>
-                {deleting ? "Deleting…" : "Delete post"}
-              </button>
-            </>
-          }
-        >
-          {null}
-        </Dialog>
-      )}
-    </>
+    </div>
+  );
+
+  const onlyYou = post.only_you && (
+    <p className={styles.onlyYou}>
+      <EyeOff size={15} aria-hidden="true" />
+      <span>
+        {ONLY_YOU_LABEL}{" "}
+        <Link href={sectionHref("privacy")} className={styles.inlineLink}>
+          Privacy settings
+        </Link>
+      </span>
+    </p>
   );
 
   if (post.kind !== "hike" || !post.hike) {
     return (
-      <li className={`${styles.card} ${styles.compact}`}>
-        <div className={styles.compactRow}>
-          {post.milestone ? (
-            // The badge and its name both open the milestone's card.
-            <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} keyboard={false} className={styles.compactBadge}>
-              <MilestoneBadge icon={post.milestone.icon} tier={post.milestone.tier} className={styles.badge} />
+      <li className={`${styles.card} ${post.only_you ? styles.cardOnlyYou : ""}`}>
+        {onlyYou}
+        {head}
+        {post.milestone ? (
+          // The badge and its name both open the milestone's card.
+          <div className={styles.standalone}>
+            <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} keyboard={false}>
+              <MilestoneBadge icon={post.milestone.icon} tier={post.milestone.tier} className={styles.badgeLarge} />
             </MilestoneBadgeCard>
-          ) : (
-            <Link href={profileHref} className={styles.compactBadge} aria-hidden="true" tabIndex={-1} title={badgeLabel(post, name)}>
-              <RankEmblem level={post.rank?.level ?? 1} className={styles.badge} />
-            </Link>
-          )}
-          <p className={styles.compactText}>
-            <Link href={postHref(post)} className={styles.name}>
-              {name}
-            </Link>{" "}
-            {post.milestone ? (
-              <>
-                earned{" "}
-                <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} variant="text">
-                  {post.milestone.title}
-                </MilestoneBadgeCard>
-              </>
-            ) : (
-              <>
-                reached <strong>{post.rank?.title}</strong>
-              </>
-            )}
-            {when && <span className={styles.meta}> · {when}</span>}
-          </p>
-        </div>
+            <span className={styles.standaloneText}>
+              <span className={styles.trailLabel}>Milestone earned</span>
+              <MilestoneBadgeCard badge={post.milestone} owner={name} mine={post.mine} variant="text">
+                <span className={styles.standaloneTitle}>{post.milestone.title}</span>
+              </MilestoneBadgeCard>
+            </span>
+          </div>
+        ) : (
+          <Link href={postHref(post)} className={`${styles.standalone} ${styles.standaloneLink}`}>
+            <RankEmblem level={post.rank?.level ?? 1} className={styles.badgeLarge} />
+            <span className={styles.standaloneText}>
+              <span className={styles.trailLabel}>New rank</span>
+              <span className={styles.standaloneTitle}>{post.rank?.title}</span>
+            </span>
+          </Link>
+        )}
         {actions}
-        {dialogs}
       </li>
     );
   }
@@ -187,32 +188,36 @@ export default function PostCard({
   const { hike } = post;
   const trail = hike.trail;
   const place = trail.park_name ?? trail.region;
+  const phrases = earnedPhrases(post.earned);
   return (
-    <li className={styles.card}>
-      <div className={styles.head}>
-        <Link href={profileHref} className={styles.avatarLink} aria-label={`${name}'s profile`}>
-          <Avatar path={post.author.avatar_path} name={post.author.display_name ?? post.author.username} email={null} size={40} />
+    <li className={`${styles.card} ${post.only_you ? styles.cardOnlyYou : ""}`}>
+      {onlyYou}
+      {head}
+
+      <p className={styles.headline}>
+        Hiked{" "}
+        <Link href={postHref(post)} className={styles.headlineTrail}>
+          {trail.name}
         </Link>
-        <div className={styles.who}>
-          <span className={styles.nameRow}>
-            <Link href={profileHref} className={styles.name}>
-              {name}
-            </Link>
-            {hike.verified && <VerifiedCheck />}
+        {phrases.map((phrase) => (
+          <span key={phrase} className={styles.headlineEarned}>
+            {" · "}
+            {phrase}
           </span>
-          <span className={styles.meta}>
-            @{post.author.username}
-            {when && <> · {when}</>}
-          </span>
-        </div>
-      </div>
+        ))}
+      </p>
+      {post.earned.length > 0 && <EarnedBadges earned={post.earned} owner={name} mine={post.mine} />}
+
+      {hike.note && <p className={styles.note}>{hike.note}</p>}
+      {hike.photo_path && (
+        <HikePhoto path={hike.photo_path} alt={`${name}'s photo from ${trail.name}`} className={styles.photo} />
+      )}
 
       <Link href={postHref(post)} className={styles.trail}>
         <span className={styles.trailThumb}>
-          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" />
+          <TrailPhoto photo={trail.photo} name={trail.name} variant="thumb" mini />
         </span>
         <span className={styles.trailText}>
-          <span className={styles.trailLabel}>Hiked</span>
           <span className={styles.trailName}>{trail.name}</span>
           <span className={styles.trailMeta}>
             {place}
@@ -227,13 +232,35 @@ export default function PostCard({
           </span>
         </span>
       </Link>
-
-      {hike.note && <p className={styles.note}>{hike.note}</p>}
-      {hike.photo_path && (
-        <HikePhoto path={hike.photo_path} alt={`${name}'s photo from ${trail.name}`} className={styles.photo} />
-      )}
       {actions}
-      {dialogs}
     </li>
+  );
+}
+
+/**
+ * The small badges for what a hike earned. A milestone opens its card (what
+ * it takes, when they earned it, where the viewer stands); a rank is a label.
+ */
+function EarnedBadges({ earned, owner, mine }: { earned: ActivityEarned[]; owner: string; mine: boolean }) {
+  return (
+    <ul className={styles.earned} aria-label="What this hike earned">
+      {earned.map((item) =>
+        item.kind === "milestone" && item.milestone ? (
+          <li key={`m:${item.milestone.id}`}>
+            <MilestoneBadgeCard badge={item.milestone} owner={owner} mine={mine} variant="text">
+              <span className={styles.earnedItem}>
+                <MilestoneBadge icon={item.milestone.icon} tier={item.milestone.tier} className={styles.badgeSmall} />
+                <span>{item.milestone.title}</span>
+              </span>
+            </MilestoneBadgeCard>
+          </li>
+        ) : item.rank ? (
+          <li key={`r:${item.rank.level}`} className={styles.earnedItem}>
+            <RankEmblem level={item.rank.level} className={styles.badgeSmall} />
+            <span>{item.rank.title}</span>
+          </li>
+        ) : null,
+      )}
+    </ul>
   );
 }

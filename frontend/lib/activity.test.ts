@@ -1,6 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { activityBlocker, appendPage, canShareHikes, postAction, postHref, shortAgo, type ActivityPost } from "./activity.ts";
+import {
+  activityBlocker,
+  appendPage,
+  canShareHikes,
+  earnedPhrases,
+  highFiversLine,
+  joinWords,
+  latestEarned,
+  postAction,
+  postHref,
+  shortAgo,
+  type ActivityEarned,
+  type ActivityPost,
+} from "./activity.ts";
+import type { Milestone } from "./milestones.ts";
 import type { TrailListItem } from "./trailsApi.ts";
 
 const settings = { username: "alice", is_private: false, show_journal: true, share_activity: true };
@@ -46,4 +60,44 @@ test("short relative times", () => {
 test("pages append without repeating a post", () => {
   const post = (id: string) => ({ id }) as ActivityPost;
   assert.deepEqual(appendPage([post("a"), post("b")], [post("b"), post("c")]).map((p) => p.id), ["a", "b", "c"]);
+});
+
+test("lists read naturally", () => {
+  assert.equal(joinWords([]), "");
+  assert.equal(joinWords(["A"]), "A");
+  assert.equal(joinWords(["A", "B"]), "A and B");
+  assert.equal(joinWords(["A", "B", "C"]), "A, B and C");
+});
+
+test("what a hike earned, folded into its post", () => {
+  const badge = (title: string): ActivityEarned => ({
+    kind: "milestone",
+    milestone: { id: title, category: "x", title, tier: "bronze", icon: "x" },
+    rank: null,
+  });
+  assert.deepEqual(earnedPhrases([]), []);
+  assert.deepEqual(earnedPhrases([badge("Divide crosser"), badge("Trail regular")]), [
+    "earned Divide crosser and Trail regular",
+  ]);
+  assert.deepEqual(
+    earnedPhrases([badge("First steps"), { kind: "rank", milestone: null, rank: { level: 2, title: "Day Tripper" } }]),
+    ["earned First steps", "reached Day Tripper"],
+  );
+});
+
+test("who high-fived", () => {
+  const name = (a: { username: string }) => `@${a.username}`;
+  const hiker = (username: string) => ({ username, display_name: null, avatar_path: null });
+  assert.equal(highFiversLine({ hikers: [], others: 0 }, name), "No high fives yet");
+  assert.equal(highFiversLine({ hikers: [hiker("ben")], others: 0 }, name), "@ben high-fived this");
+  assert.equal(highFiversLine({ hikers: [hiker("ben")], others: 1 }, name), "@ben and 1 other high-fived this");
+  assert.equal(highFiversLine({ hikers: [hiker("ben"), hiker("ana")], others: 3 }, name), "@ben, @ana and 3 others high-fived this");
+  assert.equal(highFiversLine({ hikers: [], others: 2 }, name), "2 others high-fived this");
+});
+
+test("the most recently earned milestone", () => {
+  const m = (id: string, earned_on: string | null, earned = true) => ({ id, earned, earned_on }) as Milestone;
+  assert.equal(latestEarned([]), null);
+  assert.equal(latestEarned([m("a", null), m("b", "2026-11-01", false)]), null);
+  assert.equal(latestEarned([m("a", "2026-10-01"), m("b", "2026-11-02"), m("c", "2026-11-02")])?.id, "b");
 });

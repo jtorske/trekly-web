@@ -39,6 +39,13 @@
   }
 }
 
+/* Activity's shell starts at 1024px (app/activity/activity.module.css). */
+@media (min-width: 1024px) {
+  .activityShell {
+    display: none;
+  }
+}
+
 /* Explore's phone and tablet map view is one screen too. */
 :global(body):has(:global(main[data-view="map"])) .explorePage {
   display: none;
