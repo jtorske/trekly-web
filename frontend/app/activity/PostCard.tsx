@@ -11,6 +11,7 @@ import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
 import RankEmblem from "@/components/RankEmblem";
 import ReportDialog from "@/components/ReportDialog";
+import ReviewNotice from "@/components/ReviewNotice";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
@@ -157,7 +158,9 @@ export default function PostCard({
     </div>
   );
 
-  const onlyYou = post.only_you && (
+  const onlyYou = post.review ? (
+    <ReviewNotice state={post.review} />
+  ) : post.only_you && (
     <p className={styles.onlyYou}>
       <EyeOff size={15} aria-hidden="true" />
       <span>

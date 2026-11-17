@@ -41,6 +41,7 @@ from app.database import get_db
 from app.follows import FollowState
 from app.milestone_dates import BadgeDates
 from app.milestones import MilestoneBadgeOut, badge_out
+from app.moderation import review_state, withheld_items
 from app.notifications import notify, retract
 from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost, ActivityReaction
@@ -136,6 +137,9 @@ class ActivityPostOut(BaseModel):
     only_you: bool = False
     # Yours, and never shared (whatever your settings): see app/activity.py backfill_posts.
     unshared: bool = False
+    # Your own post only: held for review ("pending") or removed by a
+    # moderator ("hidden"), wholly or its note or photo. Nobody else sees it.
+    review: Literal["pending", "hidden"] | None = None
 
 
 class ProfileActivityPage(BaseModel):
@@ -413,6 +417,7 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
         if item is not None
     ]
     _fold_earned(db, kept, today, viewer.id if viewer else None, badge_dates)
+    _overlay_reviews(db, kept)
     labels = labels_for(db, (row[0].user_id for _, row in kept))
     for item, row in kept:
         item.author.label = labels.get(row[0].user_id)
@@ -423,6 +428,32 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
             if not item.mine:
                 item.author.follow = states.get(row[0].user_id, "none")
     return [item for item, _ in kept], (_cursor(rows[-1][0]) if more else None)
+
+
+def _overlay_reviews(db: Session, kept: list) -> None:
+    """On the reader's own posts: anything moderation is holding back,
+    shown back to them with its review state."""
+    own = [(item, row) for item, row in kept if item.mine]
+    if not own:
+        return
+    logs = {row[0].hike_log_id for _, row in own if row[0].hike_log_id}
+    held = withheld_items(db, ("post", "hike_note", "hike_photo"), [*(row[0].id for _, row in own), *logs])
+    for item, row in own:
+        post = row[0]
+        post_item = held.get(("post", post.id))
+        note_item = held.get(("hike_note", post.hike_log_id))
+        photo_item = held.get(("hike_photo", post.hike_log_id))
+        state = review_state(post_item, note_item, photo_item)
+        if state is None and post.hidden_at is not None:
+            state = "hidden"  # hidden by an admin from the old Reports page
+        item.review = state
+        if item.hike is not None:
+            if item.hike.note is None and (note_item or (post_item and post_item.text)):
+                item.hike.note = (note_item or post_item).text
+            if item.hike.photo_path is None and (photo_item or (post_item and post_item.photo_path)):
+                item.hike.photo_path = (photo_item or post_item).photo_path
+        if state is not None:
+            item.only_you = True
 
 
 def _count(db: Session, query) -> int:

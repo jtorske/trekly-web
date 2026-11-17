@@ -71,6 +71,10 @@ class SupabaseAdmin:
     def ban(self, user_id: UUID) -> None:
         self._send("PUT", f"{self.base}/admin/users/{user_id}", {"ban_duration": BAN_DURATION})
 
+    def suspend(self, user_id: UUID, days: int) -> None:
+        """A ban that ends by itself after `days`."""
+        self._send("PUT", f"{self.base}/admin/users/{user_id}", {"ban_duration": f"{days * 24}h"})
+
     def unban(self, user_id: UUID) -> None:
         self._send("PUT", f"{self.base}/admin/users/{user_id}", {"ban_duration": "none"})
 

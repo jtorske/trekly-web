@@ -19,9 +19,9 @@ from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileReport
 from app.models.trail import Trail
 from app.routers.availability import get_today
-from app.routers.public_profiles import get_email_sender
+from app.moderation import get_moderation_services
 from tests.test_availability import fetch, world  # noqa: F401  (fixtures)
-from tests.test_public_profiles import Outbox
+from tests.moderation_fakes import Outbox, fake_services
 
 TODAY = date(2026, 10, 15)
 ADMIN = uuid.UUID("aaaaaaaa-0000-4000-8000-0000000000ad")
@@ -37,7 +37,7 @@ def fixed_today():
 @pytest.fixture
 def outbox():
     box = Outbox()
-    app.dependency_overrides[get_email_sender] = lambda: box
+    app.dependency_overrides[get_moderation_services] = lambda: fake_services(outbox=box)
     return box
 
 
@@ -473,7 +473,7 @@ def test_reporting_a_post_uses_the_report_flow(client, trails, person, outbox, a
     post_id = hike_posts(feed(client))[0]["id"]
 
     assert report(client, bob, "alice", post_id=post_id).status_code == 202
-    assert "Activity post report" in outbox.sent[0].subject
+    assert "Activity post by @alice" in outbox.sent[0].text  # the moderation digest
     assert "Buy my stuff" in outbox.sent[0].text and "bob@example.com" not in outbox.sent[0].text
     db = session_factory()
     assert str(db.scalar(select(ProfileReport.post_id))) == post_id
@@ -632,7 +632,7 @@ def test_your_unshared_posts_show_only_to_you(client, trails, person, change):
     assert shown[0]["only_you"] is False and shown[0]["mine"] is True
 
 
-def test_admin_hidden_posts_stay_hidden_from_their_owner_too(client, trails, person, session_factory):
+def test_admin_hidden_posts_show_only_to_their_owner_marked_hidden(client, trails, person, session_factory):
     from datetime import datetime, timezone
     alice = person("alice")
     log(client, alice, trails[0])
@@ -641,7 +641,10 @@ def test_admin_hidden_posts_stay_hidden_from_their_owner_too(client, trails, per
         post.hidden_at = datetime.now(timezone.utc)
     db.commit()
     db.close()
-    assert feed(client, alice["headers"])["items"] == []
+    # Nobody else sees them; Alice sees her hike post, badges folded in, marked as removed.
+    assert feed(client)["items"] == []
+    [mine] = feed(client, alice["headers"])["items"]
+    assert mine["kind"] == "hike" and mine["review"] == "hidden" and mine["only_you"] is True
 
 
 def test_who_high_fived_lists_public_profiles_only(client, trails, person):

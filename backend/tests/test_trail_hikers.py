@@ -11,15 +11,15 @@ import pytest
 from app.main import app
 from app.models.account import Profile
 from app.models.privacy import ProfileModeration
-from app.routers.public_profiles import get_email_sender
+from app.moderation import get_moderation_services
 from tests.test_availability import world  # noqa: F401  (fixture)
-from tests.test_public_profiles import Outbox
+from tests.moderation_fakes import Outbox, fake_services
 
 
 @pytest.fixture
 def outbox():
     box = Outbox()
-    app.dependency_overrides[get_email_sender] = lambda: box
+    app.dependency_overrides[get_moderation_services] = lambda: fake_services(outbox=box)
     return box
 
 
@@ -193,9 +193,8 @@ def test_report_a_trip_note(client, world, hiker, make_token, outbox):  # noqa: 
                            json={"reason": "spam", "details": "Ad", "trail_id": str(world["trail"])}, headers=bob)
     assert response.status_code == 202
     [email] = outbox.sent
-    assert email.subject == "Trip note report: @alice (spam)"
-    assert "A trip note was reported" in email.text
-    assert "Trip note on: Skyline Trail" in email.text and "Note: Buy my stuff at spam.example" in email.text
+    assert "1 reported" in email.subject  # the moderation digest
+    assert "Hike note by @alice on Skyline Trail" in email.text and "Buy my stuff at spam.example" in email.text
     # Same one-a-day limit as reporting the profile.
     again = client.post("/api/profiles/alice/report", json={"reason": "spam"}, headers=bob)
     assert again.status_code == 429

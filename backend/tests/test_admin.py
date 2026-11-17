@@ -361,15 +361,11 @@ def test_the_older_profile_moderation_routes_are_audited_too(client, admin, user
 
 
 def test_a_trip_note_report_remembers_its_trail(client, users, world, session_factory, auth_headers):  # noqa: F811
-    from tests.test_public_profiles import Outbox
-    from app.routers.public_profiles import get_email_sender
-
     db = session_factory()
     settings = db.get(ProfileSettings, users["alice"])
     settings.show_in_community = True
     db.commit()
     db.close()
-    app.dependency_overrides[get_email_sender] = lambda: Outbox()
     response = client.post("/api/profiles/alice/report", json={"reason": "spam", "trail_id": str(world["trail"])},
                            headers=auth_headers(users["bob"]))
     assert response.status_code == 202

@@ -310,12 +310,14 @@ def visible_where(today: date):
 
 
 def readable_where(today: date, viewer_id: UUID | None):
-    """visible_where, plus the viewer's own posts that only they can see."""
+    """visible_where, plus the viewer's own posts that only they can see,
+    including ones held or hidden by moderation (shown to them with a
+    "being reviewed" or "removed" note; app/moderation.py)."""
     if viewer_id is None:
         return visible_where(today)
     return or_(
         visible_where(today),
-        and_(ActivityPost.user_id == viewer_id, ActivityPost.hidden_at.is_(None), _not_future(today)),
+        and_(ActivityPost.user_id == viewer_id, _not_future(today)),
     )
 
 
@@ -326,15 +328,18 @@ def folded_where(today: date, viewer_id: UUID | None):
     owner-only (or it's the reader's own), and the hike isn't future-dated."""
     hike = aliased(ActivityPost)
     journal = ProfileSettings.show_journal
+    # The owner still sees their own held or hidden hike post, and their own
+    # owner-only one, so its badges stay folded into it.
+    shown = hike.hidden_at.is_(None)
     shared = ~hike.owner_only
     if viewer_id is not None:
         journal = or_(journal, ActivityPost.user_id == viewer_id)
+        shown = or_(shown, hike.user_id == viewer_id)
         shared = or_(shared, hike.user_id == viewer_id)
     return and_(
         ActivityPost.kind != "hike",
         ActivityPost.hike_log_id.is_not(None),
-        exists().where(hike.kind == "hike", hike.hike_log_id == ActivityPost.hike_log_id, hike.hidden_at.is_(None),
-                       shared),
+        exists().where(hike.kind == "hike", hike.hike_log_id == ActivityPost.hike_log_id, shown, shared),
         journal,
         or_(HikeLog.hiked_on.is_(None), HikeLog.hiked_on <= today + FUTURE_SLACK),
     )

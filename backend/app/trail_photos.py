@@ -296,10 +296,51 @@ class PhotoStorage:
             pass
         raise StorageError(f"Storage request failed ({f'HTTP {status}' if status else 'no response'}).") from None
 
-    def upload(self, path: str, data: bytes, upsert: bool = False) -> None:
+    def upload(self, path: str, data: bytes, upsert: bool = False, content_type: str = "image/webp") -> None:
         self._send(f"{self.base}/{self.bucket}/{path}", data, "POST",
-                   {"Content-Type": "image/webp", "x-upsert": "true" if upsert else "false",
+                   {"Content-Type": content_type, "x-upsert": "true" if upsert else "false",
                     "cache-control": "max-age=31536000"})
+
+    def _fetch(self, request: urllib.request.Request, limit: int) -> tuple[bytes, str]:
+        status = None
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                data = response.read(limit + 1)
+                if len(data) > limit:
+                    raise StorageError("Storage object is too large.")
+                return data, response.headers.get("Content-Type", "application/octet-stream")
+        except urllib.error.HTTPError as error:
+            status = error.code
+        except (urllib.error.URLError, TimeoutError, OSError):
+            pass
+        raise StorageError(f"Storage request failed ({f'HTTP {status}' if status else 'no response'}).") from None
+
+    def download(self, path: str, limit: int = 10 * 1024 * 1024) -> tuple[bytes, str]:
+        """An object's bytes and content type (private buckets too)."""
+        request = urllib.request.Request(
+            f"{self.base}/authenticated/{self.bucket}/{urllib.parse.quote(path)}",
+            headers={**self._auth_headers(), "User-Agent": USER_AGENT},
+        )
+        return self._fetch(request, limit)
+
+    def signed_url(self, path: str, seconds: int = 600) -> str:
+        """A short-lived link to a private object, for the admin area."""
+        request = urllib.request.Request(
+            f"{self.base}/sign/{self.bucket}/{urllib.parse.quote(path)}",
+            data=json.dumps({"expiresIn": seconds}).encode(),
+            method="POST",
+            headers={**self._auth_headers(), "User-Agent": USER_AGENT, "Content-Type": "application/json"},
+        )
+        body, _ = self._fetch(request, 64 * 1024)
+        try:
+            signed = json.loads(body).get("signedURL")
+        except (ValueError, AttributeError):
+            signed = None
+        if not isinstance(signed, str) or not signed:
+            raise StorageError("Storage didn't return a signed link.")
+        # signedURL is relative to /storage/v1.
+        root = self.base.removesuffix("/object")
+        return f"{root}{signed}" if signed.startswith("/") else signed
 
     def delete(self, paths: list[str]) -> None:
         if not paths:

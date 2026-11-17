@@ -37,6 +37,7 @@ from app.models.admin import AUTH_USERS, AdminAuditLog
 from app.models.availability import AvailabilityAlert, JobLock
 from app.models.backcountry import BackcountrySite
 from app.models.hike_log import HikeLog
+from app.models.moderation import ModerationItem
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
@@ -208,6 +209,8 @@ class OverviewOut(BaseModel):
     hikes_total: int
     active_alerts: int
     open_reports: int
+    # Held, reported and unscreened items waiting in /admin/moderation.
+    moderation_queue: int = 0
     poller: PollerOut | None
 
 
@@ -496,6 +499,9 @@ def overview(db: Session = Depends(get_db)):
         ) or 0,
         open_reports=db.scalar(
             select(func.count()).select_from(ProfileReport).where(ProfileReport.status == "open")
+        ) or 0,
+        moderation_queue=db.scalar(
+            select(func.count()).select_from(ModerationItem).where(ModerationItem.in_queue.is_(True))
         ) or 0,
         poller=poller,
     )

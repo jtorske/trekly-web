@@ -15,7 +15,6 @@ Direct Supabase access is guarded separately by row-level security with
 the same rule (app/privacy.py, migration 214aa07bf743).
 """
 
-import os
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Literal
@@ -39,11 +38,12 @@ from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
+from app import moderation_config
+from app.moderation import Services, get_moderation_services, record_report, report_target
 from app.models.setup import GearSetup
 from app.models.trip_plan import TripPlan
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
-from app.notify import Email, EmailSender, email_sender_from_env
 from app.points import user_rank
 from app.privacy import Visibility, visibility
 from app.routers.activity import optional_user, profile_activity_count
@@ -55,8 +55,7 @@ from app.streaks import Streak, current_on, earliest_today
 
 router = APIRouter(prefix="/api/profiles", tags=["public profiles"])
 
-REPORTS_TO = os.getenv("PROFILE_REPORTS_EMAIL", "treklyusersupport@gmail.com")
-REPORTS_PER_DAY = 5
+REPORTS_PER_DAY = moderation_config.REPORTS_PER_DAY
 REPORT_REASONS = ("spam", "harassment", "inappropriate", "impersonation", "privacy", "other")
 NO_STORE = {"Cache-Control": "no-store"}
 
@@ -378,58 +377,8 @@ class ReportIn(BaseModel):
         return value
 
 
-def get_email_sender() -> EmailSender:
-    """Overridden in tests."""
-    return email_sender_from_env()
-
-
 def _now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def report_email(
-    profile: Profile,
-    reporter: CurrentUser,
-    reporter_profile: Profile | None,
-    payload: ReportIn,
-    trip_note: HikeLog | None = None,
-    post: ActivityPost | None = None,
-) -> Email:
-    app_url = os.getenv("APP_URL", "http://localhost:3000").rstrip("/")
-    reporter_name = (reporter_profile.username if reporter_profile else None) or "(no username)"
-    note_lines = (
-        [
-            f"Trip note on: {trip_note.trail.name} ({app_url}/trails/{trip_note.trail.slug})",
-            f"Note: {trip_note.note}",
-        ]
-        if trip_note
-        else []
-    )
-    if post is not None:
-        hike = post.hike_log if post.kind == "hike" else None
-        note_lines = [
-            f"Activity post: {post.kind} post {post.id}",
-            *([f"Trail: {hike.trail.name}", f"Note: {hike.note or '(none)'}"] if hike else []),
-        ]
-    subject = "An Activity post" if post else "A trip note" if trip_note else "A profile"
-    text = "\n".join(
-        [
-            f"{subject} was reported on Trekly.",
-            "",
-            f"Profile: @{profile.username} ({app_url}/u/{profile.username})",
-            f"Profile user id: {profile.id}",
-            *note_lines,
-            f"Reason: {payload.reason}",
-            f"Details: {payload.details or '(none)'}",
-            "",
-            # The reporter's account, not their email address (see the Privacy Policy).
-            f"Reported by: @{reporter_name}, user id {reporter.id}",
-            "",
-            f"Review it in the admin area: {app_url}/admin/reports",
-        ]
-    )
-    kind = "Activity post report" if post else "Trip note report" if trip_note else "Profile report"
-    return Email(to=REPORTS_TO, subject=f"{kind}: @{profile.username} ({payload.reason})", text=text)
 
 
 @router.post("/{username}/report", status_code=status.HTTP_202_ACCEPTED)
@@ -438,10 +387,12 @@ def report_profile(
     payload: ReportIn,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
-    sender: EmailSender = Depends(get_email_sender),
     today: date = Depends(get_today),
+    services: Services = Depends(get_moderation_services),
 ):
-    """Email support about a profile. Signed-in users only, and rate-limited:
+    """Report a profile, a trip note or a post to the moderation queue.
+    Support hears about it in the hourly digest (app/moderation.py), and
+    enough qualifying reports hide it pending review. Signed-in users only, and rate-limited:
     REPORTS_PER_DAY reports a day, and one per profile a day. A trip note or
     an Activity post counts as its owner's profile; a trip note can only be
     reported while it shows in "Hiked by", a post while it shows in the
@@ -480,19 +431,17 @@ def report_profile(
     if len(recent) >= REPORTS_PER_DAY:
         raise HTTPException(status_code=429, detail="You've sent several reports today. Try again tomorrow.")
 
-    db.add(ProfileReport(reporter_id=user.id, profile_id=profile.id, reason=payload.reason,
-                         details=payload.details, created_at=_now(),
-                         trail_id=trip_note.trail_id if trip_note else None,
-                         post_id=post.id if post else None))
+    report = ProfileReport(reporter_id=user.id, profile_id=profile.id, reason=payload.reason,
+                           details=payload.details, created_at=_now(),
+                           trail_id=trip_note.trail_id if trip_note else None,
+                           post_id=post.id if post else None)
+    db.add(report)
     db.flush()
-    try:
-        sender.send(report_email(profile, user, db.get(Profile, user.id), payload, trip_note, post))
-    except Exception as error:
-        db.rollback()  # not sent, so it doesn't count against the limit
-        raise HTTPException(
-            status_code=503, detail="We couldn't send your report. Try again in a moment."
-        ) from error
+    kind, target_id, content, photo = report_target(post, trip_note, profile)
+    record_report(db, services, report, kind=kind, target_id=target_id, author_id=profile.id,
+                  text=content, photo_path=photo)
     db.commit()
+    services.run_after_commit()
     return {"status": "sent"}
 
 

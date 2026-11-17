@@ -6,7 +6,7 @@ import { sitemapProfiles, sitemapTrails } from "@/lib/trailsServer";
 export const revalidate = 3600;
 
 // When the legal pages' text last changed (their "Last updated" dates).
-const LEGAL_UPDATED = { privacy: "2026-11-10", terms: "2026-11-10" };
+const LEGAL_UPDATED = { privacy: "2026-11-19", terms: "2026-11-19", guidelines: "2026-11-19" };
 
 function date(value: string | null | undefined): Date | undefined {
   return value ? new Date(value) : undefined;
@@ -41,5 +41,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: absoluteUrl("/privacy"), lastModified: new Date(LEGAL_UPDATED.privacy), changeFrequency: "yearly", priority: 0.2 },
     { url: absoluteUrl("/terms"), lastModified: new Date(LEGAL_UPDATED.terms), changeFrequency: "yearly", priority: 0.2 },
+    { url: absoluteUrl("/guidelines"), lastModified: new Date(LEGAL_UPDATED.guidelines), changeFrequency: "yearly", priority: 0.2 },
   ];
 }

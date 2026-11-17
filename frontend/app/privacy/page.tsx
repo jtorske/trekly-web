@@ -15,7 +15,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: November 17, 2026</p>
+        <p className={styles.updated}>Last updated: November 19, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
             in standard server logs by our hosting providers.
           </li>
           <li>
-            <strong>Visit streak:</strong> when you&apos;re signed in, the date of your most recent
+            <strong>Visit streak:</strong>{" "}when you&apos;re signed in, the date of your most recent
             visit and your current and longest streak. We don&apos;t keep a history of your visits.
             Your browser&apos;s time zone is used to work out the date and isn&apos;t stored.
           </li>
@@ -96,12 +96,52 @@ export default function PrivacyPage() {
           </li>
           <li>To send service messages, such as sign-up confirmation and password resets.</li>
           <li>To fix bugs, prevent abuse, and improve Trekly.</li>
+          <li>
+            To check what you post against our{" "}
+            <Link href="/guidelines">Community Guidelines</Link>{" "}(see Content moderation below).
+          </li>
           <li>To respond to you when you contact us.</li>
         </ul>
         <p>
           We don&apos;t send marketing emails or newsletters. We only email you about your account
           and the alerts you set up.
         </p>
+
+        <h2>Content moderation</h2>
+        <p>
+          To keep Trekly safe, text and photos you post (hike notes and photos, Activity posts,
+          comments, your bio and your profile photo) are checked by an automated moderation
+          service, OpenAI&apos;s moderation API, when you post or edit them. The service returns
+          scores for categories such as harassment, hate, sexual content and violence. We keep
+          those scores with the item so our administrator can review it.
+        </p>
+        <ul>
+          <li>
+            Only the content itself is sent for checking, not your name, username or email
+            address. OpenAI doesn&apos;t use it to train its models.
+          </li>
+          <li>
+            If the check flags something, it&apos;s held for a person to review. You still see it,
+            marked &ldquo;being reviewed,&rdquo; but nobody else does until it&apos;s approved.
+            Nothing is removed by the automated check alone.
+          </li>
+          <li>
+            When you report something, we record who reported it, the reason and any details you
+            add. The person you report is never told who you are. We also use your account&apos;s
+            age and whether your email is confirmed to decide whether a report counts toward
+            hiding content automatically.
+          </li>
+          <li>
+            Our administrator reviews held and reported content and may approve it, hide it, warn
+            you, or suspend or close your account. We email you if something you posted is hidden,
+            with the reason and how to appeal.
+          </li>
+          <li>
+            If content appears to involve the sexual exploitation of a child, we keep it and the
+            related account information, lock the account, and report it to Cybertip.ca and the
+            police, as Canadian law requires.
+          </li>
+        </ul>
 
         <h2>What other users can see</h2>
         <p>
@@ -223,6 +263,11 @@ export default function PrivacyPage() {
                 <td>Alert details, email address for alerts</td>
               </tr>
               <tr>
+                <td>OpenAI</td>
+                <td>Automated moderation of posts, notes, comments, bios and photos</td>
+                <td>The text or photo being checked</td>
+              </tr>
+              <tr>
                 <td>Google</td>
                 <td>&ldquo;Sign in with Google&rdquo; (only if you use it)</td>
                 <td>Name, email, profile picture</td>
@@ -245,7 +290,10 @@ export default function PrivacyPage() {
           We keep your information while your account is active. If you delete your account, we
           delete your personal information, including your photos, within 30 days, except where we
           need to keep it longer for legal reasons. Our hosting providers keep server logs for a
-          limited time under their own retention policies.
+          limited time under their own retention policies. Moderation records about content you
+          posted (scores, reports and decisions) are deleted with your account, except where
+          the law requires us to keep them, such as material reported to the police.
+          Reports you sent about others are deleted with your account too.
         </p>
 
         <h2>Your choices and rights</h2>
@@ -260,7 +308,7 @@ export default function PrivacyPage() {
           <li>Ask for a copy of your personal information, or ask us to correct it.</li>
           <li>Delete your account at any time from within the app.</li>
           <li>
-            Contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> with any other
+            Contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{" "}with any other
             privacy request.
           </li>
         </ul>

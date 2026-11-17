@@ -121,3 +121,8 @@ class ProfileReport(Base):
     status = Column(Text, nullable=False, default="open", server_default="open")
     resolved_at = Column(DateTime(timezone=True))
     resolved_by = Column(Uuid)
+    # The moderation item it's about (app/moderation.py), and whether it
+    # counts toward the auto-hide: the reporter's email is confirmed, their
+    # account is old enough, and the reported person hasn't blocked them.
+    item_id = Column(Uuid, ForeignKey("moderation_items.id", ondelete="SET NULL"), index=True)
+    counts_toward_hide = Column(Boolean, nullable=False, default=False, server_default=false())

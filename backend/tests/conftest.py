@@ -29,6 +29,8 @@ from app.catalog.providers.base import SourceInfo  # noqa: E402
 from app.database import Base, get_db  # noqa: E402
 from app.models.admin import auth_metadata  # noqa: E402
 from app.main import app  # noqa: E402
+from app.moderation import get_moderation_services  # noqa: E402
+from tests.moderation_fakes import fake_services  # noqa: E402
 
 SUPABASE_URL = "https://test-project.supabase.co"
 ISSUER = f"{SUPABASE_URL}/auth/v1"
@@ -42,7 +44,8 @@ GEAR_TABLES = [
                 "trail_photo_candidates", "trail_route_maps", "profile_settings", "profile_preferences", "profile_moderation", "profile_reports",
                 "admin_audit_log", "visit_streaks", "signup_email_requests", "activity_posts", "activity_reactions", "nudge_dismissals", "account_labels",
                 "follows", "blocks", "notifications", "notification_preferences",
-                "trekly_post_drafts", "trekly_post_type_settings", "trekly_facts")
+                "trekly_post_drafts", "trekly_post_type_settings", "trekly_facts",
+                "moderation_items", "account_restrictions")
 ]
 
 
@@ -203,6 +206,8 @@ def client(session_factory, seeded, signing_key):
     verifier = TokenVerifier(SUPABASE_URL, jwks_client=FakeJWKSClient(signing_key.public_key()))
     app.dependency_overrides[get_db] = _get_db
     app.dependency_overrides[get_verifier_dependency] = lambda: verifier
+    # Screening passes, Storage and email are fakes; moderation tests override this.
+    app.dependency_overrides[get_moderation_services] = lambda: fake_services()
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

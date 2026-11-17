@@ -323,6 +323,13 @@ export default function Composer({
                 placeholder="Who you went with, what you saw…"
                 onChange={(event) => setNote(event.target.value)}
               />
+              <span className={ui.hint}>
+                Notes and photos follow the{" "}
+                <Link href="/guidelines" className={styles.inlineLink}>
+                  Community Guidelines
+                </Link>
+                .
+              </span>
             </label>
 
             {preview && (

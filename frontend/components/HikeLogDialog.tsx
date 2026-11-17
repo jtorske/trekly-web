@@ -5,6 +5,8 @@ import Link from "next/link";
 import DateInput from "./DateInput";
 import Dialog from "./Dialog";
 import ui from "./ui.module.css";
+import ReviewNotice from "./ReviewNotice";
+import { partsLabel } from "@/lib/moderation";
 import { useAuth } from "./AuthProvider";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
 import { undatedLabel } from "@/lib/hikeDate";
@@ -210,6 +212,7 @@ export default function HikeLogDialog({
           <span className={ui.hint}>
             {note.length} / {HIKE_NOTE_MAX}
           </span>
+          {entry?.review && <ReviewNotice state={entry.review} what={partsLabel(entry.review_parts ?? [], "note")} />}
         </div>
 
         <div className={ui.field}>

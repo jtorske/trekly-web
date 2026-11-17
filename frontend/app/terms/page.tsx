@@ -15,7 +15,7 @@ export default function TermsPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Terms of Use</h1>
-        <p className={styles.updated}>Last updated: November 10, 2026</p>
+        <p className={styles.updated}>Last updated: November 19, 2026</p>
         <p className={styles.summary}>
           By using Trekly, you agree to these terms. Trekly helps you plan hikes and backpacking
           trips, but you are responsible for your own safety in the backcountry.
@@ -80,7 +80,10 @@ export default function TermsPage() {
         </ul>
 
         <h2>Acceptable use</h2>
-        <p>Don&apos;t:</p>
+        <p>
+          Follow our <Link href="/guidelines">Community Guidelines</Link>{" "}in everything you post.
+          In short, don&apos;t:
+        </p>
         <ul>
           <li>Break the law or Parks Canada rules using Trekly.</li>
           <li>
@@ -105,8 +108,10 @@ export default function TermsPage() {
           You own what you create in Trekly, such as trip plans, gear lists, hike logs, and photos.
           You give us permission to store, display, and process it so we can run Trekly for you, and
           to show the parts of your profile you&apos;ve made public to other people. You can change
-          what&apos;s public at any time. Only upload photos you took or have the right to share. We
-          may remove content, or hide profiles, that break these terms.
+          what&apos;s public at any time. Only upload photos you took or have the right to share. What
+          you post is checked by an automated moderation service, and we may hold it for review,
+          remove it, or hide profiles, warn, suspend or close accounts that break these terms or
+          the <Link href="/guidelines">Community Guidelines</Link>.
         </p>
 
         <h2>Our content</h2>

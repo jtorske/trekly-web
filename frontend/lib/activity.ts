@@ -1,3 +1,4 @@
+import type { ReviewState } from "./moderation";
 import type { AccountLabel } from "./accountLabels";
 import type { FollowState } from "./follows";
 import type { Milestone, MilestoneBadgeInfo } from "./milestones";
@@ -68,6 +69,8 @@ export interface ActivityPost {
   only_you: boolean;
   /** Your own hike (or what it earned) that you never shared: only you see it, whatever your settings. */
   unshared?: boolean;
+  /** Your own post only: held for review, or removed by a moderator (lib/moderation.ts). */
+  review?: ReviewState | null;
 }
 
 export interface HighFivers {

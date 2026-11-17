@@ -18,6 +18,7 @@ from app.models.catalog import (
 )
 from app.models.featured_badge import FeaturedBadge
 from app.models.hike_log import HikeLog
+from app.models.moderation import AccountRestriction, ModerationItem
 from app.models.nudge import NudgeDismissal
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
@@ -35,6 +36,8 @@ from app.models.visit_streak import VisitStreak
 from app.models.trekly_post import TreklyFact, TreklyPostDraft, TreklyPostTypeSetting
 
 __all__ = [
+    "AccountRestriction",
+    "ModerationItem",
     "AccountLabel",
     "ActivityPost",
     "ActivityReaction",

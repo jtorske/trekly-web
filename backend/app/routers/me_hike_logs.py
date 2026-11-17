@@ -21,12 +21,19 @@ verified, match_score and nights come only from a matched GPS track. Editing
 a verified hike's date drops its verification: the date no longer comes from
 the track.
 
+Moderation (app/moderation.py): a new or changed note or photo is screened
+first. Flagged content is held: it's kept off the entry for everyone else,
+and the owner's own responses show it with `review` ("pending" while it's
+being reviewed, "hidden" once a moderator has removed it). New entries
+follow the post rate limits, and photos need a confirmed email.
+
 `share` ("Share to Activity" in the dialog) posts the hike, and any milestone
 or rank it earns, to the Activity feed; false removes the hike's post; left
 out, nothing changes (app/activity.py). POST /past never posts.
 """
 
 import re
+from typing import Literal
 from datetime import date, datetime, timedelta
 from uuid import UUID
 
@@ -42,6 +49,10 @@ from app.featured import prune_featured
 from app.hike_service import NewHike, Progress, add_hikes
 from app.milestones import MilestoneBadgeOut, badge_out
 from app.models.activity import ActivityPost
+from app.moderation import (
+    Services, content_removed, ensure_can_add_photo, ensure_can_publish, ensure_post_rate, get_moderation_services,
+    publishable, record_screening, review_state, run_screening, unchanged, withheld_items,
+)
 from app.models.hike_log import MAX_NOTE_LENGTH, HikeLog
 from app.models.trail import Trail
 from app.routers.availability import get_today
@@ -91,6 +102,10 @@ class HikeLogOut(BaseModel):
     updated_at: datetime
     # Posted to the Activity feed (whether or not the feed shows it right now).
     shared: bool = False
+    # The owner's note or photo is held for review ("pending") or was removed
+    # by a moderator ("hidden"); `review_parts` says which. Others don't see it.
+    review: Literal["pending", "hidden"] | None = None
+    review_parts: list[Literal["note", "photo"]] = []
 
 
 class PastHikesIn(BaseModel):
@@ -152,18 +167,51 @@ def _shared_ids(db: Session, user_id: UUID) -> set[UUID]:
     ))
 
 
-def _out(log: HikeLog, shared: set[UUID] = frozenset()) -> HikeLogOut:
+REVIEW_KINDS = ("hike_note", "hike_photo", "post")
+
+
+def _held(db: Session, logs: list[HikeLog]) -> dict:
+    """Held or hidden notes and photos (and held hike posts) of these entries."""
+    ids = [log.id for log in logs]
+    posts = dict(db.execute(
+        select(ActivityPost.hike_log_id, ActivityPost.id)
+        .where(ActivityPost.hike_log_id.in_(ids), ActivityPost.kind == "hike")
+    ).all()) if ids else {}
+    items = withheld_items(db, REVIEW_KINDS, [*ids, *posts.values()])
+    return {
+        log.id: (items.get(("hike_note", log.id)), items.get(("hike_photo", log.id)),
+                 items.get(("post", posts.get(log.id))))
+        for log in logs
+    }
+
+
+def _out(log: HikeLog, shared: set[UUID] = frozenset(), held: tuple = (None, None, None)) -> HikeLogOut:
+    note_item, photo_item, post_item = held
+    note, photo = log.note, log.photo_path
+    parts: list[str] = []
+    if note is None and (note_item or (post_item and post_item.text)):
+        note = (note_item or post_item).text
+        parts.append("note")
+    if photo is None and (photo_item or (post_item and post_item.photo_path)):
+        photo = (photo_item or post_item).photo_path
+        parts.append("photo")
     return HikeLogOut(
         trail=TrailListItemOut.model_validate(log.trail),
         hiked_on=log.hiked_on,
-        note=log.note,
-        photo_path=log.photo_path,
+        note=note,
+        photo_path=photo,
         verified=bool(log.verified),
         nights=log.nights,
         logged_at=log.created_at,
         updated_at=log.updated_at,
         shared=log.id in shared,
+        review=review_state(*held),
+        review_parts=parts,
     )
+
+
+def _one(db: Session, log: HikeLog, shared: set[UUID]) -> HikeLogOut:
+    return _out(log, shared, _held(db, [log])[log.id])
 
 
 def check_fair_use(db: Session, user_id: UUID, trail_id: UUID, hiked_on: date | None, today: date) -> None:
@@ -188,10 +236,47 @@ def check_fair_use(db: Session, user_id: UUID, trail_id: UUID, hiked_on: date | 
         )
 
 
-def _apply(log: HikeLog, payload: HikeLogIn) -> None:
+# (moderation kind, column, item attribute) for what a journal entry can hold back.
+SCREENED = (("hike_note", "note", "text"), ("hike_photo", "photo_path", "photo_path"))
+
+
+def _screen(db: Session, services: Services, user_id: UUID, log: HikeLog | None, payload: HikeLogIn):
+    """What to write to the note and photo columns, after screening anything
+    new, and a function that records the screenings once the entry exists."""
+    held = _held(db, [log])[log.id] if log else (None, None, None)
+    values, pending = {}, []
+    for (kind, column, attribute), item in zip(SCREENED, held[:2]):
+        new = getattr(payload, column)
+        current = getattr(log, column) if log else None
+        if new == current or unchanged(item, new, attribute) or unchanged(held[2], new, attribute):
+            values[column] = current
+            continue
+        if new is None:
+            if log is not None:
+                content_removed(db, kind, log.id)
+            values[column] = None
+            continue
+        if kind == "hike_photo":
+            ensure_can_add_photo(db, user_id)
+        verdict = run_screening(services, kind, new if attribute == "text" else None,
+                                new if attribute == "photo_path" else None)
+        # Content replacing something a moderator hid is held; record_screening decides.
+        values[column] = new if publishable(verdict) and (item is None or item.decision != "hidden") else None
+        pending.append((kind, column, attribute, new, verdict))
+
+    def record(entry: HikeLog) -> None:
+        for kind, column, attribute, new, verdict in pending:
+            outcome = record_screening(db, services, verdict, kind=kind, target_id=entry.id, author_id=user_id,
+                                       **{attribute: new})
+            setattr(entry, column, new if outcome.publish else None)
+
+    return values, record
+
+
+def _apply(log: HikeLog, payload: HikeLogIn, values: dict) -> None:
     if log.verified and payload.hiked_on != log.hiked_on:
         log.verified, log.match_score, log.nights = False, None, None
-    log.hiked_on, log.note, log.photo_path = payload.hiked_on, payload.note, payload.photo_path
+    log.hiked_on, log.note, log.photo_path = payload.hiked_on, values["note"], values["photo_path"]
 
 
 def _find(db: Session, user_id: UUID, trail_id: UUID) -> HikeLog | None:
@@ -211,7 +296,8 @@ def list_hike_logs(user_id: UUID = Depends(get_current_user_id), db: Session = D
         .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
     shared = _shared_ids(db, user_id)
-    return [_out(row, shared) for row in rows]
+    held = _held(db, rows)
+    return [_out(row, shared, held[row.id]) for row in rows]
 
 
 @router.put("/{trail_id}", response_model=HikeSavedOut)
@@ -222,6 +308,7 @@ def put_hike_log(
     user_id: UUID = Depends(get_current_user_id),
     db: Session = Depends(get_db),
     today: date = Depends(get_today),
+    services: Services = Depends(get_moderation_services),
 ):
     """Create (201) or replace (200) the entry for this trail.
 
@@ -240,31 +327,40 @@ def put_hike_log(
         if folder != str(user_id) or not PHOTO_NAME.match(name):
             raise HTTPException(status_code=422, detail="Photos must be uploaded to your own folder.")
 
+    ensure_can_publish(db, user_id)
     log = _find(db, user_id, trail_id)
     if log is None or log.hiked_on != payload.hiked_on:
         check_fair_use(db, user_id, trail_id, payload.hiked_on, today)
-    # What they'd earned before, to post what this hike adds.
-    before = standing(db, user_id) if payload.share else None
     if log is None:
         if trail.retired_at is not None:
             raise HTTPException(status_code=409, detail="This trail has been retired and can't be added.")
+        ensure_post_rate(db, user_id)
+    values, record = _screen(db, services, user_id, log, payload)
+    # What they'd earned before, to post what this hike adds.
+    before = standing(db, user_id) if payload.share else None
+    if log is None:
         result = add_hikes(
-            db, user_id, [NewHike(trail_id, payload.hiked_on, payload.note, payload.photo_path)]
+            db, user_id, [NewHike(trail_id, payload.hiked_on, values["note"], values["photo_path"])]
         )
         if result.added:
             response.status_code = status.HTTP_201_CREATED
             added = result.added[0]
+            record(added)
+            db.commit()
+            services.run_after_commit()
             after_hike_saved(db, user_id, added, payload.share, before, today)
             return HikeSavedOut(
-                **_out(added, _shared_ids(db, user_id)).model_dump(), progress=progress_out(result.progress)
+                **_one(db, added, _shared_ids(db, user_id)).model_dump(), progress=progress_out(result.progress)
             )
         # A concurrent duplicate request created it first; apply this one on top.
         log = _find(db, user_id, trail_id)
-    _apply(log, payload)
+    _apply(log, payload, values)
+    record(log)
     db.commit()
+    services.run_after_commit()
     log = _find(db, user_id, trail_id)
     after_hike_saved(db, user_id, log, payload.share, before, today)
-    return HikeSavedOut(**_out(log, _shared_ids(db, user_id)).model_dump())
+    return HikeSavedOut(**_one(db, log, _shared_ids(db, user_id)).model_dump())
 
 
 @router.post("/past", response_model=PastHikesOut, status_code=status.HTTP_201_CREATED)

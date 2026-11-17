@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import ReviewNotice from "@/components/ReviewNotice";
+import { partsLabel } from "@/lib/moderation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import UsernameField, { useUsernameStatus } from "@/components/UsernameField";
@@ -157,6 +159,9 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
           </span>
           <textarea className={ui.input} rows={4} value={values.bio} onChange={set("bio")} aria-invalid={Boolean(errors.bio)} />
           {errors.bio && <span className={ui.fieldError}>{errors.bio}</span>}
+          {profile.review && (
+            <ReviewNotice state={profile.review} what={partsLabel(profile.review_parts ?? [], "profile")} />
+          )}
         </label>
 
         <div className={styles.provinceField}>

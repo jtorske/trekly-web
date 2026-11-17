@@ -13,13 +13,15 @@ import uuid
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 
 from app.main import app
+from app.moderation import get_moderation_services
+from tests.moderation_fakes import Outbox, fake_services
 from app.models.availability import AvailabilityAlert
 from app.models.trail import Trail
 from app.models.trip_plan import TripPlan
 from app.notify import Email
-from app.routers.public_profiles import get_email_sender
 from tests.test_availability import TODAY, fetch, outbox, world  # noqa: F401  (fixtures)
 
 ALICE_EMAIL = "alice-canary@example.com"
@@ -42,21 +44,11 @@ PUBLIC_DEFAULTS = {
 }
 
 
-class Outbox:
-    def __init__(self, fail=False):
-        self.sent: list[Email] = []
-        self.fail = fail
-
-    def send(self, email: Email) -> None:
-        if self.fail:
-            raise RuntimeError("mail server down")
-        self.sent.append(email)
-
-
 @pytest.fixture
 def outbox():
+    """Admin emails: reports now reach support in the moderation digest."""
     box = Outbox()
-    app.dependency_overrides[get_email_sender] = lambda: box
+    app.dependency_overrides[get_moderation_services] = lambda: fake_services(outbox=box)
     return box
 
 
@@ -407,11 +399,11 @@ def test_signed_in_visitor_can_report_a_profile(client, alice_profile, people, o
     bob_id, bob = people["bob"]
     response = client.post("/api/profiles/alice/report", json={"reason": "spam", "details": " Selling boots "}, headers=bob)
     assert response.status_code == 202
-    [email] = outbox.sent
+    [email] = outbox.sent  # the moderation digest
     assert email.to == "treklyusersupport@gmail.com"
-    assert "@alice" in email.subject and "spam" in email.subject
-    assert "/u/alice" in email.text and "Selling boots" in email.text and str(bob_id) in email.text
-    assert "bob@example.com" not in email.text  # the reporter's account, never their email
+    assert "moderation" in email.subject.lower() and "1 reported" in email.subject
+    assert "Profile by @alice" in email.text and "/admin/moderation" in email.text
+    assert "bob@example.com" not in email.text and str(bob_id) not in email.text
     # Support learns who reported, but the report never exposes Alice's private data.
     assert_no_canaries(email.text, "the report email")
 
@@ -438,7 +430,8 @@ def test_reports_are_rate_limited(client, alice_profile, people, outbox, make_to
     client.patch("/api/me/profile", json={"username": "other_last"}, headers=headers)
     limited = client.post("/api/profiles/other_last/report", json={"reason": "spam"}, headers=bob)
     assert limited.status_code == 429 and "several reports" in limited.text
-    assert len(outbox.sent) == 5
+    # One digest an hour, however many reports.
+    assert len(outbox.sent) == 1
 
 
 def test_reports_need_a_known_reason_and_not_yourself(client, alice_profile, people, outbox):
@@ -449,13 +442,18 @@ def test_reports_need_a_known_reason_and_not_yourself(client, alice_profile, peo
     assert client.post("/api/profiles/nobody/report", json={"reason": "spam"}, headers=bob).status_code == 404
 
 
-def test_a_failed_email_doesnt_count_against_the_limit(client, alice_profile, people):
+def test_a_failed_digest_email_never_loses_the_report(client, alice_profile, people, session_factory):
     _, bob = people["bob"]
-    app.dependency_overrides[get_email_sender] = lambda: Outbox(fail=True)
-    assert client.post("/api/profiles/alice/report", json={"reason": "spam"}, headers=bob).status_code == 503
-    box = Outbox()
-    app.dependency_overrides[get_email_sender] = lambda: box
+    app.dependency_overrides[get_moderation_services] = lambda: fake_services(outbox=Outbox(fail=True))
     assert client.post("/api/profiles/alice/report", json={"reason": "spam"}, headers=bob).status_code == 202
+    db = session_factory()
+    from app.models.moderation import ModerationItem
+    from app.models.privacy import ProfileReport
+
+    [item] = db.scalars(select(ModerationItem).where(ModerationItem.in_queue.is_(True))).all()
+    assert item.in_queue and item.digest_sent_at is None  # the next digest picks it up
+    assert db.scalar(select(ProfileReport)).item_id == item.id
+    db.close()
 
 
 # ------------------------------------------------------------- moderation

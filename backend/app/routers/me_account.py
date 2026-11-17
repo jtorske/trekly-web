@@ -29,6 +29,12 @@ from app.models.social import Follow, Notification, NotificationPreferences
 from app.models.trail import Trail
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
+from app.moderation import (
+    Services, content_removed, ensure_can_add_photo, ensure_can_publish, get_moderation_services,
+    record_screening, restriction, review_state, run_screening, unchanged, withheld_items,
+)
+from app.moderation_config import APPEAL_EMAIL
+from app.models.moderation import AccountRestriction, ModerationItem
 from app.privacy import visibility
 from app.provinces import HomeProvince
 from app.usernames import RESERVED_MESSAGE, REQUIRED_MESSAGE, TAKEN_MESSAGE, is_taken, normalize, rule_problem
@@ -73,6 +79,10 @@ class ProfileOut(BaseModel):
     # The /welcome setup flow still has to run: no username yet, or never
     # finished or skipped. Owner-only, like everything on this route.
     onboarding_pending: bool
+    # Their bio or profile photo is held for review ("pending") or was
+    # removed by a moderator ("hidden"); others don't see it (app/moderation.py).
+    review: Literal["pending", "hidden"] | None = None
+    review_parts: list[Literal["bio", "avatar"]] = []
 
 
 def _clean(value):
@@ -166,15 +176,26 @@ def _profile_out(db: Session, user: CurrentUser, profile: Profile) -> ProfileOut
         following=follows.following_count(db, user.id),
         follow_requests=follows.request_count(db, user.id),
     )
+    held = withheld_items(db, ("bio", "avatar", "profile"), [profile.id])
+    bio_item, avatar_item, profile_item = (held.get((kind, profile.id)) for kind in ("bio", "avatar", "profile"))
+    bio, avatar, parts = profile.bio, profile.avatar_path, []
+    if bio is None and (bio_item or (profile_item and profile_item.text)):
+        bio = (bio_item or profile_item).text
+        parts.append("bio")
+    if avatar is None and (avatar_item or (profile_item and profile_item.photo_path)):
+        avatar = (avatar_item or profile_item).photo_path
+        parts.append("avatar")
     return ProfileOut(
         id=profile.id,
         email=user.email,
         display_name=profile.display_name,
         username=profile.username,
-        bio=profile.bio,
+        bio=bio,
         home_region=profile.home_region,
         home_province=profile.home_province,
-        avatar_path=profile.avatar_path,
+        avatar_path=avatar,
+        review=review_state(bio_item, avatar_item, profile_item),
+        review_parts=parts,
         units=profile.units,
         member_since=member_since or profile.created_at,
         counts=counts,
@@ -201,6 +222,7 @@ def update_profile(
     payload: ProfileUpdate,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    services: Services = Depends(get_moderation_services),
 ):
     profile = _ensure_profile(db, user.id)
     data = payload.model_dump(exclude_unset=True)
@@ -208,6 +230,7 @@ def update_profile(
         folder, _, name = data["avatar_path"].partition("/")
         if folder != str(user.id) or not AVATAR_NAME.match(name):
             raise HTTPException(status_code=422, detail="Avatars must be uploaded to your own folder.")
+    _moderate_profile(db, services, user.id, profile, data)
     if data.get("username") and is_taken(db, data["username"], by_other_than=user.id):
         raise HTTPException(status_code=409, detail=TAKEN_MESSAGE)
     for field, value in data.items():
@@ -220,8 +243,42 @@ def update_profile(
         if "username_reserved" in str(error.orig):
             raise HTTPException(status_code=422, detail=RESERVED_MESSAGE) from error
         raise HTTPException(status_code=409, detail=TAKEN_MESSAGE) from error
+    services.run_after_commit()
     db.refresh(profile)
     return _profile_out(db, user, profile)
+
+
+# (moderation kind, column, item attribute) for the profile's screened fields.
+PROFILE_SCREENED = (("bio", "bio", "text"), ("avatar", "avatar_path", "photo_path"))
+
+
+def _moderate_profile(db: Session, services: Services, user_id: UUID, profile: Profile, data: dict) -> None:
+    """Screens a new bio or profile photo. Held ones are taken out of `data`,
+    so their column stays empty while they wait; re-sending the held value
+    changes nothing."""
+    if not any(column in data for _, column, _ in PROFILE_SCREENED):
+        return
+    held = withheld_items(db, ("bio", "avatar", "profile"), [profile.id])
+    for kind, column, attribute in PROFILE_SCREENED:
+        if column not in data:
+            continue
+        new, current = data[column], getattr(profile, column)
+        own, whole = held.get((kind, profile.id)), held.get(("profile", profile.id))
+        if new == current or unchanged(own, new, attribute) or unchanged(whole, new, attribute):
+            data.pop(column)
+            continue
+        ensure_can_publish(db, user_id)
+        if new is None:
+            content_removed(db, kind, profile.id)
+            continue
+        if kind == "avatar":
+            ensure_can_add_photo(db, user_id)
+        verdict = run_screening(services, kind, new if attribute == "text" else None,
+                                new if attribute == "photo_path" else None)
+        outcome = record_screening(db, services, verdict, kind=kind, target_id=profile.id, author_id=user_id,
+                                   **{attribute: new})
+        if not outcome.publish:
+            data[column] = None
 
 
 @router.get("/saved-trails", response_model=list[SavedTrailOut])
@@ -294,6 +351,9 @@ def delete_account(
         raise HTTPException(
             status_code=422, detail=f'Type "{DELETE_CONFIRMATION}" to confirm.'
         )
+    # A locked account's data is kept for the authorities (app/moderation.py).
+    if restriction(db, user.id) == "locked":
+        raise HTTPException(status_code=403, detail=f"This account is locked. Contact {APPEAL_EMAIL}.")
     for setup in db.scalars(select(GearSetup).where(GearSetup.user_id == user.id)):
         db.delete(setup)
     db.flush()
@@ -308,6 +368,9 @@ def delete_account(
     db.execute(delete(Notification).where((Notification.user_id == user.id) | (Notification.actor_id == user.id)))
     db.execute(delete(NotificationPreferences).where(NotificationPreferences.user_id == user.id))
     db.execute(delete(ProfileModeration).where(ProfileModeration.user_id == user.id))
+    # Moderation records go too, except child-safety evidence, which the law says to keep.
+    db.execute(delete(ModerationItem).where(ModerationItem.author_id == user.id, ModerationItem.child_safety.is_(False)))
+    db.execute(delete(AccountRestriction).where(AccountRestriction.user_id == user.id))
     db.execute(delete(ProfileSettings).where(ProfileSettings.user_id == user.id))
     db.execute(delete(VisitStreak).where(VisitStreak.user_id == user.id))
     db.execute(delete(NudgeDismissal).where(NudgeDismissal.user_id == user.id))

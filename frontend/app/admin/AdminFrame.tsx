@@ -14,7 +14,7 @@ import styles from "./admin.module.css";
 const TABS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/reports", label: "Reports", icon: Flag },
+  { href: "/admin/moderation", label: "Moderation", icon: Flag },
   { href: "/admin/photos", label: "Trail photos", icon: ImageIcon },
   { href: "/admin/trekly-posts", label: "Post queue", icon: ListChecks },
   { href: "/admin/posts", label: "Write a post", icon: Megaphone },

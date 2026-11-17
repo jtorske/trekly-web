@@ -134,10 +134,10 @@ function OverviewBody() {
     { label: "Hikes logged", value: overview.hikes_total },
     { label: "Active alerts", value: overview.active_alerts },
     {
-      label: "Open reports",
-      value: overview.open_reports,
-      note: overview.open_reports ? "Needs a look" : "All clear",
-      href: "/admin/reports",
+      label: "Moderation queue",
+      value: overview.moderation_queue,
+      note: overview.moderation_queue ? "Needs a look" : "All clear",
+      href: "/admin/moderation",
     },
   ];
   return (

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { ReviewState } from "./moderation";
 import type { HomeCode } from "./provinces";
 import type { TrailListItem } from "./trailsApi";
 import type { UnitSystem } from "./units";
@@ -23,6 +24,9 @@ export interface Profile {
   is_admin: boolean;
   /** /welcome still has to run: no username yet, or never finished or skipped. */
   onboarding_pending: boolean;
+  /** Your bio or profile photo is held for review or was removed by a moderator; only you see it. */
+  review?: ReviewState | null;
+  review_parts?: ("bio" | "avatar")[];
 }
 
 export type ProfileUpdate = Partial<

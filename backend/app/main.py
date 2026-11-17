@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import (
     activity,
     admin,
+    admin_moderation,
     admin_official_posts,
     admin_profiles,
     admin_trail_photos,
@@ -100,6 +101,7 @@ app.include_router(me_preferences.router)
 app.include_router(public_profiles.router)
 app.include_router(public_profiles.sitemap_router)
 app.include_router(admin.router)
+app.include_router(admin_moderation.router)
 app.include_router(admin_profiles.router)
 app.include_router(admin_official_posts.router)
 app.include_router(admin_trekly_posts.router)

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { ReviewState } from "./moderation";
 import type { Tier } from "./milestones";
 import type { TrailListItem } from "./trailsApi";
 
@@ -18,6 +19,9 @@ export interface HikeLog {
   updated_at: string;
   /** Posted to the Activity feed. */
   shared: boolean;
+  /** The note or photo is held for review or was removed by a moderator; only you see it. */
+  review?: ReviewState | null;
+  review_parts?: ("note" | "photo")[];
 }
 
 export interface HikeLogInput {

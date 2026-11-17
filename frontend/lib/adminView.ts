@@ -84,6 +84,14 @@ export const ACTION_LABELS: Record<AuditEntry["action"], string> = {
   reopen_report: "Reopened report",
   hide_post: "Hid Activity post",
   unhide_post: "Unhid Activity post",
+  official_post: "Posted as Trekly",
+  delete_official_post: "Deleted a Trekly post",
+  approve_item: "Approved content",
+  hide_item: "Hid content",
+  warn_user: "Sent a warning",
+  suspend_user: "Suspended",
+  unsuspend_user: "Lifted a suspension or lock",
+  lock_account: "Locked account",
 };
 
 export interface Confirmation {

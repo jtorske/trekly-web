@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import Dialog from "@/components/Dialog";
 import ui from "@/components/ui.module.css";
 import profileStyles from "@/app/profile/page.module.css";
@@ -56,7 +57,15 @@ export default function ReportDialog({
   return (
     <Dialog
       title={postId ? `Report ${name}'s post` : trailId ? `Report ${name}'s trip note` : `Report ${name}`}
-      subtitle="Reports go to the Trekly team. The person you report isn't told who sent it."
+      subtitle={
+        <>
+          Reports go to the Trekly team. The person you report isn&apos;t told who sent it. See the{" "}
+          <Link href="/guidelines" target="_blank">
+            Community Guidelines
+          </Link>
+          .
+        </>
+      }
       onClose={onClose}
       busy={busy}
       size="sm"

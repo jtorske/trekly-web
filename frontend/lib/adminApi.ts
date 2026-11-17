@@ -96,7 +96,15 @@ export type AuditAction =
   | "resolve_report"
   | "reopen_report"
   | "hide_post"
-  | "unhide_post";
+  | "unhide_post"
+  | "official_post"
+  | "delete_official_post"
+  | "approve_item"
+  | "hide_item"
+  | "warn_user"
+  | "suspend_user"
+  | "unsuspend_user"
+  | "lock_account";
 
 export interface AuditEntry {
   id: string;
@@ -136,6 +144,8 @@ export interface Overview {
   hikes_total: number;
   active_alerts: number;
   open_reports: number;
+  /** Held, reported and unscreened items waiting in /admin/moderation. */
+  moderation_queue: number;
   poller: { last_started_at: string | null; last_finished_at: string | null; last_result: string | null; running: boolean } | null;
 }
 

@@ -32,7 +32,17 @@ AUDIT_ACTIONS = (
     "unhide_post",
     "official_post",
     "delete_official_post",
+    # Moderation (app/routers/admin_moderation.py). lock_account is also
+    # written by the automatic child-safety lock, with SYSTEM_ADMIN_ID.
+    "approve_item",
+    "hide_item",
+    "warn_user",
+    "suspend_user",
+    "unsuspend_user",
+    "lock_account",
 )
+# admin_id on an audit row the system wrote itself (the child-safety lock).
+SYSTEM_ADMIN_ID = uuid.UUID(int=0)
 
 
 class AdminAuditLog(Base):
