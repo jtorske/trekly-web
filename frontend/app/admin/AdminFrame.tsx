@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, ty
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Flag, Image as ImageIcon, LayoutDashboard, Megaphone, Users, type LucideIcon } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { ApiError } from "@/lib/api";
@@ -72,26 +73,41 @@ function AdminNav() {
 
 type Gate = { status: "checking" } | { status: "forbidden" } | { status: "error"; message: string } | { status: "admin" };
 
+// The account the API last confirmed as an admin. Each admin page has its own
+// frame, so without this every tab click waited on /api/admin/me again
+// (~120 ms) before showing anything. The API still checks every request.
+let confirmedAdmin: string | null = null;
+
 /** Renders `children` only once the API confirms this account is an admin. */
 function AdminGate({ children }: { children: ReactNode }) {
-  const [gate, setGate] = useState<Gate>({ status: "checking" });
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+  const [gate, setGate] = useState<Gate>(() =>
+    userId !== null && confirmedAdmin === userId ? { status: "admin" } : { status: "checking" },
+  );
+  const known = gate.status === "admin" && confirmedAdmin === userId;
 
   const check = useCallback((signal?: AbortSignal) => {
     adminApi
       .me(signal)
-      .then(() => setGate({ status: "admin" }))
+      .then(() => {
+        confirmedAdmin = userId;
+        setGate({ status: "admin" });
+      })
       .catch((error: unknown) => {
         if ((error as { name?: string }).name === "AbortError") return;
+        confirmedAdmin = null;
         if (error instanceof ApiError && error.status === 403) setGate({ status: "forbidden" });
         else setGate({ status: "error", message: error instanceof Error ? error.message : "That didn't load." });
       });
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
+    if (known) return;
     const controller = new AbortController();
     check(controller.signal);
     return () => controller.abort();
-  }, [check]);
+  }, [check, known]);
 
   if (gate.status === "checking") return <div className={`${ui.skeleton} ${styles.gateSkeleton}`} aria-busy="true" aria-label="Loading" />;
   if (gate.status === "forbidden") return <p className={ui.notice}>This area is only for Trekly admins.</p>;

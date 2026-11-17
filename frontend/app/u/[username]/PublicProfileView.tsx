@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { setQueryParam, useQueryParam } from "@/lib/useQueryParam";
+import { preloadTrailCatalogue } from "@/lib/useTrailCatalogue";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Backpack, Bookmark, Flag, FlaskConical, Footprints, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
@@ -17,7 +18,7 @@ import {
   FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
-  ProfilePanel,
+  ProfilePanels,
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
@@ -73,8 +74,6 @@ const badgeColour = (entry: PublicJournalEntry) => groupColour(`region:${entry.t
  * Settings → Privacy or /profile, ?preview=1) shows the page without it.
  */
 export default function PublicProfileView({ username }: { username: string }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, status } = useAuth();
   const signedIn = status === "signedIn";
   const { profile: me } = useProfile();
@@ -85,7 +84,8 @@ export default function PublicProfileView({ username }: { username: string }) {
 
   const handle = username.toLowerCase();
   const isOwner = Boolean(me?.username && me.username === handle);
-  const preview = isOwner && searchParams.get("preview") === "1";
+  const previewParam = useQueryParam("preview");
+  const preview = isOwner && previewParam === "1";
 
   useEffect(() => {
     if (status === "loading") return;
@@ -119,17 +119,15 @@ export default function PublicProfileView({ username }: { username: string }) {
   );
   const activity = usePostPages(activityOpen && status !== "loading" ? `u:${handle}:${signedIn}` : null, fetchActivity);
   // Preview and the open tab both live in the query string; changing one keeps the other.
-  const go = (changes: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(changes)) {
-      if (value === null) params.delete(key);
-      else params.set(key, value);
-    }
-    const query = params.toString();
-    router.replace(`/u/${encodeURIComponent(handle)}${query ? `?${query}` : ""}`, { scroll: false });
-  };
-  const setPreview = (on: boolean) => go({ preview: on ? "1" : null });
-  const setTab = (key: PublicTab) => go({ tab: key });
+  // Neither re-requests the page. The open tab is read only by the tab bar, the
+  // panels and the stat rows (ProfileShell), so a click doesn't re-render this view.
+  const setPreview = (on: boolean) => setQueryParam("preview", on ? "1" : null, { replace: true });
+  const setTab = (key: PublicTab) => setQueryParam("tab", key);
+  // Their Journal tab sums hikes against the trail catalogue; fetch it now, not on first open.
+  const hasJournal = load.status === "ready" && Boolean(load.profile.journal?.entries.length);
+  useEffect(() => {
+    if (hasJournal) preloadTrailCatalogue().catch(() => undefined);
+  }, [hasJournal]);
 
   if (load.status === "loading") return <ProfileSkeleton />;
 
@@ -199,21 +197,20 @@ export default function PublicProfileView({ username }: { username: string }) {
   if (profile.gear) tabs.push({ key: "gear", label: "Gear", count: profile.gear.items.length });
   if (profile.saved_trails) tabs.push({ key: "trails", label: "Saved trails", count: profile.saved_trails.length });
   if (profile.trip_plans) tabs.push({ key: "trips", label: "Trips", count: profile.trip_plans.length });
-  const requested = searchParams.get("tab");
-  const tab = tabs.find((t) => t.key === requested)?.key ?? tabs[0]?.key ?? null;
+  const tabConfig = tabs.length > 0 ? { keys: tabs.map((t) => t.key), fallback: tabs[0].key } : undefined;
 
   const stats: StatRow[] = [];
   if (profile.gear) {
-    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear"), active: tab === "gear" });
+    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear"), tab: "gear" });
   }
   if (profile.saved_trails) {
-    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails"), active: tab === "trails" });
+    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails"), tab: "trails" });
   }
   if (profile.trip_plans) {
-    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips"), active: tab === "trips" });
+    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips"), tab: "trips" });
   }
   if (profile.journal) {
-    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal"), active: tab === "journal" });
+    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal"), tab: "journal" });
   }
 
   const banner = (preview || showOwnerControls) && (
@@ -284,7 +281,7 @@ export default function PublicProfileView({ username }: { username: string }) {
   );
 
   return (
-    <ProfileLayout banner={banner} aside={aside}>
+    <ProfileLayout banner={banner} aside={aside} tabs={tabConfig}>
       {profile.label === "demo" && (
         <p className={styles.demoNotice}>
           <FlaskConical size={16} aria-hidden="true" />
@@ -303,38 +300,40 @@ export default function PublicProfileView({ username }: { username: string }) {
               : `${name} shares their hikes, gear and trails with approved followers only.`}
           </p>
         </div>
-      ) : tab === null ? (
+      ) : tabs.length === 0 ? (
         <div className={styles.messageCard}>
           <p className={styles.quiet}>{name} hasn&apos;t shared anything else yet.</p>
         </div>
       ) : (
         <>
-          <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label={`${name}'s profile sections`} />
-          <ProfilePanel tab={tab}>
-            {tab === "activity" && (
-              <ActivityTab
-                pages={activity}
-                owner={false}
-                signedIn={signedIn}
-                viewer={me?.username ?? null}
-                name={name}
-              />
-            )}
-            {tab === "journal" && profile.journal && (
-              <>
-                <JournalTab
-                  hikes={profile.journal.entries}
+          <ProfileTabs tabs={tabs} onChange={setTab} label={`${name}'s profile sections`} />
+          <ProfilePanels
+            panels={{
+              activity: profile.activity_count !== null && (
+                <ActivityTab
+                  pages={activity}
                   owner={false}
-                  units={units}
-                  undatedCaption={profile.journal.hide_dates ? null : undatedLabel(null, false)}
+                  signedIn={signedIn}
+                  viewer={me?.username ?? null}
+                  name={name}
                 />
-                {profile.journal.entries.length > 0 && <JournalSection journal={profile.journal} />}
-              </>
-            )}
-            {tab === "gear" && profile.gear && <GearSection gear={profile.gear} units={units} />}
-            {tab === "trails" && profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />}
-            {tab === "trips" && profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />}
-          </ProfilePanel>
+              ),
+              journal: profile.journal && (
+                <>
+                  <JournalTab
+                    hikes={profile.journal.entries}
+                    owner={false}
+                    units={units}
+                    undatedCaption={profile.journal.hide_dates ? null : undatedLabel(null, false)}
+                  />
+                  {profile.journal.entries.length > 0 && <JournalSection journal={profile.journal} />}
+                </>
+              ),
+              gear: profile.gear && <GearSection gear={profile.gear} units={units} />,
+              trails: profile.saved_trails && <SavedTrailsSection trails={profile.saved_trails} />,
+              trips: profile.trip_plans && <TripPlansSection plans={profile.trip_plans} />,
+            }}
+          />
         </>
       )}
       {reporting && <ReportDialog username={profile.username} name={name} onClose={() => setReporting(false)} />}

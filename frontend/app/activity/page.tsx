@@ -50,15 +50,19 @@ export default function ActivityPage() {
   // Until they pick a tab: Following once they follow anyone, Everyone otherwise.
   const scope: ActivityScope = chosen ?? defaultScope(signedIn, profile?.counts?.following);
   const decided = status !== "loading" && (!signedIn || chosen !== null || profile !== null);
-  const [feed, setFeed] = useState<Feed | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // One feed per filter, kept for the visit, so switching back is instant.
+  const [feeds, setFeeds] = useState<Record<string, Feed>>({});
+  const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
+  const [failure, setFailure] = useState<{ key: string; message: string } | null>(null);
+  const firstPages = useRef(new Set<string>());
   const sentinel = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const composer = useRef<ComposerHandle>(null);
   const isHidden = useHidden();
   const requestKey = `${status}:${scope}`;
-  const current = feed?.key === requestKey ? feed : null;
+  const current = feeds[requestKey] ?? null;
+  const loading = Boolean(loadingKeys[requestKey]);
+  const error = failure?.key === requestKey ? failure.message : null;
   const province = profile?.home_province ?? null;
   // "Trekly picks" between posts while real activity is quiet (Everyone only).
   const [picks, setPicks] = useState<FeedPicks | null>(null);
@@ -69,37 +73,76 @@ export default function ActivityPage() {
   }, []);
   const shownPicks = scope === "everyone" ? picks : null;
 
-  const load = useCallback(
-    async (cursor: string | null, signal?: AbortSignal) => {
-      setLoading(true);
-      setError(null);
+  // A page of one filter's feed; the first page only once at a time (a hover
+  // prefetch and the click that follows share it).
+  const fetchFeed = useCallback(
+    async (target: ActivityScope, cursor: string | null, signal?: AbortSignal) => {
+      const key = `${status}:${target}`;
+      if (cursor === null) {
+        if (firstPages.current.has(key)) return;
+        firstPages.current.add(key);
+      }
+      setLoadingKeys((prev) => ({ ...prev, [key]: true }));
+      setFailure((prev) => (prev?.key === key ? null : prev));
       try {
-        const page = await getActivity(scope, cursor, signedIn, signal);
-        setFeed((prev) => ({
-          key: requestKey,
-          posts: cursor && prev?.key === requestKey ? appendPage(prev.posts, page.items) : page.items,
-          cursor: page.next_cursor,
-          done: page.next_cursor === null,
-        }));
+        const page = await getActivity(target, cursor, signedIn, signal);
+        setFeeds((prev) => {
+          const before = prev[key];
+          return {
+            ...prev,
+            [key]: {
+              key,
+              posts: cursor && before ? appendPage(before.posts, page.items) : page.items,
+              cursor: page.next_cursor,
+              done: page.next_cursor === null,
+            },
+          };
+        });
       } catch (caught) {
         if ((caught as { name?: string }).name === "AbortError") return;
-        setError(caught instanceof Error ? caught.message : "The feed didn't load.");
+        setFailure({ key, message: caught instanceof Error ? caught.message : "The feed didn't load." });
       } finally {
-        if (!signal?.aborted) setLoading(false);
+        if (cursor === null) firstPages.current.delete(key);
+        setLoadingKeys((prev) => ({ ...prev, [key]: false }));
       }
     },
-    [scope, signedIn, requestKey],
+    [status, signedIn],
   );
+  const load = useCallback(
+    (cursor: string | null, signal?: AbortSignal) => fetchFeed(scope, cursor, signal),
+    [fetchFeed, scope],
+  );
+  /** Loads a filter's first page ahead of a click (hover, focus, idle). */
+  const prefetch = (target: ActivityScope) => {
+    if (decided && !feeds[`${status}:${target}`]) void fetchFeed(target, null);
+  };
 
-  // First page whenever the filter or sign-in changes (and after posting, below).
+  // The first page whenever the filter or sign-in changes, unless it's already here.
+  const cached = Boolean(current);
   useEffect(() => {
-    if (!decided) return;
+    if (!decided || cached) return;
     const controller = new AbortController();
     queueMicrotask(() => {
       if (!controller.signal.aborted) void load(null, controller.signal);
     });
     return () => controller.abort();
-  }, [decided, load]);
+  }, [decided, cached, load]);
+
+  // Once the open feed is in, the other filters load quietly, so a tap on a
+  // phone (no hover to prefetch on) doesn't wait either.
+  const others = [signedIn && "following", "everyone", province && "province"].filter(
+    (s): s is ActivityScope => Boolean(s) && s !== scope,
+  );
+  const idleKey = cached ? others.map((s) => `${status}:${s}`).filter((key) => !feeds[key]).join(",") : "";
+  useEffect(() => {
+    if (!idleKey) return;
+    const run = () => {
+      for (const key of idleKey.split(",")) void fetchFeed(key.slice(key.indexOf(":") + 1) as ActivityScope, null);
+    };
+    // A beat after the open feed paints (requestIdleCallback is missing in older Safari).
+    const handle = window.setTimeout(run, 400);
+    return () => window.clearTimeout(handle);
+  }, [idleKey, fetchFeed]);
 
   // Not sharing yet? A small card offers the setting until they put it away
   // or turn it on (the API decides; it never shows to guests).
@@ -125,14 +168,20 @@ export default function ActivityPage() {
     return () => observer.disconnect();
   }, [current, loading, error, load]);
 
+  // A post can sit in several filters' feeds; change it in all of them.
   const update = (id: string, change: Partial<ActivityPost> | null) =>
-    setFeed((prev) =>
-      prev && {
-        ...prev,
-        posts: change === null
-          ? prev.posts.filter((post) => post.id !== id)
-          : prev.posts.map((post) => (post.id === id ? { ...post, ...change } : post)),
-      },
+    setFeeds((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).map(([key, feed]) => [
+          key,
+          {
+            ...feed,
+            posts: change === null
+              ? feed.posts.filter((post) => post.id !== id)
+              : feed.posts.map((post) => (post.id === id ? { ...post, ...change } : post)),
+          },
+        ]),
+      ),
     );
 
   const signInHref = `/login${nextQuery(pathname)}`;
@@ -262,7 +311,11 @@ export default function ActivityPage() {
               handle={composer}
               logs={hikeLogs.byTrail}
               save={hikeLogs.save}
-              onPosted={() => void load(null)}
+              onPosted={() => {
+                // The other filters may now be missing the post; they load again when opened.
+                setFeeds((prev) => (prev[requestKey] ? { [requestKey]: prev[requestKey] } : {}));
+                void load(null);
+              }}
               signInHref={signInHref}
             />
 
@@ -274,6 +327,8 @@ export default function ActivityPage() {
                     className={styles.tab}
                     aria-pressed={scope === "following"}
                     onClick={() => setScope("following")}
+                    onPointerEnter={() => prefetch("following")}
+                    onFocus={() => prefetch("following")}
                   >
                     Following
                   </button>
@@ -283,6 +338,8 @@ export default function ActivityPage() {
                   className={styles.tab}
                   aria-pressed={scope === "everyone"}
                   onClick={() => setScope("everyone")}
+                  onPointerEnter={() => prefetch("everyone")}
+                  onFocus={() => prefetch("everyone")}
                 >
                   Everyone
                 </button>
@@ -292,6 +349,8 @@ export default function ActivityPage() {
                     className={styles.tab}
                     aria-pressed={scope === "province"}
                     onClick={() => setScope("province")}
+                    onPointerEnter={() => prefetch("province")}
+                    onFocus={() => prefetch("province")}
                   >
                     From my province
                   </button>

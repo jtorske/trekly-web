@@ -2,7 +2,7 @@
 
 import AccountBadge from "@/components/AccountBadge";
 import type { AccountLabel } from "@/lib/accountLabels";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Activity, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { CalendarDays, ChevronRight, MapPin, Pencil, type LucideIcon } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
@@ -21,7 +21,28 @@ import type { TrailListItem } from "@/lib/trailsApi";
 import type { Rank } from "@/lib/rank";
 import { bestLabel, showsStreak, streakLabel, type StreakCounts } from "@/lib/visitStreak";
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
+import { useQueryParam } from "@/lib/useQueryParam";
 import styles from "./shell.module.css";
+
+/** Which tabs this profile has, and the one open when ?tab= names none of them. */
+export interface ProfileTabConfig {
+  keys: string[];
+  fallback: string;
+}
+
+const TabConfigContext = createContext<ProfileTabConfig | null>(null);
+
+/**
+ * The open tab, from ?tab= in the URL. Only the tab bar, the panels and the
+ * stat rows read it, so a click repaints those and not the page (which would
+ * hand every hidden panel new props to render before it could show).
+ */
+function useOpenTab(): string | null {
+  const config = useContext(TabConfigContext);
+  const requested = useQueryParam("tab");
+  if (!config) return null;
+  return requested !== null && config.keys.includes(requested) ? requested : config.fallback;
+}
 
 /**
  * The two-column profile layout shared by /profile (the owner) and
@@ -31,8 +52,26 @@ import styles from "./shell.module.css";
  * ProfilePanel. Below 900px the card becomes a compact header above the tabs
  * and the page scrolls as usual.
  */
-export function ProfileLayout({ banner, aside, children }: { banner?: ReactNode; aside: ReactNode; children: ReactNode }) {
+export function ProfileLayout({
+  banner,
+  aside,
+  tabs,
+  children,
+}: {
+  banner?: ReactNode;
+  aside: ReactNode;
+  tabs?: ProfileTabConfig;
+  children: ReactNode;
+}) {
+  // Stable while the set of tabs is, so the readers don't re-render for nothing.
+  const signature = tabs ? `${tabs.fallback}|${tabs.keys.join(",")}` : "";
+  const config = useMemo<ProfileTabConfig | null>(() => {
+    if (!signature) return null;
+    const [fallback, keys] = signature.split("|");
+    return { fallback, keys: keys.split(",") };
+  }, [signature]);
   return (
+    <TabConfigContext.Provider value={config}>
     <main className={styles.page}>
       <div className={styles.wrap}>
         {banner}
@@ -42,35 +81,64 @@ export function ProfileLayout({ banner, aside, children }: { banner?: ReactNode;
         </div>
       </div>
     </main>
+    </TabConfigContext.Provider>
   );
 }
 
 /**
- * The tab panel under ProfileTabs: the one scrolling region on desktop, with a
- * soft fade at the bottom while there's more below. Back at the top on every
- * tab change.
+ * The tab panels under ProfileTabs. Every panel stays mounted: the open one
+ * shows, the rest sit in hidden <Activity> boundaries (pre-rendered at idle
+ * priority, effects paused), so a tab click only swaps which one is visible.
+ * Panels render from data the page already loaded; one still waiting shows
+ * its own skeleton.
  */
-export function ProfilePanel({ tab, children }: { tab: string; children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
+export function ProfilePanels<K extends string>({ panels }: { panels: Partial<Record<K, ReactNode>> }) {
+  const active = useOpenTab();
+  // A section the API left out (null or false) has no panel.
+  const keys = (Object.keys(panels) as K[]).filter((key) => panels[key] != null && panels[key] !== false);
+  return (
+    <>
+      {keys.map((key) => (
+        <Activity key={key} mode={key === active ? "visible" : "hidden"} name={`panel-${key}`}>
+          <ProfilePanel tab={key}>{panels[key]}</ProfilePanel>
+        </Activity>
+      ))}
+    </>
+  );
+}
 
-  useEffect(() => {
+/**
+ * One tab's panel: the scrolling region on desktop, with a soft fade at the
+ * bottom while there's more below. Hiding drops the scroll position, so it's
+ * kept here and put back (before paint) when the tab opens again.
+ */
+function ProfilePanel({ tab, children }: { tab: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const scrollTop = useRef(0);
+
+  // Layout effects run again each time the hidden Activity shows.
+  useLayoutEffect(() => {
     const panel = ref.current;
     if (!panel) return;
-    panel.scrollTop = 0;
+    panel.scrollTop = scrollTop.current;
     const update = () => {
       panel.toggleAttribute("data-more", panel.scrollTop + panel.clientHeight < panel.scrollHeight - 1);
+    };
+    const onScroll = () => {
+      scrollTop.current = panel.scrollTop;
+      update();
     };
     update();
     // The content grows as sections load, and the panel resizes with the window.
     const observer = new ResizeObserver(update);
     observer.observe(panel);
     if (panel.firstElementChild) observer.observe(panel.firstElementChild);
-    panel.addEventListener("scroll", update, { passive: true });
+    panel.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       observer.disconnect();
-      panel.removeEventListener("scroll", update);
+      panel.removeEventListener("scroll", onScroll);
     };
-  }, [tab]);
+  }, []);
 
   return (
     <div ref={ref} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel} data-profile-panel>
@@ -88,18 +156,17 @@ export interface StatRow {
   value: number | null;
   href?: string;
   onSelect?: () => void;
-  /** The row's tab is the one open. */
-  active?: boolean;
+  /** The tab it opens: the row is marked while that tab is open. */
+  tab?: string;
 }
 
 /**
- * After a stat row opens its tab: the tab content starts at the top, and on
- * a phone or tablet (where the page itself scrolls) the tabs come into view.
+ * After a stat row opens its tab: on a phone or tablet (where the page itself
+ * scrolls) the tabs come into view. On desktop the panel keeps its place, as
+ * it does from the tabs.
  */
 export function revealProfileTabs() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const panel = document.querySelector<HTMLElement>("[data-profile-panel]");
-  if (panel) panel.scrollTop = 0;
   if (window.matchMedia("(max-width: 900px)").matches) {
     document.getElementById("profile-tabs")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
@@ -249,6 +316,7 @@ export function IdentityCard({
 }
 
 function StatLink({ stat }: { stat: StatRow }) {
+  const active = useOpenTab() === stat.tab && stat.tab !== undefined;
   const Icon = stat.icon;
   const label = stat.value === 1 ? stat.label[0] : stat.label[1];
   const content = (
@@ -279,8 +347,8 @@ function StatLink({ stat }: { stat: StatRow }) {
         revealProfileTabs();
       }}
       disabled={!stat.onSelect}
-      aria-current={stat.active || undefined}
-      data-active={stat.active || undefined}
+      aria-current={active || undefined}
+      data-active={active || undefined}
     >
       {content}
     </button>
@@ -460,15 +528,14 @@ export interface TabItem<K extends string> {
  */
 export function ProfileTabs<K extends string>({
   tabs,
-  active,
   onChange,
   label,
 }: {
   tabs: TabItem<K>[];
-  active: K;
   onChange: (key: K) => void;
   label: string;
 }) {
+  const active = useOpenTab();
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ x: number; width: number } | null>(null);
   const [fade, setFade] = useState({ start: false, end: false });

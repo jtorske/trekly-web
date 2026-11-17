@@ -2,9 +2,11 @@
 
 import { Suspense, useCallback, useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { setQueryParam } from "@/lib/useQueryParam";
+import { preloadTrailCatalogue } from "@/lib/useTrailCatalogue";
 import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import { useProfilePhoto } from "@/app/settings/ProfilePhoto";
@@ -30,7 +32,7 @@ import {
   FeaturedBadgeSlots,
   IdentityCard,
   ProfileLayout,
-  ProfilePanel,
+  ProfilePanels,
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
@@ -56,10 +58,10 @@ function OwnerCard({
 
 const TAB_KEYS = ["overview", "activity", "journal", "gear", "trails", "trips"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
+const TAB_CONFIG = { keys: [...TAB_KEYS], fallback: "overview" };
 
 function ProfileContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user } = useAuth();
   // Saving in Settings broadcasts the updated profile, so this stays current.
   const { profile, error, loading, reload } = useProfile();
@@ -99,15 +101,21 @@ function ProfileContent() {
   }, [hikeCount]);
   const [units] = useUnits();
 
-  const requested = searchParams.get("tab");
+  // The Journal tab sums hikes against the trail catalogue; fetch it now, not on first open.
+  useEffect(() => {
+    preloadTrailCatalogue().catch(() => undefined);
+  }, []);
+
   // Settings used to be a tab here; old links and emails still point at it.
   useEffect(() => {
-    if (requested === "settings") router.replace(legacySettingsHref(window.location.hash));
-  }, [requested, router]);
+    if (new URLSearchParams(window.location.search).get("tab") === "settings") {
+      router.replace(legacySettingsHref(window.location.hash));
+    }
+  }, [router]);
 
-  const tab: TabKey = TAB_KEYS.includes(requested as TabKey) ? (requested as TabKey) : "overview";
-  const setTab = (key: TabKey) =>
-    router.replace(key === "overview" ? "/profile" : `/profile?tab=${key}`, { scroll: false });
+  // The open tab lives in the URL and is read only by the tab bar, the panels
+  // and the stat rows (ProfileShell), so a click doesn't re-render this page.
+  const setTab = (key: TabKey) => setQueryParam("tab", key === "overview" ? null : key);
 
   if (loading) return <ProfileSkeleton />;
   if (error || !profile) {
@@ -193,20 +201,21 @@ function ProfileContent() {
       }
       stats={[
         // Every tab's data loads with the page, so switching never waits on a request.
-        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear"), active: tab === "gear" },
-        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails"), active: tab === "trails" },
-        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips"), active: tab === "trips" },
-        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, onSelect: () => setTab("journal"), active: tab === "journal" },
+        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear"), tab: "gear" },
+        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails"), tab: "trails" },
+        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips"), tab: "trips" },
+        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, onSelect: () => setTab("journal"), tab: "journal" },
       ]}
     />
   );
 
   return (
-    <ProfileLayout aside={aside}>
-      <ProfileTabs tabs={tabs} active={tab} onChange={setTab} label="Profile sections" />
+    <ProfileLayout aside={aside} tabs={TAB_CONFIG}>
+      <ProfileTabs tabs={tabs} onChange={setTab} label="Profile sections" />
 
-      <ProfilePanel tab={tab}>
-        {tab === "overview" && (
+      <ProfilePanels
+        panels={{
+          overview: (
           <>
             {isNew && (
               <div className={ui.notice}>
@@ -260,9 +269,9 @@ function ProfileContent() {
               </SectionCard>
             </div>
           </>
-        )}
+          ),
 
-        {tab === "gear" && (
+          gear: (
           <>
             <SectionCard
               id="gear"
@@ -280,15 +289,15 @@ function ProfileContent() {
               <SetupsSection data={setups} units={units} />
             </SectionCard>
           </>
-        )}
+          ),
 
-        {tab === "trails" && (
+          trails: (
           <SectionCard id="trails" title="Saved trails" count={savedCount ?? undefined}>
             <SavedTrailList data={savedTrails} units={units} />
           </SectionCard>
-        )}
+          ),
 
-        {tab === "activity" && (
+          activity: (
           <ActivityTab
             pages={activity}
             owner
@@ -298,21 +307,22 @@ function ProfileContent() {
             privacy={privacy}
             onPrivacy={setPrivacy}
           />
-        )}
+          ),
 
-        {tab === "journal" && <JournalTab
+          journal: <JournalTab
             hikes={hikes.loading ? null : hikes.logs}
             owner
             units={units}
             undatedCaption={undatedLabel(user?.created_at, false)}
-          />}
+          />,
 
-        {tab === "trips" && (
+          trips: (
           <SectionCard id="trips" title="Trips" count={tripCount ?? undefined}>
             <TripsSection data={plans} />
           </SectionCard>
-        )}
-      </ProfilePanel>
+          ),
+        }}
+      />
       {pickingBadges && featured && (
         <BadgePicker
           logs={hikes.logs}
