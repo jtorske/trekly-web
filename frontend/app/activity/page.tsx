@@ -19,6 +19,7 @@ import { toast } from "@/lib/toast";
 import { useNudge } from "@/lib/useNudge";
 import PickCard from "./PickCard";
 import PostCard from "./PostCard";
+import FindHikers from "./FindHikers";
 import { HikersYouMightKnow, ProfileCard, RecentlyEarned, TrendingTrails } from "./Sidebar";
 import styles from "./activity.module.css";
 
@@ -377,9 +378,10 @@ export default function ActivityPage() {
 
         <aside className={styles.right} aria-label="Around Trekly">
           <div className={styles.rightCard}>{card}</div>
+          {signedIn && <FindHikers />}
           <TrendingTrails />
           {signedIn && <RecentlyEarned />}
-          <HikersYouMightKnow />
+          <HikersYouMightKnow signedIn={signedIn} homeProvince={profile?.home_province ?? null} />
         </aside>
       </div>
     </main>

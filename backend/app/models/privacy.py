@@ -63,6 +63,10 @@ class ProfileSettings(Base):
     # "Hide my followers and following lists": the counts still show, the
     # lists open only for them (migration b3d7f2a9c4e1).
     hide_follow_lists = Column(Boolean, nullable=False, default=False, server_default=false())
+    # "Let people find me in search": a private profile appears in people
+    # search (name, username and photo only) only with this on. Public
+    # profiles are always searchable (migration e6b2d8a4c0f7).
+    findable_in_search = Column(Boolean, nullable=False, default=False, server_default=false())
     public_notice_pending = Column(Boolean, nullable=False, default=False, server_default=false())
     # When they last chose Public or Private themselves; the setup flow can't
     # finish or be skipped without it (migration c7e3a9f1d5b2). API-only.

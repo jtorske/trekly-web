@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Search } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import AccountMenu from "./AccountMenu";
 import Avatar from "./Avatar";
@@ -122,6 +123,14 @@ export default function Navbar() {
             {link.label}
           </Link>
         ))}
+        <Link
+          href="/search"
+          className={bellStyles.bell}
+          aria-label="Search trails and hikers"
+          aria-current={pathname === "/search" ? "page" : undefined}
+        >
+          <Search size={20} aria-hidden="true" />
+        </Link>
         {account}
       </div>
 

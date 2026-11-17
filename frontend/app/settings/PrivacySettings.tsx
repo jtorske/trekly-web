@@ -219,6 +219,19 @@ export default function PrivacySettingsForm({ onEditProfile }: { onEditProfile: 
       </fieldset>
 
       <fieldset className={styles.switchGroup}>
+        <legend className={styles.switchLegend}>Search</legend>
+        <Switch
+          id="privacy-findable"
+          label="Let people find me in search"
+          hint="Signed-in hikers can find you by name or username and ask to follow you. They see only your name, username and photo until you approve them. Off until you turn it on."
+          disabledReason={settings.is_private ? undefined : "Your profile is public, so hikers can always find it in search."}
+          checked={settings.is_private ? settings.findable_in_search : true}
+          disabled={!settings.is_private}
+          onChange={(value) => change("findable_in_search", value)}
+        />
+      </fieldset>
+
+      <fieldset className={styles.switchGroup}>
         <legend className={styles.switchLegend}>Followers</legend>
         <Switch
           id="privacy-follow-lists"

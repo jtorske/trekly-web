@@ -13,6 +13,7 @@ from app.routers import (
     availability,
     follows,
     gear,
+    hiker_search,
     me_account,
     me_alerts,
     me_featured_badges,
@@ -77,6 +78,7 @@ app.include_router(activity.router)
 app.include_router(activity.profile_router)
 app.include_router(activity.me_router)
 app.include_router(follows.router)
+app.include_router(hiker_search.router)
 app.include_router(notifications.router)
 app.include_router(availability.router)
 app.include_router(gear.router)

@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <main className={styles.page}>
       <article className={styles.sheet}>
         <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.updated}>Last updated: November 10, 2026</p>
+        <p className={styles.updated}>Last updated: November 17, 2026</p>
         <p className={styles.summary}>
           Trekly collects only what it needs to run your account, your trip plans, and your permit
           alerts. It does not sell your personal information or show you ads based on it.
@@ -147,6 +147,21 @@ export default function PrivacyPage() {
           only), unless you turn on Hide my followers and following lists (off by default). You can
           remove a follower at any time, and they aren&apos;t told. If you make a private profile
           public, any waiting requests are approved.
+        </p>
+        <p>
+          Signed-in users can search for other hikers by username or display name. A public profile
+          always appears in search. A private profile appears only if you turn on Let people find me
+          in search (off by default), and then only with your username, display name and profile
+          picture, so people can ask to follow you. When your profile is public, or for followers
+          you&apos;ve approved, a result can also show what your profile already shows them: your
+          rank, your home province, and how many trails you&apos;ve both hiked (only if they can see
+          your Trail Journal). Results are ordered by
+          who they follow and what you have in common, using only what they can see. If you&apos;ve
+          turned on Show me in community features, Trekly may also suggest you on the Activity page
+          to hikers from your home province (if you show it) or who&apos;ve hiked the same trails.
+          Profiles we&apos;ve hidden and accounts without a username never appear in search or
+          suggestions. We don&apos;t save your searches, though like any request they can appear
+          briefly in our hosting providers&apos; server logs.
         </p>
         <p>
           If you turn on Share my activity in the feed (off by default), hikes you choose to share,

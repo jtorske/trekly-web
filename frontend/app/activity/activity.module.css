@@ -1191,3 +1191,87 @@
     transition: none;
   }
 }
+
+/* ------------------------------------------------------------- find hikers */
+
+.finder {
+  position: relative;
+}
+
+.finderBar {
+  position: relative;
+}
+
+.finderIcon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  color: var(--soft-ink);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.finderInput {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: white;
+  padding: 0.45rem 0.9rem 0.45rem 2.2rem;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.finderInput:focus {
+  border-color: var(--color-rust);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-rust) 22%, transparent);
+}
+
+.finderResults {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  left: 0;
+  border: 1px solid var(--hair);
+  border-radius: 0.9rem;
+  background: var(--color-cream);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 18%, transparent);
+  padding: 0.35rem 0.75rem 0.5rem;
+}
+
+.finderList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.finderNote {
+  padding: 0.6rem 0;
+  color: var(--soft-ink);
+  font-size: 0.88rem;
+}
+
+.finderSkeleton {
+  height: 2.6rem;
+  margin: 0.4rem 0;
+  border-radius: 0.6rem;
+}
+
+.finderAll {
+  display: block;
+  border-top: 1px solid var(--hair);
+  margin-top: 0.2rem;
+  padding: 0.55rem 0 0.15rem;
+  color: var(--color-rust-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.finderAll:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

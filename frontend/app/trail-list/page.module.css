@@ -44,6 +44,23 @@
   padding: 0.4rem 0.4rem 0.4rem 1.25rem;
 }
 
+/* "@name" typed into the box: a way to people search. */
+.hikerHint {
+  margin: 0.5rem 0 0 1.25rem;
+  color: var(--color-muted-text);
+  font-size: 0.88rem;
+}
+
+.hikerHintLink {
+  color: var(--color-rust-text);
+  font-weight: 700;
+}
+
+.hikerHintLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .searchInput {
   min-width: 0;
   flex: 1;

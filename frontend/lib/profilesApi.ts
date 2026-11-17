@@ -37,6 +37,8 @@ export interface PrivacySettings {
   share_activity: boolean;
   /** "Hide my followers and following lists": counts still show. */
   hide_follow_lists: boolean;
+  /** "Let people find me in search": a private profile appears in people search (name, username, photo). Public ones always do. */
+  findable_in_search: boolean;
   /** The one-time "profiles can be public now" banner, for existing users. */
   public_notice_pending: boolean;
   username: string | null;

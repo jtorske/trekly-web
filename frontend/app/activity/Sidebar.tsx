@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Mountain } from "lucide-react";
 import Avatar from "@/components/Avatar";
+import HikerRow from "@/components/social/HikerRow";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import RankEmblem from "@/components/RankEmblem";
 import StreakFlame from "@/components/StreakFlame";
@@ -12,8 +13,11 @@ import ui from "@/components/ui.module.css";
 import { latestEarned, type TrendingTrail } from "@/lib/activity";
 import { getTrending } from "@/lib/activityApi";
 import type { Profile } from "@/lib/accountApi";
+import { suggestionReason, type HikerResult } from "@/lib/hikerSearch";
+import { getSuggestedHikers } from "@/lib/hikerSearchApi";
 import { categorySlug, earnedCount, earnedWhen } from "@/lib/milestones";
 import { formatHikeDate } from "@/lib/publicProfile";
+import { province as provinceFor } from "@/lib/provinces";
 import { progressLabel } from "@/lib/rank";
 import { useMilestones } from "@/lib/useMilestones";
 import { useRank } from "@/lib/useRank";
@@ -199,9 +203,34 @@ export function RecentlyEarned() {
 }
 
 /**
- * "Hikers you might know": the slot for suggestions once following exists.
- * There's nothing to suggest from yet, so it renders nothing.
+ * "Hikers you might know": people with trails in common or from your home
+ * province who've turned on community features, and whom you don't follow
+ * yet (app/hiker_search.py). Nothing shows until there's someone to suggest.
  */
-export function HikersYouMightKnow() {
-  return null;
+export function HikersYouMightKnow({ signedIn, homeProvince }: { signedIn: boolean; homeProvince: string | null }) {
+  const [hikers, setHikers] = useState<HikerResult[] | null>(null);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const controller = new AbortController();
+    getSuggestedHikers(controller.signal)
+      .then((body) => setHikers(body.items))
+      .catch(() => setHikers([]));
+    return () => controller.abort();
+  }, [signedIn]);
+
+  if (!signedIn || !hikers || hikers.length === 0) return null;
+  const place = provinceFor(homeProvince)?.name ?? null;
+  return (
+    <section className={styles.sideCard} aria-labelledby="might-know-title">
+      <h2 id="might-know-title" className={styles.sideTitle}>
+        Hikers you might know
+      </h2>
+      <ul className={styles.finderList}>
+        {hikers.map((hiker) => (
+          <HikerRow key={hiker.username} hiker={hiker} compact reason={suggestionReason(hiker, place)} />
+        ))}
+      </ul>
+    </section>
+  );
 }

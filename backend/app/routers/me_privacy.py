@@ -36,6 +36,7 @@ class PrivacyOut(BaseModel):
     show_visit_streak: bool
     share_activity: bool
     hide_follow_lists: bool
+    findable_in_search: bool
     public_notice_pending: bool
     username: str | None
     hidden_by_moderators: bool
@@ -57,6 +58,7 @@ class PrivacyUpdate(BaseModel):
     show_visit_streak: bool | None = None
     share_activity: bool | None = None
     hide_follow_lists: bool | None = None
+    findable_in_search: bool | None = None
     # The one-time notice can only be dismissed, never brought back.
     public_notice_pending: Literal[False] | None = None
 

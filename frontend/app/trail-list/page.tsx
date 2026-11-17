@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Suspense,
   useCallback,
@@ -59,6 +60,7 @@ import {
 } from "@/lib/trailsApi";
 import type { UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
+import { hikerSearchHint } from "@/lib/hikerSearch";
 import TrailCard, { TrailCardSkeleton } from "./TrailCard";
 import styles from "./page.module.css";
 
@@ -367,6 +369,7 @@ function ExploreContent() {
   const filtersId = useId();
 
   const [input, setInput] = useState(q);
+  const hikerHint = hikerSearchHint(input);
   // Set while the box holds typing that hasn't reached the URL yet.
   const [typing, setTyping] = useState(false);
   const [seenQ, setSeenQ] = useState(q);
@@ -716,6 +719,14 @@ function ExploreContent() {
                 Search
               </button>
             </form>
+            {hikerHint && (
+              <p className={styles.hikerHint}>
+                Looking for a hiker?{" "}
+                <Link href={hikerHint} className={styles.hikerHintLink}>
+                  Search people <span aria-hidden="true">→</span>
+                </Link>
+              </p>
+            )}
 
             {/* Shortcuts into the same filters as the panel. */}
             <div className={styles.quickChips} role="group" aria-label="Quick filters">

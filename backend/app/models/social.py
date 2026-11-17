@@ -38,6 +38,24 @@ class Follow(Base):
     accepted_at = Column(DateTime(timezone=True))
 
 
+class Block(Base):
+    """One hiker blocking another (migration e6b2d8a4c0f7). People search and
+    "Hikers you might know" leave out blocks in either direction. Only the
+    API writes it; a client reads only the rows where it's the blocker."""
+
+    __tablename__ = "blocks"
+    __table_args__ = (
+        PrimaryKeyConstraint("blocker_id", "blocked_id", name="blocks_pkey"),
+        CheckConstraint("blocker_id <> blocked_id", name="blocks_not_self_check"),
+        Index("blocks_blocked_idx", "blocked_id"),
+    )
+
+    # Same values as auth.users.id; the FKs to auth.users are added in the migration.
+    blocker_id = Column(Uuid, nullable=False)
+    blocked_id = Column(Uuid, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
 NOTIFICATION_KINDS = ("new_follower", "follow_request", "request_approved", "high_five", "comment")
 
 

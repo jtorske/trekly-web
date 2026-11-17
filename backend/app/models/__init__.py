@@ -23,7 +23,7 @@ from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileModeration, ProfileReport, ProfileSettings
 from app.models.setup import GearSetup, GearSetupItem
 from app.models.signup_email import SignupEmailRequest
-from app.models.social import Follow, Notification, NotificationPreferences
+from app.models.social import Block, Follow, Notification, NotificationPreferences
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto, TrailPhotoCandidates, TrailPhotoReview, TrailRouteMap
 from app.models.trail_campground import TrailBookingSystem, TrailCampground
@@ -43,6 +43,7 @@ __all__ = [
     "AvailabilityCache",
     "BackcountryPark",
     "BackcountrySite",
+    "Block",
     "CatalogBrand",
     "CatalogBrandAlias",
     "CatalogCategory",

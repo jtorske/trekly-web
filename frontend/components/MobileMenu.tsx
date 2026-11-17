@@ -14,6 +14,7 @@ import {
   Bell,
   Compass,
   LogIn,
+  Search,
   UserPlus,
   X,
   type LucideIcon,
@@ -241,6 +242,10 @@ export default function MobileMenu({
               {link.label}
             </Link>
           ))}
+          <Link href="/search" className={row} {...currentProps("/search")} onClick={requestClose}>
+            <RowIcon icon={Search} />
+            Search
+          </Link>
           {identity && (
             <Link
               href="/notifications"
