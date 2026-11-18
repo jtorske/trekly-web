@@ -229,6 +229,10 @@
 
 /* Fact bank */
 
+.intro {
+  margin-bottom: 1.1rem;
+}
+
 .factText {
   margin: 0;
   max-width: 40rem;

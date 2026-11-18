@@ -424,6 +424,17 @@ def test_running_twice_never_duplicates_drafts_or_posts(session_factory, trails)
     assert len(outbox.sent) <= 1  # one digest a day at most
 
 
+def test_a_rerun_drafts_nothing_more_the_same_day(session_factory, trails):
+    db = session_factory()
+    for name in ("Falls Four", "Lake Low"):
+        db.get(Trail, trails[name]).created_at = NOW - timedelta(days=2)
+    db.commit()
+    cfg = config(**{"types.conditions.enabled": False})
+    assert "new_on_trekly" in run(db, cfg).drafted
+    assert run(db, cfg, now=NOW + timedelta(hours=1)).drafted == []
+    assert count(db, TreklyPostDraft, TreklyPostDraft.post_type == "new_on_trekly") == 1
+
+
 def test_nothing_is_published_without_auto_publish_or_approval(session_factory, trails):
     db = session_factory()
     make_official(db)

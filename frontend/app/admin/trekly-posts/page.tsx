@@ -582,7 +582,7 @@ function FactBank() {
           </button>
         )}
       </div>
-      <p className={styles.muted}>
+      <p className={`${styles.muted} ${page.intro}`}>
         Fun fact posts use approved facts only, word for word, each linking its source. Changing a fact&apos;s text or
         link un-approves it.
         {facts && ` ${facts.length - waiting} approved, ${waiting} waiting for review.`}

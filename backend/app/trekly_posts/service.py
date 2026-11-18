@@ -279,6 +279,11 @@ def run_daily(db: Session, config: PostsConfig, *, now: datetime, client: writer
             type_cfg = config.type(name)
             if not type_cfg.runs_on(today):
                 continue
+            if db.scalar(select(TreklyPostDraft.id).where(TreklyPostDraft.post_type == name,
+                                                          TreklyPostDraft.run_date == today).limit(1)):
+                # One draft per type a day, however often the run happens.
+                report.skipped.append(name)
+                continue
             try:
                 candidate = generate(ctx)
             except Exception as error:  # one broken generator mustn't stop the rest
