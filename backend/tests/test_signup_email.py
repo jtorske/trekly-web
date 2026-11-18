@@ -235,7 +235,10 @@ def test_the_address_is_matched_without_case_or_spaces(ready, outbox):
 
 def test_right_after_sign_up_supabases_own_confirmation_isnt_doubled(ready, session_factory, supabase):
     db = session_factory()
-    add_account(db, "fresh@example.com", confirmed=False, confirmation_sent_at=NOW - timedelta(seconds=20))
+    # The real clock, not NOW: the route compares with it, and NOW is set at
+    # collection, which can be minutes before this test runs in the full suite.
+    add_account(db, "fresh@example.com", confirmed=False,
+                confirmation_sent_at=datetime.now(timezone.utc) - timedelta(seconds=20))
     db.close()
     ask(ready, "fresh@example.com", reason="signup")
     assert supabase.resent == []
