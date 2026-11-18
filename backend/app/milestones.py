@@ -514,17 +514,19 @@ def setup_base_weight_kg(items: Iterable[UserGearItem]) -> float | None:
     return grams / 1000
 
 
+def hike_fact(log: HikeLog) -> Hike:
+    """One journal entry as the rules read it (its trail must be loaded)."""
+    return Hike(
+        log.trail, log.hiked_on, bool(log.note), bool(log.photo_path), log.created_at.date(),
+        verified=bool(log.verified), track_nights=log.nights,
+    )
+
+
 def gather(db: Session, user_id: UUID) -> Facts:
     """Everything the rules read, for one user."""
     logs = db.scalars(select(HikeLog).where(HikeLog.user_id == user_id).options(joinedload(HikeLog.trail))).all()
     facts = Facts(
-        hikes=[
-            Hike(
-                log.trail, log.hiked_on, bool(log.note), bool(log.photo_path), log.created_at.date(),
-                verified=bool(log.verified), track_nights=log.nights,
-            )
-            for log in logs
-        ],
+        hikes=[hike_fact(log) for log in logs],
         plans=db.scalar(select(func.count()).select_from(TripPlan).where(TripPlan.user_id == user_id)) or 0,
         alerts=db.scalar(
             select(func.count()).select_from(AvailabilityAlert).where(AvailabilityAlert.user_id == user_id)

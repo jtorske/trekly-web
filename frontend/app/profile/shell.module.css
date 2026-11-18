@@ -413,90 +413,6 @@
   justify-content: center;
 }
 
-.divider {
-  border: 0;
-  border-top: 1px solid var(--hair);
-}
-
-.stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin: -0.5rem;
-}
-
-.stat {
-  display: flex;
-  width: 100%;
-  min-height: 2.75rem;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: 0.75rem;
-  padding: 0.5rem;
-  color: var(--ink);
-  font-size: 0.94rem;
-  text-align: left;
-  transition: background-color 120ms ease;
-}
-
-.stat:not(:disabled) {
-  cursor: pointer;
-}
-
-.stat:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-olive) 12%, transparent);
-}
-
-.stat:focus-visible {
-  outline: 2px solid var(--color-rust);
-  outline-offset: 1px;
-}
-
-/* The row whose tab is open. */
-.stat[data-active] {
-  background: color-mix(in srgb, var(--color-olive) 18%, transparent);
-  box-shadow: inset 3px 0 0 var(--color-olive);
-}
-
-.statChevron {
-  flex-shrink: 0;
-  margin-left: -0.35rem;
-  color: var(--muted);
-  opacity: 0.6;
-  transition: transform 120ms ease, opacity 120ms ease;
-}
-
-.stat:hover .statChevron,
-.stat[data-active] .statChevron {
-  opacity: 1;
-  transform: translateX(2px);
-}
-
-.stat:disabled {
-  cursor: default;
-}
-
-.statIcon {
-  flex-shrink: 0;
-  color: var(--color-olive);
-}
-
-.statLabel {
-  flex: 1;
-  min-width: 0;
-}
-
-.statValue {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.statSkeleton {
-  width: 1.5rem;
-  height: 1rem;
-  border-radius: 0.25rem;
-}
-
 .joined {
   display: flex;
   align-items: center;
@@ -676,13 +592,6 @@
   background: color-mix(in srgb, var(--color-rust) 10%, transparent);
 }
 
-.overviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  align-items: start;
-  gap: 1.5rem;
-}
-
 /* Skeletons, sized like what they stand in for. */
 
 .skeletonAvatar {
@@ -705,10 +614,6 @@
 .skeletonButton {
   height: 2.75rem;
   border-radius: 999px;
-}
-
-.skeletonStat {
-  height: 2.75rem;
 }
 
 .skeletonTabs {
@@ -770,19 +675,6 @@
     gap: 1rem;
   }
 
-  .stats {
-    gap: 0;
-  }
-
-  .stat {
-    min-height: 2rem;
-    padding: 0.25rem 0.5rem;
-  }
-
-  .skeletonStat {
-    height: 2rem;
-  }
-
   .footer {
     margin-top: -0.25rem;
   }
@@ -838,55 +730,6 @@
     font-size: 1.15rem;
   }
 
-  .divider {
-    display: none;
-  }
-
-  .stats {
-    display: grid;
-    /* One row however many stats are public. */
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
-    gap: 0.5rem;
-    margin: 0;
-  }
-
-  .stat {
-    height: 100%;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    border: 1px solid var(--hair);
-    padding: 0.5rem 0.25rem;
-    font-size: 0.75rem;
-    text-align: center;
-  }
-
-  .statIcon,
-  .statChevron {
-    display: none;
-  }
-
-  .stat[data-active] {
-    border-color: var(--color-olive);
-    box-shadow: none;
-  }
-
-  .statLabel {
-    flex: none;
-    order: 2;
-    color: var(--muted);
-    line-height: 1.2;
-  }
-
-  .statValue {
-    order: 1;
-    font-family: var(--display);
-    font-size: 1.35rem;
-    line-height: 1;
-  }
-
   .section {
     padding: 1rem;
   }
@@ -901,9 +744,7 @@
 @media (prefers-reduced-motion: reduce) {
   .badgeLink,
   .homeTrigger,
-  .statChevron,
   .indicator,
-  .stat,
   .tab,
   .tabBar::before,
   .tabBar::after {

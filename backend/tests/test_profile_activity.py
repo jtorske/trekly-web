@@ -251,3 +251,90 @@ def test_deleting_a_hike_post_takes_its_folded_milestones(client, trails, person
     db.close()
     # The hike stays in the journal.
     assert client.get("/api/me/hike-logs", headers=alice["headers"]).json()
+
+
+# ---------------------------------------------- hikes that never posted
+
+
+def test_hikes_logged_while_sharing_was_off_post_when_the_owner_opens_the_tab(client, trails, person):
+    """The dialog doesn't send `share` while sharing is off, so nothing posts on save.
+    The owner's Activity tab posts them, only for the owner until sharing is on,
+    dated by the hike, with the first hike's milestone folded into it."""
+    alice = person("alice", share=False)
+    log(client, alice, trails[1], hiked_on="2026-09-01", share=None)
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=None)  # logged second, hiked first
+    assert feed(client)["items"] == []
+
+    body = mine(client, alice)
+    hikes = [item for item in body["items"] if item["kind"] == "hike"]
+    assert [h["hike"]["trail"]["id"] for h in hikes] == [str(trails[1]), str(trails[0])]
+    assert all(item["only_you"] for item in body["items"])
+    assert hikes[0]["posted_at"].startswith("2026-09-01") and hikes[1]["posted_at"].startswith("2026-08-01")
+    earliest = [e["milestone"]["id"] for e in hikes[1]["earned"] if e["kind"] == "milestone"]
+    assert "first-hike" in earliest
+    assert visit(client, "alice", expect=404)
+
+    set_privacy(client, alice, share_activity=True)
+    assert [item["id"] for item in visit(client, "alice")["items"]] == [item["id"] for item in body["items"]]
+    assert {item["id"] for item in feed(client)["items"]} == {item["id"] for item in body["items"]}
+
+
+def test_past_hikes_post_too_before_the_dated_ones(client, trails, person):
+    alice = person("alice")
+    response = client.post("/api/me/hike-logs/past", json={"trail_ids": [str(t) for t in trails[1:3]]},
+                           headers=alice["headers"])
+    assert response.status_code == 201
+    log(client, alice, trails[0], hiked_on="2026-07-01")
+
+    body = mine(client, alice)
+    hikes = [item for item in body["items"] if item["kind"] == "hike"]
+    assert len(hikes) == 3
+    # The dated hike posted when it was saved, after the past hikes had earned "First steps".
+    dated = next(h for h in hikes if h["hike"]["trail"]["id"] == str(trails[0]))
+    assert "first-hike" not in [e["milestone"]["id"] for e in dated["earned"] if e["kind"] == "milestone"]
+    assert "first-hike" in folded(body)
+
+
+def test_the_backfill_runs_once(client, trails, person, session_factory):
+    from app.activity import backfill_posts
+    from tests.test_activity import TODAY
+
+    alice = person("alice", share=False)
+    for trail in trails[:3]:
+        log(client, alice, trail, share=None)
+    first = mine(client, alice)
+    assert mine(client, alice)["total"] == first["total"]
+    db = session_factory()
+    assert backfill_posts(db, alice["id"], TODAY) == 0
+    db.close()
+
+
+def test_unshared_and_deleted_hikes_stay_off(client, trails, person):
+    alice = person("alice")
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=False)  # unticked
+    log(client, alice, trails[1], hiked_on="2026-08-02")
+    body = mine(client, alice)
+    hikes = [item for item in body["items"] if item["kind"] == "hike"]
+    assert [h["hike"]["trail"]["id"] for h in hikes] == [str(trails[1])]
+
+    assert client.delete(f"/api/activity/{hikes[0]['id']}", headers=alice["headers"]).status_code == 204
+    assert [item for item in mine(client, alice)["items"] if item["kind"] == "hike"] == []
+
+    # Ticking the box again posts it.
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=True)
+    assert [h["hike"]["trail"]["id"] for h in mine(client, alice)["items"] if h["kind"] == "hike"] == [str(trails[0])]
+
+
+def test_future_dated_hikes_wait(client, trails, person, session_factory):
+    """The API refuses future dates, but a browser can edit its own row."""
+    from datetime import date
+
+    from app.models.hike_log import HikeLog
+
+    alice = person("alice", share=False)
+    log(client, alice, trails[0], share=None)
+    db = session_factory()
+    db.scalar(select(HikeLog).where(HikeLog.user_id == alice["id"])).hiked_on = date(2026, 12, 24)
+    db.commit()
+    db.close()
+    assert mine(client, alice)["items"] == []

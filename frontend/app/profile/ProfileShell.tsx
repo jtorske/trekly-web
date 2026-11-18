@@ -4,7 +4,7 @@ import AccountBadge from "@/components/AccountBadge";
 import type { AccountLabel } from "@/lib/accountLabels";
 import { Activity, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, MapPin, Pencil, type LucideIcon } from "lucide-react";
+import { CalendarDays, MapPin, Pencil } from "lucide-react";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
 import { BadgeCardBody, CardLine, DetailCard } from "@/components/MilestoneCard";
@@ -34,8 +34,8 @@ export interface ProfileTabConfig {
 const TabConfigContext = createContext<ProfileTabConfig | null>(null);
 
 /**
- * The open tab, from ?tab= in the URL. Only the tab bar, the panels and the
- * stat rows read it, so a click repaints those and not the page (which would
+ * The open tab, from ?tab= in the URL. Only the tab bar and the panels read
+ * it, so a click repaints those and not the page (which would
  * hand every hidden panel new props to render before it could show).
  */
 function useOpenTab(): string | null {
@@ -148,31 +148,6 @@ function ProfilePanel({ tab, children }: { tab: string; children: ReactNode }) {
   );
 }
 
-export interface StatRow {
-  key: string;
-  icon: LucideIcon;
-  /** Singular and plural, e.g. ["Gear item", "Gear items"]. */
-  label: [string, string];
-  /** null while loading. */
-  value: number | null;
-  href?: string;
-  onSelect?: () => void;
-  /** The tab it opens: the row is marked while that tab is open. */
-  tab?: string;
-}
-
-/**
- * After a stat row opens its tab: on a phone or tablet (where the page itself
- * scrolls) the tabs come into view. On desktop the panel keeps its place, as
- * it does from the tabs.
- */
-export function revealProfileTabs() {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (window.matchMedia("(max-width: 900px)").matches) {
-    document.getElementById("profile-tabs")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  }
-}
-
 export function IdentityCard({
   avatar,
   name,
@@ -191,7 +166,6 @@ export function IdentityCard({
   streakGrew = false,
   badges,
   action,
-  stats,
   footer,
 }: {
   avatar: ReactNode;
@@ -219,7 +193,6 @@ export function IdentityCard({
   streakGrew?: boolean;
   badges?: ReactNode;
   action?: ReactNode;
-  stats: StatRow[];
   footer?: ReactNode;
 }) {
   const home = findProvince(province);
@@ -298,61 +271,8 @@ export function IdentityCard({
 
       {action && <div className={styles.action}>{action}</div>}
 
-      {stats.length > 0 && (
-        <>
-          <hr className={styles.divider} />
-          <ul className={styles.stats} aria-label="Stats">
-            {stats.map((stat) => (
-              <li key={stat.key}>
-                <StatLink stat={stat} />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
       {footer && <div className={styles.footer}>{footer}</div>}
     </div>
-  );
-}
-
-function StatLink({ stat }: { stat: StatRow }) {
-  const active = useOpenTab() === stat.tab && stat.tab !== undefined;
-  const Icon = stat.icon;
-  const label = stat.value === 1 ? stat.label[0] : stat.label[1];
-  const content = (
-    <>
-      <Icon className={styles.statIcon} size={18} aria-hidden="true" />
-      <span className={styles.statLabel}>{label}</span>
-      {stat.value === null ? (
-        <span className={`${ui.skeleton} ${styles.statSkeleton}`} aria-label="Loading" />
-      ) : (
-        <span className={styles.statValue}>{stat.value}</span>
-      )}
-      <ChevronRight className={styles.statChevron} size={16} aria-hidden="true" />
-    </>
-  );
-  if (stat.href) {
-    return (
-      <Link href={stat.href} className={styles.stat}>
-        {content}
-      </Link>
-    );
-  }
-  return (
-    <button
-      type="button"
-      className={styles.stat}
-      onClick={() => {
-        stat.onSelect?.();
-        revealProfileTabs();
-      }}
-      disabled={!stat.onSelect}
-      aria-current={active || undefined}
-      data-active={active || undefined}
-    >
-      {content}
-    </button>
   );
 }
 
@@ -667,12 +587,6 @@ export function ProfileSkeleton() {
                 </div>
               </div>
               <div className={`${ui.skeleton} ${styles.skeletonButton}`} />
-              <hr className={styles.divider} />
-              <div className={styles.stats}>
-                {[0, 1, 2, 3].map((row) => (
-                  <div key={row} className={`${ui.skeleton} ${styles.skeletonStat}`} />
-                ))}
-              </div>
             </div>
           </aside>
           <div className={styles.pane}>

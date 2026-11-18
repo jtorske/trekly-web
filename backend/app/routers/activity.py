@@ -33,7 +33,7 @@ from app.account_labels import AccountLabelName, labels_for, may_interact, real_
 from app.picks import SPARSE_BELOW, PickKind, picks, real_posts_this_week
 from app.trail_photos import public_photo_url
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, activity_open, can_share, folded_where, following_where, is_visible,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, backfill_posts, can_share, folded_where, following_where, is_visible,
     province_where, readable_query,
 )
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
@@ -540,6 +540,10 @@ def delete_post(post_id: UUID, user: CurrentUser = Depends(get_current_user), db
     if post is None or post.user_id != user.id:
         raise HTTPException(status_code=404, detail="Post not found")
     if post.kind == "hike":
+        # Off the feed for good: the profile's backfill won't post it again.
+        log = db.get(HikeLog, post.hike_log_id)
+        if log is not None:
+            log.unshared = True
         for child in db.scalars(select(ActivityPost).where(
             ActivityPost.user_id == user.id,
             ActivityPost.kind != "hike",
@@ -602,6 +606,9 @@ def my_activity(
     """The owner's Activity tab on /profile: all their posts, shown to others
     or not (those are marked only_you). `sharing`: whether others can see them."""
     response.headers.update(NO_STORE)
+    if cursor is None:
+        # Hikes that never posted (sharing was off, onboarding, past hikes) post now.
+        backfill_posts(db, user.id, today)
     query = _cards(today, user.id).where(ActivityPost.user_id == user.id)
     items, next_cursor = _page(db, query, cursor, limit, user, today)
     return ProfileActivityPage(

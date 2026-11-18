@@ -20,7 +20,7 @@ from sqlalchemy import (
     Boolean, CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, Numeric, Text, UniqueConstraint, Uuid,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from sqlalchemy.sql import false, func
 
 from app.database import Base
 
@@ -59,6 +59,9 @@ class HikeLog(Base):
     match_score = Column(Numeric(4, 3))
     # The track's own nights for an overnight trip; null means the trail's typical nights.
     nights = Column(Integer)
+    # The owner unticked "Share to Activity" or deleted the hike's post: it's
+    # never posted again on its own (app/activity.py backfill_posts).
+    unshared = Column(Boolean, nullable=False, default=False, server_default=false())
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

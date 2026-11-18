@@ -3,10 +3,15 @@
 Posting (only from real activity, see app/models/activity.py):
 - Saving a hike in the journal dialog with "Share to Activity" ticked
   posts it, along with any milestone or rank that hike earned. Unticking
-  it later removes the hike's post. Undated past hikes added in bulk
-  (onboarding, "Add past hikes") never post, and nothing posts while the
-  owner can't share (see can_share), so a post never waits, unseen, to
-  appear when a setting changes.
+  it later (or deleting its post) removes the post and marks the hike
+  unshared.
+- Every other hike is posted when its owner next opens their profile's
+  Activity tab (backfill_posts): hikes logged while sharing was off,
+  onboarding picks and "Add past hikes". Their posts are dated when the
+  hike was, so they sit in the feed in order rather than at the top, and
+  they carry the milestones and ranks the hike earned, found by replaying
+  the journal. While the owner can't share, only they see these posts;
+  turning sharing on shows them (the profile's banner says so).
 - Planning and gear milestones are never posted: they'd say something
   about trip plans, alerts or gear rather than a hike.
 
@@ -33,15 +38,17 @@ A milestone or rank earned by a hike folds into that hike's post (its
 only when they can't, e.g. after the hike post was deleted or unshared.
 """
 
-from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from dataclasses import dataclass, replace
+from datetime import date, datetime, time, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import and_, case, exists, false, or_, select
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, aliased, joinedload
 
 from app.account_labels import is_label
-from app.milestones import earned_ids, gather
+from app.milestone_dates import facts_on, other_dates
+from app.milestones import Facts, earned_ids, gather, hike_fact
 from app.milestones_config import ACTIVE
 from app.models.account import Profile
 from app.models.activity import ActivityPost
@@ -83,7 +90,10 @@ class Standing:
 
 
 def standing(db: Session, user_id: UUID) -> Standing:
-    facts = gather(db, user_id)
+    return _standing(gather(db, user_id))
+
+
+def _standing(facts: Facts) -> Standing:
     return Standing(milestones=frozenset(earned_ids(facts)), rank_level=rank_for(score(facts).total).level)
 
 
@@ -103,14 +113,15 @@ def after_hike_saved(
     if share is None:
         return
     existing = hike_post(db, log.id)
+    log.unshared = not share
     if not share:
         if existing is not None:
             db.delete(existing)
-            db.commit()
+        db.commit()
         return
-    if not can_share(db, user_id):
-        return
-    if log.hiked_on is not None and log.hiked_on > today + FUTURE_SLACK:
+    if not can_share(db, user_id) or _future(log, today):
+        # Posted later, by backfill_posts.
+        db.commit()
         return
     now = _now()
     if existing is None:
@@ -135,6 +146,95 @@ def after_hike_saved(
             db.add(ActivityPost(user_id=user_id, kind="rank", hike_log_id=log.id, rank_level=after.rank_level,
                                 created_at=now + timedelta(microseconds=2)))
     db.commit()
+
+
+def _future(log: HikeLog, today: date) -> bool:
+    return log.hiked_on is not None and log.hiked_on > today + FUTURE_SLACK
+
+
+def _hike_day(log: HikeLog) -> date:
+    return log.hiked_on or log.created_at.date()
+
+
+def _aware(moment: datetime) -> datetime:
+    return moment if moment.tzinfo else moment.replace(tzinfo=timezone.utc)
+
+
+def _posted_at(log: HikeLog) -> datetime:
+    """A backfilled hike post's time: the evening of the hike (as the demo
+    accounts' are), but never after it was logged; an undated past hike, when
+    it was logged."""
+    logged = _aware(log.created_at)
+    if log.hiked_on is None:
+        return logged
+    return min(datetime.combine(log.hiked_on, time(19, 30), tzinfo=timezone.utc), logged)
+
+
+def unposted_hikes(user_id: UUID, today: date):
+    """Their hikes that backfill_posts would post: no post, not unshared, not future-dated."""
+    return select(HikeLog.id).where(
+        HikeLog.user_id == user_id,
+        ~HikeLog.unshared,
+        or_(HikeLog.hiked_on.is_(None), HikeLog.hiked_on <= today + FUTURE_SLACK),
+        ~exists().where(ActivityPost.kind == "hike", ActivityPost.hike_log_id == HikeLog.id),
+    )
+
+
+def backfill_posts(db: Session, user_id: UUID, today: date) -> int:
+    """Post every hike of theirs that has no post and wasn't unshared, with the
+    milestones and ranks it earned, as if each had been shared when it was
+    hiked. Returns how many hikes it posted; cheap once there are none.
+
+    The journal is replayed in hike order (undated past hikes first, as they
+    were logged): the facts as they stood on each hike's day, with only the
+    hikes up to it, tell what that hike added. A milestone or rank that
+    already has a post isn't posted again."""
+    todo = set(db.scalars(unposted_hikes(user_id, today)))
+    if not todo:
+        return 0
+    facts = gather(db, user_id)
+    others = other_dates(db, user_id)
+    logs = sorted(
+        db.scalars(select(HikeLog).where(HikeLog.user_id == user_id).options(joinedload(HikeLog.trail))).all(),
+        # Undated past hikes came before any dated one.
+        key=lambda log: (log.hiked_on or date.min, _aware(log.created_at), log.id),
+    )
+    posted_milestones = set(db.scalars(select(ActivityPost.milestone).where(
+        ActivityPost.user_id == user_id, ActivityPost.kind == "milestone")))
+    posted_ranks = set(db.scalars(select(ActivityPost.rank_level).where(
+        ActivityPost.user_id == user_id, ActivityPost.kind == "rank")))
+
+    def upto(count: int, day: date) -> Standing:
+        return _standing(replace(facts_on(facts, day, **others), hikes=[hike_fact(log) for log in logs[:count]]))
+
+    posted = 0
+    for index, log in enumerate(logs):
+        if log.id not in todo:
+            continue
+        day = _hike_day(log)
+        before, after = upto(index, day), upto(index + 1, day)
+        when = _posted_at(log)
+        db.add(ActivityPost(user_id=user_id, kind="hike", hike_log_id=log.id, created_at=when))
+        for milestone_id in sorted(after.milestones - before.milestones - posted_milestones):
+            milestone = MILESTONES.get(milestone_id)
+            if milestone is None or milestone.category in UNPOSTED_CATEGORIES:
+                continue
+            posted_milestones.add(milestone_id)
+            db.add(ActivityPost(
+                user_id=user_id, kind="milestone", hike_log_id=log.id, milestone=milestone_id,
+                reveals_date=milestone.category == "seasons", created_at=when + timedelta(microseconds=1),
+            ))
+        if after.rank_level > before.rank_level and after.rank_level not in posted_ranks:
+            posted_ranks.add(after.rank_level)
+            db.add(ActivityPost(user_id=user_id, kind="rank", hike_log_id=log.id, rank_level=after.rank_level,
+                                created_at=when + timedelta(microseconds=2)))
+        posted += 1
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()  # a concurrent request posted them first
+        return 0
+    return posted
 
 
 # ------------------------------------------------------------------ reading

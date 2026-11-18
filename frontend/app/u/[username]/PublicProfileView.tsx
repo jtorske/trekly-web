@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { setQueryParam, useQueryParam } from "@/lib/useQueryParam";
 import { preloadTrailCatalogue } from "@/lib/useTrailCatalogue";
 import Link from "next/link";
-import { Backpack, Bookmark, Flag, FlaskConical, Footprints, Tent } from "lucide-react";
+import { Flag, FlaskConical } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import GearThumb from "@/components/GearThumb";
@@ -22,7 +22,6 @@ import {
   ProfileSkeleton,
   ProfileTabs,
   SectionCard,
-  type StatRow,
   type TabItem,
 } from "@/app/profile/ProfileShell";
 import JournalTab from "@/app/profile/JournalTab";
@@ -120,8 +119,8 @@ export default function PublicProfileView({ username }: { username: string }) {
   );
   const activity = usePostPages(activityOpen && status !== "loading" ? `u:${handle}:${signedIn}` : null, fetchActivity);
   // Preview and the open tab both live in the query string; changing one keeps the other.
-  // Neither re-requests the page. The open tab is read only by the tab bar, the
-  // panels and the stat rows (ProfileShell), so a click doesn't re-render this view.
+  // Neither re-requests the page. The open tab is read only by the tab bar and the
+  // panels (ProfileShell), so a click doesn't re-render this view.
   const setPreview = (on: boolean) => setQueryParam("preview", on ? "1" : null, { replace: true });
   const setTab = (key: PublicTab) => setQueryParam("tab", key);
   // Their Journal tab sums hikes against the trail catalogue; fetch it now, not on first open.
@@ -200,20 +199,6 @@ export default function PublicProfileView({ username }: { username: string }) {
   if (profile.trip_plans) tabs.push({ key: "trips", label: "Trips", count: profile.trip_plans.length });
   const tabConfig = tabs.length > 0 ? { keys: tabs.map((t) => t.key), fallback: tabs[0].key } : undefined;
 
-  const stats: StatRow[] = [];
-  if (profile.gear) {
-    stats.push({ key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: profile.gear.items.length, onSelect: () => setTab("gear"), tab: "gear" });
-  }
-  if (profile.saved_trails) {
-    stats.push({ key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: profile.saved_trails.length, onSelect: () => setTab("trails"), tab: "trails" });
-  }
-  if (profile.trip_plans) {
-    stats.push({ key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: profile.trip_plans.length, onSelect: () => setTab("trips"), tab: "trips" });
-  }
-  if (profile.journal) {
-    stats.push({ key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: profile.journal.entries.length, onSelect: () => setTab("journal"), tab: "journal" });
-  }
-
   const banner = (preview || showOwnerControls) && (
     <>
       {preview && (
@@ -269,7 +254,6 @@ export default function PublicProfileView({ username }: { username: string }) {
           </div>
         )
       }
-      stats={stats}
       footer={
         canReport && (
           <button type="button" className={`${ui.ghost} ${styles.reportButton}`} onClick={() => setReporting(true)}>

@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Backpack, Bookmark, Footprints, Pencil, Tent } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { setQueryParam } from "@/lib/useQueryParam";
 import { preloadTrailCatalogue } from "@/lib/useTrailCatalogue";
@@ -43,7 +43,7 @@ import { joinedLabel } from "@/lib/publicProfile";
 import BadgePicker from "./BadgePicker";
 import { RankProgress } from "./RankDetails";
 import JournalTab from "./JournalTab";
-import ActivityTab, { RecentActivityCard } from "./ActivityTab";
+import ActivityTab from "./ActivityTab";
 import { GearSection, SavedTrailList, SetupsSection, TripsSection } from "./sections";
 import shell from "./shell.module.css";
 
@@ -56,9 +56,10 @@ function OwnerCard({
   return <IdentityCard {...card} avatar={photo.avatar} notice={photo.status} />;
 }
 
-const TAB_KEYS = ["overview", "activity", "journal", "gear", "trails", "trips"] as const;
+// Activity first, like a profile feed; old ?tab=overview links land on it.
+const TAB_KEYS = ["activity", "journal", "gear", "trails", "trips"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
-const TAB_CONFIG = { keys: [...TAB_KEYS], fallback: "overview" };
+const TAB_CONFIG = { keys: [...TAB_KEYS], fallback: "activity" };
 
 function ProfileContent() {
   const router = useRouter();
@@ -74,7 +75,7 @@ function ProfileContent() {
   const { streak, grew: streakGrew } = useStreak();
   const [featured, setFeatured] = useState<FeaturedBadges | null>(null);
   const [pickingBadges, setPickingBadges] = useState(false);
-  // Their own posts, for the Activity tab and the Overview's Recent activity card.
+  // Their own posts, for the Activity tab.
   const fetchActivity = useCallback(
     (cursor: string | null, signal?: AbortSignal) => getMyActivity(cursor, undefined, signal),
     [],
@@ -113,9 +114,9 @@ function ProfileContent() {
     }
   }, [router]);
 
-  // The open tab lives in the URL and is read only by the tab bar, the panels
-  // and the stat rows (ProfileShell), so a click doesn't re-render this page.
-  const setTab = (key: TabKey) => setQueryParam("tab", key === "overview" ? null : key);
+  // The open tab lives in the URL and is read only by the tab bar and the panels
+  // (ProfileShell), so a click doesn't re-render this page.
+  const setTab = (key: TabKey) => setQueryParam("tab", key === "activity" ? null : key);
 
   if (loading) return <ProfileSkeleton />;
   if (error || !profile) {
@@ -145,7 +146,6 @@ function ProfileContent() {
   const isNew = !profile.display_name && !profile.bio && !profile.avatar_path;
 
   const tabs: TabItem<TabKey>[] = [
-    { key: "overview", label: "Overview" },
     { key: "activity", label: "Activity", count: activity.error ? undefined : activity.total },
     { key: "journal", label: "Journal", count: hikeCount },
     { key: "gear", label: "My gear", count: gearCount },
@@ -199,13 +199,6 @@ function ProfileContent() {
           Edit profile
         </Link>
       }
-      stats={[
-        // Every tab's data loads with the page, so switching never waits on a request.
-        { key: "gear", icon: Backpack, label: ["Gear item", "Gear items"], value: gearCount, onSelect: () => setTab("gear"), tab: "gear" },
-        { key: "saved", icon: Bookmark, label: ["Saved trail", "Saved trails"], value: savedCount, onSelect: () => setTab("trails"), tab: "trails" },
-        { key: "trips", icon: Tent, label: ["Planned trip", "Planned trips"], value: tripCount, onSelect: () => setTab("trips"), tab: "trips" },
-        { key: "hiked", icon: Footprints, label: ["Trail hiked", "Trails hiked"], value: hikeCount, onSelect: () => setTab("journal"), tab: "journal" },
-      ]}
     />
   );
 
@@ -215,7 +208,7 @@ function ProfileContent() {
 
       <ProfilePanels
         panels={{
-          overview: (
+          activity: (
           <>
             {isNew && (
               <div className={ui.notice}>
@@ -226,48 +219,15 @@ function ProfileContent() {
                 , lay out the gear you own, and bookmark trails you want to hike.
               </div>
             )}
-            <RecentActivityCard pages={activity} onSeeAll={() => setTab("activity")} />
-            <SectionCard
-              id="setups"
-              title="My setups"
-              action={
-                setups.setups.length > 0 && (
-                  <Link href="/gear" className={shell.sectionLink}>
-                    Manage setups →
-                  </Link>
-                )
-              }
-            >
-              <SetupsSection data={setups} units={units} />
-            </SectionCard>
-            <div className={shell.overviewGrid}>
-              <SectionCard
-                id="recent-gear"
-                title="Recently added gear"
-                action={
-                  Boolean(gearCount) && (
-                    <Link href="/gear" className={shell.sectionLink}>
-                      View all gear →
-                    </Link>
-                  )
-                }
-              >
-                <GearSection gear={gear} units={units} limit={4} />
-              </SectionCard>
-              <SectionCard
-                id="recent-trails"
-                title="Recently saved trails"
-                action={
-                  Boolean(savedCount) && (
-                    <button type="button" className={shell.sectionLink} onClick={() => setTab("trails")}>
-                      See all →
-                    </button>
-                  )
-                }
-              >
-                <SavedTrailList data={savedTrails} units={units} limit={4} />
-              </SectionCard>
-            </div>
+            <ActivityTab
+              pages={activity}
+              owner
+              signedIn
+              viewer={profile.username}
+              name={name}
+              privacy={privacy}
+              onPrivacy={setPrivacy}
+            />
           </>
           ),
 
@@ -285,7 +245,18 @@ function ProfileContent() {
             >
               <GearSection gear={gear} units={units} />
             </SectionCard>
-            <SectionCard id="gear-setups" title="Setups" count={setups.loading ? undefined : setups.setups.length}>
+            <SectionCard
+              id="gear-setups"
+              title="My setups"
+              count={setups.loading ? undefined : setups.setups.length}
+              action={
+                setups.setups.length > 0 && (
+                  <Link href="/gear" className={shell.sectionLink}>
+                    Manage setups →
+                  </Link>
+                )
+              }
+            >
               <SetupsSection data={setups} units={units} />
             </SectionCard>
           </>
@@ -295,18 +266,6 @@ function ProfileContent() {
           <SectionCard id="trails" title="Saved trails" count={savedCount ?? undefined}>
             <SavedTrailList data={savedTrails} units={units} />
           </SectionCard>
-          ),
-
-          activity: (
-          <ActivityTab
-            pages={activity}
-            owner
-            signedIn
-            viewer={profile.username}
-            name={name}
-            privacy={privacy}
-            onPrivacy={setPrivacy}
-          />
           ),
 
           journal: <JournalTab

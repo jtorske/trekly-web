@@ -126,10 +126,8 @@ class EarnedDates:
     from_past_hikes: set[str]
 
 
-def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[tuple[Milestone, Result]]) -> EarnedDates:
-    """earned_dates (and past_hike_milestones) with the plan and alert dates read for one user."""
-    if not any(result.earned for _, result in results):
-        return EarnedDates({}, set())
+def other_dates(db: Session, user_id: UUID) -> dict[str, list[date]]:
+    """The plan, alert and alert-notice days facts_on and earned_dates take, for one user."""
     plan_dates = [d.date() for d in db.scalars(select(TripPlan.created_at).where(TripPlan.user_id == user_id))]
     alerts = db.execute(
         select(AvailabilityAlert.created_at, AvailabilityAlert.notified_at, AvailabilityAlert.status, AvailabilityAlert.updated_at)
@@ -140,11 +138,18 @@ def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[
         for _, notified_at, status, updated_at in alerts
         if notified_at is not None or status == "notified"
     ]
-    others = {
+    return {
         "plan_dates": plan_dates,
         "alert_dates": [created_at.date() for created_at, *_ in alerts],
         "notified_dates": notified,
     }
+
+
+def gather_earned_dates(db: Session, user_id: UUID, facts: Facts, results: list[tuple[Milestone, Result]]) -> EarnedDates:
+    """earned_dates (and past_hike_milestones) with the plan and alert dates read for one user."""
+    if not any(result.earned for _, result in results):
+        return EarnedDates({}, set())
+    others = other_dates(db, user_id)
     dates = earned_dates(facts, results, **others)
     return EarnedDates(dates, past_hike_milestones(facts, dates, **others))
 
