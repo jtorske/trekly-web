@@ -147,7 +147,8 @@ class PastHikesOut(BaseModel):
 
 def _shared_ids(db: Session, user_id: UUID) -> set[UUID]:
     return set(db.scalars(
-        select(ActivityPost.hike_log_id).where(ActivityPost.user_id == user_id, ActivityPost.kind == "hike")
+        select(ActivityPost.hike_log_id).where(
+            ActivityPost.user_id == user_id, ActivityPost.kind == "hike", ~ActivityPost.owner_only)
     ))
 
 

@@ -13,6 +13,7 @@ interface Pages {
   done: boolean;
   total: number | null;
   sharing: boolean | null;
+  pastHikes: number;
 }
 
 export interface PostPages {
@@ -21,6 +22,8 @@ export interface PostPages {
   /** All cards, less any pending delete. */
   total: number | null;
   sharing: boolean | null;
+  /** Owner only: hikes the "Share your past hikes?" prompt offers (0: don't ask). */
+  pastHikes: number;
   loading: boolean;
   error: string | null;
   done: boolean;
@@ -63,6 +66,7 @@ export function usePostPages(key: string | null, fetchPage: FetchPostPage): Post
             done: page.next_cursor === null,
             total: continuing ? prev.total : page.total,
             sharing: continuing ? prev.sharing : page.sharing,
+            pastHikes: continuing ? prev.pastHikes : page.past_hikes ?? 0,
           };
         });
       } catch (caught) {
@@ -125,6 +129,7 @@ export function usePostPages(key: string | null, fetchPage: FetchPostPage): Post
     posts: current?.posts ?? null,
     total,
     sharing: current?.sharing ?? null,
+    pastHikes: current?.pastHikes ?? 0,
     loading,
     error: shownError,
     done: current?.done ?? false,

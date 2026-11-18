@@ -66,6 +66,8 @@ export interface ActivityPost {
   mine: boolean;
   /** Your own post that nobody else can see (sharing off, private profile…). */
   only_you: boolean;
+  /** Your own hike (or what it earned) that you never shared: only you see it, whatever your settings. */
+  unshared?: boolean;
 }
 
 export interface HighFivers {
@@ -115,6 +117,8 @@ export interface TrendingTrail {
 }
 
 export const ONLY_YOU_LABEL = "Only you can see this. Turn on sharing to post it.";
+/** On a hike you never shared: sharing your activity doesn't show it. */
+export const UNSHARED_LABEL = "Only you can see this hike. You haven't shared it.";
 
 export interface ActivityPage {
   items: ActivityPost[];
@@ -133,6 +137,8 @@ export interface ProfileActivityPage {
   total: number | null;
   /** The owner's own view only: whether others can see their posts now. */
   sharing: boolean | null;
+  /** The owner's first page only: hikes the one-time "Share your past hikes?" prompt offers (0: don't ask). */
+  past_hikes?: number | null;
 }
 
 export type ActivityScope = "following" | "everyone" | "province";

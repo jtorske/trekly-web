@@ -14,6 +14,10 @@ export const setHighFive = (postId: string, on: boolean) =>
     auth: true,
   });
 
+/** The one-time "Share your past hikes?" prompt's answer; resolves to how many hikes were shared. */
+export const answerPastHikes = (share: boolean) =>
+  apiFetch<{ shared: number }>("/api/me/activity/past-hikes", { method: "POST", body: { share }, auth: true });
+
 export const deleteActivityPost = (postId: string) =>
   apiFetch<void>(`/api/activity/${encodeURIComponent(postId)}`, { method: "DELETE", auth: true });
 

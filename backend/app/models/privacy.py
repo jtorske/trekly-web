@@ -60,6 +60,9 @@ class ProfileSettings(Base):
     # profile is public (migration a8c3f1d5e7b2). Turning it off hides every
     # post they've made.
     share_activity = Column(Boolean, nullable=False, default=False, server_default=false())
+    # When they answered "Share your past hikes?" (shared or not now); the
+    # prompt is asked once (migration e3c7a9d5f1b2).
+    past_hikes_answered_at = Column(DateTime(timezone=True))
     # "Hide my followers and following lists": the counts still show, the
     # lists open only for them (migration b3d7f2a9c4e1).
     hide_follow_lists = Column(Boolean, nullable=False, default=False, server_default=false())

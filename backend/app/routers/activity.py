@@ -17,7 +17,7 @@ leave the API: never a user id, email, the hike's created date, or the
 date of a hike whose owner hides dates.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Literal
 from uuid import UUID
 
@@ -33,7 +33,7 @@ from app.account_labels import AccountLabelName, labels_for, may_interact, real_
 from app.picks import SPARSE_BELOW, PickKind, picks, real_posts_this_week
 from app.trail_photos import public_photo_url
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, activity_open, backfill_posts, can_share, folded_where, following_where, is_visible,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, backfill_posts, can_share, past_hikes_waiting, share_past_hikes, folded_where, following_where, is_visible,
     province_where, readable_query,
 )
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
@@ -48,7 +48,7 @@ from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
 from app.models.trail import Trail
 from app.points_config import RANKS
-from app.privacy import Visibility, visibility
+from app.privacy import Visibility, ensure_settings, visibility
 from app.routers.availability import get_today
 from app.routers.trails import live_trails
 from app.schemas.trail import TrailListItemOut
@@ -134,6 +134,8 @@ class ActivityPostOut(BaseModel):
     high_fived: bool = False
     mine: bool = False
     only_you: bool = False
+    # Yours, and never shared (whatever your settings): see app/activity.py backfill_posts.
+    unshared: bool = False
 
 
 class ProfileActivityPage(BaseModel):
@@ -144,6 +146,17 @@ class ProfileActivityPage(BaseModel):
     total: int | None = None
     # The owner's view only: whether others can see their posts right now.
     sharing: bool | None = None
+    # The owner's first page only: how many never-shared hikes the one-time
+    # "Share your past hikes?" prompt offers to share (0: don't ask; None: not the owner).
+    past_hikes: int | None = None
+
+
+class PastHikesIn(BaseModel):
+    share: bool
+
+
+class PastHikesOut(BaseModel):
+    shared: int
 
 
 class ActivityPage(BaseModel):
@@ -256,6 +269,7 @@ def _out(post, profile, settings, log, public, counts, mine_ids, viewer, badge_d
         high_fived=post.id in mine_ids,
         mine=mine,
         only_you=mine and not public,
+        unshared=mine and bool(post.owner_only),
     )
     if post.kind == "hike":
         out.hike = ActivityHike(
@@ -611,9 +625,28 @@ def my_activity(
         backfill_posts(db, user.id, today)
     query = _cards(today, user.id).where(ActivityPost.user_id == user.id)
     items, next_cursor = _page(db, query, cursor, limit, user, today)
+    sharing = can_share(db, user.id)
+    settings = db.get(ProfileSettings, user.id)
+    ask = cursor is None and sharing and settings is not None and settings.past_hikes_answered_at is None
     return ProfileActivityPage(
         items=items,
         next_cursor=next_cursor,
         total=None if cursor else _count(db, query),
-        sharing=can_share(db, user.id),
+        sharing=sharing,
+        past_hikes=past_hikes_waiting(db, user.id) if ask else 0,
     )
+
+
+@me_router.post("/past-hikes", response_model=PastHikesOut)
+def answer_past_hikes(
+    payload: PastHikesIn,
+    user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """The one-time "Share your past hikes?" prompt: yes shares every hike that
+    only the owner sees (except those they unshared), with what each earned;
+    either answer puts the prompt away for good."""
+    settings = ensure_settings(db, user.id)
+    settings.past_hikes_answered_at = datetime.now(timezone.utc)
+    db.commit()
+    return PastHikesOut(shared=share_past_hikes(db, user.id) if payload.share else 0)

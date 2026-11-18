@@ -92,6 +92,10 @@ class ActivityPost(Base):
     source_label = Column(Text)
     source_date = Column(Date)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # Only its owner sees it, whatever their settings: a hike that was never
+    # shared, posted for the owner's own Activity tab (app/activity.py
+    # backfill_posts), until they share it.
+    owner_only = Column(Boolean, nullable=False, default=False, server_default=false())
     # Set by an admin (audited); a hidden post shows to nobody.
     hidden_at = Column(DateTime(timezone=True))
     hidden_by = Column(Uuid)

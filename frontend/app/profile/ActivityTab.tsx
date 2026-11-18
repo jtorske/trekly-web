@@ -10,6 +10,7 @@ import feedStyles from "@/app/activity/activity.module.css";
 import type { PostPages } from "@/app/activity/usePostPages";
 import { sectionHref } from "@/app/settings/settingsSections";
 import { activityBlocker, deleteKey } from "@/lib/activity";
+import { answerPastHikes } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { updatePrivacy, type PrivacySettings } from "@/lib/profilesApi";
 import { toast } from "@/lib/toast";
@@ -36,13 +37,61 @@ function useShareToggle(pages: PostPages, onPrivacy?: (settings: PrivacySettings
 }
 
 /**
+ * Asked once, while sharing is on: the hikes only the owner sees (logged
+ * before they shared their activity, onboarding, past hikes) can be shared
+ * together. Either answer puts it away for good.
+ */
+function PastHikesPrompt({ pages }: { pages: PostPages }) {
+  const [state, setState] = useState<"ask" | "saving" | "done">("ask");
+  if (state === "done" || pages.pastHikes === 0) return null;
+  const count = pages.pastHikes;
+  const hikes = count === 1 ? "1 earlier hike" : `${count} earlier hikes`;
+  const answer = async (share: boolean) => {
+    setState("saving");
+    try {
+      const { shared } = await answerPastHikes(share);
+      setState("done");
+      if (share) {
+        toast.success(`Shared ${shared === 1 ? "1 hike" : `${shared} hikes`} on your profile and in the Activity feed.`);
+        pages.reload();
+      }
+    } catch (caught) {
+      setState("ask");
+      toast.failure(share ? "share your past hikes" : "save that", caught);
+    }
+  };
+  return (
+    <div className={`${ui.notice} ${styles.prompt}`} role="region" aria-labelledby="past-hikes-title">
+      <div>
+        <p id="past-hikes-title" className={styles.promptTitle}>
+          Share your past hikes?
+        </p>
+        <p>
+          Only you can see your {hikes}. Share them on your profile and in the Activity feed, with the badges
+          they earned. Hikes you unshared stay private.
+        </p>
+      </div>
+      <div className={styles.promptActions}>
+        <button type="button" className={ui.primary} disabled={state === "saving"} onClick={() => void answer(true)}>
+          {state === "saving" ? "Saving…" : "Share them"}
+        </button>
+        <button type="button" className={ui.ghost} disabled={state === "saving"} onClick={() => void answer(false)}>
+          Not now
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
  * The profile's Activity tab (the first tab): that person's hikes, and the
  * badges and ranks they earned, newest first, as the Activity feed shows
  * them, loading more as you scroll.
  *
  * The owner (on /profile) sees all of theirs, with a banner while nobody else
- * can. Every hike has a post unless they took it off (the API posts the
- * rest when this tab first loads). Visitors only ever get this tab when the API opens it (public profile,
+ * can. Every hike of theirs is here (the API gives the ones they never
+ * shared an owner-only post when this tab first loads); visitors only see
+ * the shared ones. Visitors only ever get this tab when the API opens it (public profile,
  * sharing on), and then only the posts the feed would show them.
  */
 export default function ActivityTab({
@@ -95,7 +144,7 @@ export default function ActivityTab({
     <div className={`${ui.notice} ${styles.banner}`} role="status">
       <p>
         <strong>Only you can see these.</strong>{" "}
-        {blocker && switchedOn ? blocker : "Turn on sharing to post them to the Activity feed."}
+        {blocker && switchedOn ? blocker : "Turn on sharing to post your shared hikes to the Activity feed."}
       </p>
       {blocker && switchedOn ? (
         <Link href={sectionHref("privacy")} className={ui.secondary}>
@@ -204,6 +253,7 @@ export default function ActivityTab({
 
   return (
     <div className={styles.tab}>
+      {owner && <PastHikesPrompt pages={pages} />}
       {banner}
       {body}
     </div>

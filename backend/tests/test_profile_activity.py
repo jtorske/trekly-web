@@ -189,7 +189,7 @@ def test_no_tab_on_a_profile_hidden_by_admins_or_unknown(client, trails, person,
 def test_sharing_on_with_nothing_posted_is_an_empty_tab(client, person):
     person("alice")
     assert profile_count(client, "alice") == 0
-    assert visit(client, "alice") == {"items": [], "next_cursor": None, "total": 0, "sharing": None}
+    assert visit(client, "alice") == {"items": [], "next_cursor": None, "total": 0, "sharing": None, "past_hikes": None}
 
 
 def test_a_hidden_journal_leaves_only_rank_posts(client, trails, person):
@@ -256,30 +256,71 @@ def test_deleting_a_hike_post_takes_its_folded_milestones(client, trails, person
 # ---------------------------------------------- hikes that never posted
 
 
-def test_hikes_logged_while_sharing_was_off_post_when_the_owner_opens_the_tab(client, trails, person):
-    """The dialog doesn't send `share` while sharing is off, so nothing posts on save.
-    The owner's Activity tab posts them, only for the owner until sharing is on,
-    dated by the hike, with the first hike's milestone folded into it."""
+def hike_ids(body):
+    return [item["hike"]["trail"]["id"] for item in body["items"] if item["kind"] == "hike"]
+
+
+def past_hikes(client, who, share):
+    response = client.post("/api/me/activity/past-hikes", json={"share": share}, headers=who["headers"])
+    assert response.status_code == 200, response.text
+    return response.json()["shared"]
+
+
+def test_the_owner_sees_every_hike_but_nobody_else_sees_unshared_ones(client, trails, person):
+    """The dialog doesn't send `share` while sharing is off, so nothing posts on
+    save. The owner's tab shows them anyway, dated by the hike, with what each
+    earned; turning sharing on later doesn't show them to anyone else."""
     alice = person("alice", share=False)
     log(client, alice, trails[1], hiked_on="2026-09-01", share=None)
     log(client, alice, trails[0], hiked_on="2026-08-01", share=None)  # logged second, hiked first
-    assert feed(client)["items"] == []
 
     body = mine(client, alice)
     hikes = [item for item in body["items"] if item["kind"] == "hike"]
-    assert [h["hike"]["trail"]["id"] for h in hikes] == [str(trails[1]), str(trails[0])]
-    assert all(item["only_you"] for item in body["items"])
+    assert hike_ids(body) == [str(trails[1]), str(trails[0])]
+    assert all(item["only_you"] and item["unshared"] for item in body["items"])
     assert hikes[0]["posted_at"].startswith("2026-09-01") and hikes[1]["posted_at"].startswith("2026-08-01")
-    earliest = [e["milestone"]["id"] for e in hikes[1]["earned"] if e["kind"] == "milestone"]
-    assert "first-hike" in earliest
-    assert visit(client, "alice", expect=404)
+    assert "first-hike" in [e["milestone"]["id"] for e in hikes[1]["earned"] if e["kind"] == "milestone"]
+    assert body["past_hikes"] == 0  # not asked while sharing is off
 
     set_privacy(client, alice, share_activity=True)
-    assert [item["id"] for item in visit(client, "alice")["items"]] == [item["id"] for item in body["items"]]
-    assert {item["id"] for item in feed(client)["items"]} == {item["id"] for item in body["items"]}
+    assert visit(client, "alice")["items"] == []
+    assert feed(client)["items"] == []
+    # The journal doesn't call them shared either.
+    entries = client.get("/api/me/hike-logs", headers=alice["headers"]).json()
+    assert not any(entry["shared"] for entry in entries)
+
+    # New hikes from now on post as usual.
+    log(client, alice, trails[2], hiked_on="2026-10-01")
+    assert hike_ids(visit(client, "alice")) == [str(trails[2])]
+    assert hike_ids(mine(client, alice)) == [str(trails[2]), str(trails[1]), str(trails[0])]
 
 
-def test_past_hikes_post_too_before_the_dated_ones(client, trails, person):
+def test_share_your_past_hikes_is_asked_once(client, trails, person):
+    alice = person("alice", share=False)
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=None)
+    log(client, alice, trails[1], hiked_on="2026-08-05", share=None)
+    mine(client, alice)
+    set_privacy(client, alice, share_activity=True)
+    assert mine(client, alice)["past_hikes"] == 2
+
+    assert past_hikes(client, alice, share=True) == 2
+    shown = visit(client, "alice")
+    assert hike_ids(shown) == [str(trails[1]), str(trails[0])]
+    assert "first-hike" in folded(shown)  # what they earned is shared with them
+    assert mine(client, alice)["past_hikes"] == 0
+
+
+def test_not_now_puts_the_prompt_away(client, trails, person):
+    alice = person("alice", share=False)
+    log(client, alice, trails[0], share=None)
+    mine(client, alice)
+    set_privacy(client, alice, share_activity=True)
+    assert past_hikes(client, alice, share=False) == 0
+    assert mine(client, alice)["past_hikes"] == 0
+    assert visit(client, "alice")["items"] == []
+
+
+def test_past_hikes_from_onboarding_are_the_owners_until_shared(client, trails, person):
     alice = person("alice")
     response = client.post("/api/me/hike-logs/past", json={"trail_ids": [str(t) for t in trails[1:3]]},
                            headers=alice["headers"])
@@ -287,12 +328,36 @@ def test_past_hikes_post_too_before_the_dated_ones(client, trails, person):
     log(client, alice, trails[0], hiked_on="2026-07-01")
 
     body = mine(client, alice)
-    hikes = [item for item in body["items"] if item["kind"] == "hike"]
-    assert len(hikes) == 3
-    # The dated hike posted when it was saved, after the past hikes had earned "First steps".
-    dated = next(h for h in hikes if h["hike"]["trail"]["id"] == str(trails[0]))
-    assert "first-hike" not in [e["milestone"]["id"] for e in dated["earned"] if e["kind"] == "milestone"]
+    assert len(hike_ids(body)) == 3 and body["past_hikes"] == 2
+    assert hike_ids(visit(client, "alice")) == [str(trails[0])]
+    # The shared hike posted only what it added: the past hikes had earned "First steps".
+    assert "first-hike" not in folded(visit(client, "alice"))
     assert "first-hike" in folded(body)
+
+
+def test_unticked_hikes_stay_in_the_owners_tab_and_out_of_the_prompt(client, trails, person):
+    alice = person("alice")
+    log(client, alice, trails[0], hiked_on="2026-08-01")
+    log(client, alice, trails[1], hiked_on="2026-08-02", share=False)
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=False)  # unticked later
+
+    body = mine(client, alice)
+    assert sorted(hike_ids(body)) == sorted([str(trails[1]), str(trails[0])])
+    assert all(item["unshared"] for item in body["items"] if item["kind"] == "hike")
+    assert body["past_hikes"] == 0
+    assert hike_ids(visit(client, "alice")) == []
+
+    # Ticking it again shares it.
+    log(client, alice, trails[0], hiked_on="2026-08-01", share=True)
+    assert hike_ids(visit(client, "alice")) == [str(trails[0])]
+
+
+def test_a_deleted_hike_post_stays_gone(client, trails, person):
+    alice = person("alice")
+    log(client, alice, trails[0], hiked_on="2026-08-01")
+    post = next(item for item in mine(client, alice)["items"] if item["kind"] == "hike")
+    assert client.delete(f"/api/activity/{post['id']}", headers=alice["headers"]).status_code == 204
+    assert hike_ids(mine(client, alice)) == []
 
 
 def test_the_backfill_runs_once(client, trails, person, session_factory):
@@ -307,22 +372,6 @@ def test_the_backfill_runs_once(client, trails, person, session_factory):
     db = session_factory()
     assert backfill_posts(db, alice["id"], TODAY) == 0
     db.close()
-
-
-def test_unshared_and_deleted_hikes_stay_off(client, trails, person):
-    alice = person("alice")
-    log(client, alice, trails[0], hiked_on="2026-08-01", share=False)  # unticked
-    log(client, alice, trails[1], hiked_on="2026-08-02")
-    body = mine(client, alice)
-    hikes = [item for item in body["items"] if item["kind"] == "hike"]
-    assert [h["hike"]["trail"]["id"] for h in hikes] == [str(trails[1])]
-
-    assert client.delete(f"/api/activity/{hikes[0]['id']}", headers=alice["headers"]).status_code == 204
-    assert [item for item in mine(client, alice)["items"] if item["kind"] == "hike"] == []
-
-    # Ticking the box again posts it.
-    log(client, alice, trails[0], hiked_on="2026-08-01", share=True)
-    assert [h["hike"]["trail"]["id"] for h in mine(client, alice)["items"] if h["kind"] == "hike"] == [str(trails[0])]
 
 
 def test_future_dated_hikes_wait(client, trails, person, session_factory):

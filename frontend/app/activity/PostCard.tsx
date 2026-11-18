@@ -14,7 +14,7 @@ import ReportDialog from "@/components/ReportDialog";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
-import { ONLY_YOU_LABEL, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
+import { ONLY_YOU_LABEL, UNSHARED_LABEL, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
 import { deleteActivityPost, setHighFive } from "@/lib/activityApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
@@ -161,10 +161,16 @@ export default function PostCard({
     <p className={styles.onlyYou}>
       <EyeOff size={15} aria-hidden="true" />
       <span>
-        {ONLY_YOU_LABEL}{" "}
-        <Link href={sectionHref("privacy")} className={styles.inlineLink}>
-          Privacy settings
-        </Link>
+        {post.unshared ? (
+          UNSHARED_LABEL
+        ) : (
+          <>
+            {ONLY_YOU_LABEL}{" "}
+            <Link href={sectionHref("privacy")} className={styles.inlineLink}>
+              Privacy settings
+            </Link>
+          </>
+        )}
       </span>
     </p>
   );

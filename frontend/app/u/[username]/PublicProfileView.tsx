@@ -197,7 +197,9 @@ export default function PublicProfileView({ username }: { username: string }) {
   if (profile.gear) tabs.push({ key: "gear", label: "Gear", count: profile.gear.items.length });
   if (profile.saved_trails) tabs.push({ key: "trails", label: "Saved trails", count: profile.saved_trails.length });
   if (profile.trip_plans) tabs.push({ key: "trips", label: "Trips", count: profile.trip_plans.length });
-  const tabConfig = tabs.length > 0 ? { keys: tabs.map((t) => t.key), fallback: tabs[0].key } : undefined;
+  // An empty Activity tab (nothing shared yet) isn't where the page opens.
+  const opening = tabs.find((t) => t.key !== "activity" || t.count !== 0) ?? tabs[0];
+  const tabConfig = tabs.length > 0 ? { keys: tabs.map((t) => t.key), fallback: opening.key } : undefined;
 
   const banner = (preview || showOwnerControls) && (
     <>

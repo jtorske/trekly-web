@@ -3,20 +3,23 @@
 Posting (only from real activity, see app/models/activity.py):
 - Saving a hike in the journal dialog with "Share to Activity" ticked
   posts it, along with any milestone or rank that hike earned. Unticking
-  it later (or deleting its post) removes the post and marks the hike
-  unshared.
-- Every other hike is posted when its owner next opens their profile's
-  Activity tab (backfill_posts): hikes logged while sharing was off,
-  onboarding picks and "Add past hikes". Their posts are dated when the
-  hike was, so they sit in the feed in order rather than at the top, and
-  they carry the milestones and ranks the hike earned, found by replaying
-  the journal. While the owner can't share, only they see these posts;
-  turning sharing on shows them (the profile's banner says so).
+  it later makes its post owner-only and marks the hike unshared.
+- Every other hike gets an owner-only post when its owner next opens their
+  profile's Activity tab (backfill_posts): hikes logged while sharing was
+  off, onboarding picks and "Add past hikes". So the owner always sees all
+  their hikes there, but nobody else sees one they never shared, whatever
+  their settings. The posts are dated when the hike was and carry the
+  milestones and ranks it earned, found by replaying the journal.
+- The owner may share that backlog once, from the "Share your past hikes?"
+  prompt (share_past_hikes); hikes they unshared stay owner-only.
+- Deleting a hike's post marks the hike unshared: it's gone from their
+  Activity tab for good, unless they tick "Share to Activity" again.
 - Planning and gear milestones are never posted: they'd say something
   about trip plans, alerts or gear rather than a hike.
 
 Reading: a post shows while all of these hold (row-level security has the
-same rule, private.activity_post_visible in migration a8c3f1d5e7b2):
+same rule, private.activity_post_visible, last in migration e3c7a9d5f1b2):
+- it isn't owner-only;
 - the owner has a username, isn't hidden by an admin, isn't private, and
   has "Share my activity in the feed" on;
 - a hike or milestone post: their Trail Journal is shown; a rank post:
@@ -115,17 +118,27 @@ def after_hike_saved(
     existing = hike_post(db, log.id)
     log.unshared = not share
     if not share:
-        if existing is not None:
-            db.delete(existing)
+        # Off the feed, still in the owner's own Activity tab.
+        if existing is None:
+            db.add(ActivityPost(user_id=user_id, kind="hike", hike_log_id=log.id, created_at=_posted_at(log),
+                                owner_only=True))
+        else:
+            existing.owner_only = True
         db.commit()
         return
     if not can_share(db, user_id) or _future(log, today):
-        # Posted later, by backfill_posts.
+        # An owner-only post comes later, from backfill_posts.
         db.commit()
         return
     now = _now()
     if existing is None:
         db.add(ActivityPost(user_id=user_id, kind="hike", hike_log_id=log.id, created_at=now))
+    elif existing.owner_only:
+        # Sharing a hike that only its owner saw shares what it earned too.
+        for post in db.scalars(select(ActivityPost).where(
+            ActivityPost.user_id == user_id, ActivityPost.hike_log_id == log.id, ActivityPost.owner_only,
+        )):
+            post.owner_only = False
     if before is not None:
         after = standing(db, user_id)
         # Milestones first, then the rank, a moment later, so the rank leads the feed.
@@ -181,9 +194,10 @@ def unposted_hikes(user_id: UUID, today: date):
 
 
 def backfill_posts(db: Session, user_id: UUID, today: date) -> int:
-    """Post every hike of theirs that has no post and wasn't unshared, with the
-    milestones and ranks it earned, as if each had been shared when it was
-    hiked. Returns how many hikes it posted; cheap once there are none.
+    """Give every hike of theirs that has no post and wasn't unshared an
+    owner-only post, with the milestones and ranks it earned (owner-only too),
+    as if each had been posted when it was hiked. Returns how many hikes it
+    posted; cheap once there are none.
 
     The journal is replayed in hike order (undated past hikes first, as they
     were logged): the facts as they stood on each hike's day, with only the
@@ -214,7 +228,7 @@ def backfill_posts(db: Session, user_id: UUID, today: date) -> int:
         day = _hike_day(log)
         before, after = upto(index, day), upto(index + 1, day)
         when = _posted_at(log)
-        db.add(ActivityPost(user_id=user_id, kind="hike", hike_log_id=log.id, created_at=when))
+        db.add(ActivityPost(user_id=user_id, kind="hike", hike_log_id=log.id, created_at=when, owner_only=True))
         for milestone_id in sorted(after.milestones - before.milestones - posted_milestones):
             milestone = MILESTONES.get(milestone_id)
             if milestone is None or milestone.category in UNPOSTED_CATEGORIES:
@@ -223,11 +237,12 @@ def backfill_posts(db: Session, user_id: UUID, today: date) -> int:
             db.add(ActivityPost(
                 user_id=user_id, kind="milestone", hike_log_id=log.id, milestone=milestone_id,
                 reveals_date=milestone.category == "seasons", created_at=when + timedelta(microseconds=1),
+                owner_only=True,
             ))
         if after.rank_level > before.rank_level and after.rank_level not in posted_ranks:
             posted_ranks.add(after.rank_level)
             db.add(ActivityPost(user_id=user_id, kind="rank", hike_log_id=log.id, rank_level=after.rank_level,
-                                created_at=when + timedelta(microseconds=2)))
+                                created_at=when + timedelta(microseconds=2), owner_only=True))
         posted += 1
     try:
         db.commit()
@@ -235,6 +250,30 @@ def backfill_posts(db: Session, user_id: UUID, today: date) -> int:
         db.rollback()  # a concurrent request posted them first
         return 0
     return posted
+
+
+def _past_hike_posts(user_id: UUID):
+    """Their owner-only posts the "Share your past hikes?" prompt would share:
+    all but those of hikes they unshared."""
+    return select(ActivityPost).where(
+        ActivityPost.user_id == user_id,
+        ActivityPost.owner_only,
+        ~exists().where(HikeLog.id == ActivityPost.hike_log_id, HikeLog.unshared),
+    )
+
+
+def past_hikes_waiting(db: Session, user_id: UUID) -> int:
+    """How many hikes the prompt would share."""
+    return len(db.scalars(_past_hike_posts(user_id).where(ActivityPost.kind == "hike")).all())
+
+
+def share_past_hikes(db: Session, user_id: UUID) -> int:
+    """Shares their past hikes (the prompt's yes); returns how many hikes."""
+    posts = db.scalars(_past_hike_posts(user_id)).all()
+    for post in posts:
+        post.owner_only = False
+    db.commit()
+    return sum(1 for post in posts if post.kind == "hike")
 
 
 # ------------------------------------------------------------------ reading
@@ -254,6 +293,7 @@ def visible_where(today: date):
     settings = ProfileSettings
     return and_(
         ActivityPost.hidden_at.is_(None),
+        ~ActivityPost.owner_only,
         Profile.username.is_not(None),
         ~settings.is_private,
         settings.share_activity,
@@ -282,16 +322,19 @@ def readable_where(today: date, viewer_id: UUID | None):
 def folded_where(today: date, viewer_id: UUID | None):
     """A milestone or rank post this reader sees inside its hike's post instead.
     The hike post shares the author (so their settings) and the hike log, so it's
-    readable when it isn't admin-hidden, the journal shows (or it's the reader's
-    own), and the hike isn't future-dated."""
+    readable when it isn't admin-hidden, the journal shows and it isn't
+    owner-only (or it's the reader's own), and the hike isn't future-dated."""
     hike = aliased(ActivityPost)
     journal = ProfileSettings.show_journal
+    shared = ~hike.owner_only
     if viewer_id is not None:
         journal = or_(journal, ActivityPost.user_id == viewer_id)
+        shared = or_(shared, hike.user_id == viewer_id)
     return and_(
         ActivityPost.kind != "hike",
         ActivityPost.hike_log_id.is_not(None),
-        exists().where(hike.kind == "hike", hike.hike_log_id == ActivityPost.hike_log_id, hike.hidden_at.is_(None)),
+        exists().where(hike.kind == "hike", hike.hike_log_id == ActivityPost.hike_log_id, hike.hidden_at.is_(None),
+                       shared),
         journal,
         or_(HikeLog.hiked_on.is_(None), HikeLog.hiked_on <= today + FUTURE_SLACK),
     )
