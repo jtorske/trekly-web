@@ -109,6 +109,11 @@ class ActivityAnnouncement(BaseModel):
     trail: TrailListItemOut | None = None
     # Public URL in the trail-photos bucket.
     photo_url: str | None = None
+    # The official page an automatic post quotes or cites (a Parks Canada
+    # bulletin, a fact's source), with its label and date.
+    source_url: str | None = None
+    source_label: str | None = None
+    source_date: date | None = None
 
 
 class ActivityPostOut(BaseModel):
@@ -268,6 +273,9 @@ def _out(post, profile, settings, log, public, counts, mine_ids, viewer, badge_d
             body=post.body,
             trail=TrailListItemOut.model_validate(post.trail) if live else None,
             photo_url=public_photo_url(post.photo_path) if post.photo_path else None,
+            source_url=post.source_url,
+            source_label=post.source_label,
+            source_date=post.source_date,
         )
     elif post.kind == "milestone":
         out.milestone = _milestone(post, hide_dates, badge_dates)

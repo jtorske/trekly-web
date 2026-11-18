@@ -1,0 +1,708 @@
+"""Automatic @trekly posts: generators, the AI fact check and fallback, pacing,
+duplicates, the review queue API, and that warnings never pass through the AI."""
+
+import uuid
+from datetime import date, datetime, timedelta, timezone
+
+import pytest
+from sqlalchemy import func, select
+
+from app.models.account import SavedTrail
+from app.models.activity import ActivityPost
+from app.models.hike_log import HikeLog
+from app.models.trail import Trail
+from app.models.trail_photo import TrailPhoto
+from app.models.trekly_post import TreklyFact, TreklyPostDraft, TreklyPostTypeSetting
+from app.notify import Email
+from app.routers.admin_trekly_posts import get_now, get_posts_config
+from app.main import app
+from app.trekly_posts import conditions as cond
+from app.trekly_posts import service, writer
+from app.trekly_posts.config import ConfigError, load_config, parse_config
+from app.trekly_posts.generators import GENERATORS, GenContext
+from tests.test_activity import feed, log, person  # noqa: F401  (fixture)
+from tests.test_labeled_accounts import ADMIN, admin_headers, auth, official  # noqa: F401  (fixtures)
+
+# Wednesday 2026-09-23, 9 am in Alberta: larch season, spotlight day.
+NOW = datetime(2026, 9, 23, 15, 0, tzinfo=timezone.utc)
+TODAY = date(2026, 9, 23)
+
+BULLETIN_PAGE = """
+<div class="search-alert-results">
+  <div class="info">
+    <a href="https://parks.canada.ca/pn-np/ab/banff/bulletins/AAAA-1111"><h4 class="x">Trail Closure: Larch Valley Trail</h4></a>
+    <span class="text-muted small">September 22, 2026</span>
+  </div>
+  <div class="info">
+    <a href="https://parks.canada.ca/pn-np/ab/banff/bulletins/BBBB-2222"><h4 class="x">Bear Warning: Skoki trails</h4></a>
+    <span class="text-muted small">September 01, 2026</span>
+  </div>
+  <div class="info">
+    <a href="https://parks.canada.ca/pn-np/ab/banff/bulletins/CCCC-3333"><h4 class="x">Visitor centre hours</h4></a>
+    <span class="text-muted small">September 23, 2026</span>
+  </div>
+  <div class="info">
+    <a href="https://evil.example.com/pn-np/ab/banff/bulletins/DDDD"><h4 class="x">Trail Closure: fake</h4></a>
+    <span class="text-muted small">September 23, 2026</span>
+  </div>
+</div>
+"""
+
+
+def config(**overrides):
+    """The real config file, with every type on every day unless overridden."""
+    import tomllib
+    from app.trekly_posts.config import CONFIG_PATH
+
+    raw = tomllib.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    for name in raw["types"]:
+        raw["types"][name]["enabled"] = True
+        raw["types"][name]["days"] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    for path, value in overrides.items():
+        target = raw
+        keys = path.split(".")
+        for key in keys[:-1]:
+            target = target.setdefault(key, {})
+        target[keys[-1]] = value
+    return parse_config(raw)
+
+
+class FakeAI:
+    def __init__(self, answer=None, error=None):
+        self.answer = answer
+        self.error = error
+        self.calls: list[tuple[str, str]] = []
+
+    def complete(self, system, user):
+        self.calls.append((system, user))
+        if self.error:
+            raise self.error
+        return self.answer(user) if callable(self.answer) else self.answer
+
+
+class Outbox:
+    def __init__(self):
+        self.sent: list[Email] = []
+
+    def send(self, email):
+        self.sent.append(email)
+
+
+@pytest.fixture
+def trails(session_factory):
+    db = session_factory()
+    specs = [
+        ("Larch Valley", "Banff National Park", 1, ["larch"], 11.6, 535, 2611),
+        ("Lake Low", "Banff National Park", 2, [], 5.0, 120, 1500),
+        ("Ridge High", "Jasper National Park", 3, [], 14.2, 900, 2500),
+        ("Falls Four", "Yoho National Park", 4, [], 3.0, 50, 1300),
+    ]
+    ids = {}
+    for name, park, rank, tags, km, gain, top in specs:
+        trail = Trail(name=name, region="Rockies", country_code="CA", province_code="AB", park_name=park,
+                      park_type="national", terrain_difficulty="moderate", popularity_rank=rank, tags=tags,
+                      distance_km=km, route_type="out_and_back", elevation_gain_m=gain, max_elevation_m=top,
+                      created_at=NOW - timedelta(days=400))
+        db.add(trail)
+        db.flush()
+        ids[name] = trail.id
+    db.commit()
+    db.close()
+    return ids
+
+
+def hikes(db, trail_id, hikers, *, when=NOW - timedelta(days=1)):
+    for _ in range(hikers):
+        db.add(HikeLog(user_id=uuid.uuid4(), trail_id=trail_id, hiked_on=when.date(), created_at=when))
+    db.commit()
+
+
+def ctx(db, cfg=None, **kw):
+    return GenContext(db=db, config=cfg or config(), today=kw.pop("today", TODAY), now=kw.pop("now", NOW), **kw)
+
+
+def run(db, cfg=None, *, now=NOW, ai=None, outbox=None, fetch=None, recipients=("admin@example.com",)):
+    return service.run_daily(db, cfg or config(), now=now, client=ai, sender=outbox or Outbox(),
+                             recipients=list(recipients), fetch=fetch or (lambda url: "<html></html>"))
+
+
+# ------------------------------------------------------------------ config
+
+def test_the_shipped_config_loads_with_auto_publish_off_and_conditions_off():
+    cfg = load_config()
+    assert set(cfg.types) == set(GENERATORS)
+    assert cfg.type("conditions").enabled is False
+    assert cfg.type("conditions").ai is False
+    assert cfg.pacing.max_posts_per_day == 1
+    assert cfg.pacing.trail_cooldown_days == 30
+
+
+def test_config_can_never_send_conditions_to_the_ai():
+    assert config(**{"types.conditions.ai": True}).type("conditions").ai is False
+
+
+def test_bad_config_is_refused():
+    with pytest.raises(ConfigError):
+        parse_config({"types": {"memes": {}}})
+    with pytest.raises(ConfigError):
+        parse_config({"types": {"trending": {"days": ["someday"]}}})
+
+
+# --------------------------------------------------------------- generators
+
+def test_trending_needs_several_real_hikers_and_names_the_top_trail(session_factory, trails):
+    db = session_factory()
+    hikes(db, trails["Ridge High"], 2)
+    assert GENERATORS["trending"](ctx(db)) is None  # 2 hikers: could point at someone
+    hikes(db, trails["Ridge High"], 1)
+    db.add(SavedTrail(user_id=uuid.uuid4(), trail_id=trails["Lake Low"], created_at=NOW - timedelta(days=2)))
+    db.commit()
+    candidate = GENERATORS["trending"](ctx(db))
+    assert candidate.trail_id == trails["Ridge High"]
+    assert "Ridge High in Jasper National Park" in candidate.template_body
+    assert "14.2 km out and back, 900 m of elevation gain" in candidate.template_body
+    assert candidate.dedupe_key == "trending:2026-W39"
+
+
+def test_trending_ignores_old_activity(session_factory, trails):
+    db = session_factory()
+    hikes(db, trails["Ridge High"], 5, when=NOW - timedelta(days=9))
+    assert GENERATORS["trending"](ctx(db)) is None
+
+
+def test_spotlight_picks_a_larch_trail_in_larch_season(session_factory, trails):
+    db = session_factory()
+    candidate = GENERATORS["spotlight"](ctx(db))
+    assert candidate.trail_id == trails["Larch Valley"]
+    assert "larch season" in candidate.template_body
+    assert "11.6 km" in candidate.template_body
+
+
+def test_spotlight_picks_low_trails_in_shoulder_season(session_factory, trails):
+    db = session_factory()
+    day = date(2026, 5, 6)
+    candidate = GENERATORS["spotlight"](ctx(db, today=day, now=datetime(2026, 5, 6, 15, tzinfo=timezone.utc)))
+    trail = db.get(Trail, candidate.trail_id)
+    assert trail.max_elevation_m <= 1800
+    assert f"tops out at {trail.max_elevation_m} m" in candidate.template_body
+
+
+def test_spotlight_otherwise_picks_a_popular_trail(session_factory, trails):
+    db = session_factory()
+    day = date(2026, 7, 15)
+    candidate = GENERATORS["spotlight"](ctx(db, today=day, now=datetime(2026, 7, 15, 15, tzinfo=timezone.utc)))
+    assert candidate.trail_id in trails.values()
+    assert "most popular trails in the Trekly catalogue" in candidate.template_body
+
+
+def test_new_on_trekly_announces_features_then_new_trails_then_photos(session_factory, trails):
+    db = session_factory()
+    cfg = config(features=[{"id": "export", "text": "You can now export your Trail Journal.", "url": "/journal"}])
+    candidate = GENERATORS["new_on_trekly"](ctx(db, cfg))
+    assert candidate.dedupe_key == "feature:export"
+    assert candidate.template_body == "New on Trekly: You can now export your Trail Journal."
+
+    assert GENERATORS["new_on_trekly"](ctx(db)) is None  # nothing new
+    db.get(Trail, trails["Falls Four"]).created_at = NOW - timedelta(days=3)
+    db.add(TrailPhoto(trail_id=trails["Lake Low"], source="owner", photographer="Me", hero_path="a/hero.webp",
+                      thumb_path="a/thumb.webp", hero_width=10, hero_height=10, approved_by=uuid.uuid4(),
+                      created_at=NOW - timedelta(days=2)))
+    db.commit()
+    candidate = GENERATORS["new_on_trekly"](ctx(db))
+    assert candidate.dedupe_key == f"new_trail:{trails['Falls Four']}"
+    assert "just joined the catalogue" in candidate.template_body
+    service.draft_from(db, config(), candidate, TODAY, NOW, None)
+    db.commit()
+    candidate = GENERATORS["new_on_trekly"](ctx(db))
+    assert candidate.dedupe_key == f"new_photo:{trails['Lake Low']}:a/hero.webp"
+
+
+def test_roundup_posts_anonymous_totals_only_above_a_minimum(session_factory, trails):
+    db = session_factory()
+    hikes(db, trails["Ridge High"], 4)
+    hikes(db, trails["Lake Low"], 3)
+    assert GENERATORS["roundup"](ctx(db)) is None  # 7 hikers but only 7 hikes
+    hikes(db, trails["Falls Four"], 2)
+    candidate = GENERATORS["roundup"](ctx(db))
+    assert candidate.template_body.startswith("Community roundup: hikers logged 9 hikes on 3 different trails")
+    assert candidate.trail_id is None
+    assert set(candidate.data) == {"hikes_logged", "trails", "window_days"}
+
+
+def test_roundup_leaves_out_demo_and_official_accounts(session_factory, trails):
+    from app.models.account_label import AccountLabel
+
+    db = session_factory()
+    for _ in range(10):
+        user = uuid.uuid4()
+        db.add(AccountLabel(user_id=user, label="demo"))
+        db.add(HikeLog(user_id=user, trail_id=trails["Lake Low"], hiked_on=TODAY, created_at=NOW - timedelta(hours=3)))
+    db.commit()
+    assert GENERATORS["roundup"](ctx(db)) is None
+
+
+def test_fun_facts_use_only_approved_facts_with_their_source(session_factory, trails):
+    db = session_factory()
+    db.add(TreklyFact(text="Unapproved fact.", source_url="https://parks.canada.ca/a", approved=False,
+                      created_at=NOW - timedelta(days=5)))
+    db.commit()
+    assert GENERATORS["fun_fact"](ctx(db)) is None
+    fact = TreklyFact(text="Banff was founded in 1885.", source_url="https://parks.canada.ca/b", approved=True,
+                      trail_id=trails["Lake Low"], created_at=NOW - timedelta(days=4))
+    db.add(fact)
+    db.commit()
+    candidate = GENERATORS["fun_fact"](ctx(db))
+    assert candidate.template_body == "Fun fact: Banff was founded in 1885."
+    assert candidate.source_url == "https://parks.canada.ca/b"
+    assert candidate.source_label == "Source: parks.canada.ca"
+    assert candidate.fact_id == fact.id
+
+
+def test_a_fact_is_not_reused_within_its_cooldown(session_factory, trails):
+    db = session_factory()
+    db.add(TreklyFact(text="Fact A.", source_url="https://parks.canada.ca/a", approved=True))
+    db.commit()
+    first = GENERATORS["fun_fact"](ctx(db))
+    service.draft_from(db, config(), first, TODAY, NOW, None)
+    db.commit()
+    later = TODAY + timedelta(days=7)
+    assert GENERATORS["fun_fact"](ctx(db, today=later, now=NOW + timedelta(days=7))) is None
+
+
+def test_bulletins_are_parsed_from_the_official_page_only():
+    bulletins = cond.parse_bulletins(BULLETIN_PAGE, "Banff National Park",
+                                     "https://parks.canada.ca/pn-np/ab/banff/bulletins")
+    assert [(b.title, b.issued_on) for b in bulletins] == [
+        ("Trail Closure: Larch Valley Trail", date(2026, 9, 22)),
+        ("Bear Warning: Skoki trails", date(2026, 9, 1)),
+        ("Visitor centre hours", date(2026, 9, 23)),
+    ]
+
+
+def test_conditions_quote_the_bulletin_with_date_link_and_notice(session_factory, trails):
+    db = session_factory()
+    candidate = GENERATORS["conditions"](ctx(db, fetch=lambda url: BULLETIN_PAGE))
+    assert candidate.template_body == (
+        'Parks Canada bulletin for Banff National Park, issued September 22, 2026: '
+        '"Trail Closure: Larch Valley Trail" Copied from the official version on parks.canada.ca. '
+        "Check official conditions before you go."
+    )
+    assert candidate.source_url == "https://parks.canada.ca/pn-np/ab/banff/bulletins/AAAA-1111"
+    assert candidate.source_date == date(2026, 9, 22)
+    assert candidate.trail_id == trails["Larch Valley"]
+    assert candidate.dedupe_key == "conditions:aaaa-1111"
+
+
+def test_a_park_page_that_fails_doesnt_stop_conditions(session_factory, trails):
+    db = session_factory()
+
+    def fetch(url):
+        if "banff" in url:
+            return BULLETIN_PAGE
+        raise TimeoutError
+
+    context = ctx(db, fetch=fetch)
+    assert GENERATORS["conditions"](context) is not None
+    assert any("Jasper National Park" in note for note in context.notes)
+
+
+# ------------------------------------------------------ AI writer and checks
+
+DATA = {"trail_name": "Ridge High", "place": "Jasper National Park", "distance_km": "14.2",
+        "elevation_gain_m": "900", "difficulty": "moderate", "must_mention": ["Ridge High"]}
+TEMPLATE = ("Trail spotlight: Ridge High in Jasper National Park. 14.2 km out and back, 900 m of elevation gain, "
+            "rated moderate.")
+
+
+@pytest.mark.parametrize("text", [
+    "Ridge High in Jasper National Park is calling: 14.2 km out and back with 900 m of climbing.",
+    "Looking for a moderate day? Ridge High in Jasper National Park covers 14.2 km with 900 m of elevation gain.",
+])
+def test_ai_text_that_sticks_to_the_data_passes(text):
+    assert writer.check_ai_text(text, DATA, TEMPLATE, 280) == []
+
+
+@pytest.mark.parametrize("text, problem", [
+    ("Ridge High in Jasper National Park: 14.2 km and 950 m of gain.", "numbers not in the data"),
+    ("Ridge High in Jasper National Park is 15 km long.", "numbers not in the data"),
+    ("Ridge High near Maligne Lake in Jasper National Park, 14.2 km.", "name 'Maligne'"),
+    ("Ridge High in Jasper National Park is best in October.", "'october'"),
+    ("Ridge High in Jasper National Park takes two days.", "'two'"),
+    ("Ridge High in Jasper National Park is the busiest trail around.", "'busiest'"),
+    ("Ridge High in Jasper National Park has bears right now.", "'bears'"),
+    ("Jasper National Park has a 14.2 km out and back.", "leaves out 'Ridge High'"),
+    ("Ridge High in Jasper National Park. See https://example.com for more.", "link"),
+    ("Ridge High in Jasper National Park. 14.2 km. 900 m. Moderate. Go.", "more than 3 sentences"),
+    ("Ridge High in Jasper National Park " + "is lovely " * 40, "longer than 280"),
+])
+def test_ai_text_that_adds_facts_is_caught(text, problem):
+    problems = writer.check_ai_text(text, DATA, TEMPLATE, 280)
+    assert any(problem.lower() in p.lower() for p in problems), problems
+
+
+def test_the_writer_uses_good_ai_text_and_falls_back_to_the_template_otherwise():
+    good = FakeAI("Ridge High in Jasper National Park: 14.2 km out and back, 900 m of elevation gain.")
+    written = writer.write("spotlight", TEMPLATE, DATA, use_ai=True, client=good, max_chars=280)
+    assert (written.writer, written.body) == ("ai", good.answer)
+    assert "DATA:" in good.calls[0][1] and "Use only the facts" in good.calls[0][0]
+
+    invented = FakeAI("Ridge High in Jasper National Park has 2,000 m of gain.")
+    written = writer.write("spotlight", TEMPLATE, DATA, use_ai=True, client=invented, max_chars=280)
+    assert (written.writer, written.body) == ("template", TEMPLATE)
+    assert written.note.startswith("AI text rejected")
+
+    for broken in (FakeAI(None), FakeAI(error=RuntimeError("down"))):
+        written = writer.write("spotlight", TEMPLATE, DATA, use_ai=True, client=broken, max_chars=280)
+        assert (written.writer, written.body) == ("template", TEMPLATE)
+
+    off = FakeAI("anything")
+    assert writer.write("spotlight", TEMPLATE, DATA, use_ai=False, client=off, max_chars=280).writer == "template"
+    assert off.calls == []
+
+
+def test_warnings_never_reach_the_ai_even_when_asked():
+    ai = FakeAI("Totally rewritten warning.")
+    written = writer.write("conditions", "Official text.", {}, use_ai=True, client=ai, max_chars=280)
+    assert written.body == "Official text." and written.writer == "template"
+    assert ai.calls == []
+
+
+def test_the_daily_run_never_sends_conditions_to_the_ai(session_factory, trails):
+    db = session_factory()
+    ai = FakeAI(lambda user: "rewritten")
+    report = run(db, config(**{"types.conditions.ai": True}), ai=ai, fetch=lambda url: BULLETIN_PAGE)
+    assert "conditions" in report.drafted
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "conditions"))
+    assert draft.writer == "template" and "Check official conditions before you go." in draft.body
+    assert all("Larch Valley Trail" not in user for _system, user in ai.calls)
+    assert all("parks.canada.ca" not in user for _system, user in ai.calls)
+
+
+def test_ai_text_is_stored_with_the_template_for_comparison(session_factory, trails):
+    db = session_factory()
+    answer = "It's larch season: Larch Valley in Banff National Park, 11.6 km out and back, rated moderate."
+    run(db, config(**{"types.conditions.enabled": False}), ai=FakeAI(answer))
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
+    assert draft.writer == "ai" and draft.body == answer
+    assert draft.template_body.startswith("Trail spotlight: it's larch season")
+
+
+# ------------------------------------------------- the daily run and pacing
+
+def make_official(db):
+    from app.models.account import Profile
+    from app.models.account_label import AccountLabel
+
+    user = uuid.uuid4()
+    db.add(AccountLabel(user_id=user, label="official"))
+    db.add(Profile(id=user, username="trekly", display_name="Trekly"))
+    db.commit()
+    return user
+
+
+def auto(db, *types):
+    for name in types:
+        db.add(TreklyPostTypeSetting(post_type=name, auto_publish=True))
+    db.commit()
+
+
+def count(db, model, *where):
+    return db.scalar(select(func.count()).select_from(model).where(*where))
+
+
+def test_running_twice_never_duplicates_drafts_or_posts(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    auto(db, "spotlight", "trending", "fun_fact", "roundup", "new_on_trekly")
+    outbox = Outbox()
+    first = run(db, outbox=outbox)
+    drafts, posts = count(db, TreklyPostDraft), count(db, ActivityPost)
+    assert first.drafted and first.published == "spotlight" and posts == 1
+    second = run(db, outbox=outbox, now=NOW + timedelta(hours=2))
+    assert second.drafted == [] and second.published is None
+    assert (count(db, TreklyPostDraft), count(db, ActivityPost)) == (drafts, posts)
+    assert len(outbox.sent) <= 1  # one digest a day at most
+
+
+def test_nothing_is_published_without_auto_publish_or_approval(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    report = run(db)
+    assert report.drafted and report.published is None
+    assert count(db, ActivityPost) == 0
+    assert count(db, TreklyPostDraft, TreklyPostDraft.status == "draft") == len(report.drafted)
+
+
+def test_a_scheduled_draft_is_published_on_its_day_and_once(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    run(db)
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
+    draft.status, draft.publish_on = "scheduled", TODAY + timedelta(days=1)
+    db.commit()
+    assert run(db, now=NOW + timedelta(hours=1)).published is None  # not its day yet
+    tomorrow = NOW + timedelta(days=1)
+    assert run(db, now=tomorrow).published == "spotlight"
+    post = db.get(ActivityPost, db.get(TreklyPostDraft, draft.id).post_id)
+    assert (post.user_id, post.kind, post.body, post.trail_id) == (official_id, "announcement", draft.body,
+                                                                   draft.trail_id)
+    assert run(db, now=tomorrow + timedelta(hours=1)).published is None
+
+
+def test_at_most_one_post_a_day_counting_manual_ones(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    db.add(ActivityPost(user_id=official_id, kind="announcement", body="Manual post", created_at=NOW - timedelta(hours=1)))
+    db.commit()
+    auto(db, "spotlight")
+    report = run(db)
+    assert report.published is None
+    assert any("already posted" in note for note in report.notes)
+
+
+def test_the_day_counts_in_alberta_time(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    # 05:00 UTC on the 23rd is still the 22nd in Alberta.
+    db.add(ActivityPost(user_id=official_id, kind="announcement", body="Yesterday",
+                        created_at=datetime(2026, 9, 23, 5, 0, tzinfo=timezone.utc)))
+    db.commit()
+    auto(db, "spotlight")
+    assert run(db).published == "spotlight"
+
+
+def test_no_trail_twice_within_30_days(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    larch = trails["Larch Valley"]
+    db.add(ActivityPost(user_id=official_id, kind="announcement", body="Earlier", trail_id=larch,
+                        created_at=NOW - timedelta(days=29)))
+    db.commit()
+    candidate = GENERATORS["spotlight"](ctx(db))
+    assert candidate is None or candidate.trail_id != larch
+
+
+def test_publishing_refuses_a_trail_posted_about_since_the_draft(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    run(db)
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
+    db.add(ActivityPost(user_id=official_id, kind="announcement", body="Manual", trail_id=draft.trail_id,
+                        created_at=NOW - timedelta(days=2)))
+    db.commit()
+    assert "within the last 30 days" in service.publish_refusal(db, config(), draft, NOW + timedelta(days=1),
+                                                                TODAY + timedelta(days=1))
+
+
+def test_conditions_are_exempt_from_the_trail_cooldown(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    db.add(ActivityPost(user_id=official_id, kind="announcement", body="Earlier", trail_id=trails["Larch Valley"],
+                        created_at=NOW - timedelta(days=3)))
+    db.commit()
+    candidate = GENERATORS["conditions"](ctx(db, fetch=lambda url: BULLETIN_PAGE))
+    assert candidate.trail_id == trails["Larch Valley"]
+
+
+def test_a_busy_feed_skips_the_day(client, person, session_factory, trails):  # noqa: F811
+    db = session_factory()
+    make_official(db)
+    auto(db, "spotlight")
+    for i in range(6):
+        who = person(f"busy{i}")
+        log(client, who, trails["Falls Four"], hiked_on="2026-09-20")
+    db.expire_all()
+    now = datetime.now(timezone.utc)
+    report = run(db, now=now)
+    assert report.published is None and "busy day" in report.publish_note
+
+
+def test_stale_drafts_expire_and_cant_be_published(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    run(db)
+    later = NOW + timedelta(days=6)
+    run(db, now=later)
+    trending = db.scalars(select(TreklyPostDraft).where(TreklyPostDraft.run_date == TODAY)).all()
+    assert trending and all(d.status == "expired" for d in trending if d.post_type == "spotlight")
+
+
+def test_an_unapproved_fact_cant_be_published(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    fact = TreklyFact(text="A fact.", source_url="https://parks.canada.ca/a", approved=True)
+    db.add(fact)
+    db.commit()
+    run(db)
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "fun_fact"))
+    fact.approved = False
+    db.commit()
+    assert "isn't approved" in service.publish_refusal(db, config(), draft, NOW, TODAY)
+
+
+def test_nothing_publishes_until_the_official_account_exists(session_factory, trails):
+    db = session_factory()
+    auto(db, "spotlight")
+    report = run(db)
+    assert report.published is None and count(db, ActivityPost) == 0
+
+
+def test_the_digest_lists_waiting_drafts_once_a_day(session_factory, trails, monkeypatch):
+    monkeypatch.setenv("APP_URL", "https://trekly.example")
+    db = session_factory()
+    outbox = Outbox()
+    run(db, outbox=outbox)
+    assert len(outbox.sent) == 1
+    email = outbox.sent[0]
+    assert email.to == "admin@example.com" and "to review" in email.subject
+    assert "https://trekly.example/admin/trekly-posts" in email.text
+    run(db, outbox=outbox, now=NOW + timedelta(hours=3))
+    assert len(outbox.sent) == 1
+    run(db, outbox=outbox, now=NOW + timedelta(days=1))
+    assert len(outbox.sent) == 2
+
+
+def test_digest_recipients_come_from_the_env_or_the_admins(session_factory, monkeypatch):
+    from sqlalchemy import insert
+
+    from app.models.admin import AUTH_USERS
+
+    db = session_factory()
+    monkeypatch.setenv("TREKLY_POSTS_DIGEST_TO", "a@example.com, b@example.com")
+    assert service.digest_recipients(db) == ["a@example.com", "b@example.com"]
+    monkeypatch.delenv("TREKLY_POSTS_DIGEST_TO")
+    admin = uuid.uuid4()
+    db.execute(insert(AUTH_USERS).values(id=admin, email="boss@example.com"))
+    db.commit()
+    monkeypatch.setenv("ADMIN_USER_IDS", str(admin))
+    assert service.digest_recipients(db) == ["boss@example.com"]
+
+
+def test_the_lock_stops_overlapping_runs(session_factory, trails):
+    db = session_factory()
+    assert service.acquire_lock(db, NOW, "first") is None
+    report = run(db, now=NOW + timedelta(minutes=1))
+    assert report.drafted == [] and "another run" in report.notes[0]
+
+
+# -------------------------------------------------------- the review API
+
+@pytest.fixture
+def api(client, admin_headers, official, session_factory, trails):  # noqa: F811
+    app.dependency_overrides[get_now] = lambda: NOW
+    app.dependency_overrides[get_posts_config] = lambda: config(**{"types.conditions.enabled": False})
+    db = session_factory()
+    db.add(TreklyFact(text="Banff was founded in 1885.", source_url="https://parks.canada.ca/b", approved=True))
+    db.commit()
+    run(db, config(**{"types.conditions.enabled": False}))
+    db.close()
+    yield {"client": client, "headers": admin_headers}
+    app.dependency_overrides.pop(get_now, None)
+    app.dependency_overrides.pop(get_posts_config, None)
+
+
+def queue(api, **params):
+    response = api["client"].get("/api/admin/trekly-posts", params=params, headers=api["headers"])
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "no-store"
+    return response.json()
+
+
+def test_the_queue_lists_drafts_with_types_off_by_default(api):
+    body = queue(api)
+    assert body["account"]["username"] == "trekly"
+    assert all(t["auto_publish"] is False for t in body["types"])
+    assert {d["post_type"] for d in body["drafts"]} >= {"spotlight", "fun_fact"}
+    assert body["posts_today"] == 0 and body["max_posts_per_day"] == 1
+
+
+def test_edit_schedule_publish_and_reject(api, session_factory):
+    c, h = api["client"], api["headers"]
+    spotlight = next(d for d in queue(api)["drafts"] if d["post_type"] == "spotlight")
+    edited = c.patch(f"/api/admin/trekly-posts/{spotlight['id']}", json={"body": "  Edited   by hand.  "}, headers=h)
+    assert edited.status_code == 200 and edited.json()["body"] == "Edited by hand."
+    assert edited.json()["writer"] == "admin"
+
+    past = c.post(f"/api/admin/trekly-posts/{spotlight['id']}/schedule", json={"publish_on": "2026-09-01"}, headers=h)
+    assert past.status_code == 422
+    scheduled = c.post(f"/api/admin/trekly-posts/{spotlight['id']}/schedule", json={"publish_on": "2026-09-25"},
+                       headers=h)
+    assert scheduled.json()["status"] == "scheduled"
+
+    published = c.post(f"/api/admin/trekly-posts/{spotlight['id']}/publish", headers=h)
+    assert published.status_code == 200, published.text
+    assert published.json()["status"] == "published"
+    items = feed(c)["items"]
+    assert items[0]["kind"] == "announcement" and items[0]["announcement"]["body"] == "Edited by hand."
+    assert items[0]["author"]["label"] == "official"
+
+    other = next(d for d in queue(api)["drafts"] if d["status"] == "draft")
+    second = c.post(f"/api/admin/trekly-posts/{other['id']}/publish", headers=h)
+    assert second.status_code == 409 and "already posted" in second.json()["detail"]
+    assert c.post(f"/api/admin/trekly-posts/{spotlight['id']}/publish", headers=h).status_code == 409
+
+    rejected = c.post(f"/api/admin/trekly-posts/{other['id']}/reject", headers=h)
+    assert rejected.json()["status"] == "rejected"
+    assert c.patch(f"/api/admin/trekly-posts/{other['id']}", json={"body": "x"}, headers=h).status_code == 409
+
+
+def test_a_published_fact_shows_its_source_link_in_the_feed(api, session_factory):
+    db = session_factory()
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "fun_fact"))
+    db.close()  # SQLite here shares one connection with the client
+    assert api["client"].post(f"/api/admin/trekly-posts/{draft.id}/publish", headers=api["headers"]).status_code == 200
+    announcement = feed(api["client"])["items"][0]["announcement"]
+    assert announcement["source_url"] == "https://parks.canada.ca/b"
+    assert announcement["source_label"] == "Source: parks.canada.ca"
+
+
+def test_conditions_drafts_cant_be_edited(api, session_factory):
+    db = session_factory()
+    draft = TreklyPostDraft(post_type="conditions", dedupe_key="conditions:x", run_date=TODAY, body="Official.",
+                            template_body="Official.", data={})
+    db.add(draft)
+    db.commit()
+    response = api["client"].patch(f"/api/admin/trekly-posts/{draft.id}", json={"body": "Paraphrased."},
+                                   headers=api["headers"])
+    assert response.status_code == 422
+
+
+def test_auto_publish_toggle(api):
+    c, h = api["client"], api["headers"]
+    response = c.put("/api/admin/trekly-posts/types/trending", json={"auto_publish": True}, headers=h)
+    assert response.status_code == 200 and response.json()["auto_publish"] is True
+    assert next(t for t in queue(api)["types"] if t["post_type"] == "trending")["auto_publish"] is True
+    assert c.put("/api/admin/trekly-posts/types/memes", json={"auto_publish": True}, headers=h).status_code == 422
+
+
+def test_fact_bank_crud_and_reapproval_on_change(api, trails):
+    c, h = api["client"], api["headers"]
+    bad = c.post("/api/admin/trekly-posts/facts", json={"text": "x", "source_url": "http://insecure.example"}, headers=h)
+    assert bad.status_code == 422
+    made = c.post("/api/admin/trekly-posts/facts", json={
+        "text": "A fact.", "source_url": "https://parks.canada.ca/a", "trail_id": str(trails["Lake Low"]),
+        "approved": True,
+    }, headers=h)
+    assert made.status_code == 201, made.text
+    fact = made.json()
+    assert fact["approved"] is True and fact["trail"]["name"] == "Lake Low"
+    changed = c.patch(f"/api/admin/trekly-posts/facts/{fact['id']}", json={"text": "A changed fact."}, headers=h)
+    assert changed.json()["approved"] is False  # needs approving again
+    approved = c.patch(f"/api/admin/trekly-posts/facts/{fact['id']}", json={"approved": True}, headers=h)
+    assert approved.json()["approved"] is True
+    assert len(c.get("/api/admin/trekly-posts/facts", headers=h).json()) == 2  # plus the fixture's
+    assert c.delete(f"/api/admin/trekly-posts/facts/{fact['id']}", headers=h).status_code == 204
+
+
+def test_the_seed_facts_are_all_unapproved_and_sourced():
+    import json
+
+    from scripts.trekly_posts import SEED_PATH
+
+    facts = json.loads(SEED_PATH.read_text(encoding="utf-8"))
+    assert len(facts) >= 20
+    assert len({f["key"] for f in facts}) == len(facts)
+    for fact in facts:
+        assert fact["source_url"].startswith("https://")
+        assert 0 < len(fact["text"]) <= 400
+        assert "approved" not in fact

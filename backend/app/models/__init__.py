@@ -32,6 +32,8 @@ from app.models.trip_plan import TripPlan, TripPlanNight
 from app.models.user_gear import UserGearItem
 from app.models.visit_streak import VisitStreak
 
+from app.models.trekly_post import TreklyFact, TreklyPostDraft, TreklyPostTypeSetting
+
 __all__ = [
     "AccountLabel",
     "ActivityPost",
@@ -76,6 +78,9 @@ __all__ = [
     "TrailPhotoCandidates",
     "TrailPhotoReview",
     "TrailSeasonalCondition",
+    "TreklyFact",
+    "TreklyPostDraft",
+    "TreklyPostTypeSetting",
     "TripPlan",
     "TripPlanNight",
     "UserGearItem",

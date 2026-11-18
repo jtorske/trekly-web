@@ -24,7 +24,7 @@ the post. Only the API writes these tables.
 import uuid
 
 from sqlalchemy import (
-    Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, PrimaryKeyConstraint, SmallInteger, Text, Uuid,
+    Boolean, CheckConstraint, Column, Date, DateTime, ForeignKey, Index, PrimaryKeyConstraint, SmallInteger, Text, Uuid,
     false, text,
 )
 from sqlalchemy.orm import relationship
@@ -86,6 +86,11 @@ class ActivityPost(Base):
     body = Column(Text)
     trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="SET NULL"))
     photo_path = Column(Text)
+    # An announcement's source (an automatic post's official page, e.g. a
+    # Parks Canada bulletin or a fact's reference): shown as a link under it.
+    source_url = Column(Text)
+    source_label = Column(Text)
+    source_date = Column(Date)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     # Set by an admin (audited); a hidden post shows to nobody.
     hidden_at = Column(DateTime(timezone=True))

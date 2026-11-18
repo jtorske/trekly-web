@@ -50,6 +50,11 @@ export interface ActivityPost {
     trail: TrailListItem | null;
     /** Public URL of the post's own photo. */
     photo_url: string | null;
+    /** The official page an automatic post quotes or cites (a Parks Canada bulletin, a fact's source). */
+    source_url?: string | null;
+    source_label?: string | null;
+    /** YYYY-MM-DD: when the source was issued (a bulletin's date). */
+    source_date?: string | null;
   } | null;
   milestone: MilestoneBadgeInfo | null;
   rank: { level: number; title: string } | null;
@@ -232,3 +237,14 @@ export function latestEarned(milestones: Milestone[]): Milestone | null {
 
 /** The Undo key for deleting a post (lists hide it while its toast is up). */
 export const deleteKey = (postId: string) => `activity:${postId}`;
+
+/** "November 9, 2026" from a YYYY-MM-DD date, read as a calendar day (no time zone shift). */
+export function formatSourceDate(day: string): string {
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}

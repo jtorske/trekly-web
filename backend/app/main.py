@@ -9,6 +9,7 @@ from app.routers import (
     admin_official_posts,
     admin_profiles,
     admin_trail_photos,
+    admin_trekly_posts,
     availability,
     follows,
     gear,
@@ -98,6 +99,7 @@ app.include_router(public_profiles.router)
 app.include_router(admin.router)
 app.include_router(admin_profiles.router)
 app.include_router(admin_official_posts.router)
+app.include_router(admin_trekly_posts.router)
 app.include_router(usernames.router)
 
 

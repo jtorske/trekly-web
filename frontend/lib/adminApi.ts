@@ -238,3 +238,100 @@ export const officialPostsApi = {
     return payload as OfficialPhoto;
   },
 };
+
+/** The review queue for automatic @trekly posts (/admin/trekly-posts). */
+export type TreklyPostType = "trending" | "spotlight" | "new_on_trekly" | "roundup" | "fun_fact" | "conditions";
+export type TreklyDraftStatus = "draft" | "scheduled" | "published" | "rejected" | "expired";
+export type TreklyQueueFilter = "waiting" | "published" | "closed";
+
+export interface TreklyPostTypeInfo {
+  post_type: TreklyPostType;
+  label: string;
+  /** From backend/config/trekly_posts.toml. */
+  enabled: boolean;
+  days: string[];
+  ai: boolean;
+  /** Off by default: drafts wait for an admin. */
+  auto_publish: boolean;
+}
+
+export interface TreklyDraft {
+  id: string;
+  post_type: TreklyPostType;
+  status: TreklyDraftStatus;
+  body: string;
+  template_body: string;
+  /** "template", "ai" (passed the fact check) or "admin" (edited here). */
+  writer: "template" | "ai" | "admin";
+  /** Why the AI text wasn't used, when it was tried. */
+  ai_note: string | null;
+  trail: TrailListItem | null;
+  source_url: string | null;
+  source_label: string | null;
+  source_date: string | null;
+  data: Record<string, unknown>;
+  run_date: string;
+  publish_on: string | null;
+  published_at: string | null;
+  post_id: string | null;
+  created_at: string;
+  /** Why "Publish now" would be refused right now. */
+  blocked: string | null;
+}
+
+export interface TreklyQueue {
+  account: { username: string; display_name: string | null; avatar_path: string | null } | null;
+  /** The local (Alberta) date the pacing rules use. */
+  today: string;
+  posts_today: number;
+  max_posts_per_day: number;
+  busy: boolean;
+  types: TreklyPostTypeInfo[];
+  counts: Record<TreklyDraftStatus, number>;
+  drafts: TreklyDraft[];
+}
+
+export interface TreklyFact {
+  id: string;
+  text: string;
+  trail: TrailListItem | null;
+  park_name: string | null;
+  source_url: string;
+  approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TreklyFactInput {
+  text: string;
+  source_url: string;
+  trail_id: string | null;
+  park_name: string | null;
+  approved?: boolean;
+}
+
+const TREKLY = "/api/admin/trekly-posts";
+const draftUrl = (id: string, action = "") => `${TREKLY}/${encodeURIComponent(id)}${action ? `/${action}` : ""}`;
+
+export const treklyPostsApi = {
+  queue: (status: TreklyQueueFilter, signal?: AbortSignal) =>
+    apiFetch<TreklyQueue>(`${TREKLY}?${query({ status })}`, { auth: true, signal }),
+  edit: (id: string, body: string) => apiFetch<TreklyDraft>(draftUrl(id), { method: "PATCH", auth: true, body: { body } }),
+  /** null takes it back to a plain draft. */
+  schedule: (id: string, publishOn: string | null) =>
+    apiFetch<TreklyDraft>(draftUrl(id, "schedule"), { method: "POST", auth: true, body: { publish_on: publishOn } }),
+  publish: (id: string) => apiFetch<TreklyDraft>(draftUrl(id, "publish"), { method: "POST", auth: true }),
+  reject: (id: string) => apiFetch<TreklyDraft>(draftUrl(id, "reject"), { method: "POST", auth: true }),
+  setAutoPublish: (type: TreklyPostType, autoPublish: boolean) =>
+    apiFetch<TreklyPostTypeInfo>(`${TREKLY}/types/${type}`, {
+      method: "PUT",
+      auth: true,
+      body: { auto_publish: autoPublish },
+    }),
+  facts: (signal?: AbortSignal) => apiFetch<TreklyFact[]>(`${TREKLY}/facts`, { auth: true, signal }),
+  createFact: (fact: TreklyFactInput) => apiFetch<TreklyFact>(`${TREKLY}/facts`, { method: "POST", auth: true, body: fact }),
+  updateFact: (id: string, change: Partial<TreklyFactInput>) =>
+    apiFetch<TreklyFact>(`${TREKLY}/facts/${encodeURIComponent(id)}`, { method: "PATCH", auth: true, body: change }),
+  removeFact: (id: string) =>
+    apiFetch<void>(`${TREKLY}/facts/${encodeURIComponent(id)}`, { method: "DELETE", auth: true }),
+};

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { EyeOff, Flag, Hand, Trash2 } from "lucide-react";
+import { ExternalLink, EyeOff, Flag, Hand, Trash2 } from "lucide-react";
 import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
@@ -14,7 +14,7 @@ import ReportDialog from "@/components/ReportDialog";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
-import { ONLY_YOU_LABEL, deleteKey, earnedPhrases, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
+import { ONLY_YOU_LABEL, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
 import { deleteActivityPost, setHighFive } from "@/lib/activityApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
@@ -199,6 +199,16 @@ export default function PostCard({
               </span>
             </span>
           </Link>
+        )}
+        {announcement.source_url && (
+          <a href={announcement.source_url} className={styles.source} target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={14} aria-hidden="true" />
+            <span>
+              {announcement.source_label || "Source"}
+              {announcement.source_date && <> · {formatSourceDate(announcement.source_date)}</>}
+            </span>
+            <span className={ui.srOnly}> (opens in a new tab)</span>
+          </a>
         )}
         {actions}
       </li>

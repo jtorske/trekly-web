@@ -11,3 +11,5 @@ pyjwt[crypto]==2.10.1
 pillow==11.3.0
 # IANA time zones for visit streaks (app/streaks.py). Keep current: zone rules change (2026f: Alberta).
 tzdata==2026.6
+# Optional AI wording for automatic @trekly posts (app/trekly_posts/writer.py).
+anthropic==0.96.0

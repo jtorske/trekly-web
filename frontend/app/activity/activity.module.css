@@ -547,6 +547,25 @@
   border-radius: 0;
 }
 
+/* An automatic post's official source: the bulletin or page it quotes. */
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  max-width: 100%;
+  color: var(--color-rust-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.source svg {
+  flex-shrink: 0;
+}
+
 /* "Trekly picks": suggestions between posts while the feed is quiet. Dashed
    and tinted so they never read as someone's post. */
 .pick {
