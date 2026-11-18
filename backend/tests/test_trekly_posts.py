@@ -49,8 +49,9 @@ BULLETIN_PAGE = """
 """
 
 
-def config(**overrides):
-    """The real config file, with every type on every day unless overridden."""
+def config(auto=None, **overrides):
+    """The real config file, with every type on every day unless overridden.
+    `auto` forces every type's auto-publish default on or off."""
     import tomllib
     from app.trekly_posts.config import CONFIG_PATH
 
@@ -58,6 +59,8 @@ def config(**overrides):
     for name in raw["types"]:
         raw["types"][name]["enabled"] = True
         raw["types"][name]["days"] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+        if auto is not None:
+            raw["types"][name]["auto_publish"] = auto
     for path, value in overrides.items():
         target = raw
         keys = path.split(".")
@@ -128,9 +131,10 @@ def run(db, cfg=None, *, now=NOW, ai=None, outbox=None, fetch=None, recipients=(
 
 # ------------------------------------------------------------------ config
 
-def test_the_shipped_config_loads_with_auto_publish_off_and_conditions_off():
+def test_the_shipped_config_auto_publishes_every_type_and_keeps_conditions_off():
     cfg = load_config()
     assert set(cfg.types) == set(GENERATORS)
+    assert all(cfg.type(name).auto_publish for name in GENERATORS)
     assert cfg.type("conditions").enabled is False
     assert cfg.type("conditions").ai is False
     assert cfg.pacing.max_posts_per_day == 1
@@ -349,11 +353,13 @@ def test_the_writer_uses_good_ai_text_and_falls_back_to_the_template_otherwise()
     invented = FakeAI("Ridge High in Jasper National Park has 2,000 m of gain.")
     written = writer.write("spotlight", TEMPLATE, DATA, use_ai=True, client=invented, max_chars=280)
     assert (written.writer, written.body) == ("template", TEMPLATE)
-    assert written.note.startswith("AI text rejected")
+    assert written.note.startswith("Skipped: the AI text failed the fact check")
+    assert written.failed_check is True
 
     for broken in (FakeAI(None), FakeAI(error=RuntimeError("down"))):
         written = writer.write("spotlight", TEMPLATE, DATA, use_ai=True, client=broken, max_chars=280)
-        assert (written.writer, written.body) == ("template", TEMPLATE)
+        # Unreachable AI isn't a failed check: the template's own text is used.
+        assert (written.writer, written.body, written.failed_check) == ("template", TEMPLATE, False)
 
     off = FakeAI("anything")
     assert writer.write("spotlight", TEMPLATE, DATA, use_ai=False, client=off, max_chars=280).writer == "template"
@@ -435,10 +441,10 @@ def test_a_rerun_drafts_nothing_more_the_same_day(session_factory, trails):
     assert count(db, TreklyPostDraft, TreklyPostDraft.post_type == "new_on_trekly") == 1
 
 
-def test_nothing_is_published_without_auto_publish_or_approval(session_factory, trails):
+def test_with_auto_publish_off_nothing_goes_out_without_approval(session_factory, trails):
     db = session_factory()
     make_official(db)
-    report = run(db)
+    report = run(db, config(auto=False))
     assert report.drafted and report.published is None
     assert count(db, ActivityPost) == 0
     assert count(db, TreklyPostDraft, TreklyPostDraft.status == "draft") == len(report.drafted)
@@ -447,17 +453,17 @@ def test_nothing_is_published_without_auto_publish_or_approval(session_factory, 
 def test_a_scheduled_draft_is_published_on_its_day_and_once(session_factory, trails):
     db = session_factory()
     official_id = make_official(db)
-    run(db)
+    run(db, config(auto=False))
     draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
     draft.status, draft.publish_on = "scheduled", TODAY + timedelta(days=1)
     db.commit()
-    assert run(db, now=NOW + timedelta(hours=1)).published is None  # not its day yet
+    assert run(db, config(auto=False), now=NOW + timedelta(hours=1)).published is None  # not its day yet
     tomorrow = NOW + timedelta(days=1)
-    assert run(db, now=tomorrow).published == "spotlight"
+    assert run(db, config(auto=False), now=tomorrow).published == "spotlight"
     post = db.get(ActivityPost, db.get(TreklyPostDraft, draft.id).post_id)
     assert (post.user_id, post.kind, post.body, post.trail_id) == (official_id, "announcement", draft.body,
                                                                    draft.trail_id)
-    assert run(db, now=tomorrow + timedelta(hours=1)).published is None
+    assert run(db, config(auto=False), now=tomorrow + timedelta(hours=1)).published is None
 
 
 def test_at_most_one_post_a_day_counting_manual_ones(session_factory, trails):
@@ -496,7 +502,7 @@ def test_no_trail_twice_within_30_days(session_factory, trails):
 def test_publishing_refuses_a_trail_posted_about_since_the_draft(session_factory, trails):
     db = session_factory()
     official_id = make_official(db)
-    run(db)
+    run(db, config(auto=False))
     draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
     db.add(ActivityPost(user_id=official_id, kind="announcement", body="Manual", trail_id=draft.trail_id,
                         created_at=NOW - timedelta(days=2)))
@@ -531,9 +537,9 @@ def test_a_busy_feed_skips_the_day(client, person, session_factory, trails):  # 
 def test_stale_drafts_expire_and_cant_be_published(session_factory, trails):
     db = session_factory()
     make_official(db)
-    run(db)
+    run(db, config(auto=False))
     later = NOW + timedelta(days=6)
-    run(db, now=later)
+    run(db, config(auto=False), now=later)
     trending = db.scalars(select(TreklyPostDraft).where(TreklyPostDraft.run_date == TODAY)).all()
     assert trending and all(d.status == "expired" for d in trending if d.post_type == "spotlight")
 
@@ -544,7 +550,7 @@ def test_an_unapproved_fact_cant_be_published(session_factory, trails):
     fact = TreklyFact(text="A fact.", source_url="https://parks.canada.ca/a", approved=True)
     db.add(fact)
     db.commit()
-    run(db)
+    run(db, config(auto=False))
     draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "fun_fact"))
     fact.approved = False
     db.commit()
@@ -558,35 +564,80 @@ def test_nothing_publishes_until_the_official_account_exists(session_factory, tr
     assert report.published is None and count(db, ActivityPost) == 0
 
 
-def test_the_digest_lists_waiting_drafts_once_a_day(session_factory, trails, monkeypatch):
+def test_by_default_every_type_auto_publishes(session_factory, trails):
+    db = session_factory()
+    official_id = make_official(db)
+    report = run(db)
+    assert report.published == "spotlight"
+    post = db.scalar(select(ActivityPost))
+    assert (post.user_id, post.trail_id) == (official_id, trails["Larch Valley"])
+
+
+def test_an_admin_can_still_turn_a_type_off(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    db.add(TreklyPostTypeSetting(post_type="spotlight", auto_publish=False))
+    db.commit()
+    assert run(db).published is None
+    assert count(db, TreklyPostDraft, TreklyPostDraft.status == "draft") >= 1
+    assert service.auto_publish_settings(db, config())["spotlight"] is False
+    assert service.auto_publish_settings(db, config())["trending"] is True
+
+
+def test_a_post_that_fails_the_fact_check_is_skipped_not_queued(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    outbox = Outbox()
+    invented = FakeAI("Larch Valley in Banff National Park is the busiest trail, with 2,000 m of gain.")
+    report = run(db, config(**{"types.conditions.enabled": False}), ai=invented, outbox=outbox)
+    assert report.failed_check == ["spotlight"] and report.published is None
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
+    assert draft.status == "rejected" and draft.ai_note.startswith("Skipped: the AI text failed the fact check")
+    assert count(db, ActivityPost) == 0
+    # It isn't tried again the same day.
+    assert run(db, config(**{"types.conditions.enabled": False}), ai=invented,
+               now=NOW + timedelta(hours=1)).failed_check == []
+    assert "Skipped (the AI text failed the fact check)" in outbox.sent[0].text
+
+
+def test_the_digest_is_a_record_of_what_went_out_once_a_day(session_factory, trails, monkeypatch):
     monkeypatch.setenv("APP_URL", "https://trekly.example")
     db = session_factory()
+    make_official(db)
     outbox = Outbox()
     run(db, outbox=outbox)
     assert len(outbox.sent) == 1
     email = outbox.sent[0]
-    assert email.to == "admin@example.com" and "to review" in email.subject
+    post = db.scalar(select(ActivityPost))
+    assert email.to == "admin@example.com" and email.subject.startswith("Trekly posted:")
+    assert "Posted as @trekly today:" in email.text and post.body in email.text
     assert "https://trekly.example/admin/trekly-posts" in email.text
     run(db, outbox=outbox, now=NOW + timedelta(hours=3))
     assert len(outbox.sent) == 1
-    run(db, outbox=outbox, now=NOW + timedelta(days=1))
-    assert len(outbox.sent) == 2
 
 
-def test_digest_recipients_come_from_the_env_or_the_admins(session_factory, monkeypatch):
-    from sqlalchemy import insert
-
-    from app.models.admin import AUTH_USERS
-
+def test_no_digest_when_nothing_went_out(session_factory, trails):
     db = session_factory()
+    make_official(db)
+    outbox = Outbox()
+    run(db, config(auto=False), outbox=outbox)
+    assert outbox.sent == []
+
+
+def test_without_digest_recipients_it_still_runs_and_publishes(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    report = service.run_daily(db, config(), now=NOW, client=None, sender=None, recipients=[],
+                               fetch=lambda url: "<html></html>")
+    assert report.published == "spotlight" and report.digest_sent_to == 0
+
+
+def test_digest_recipients_come_only_from_the_env(monkeypatch):
     monkeypatch.setenv("TREKLY_POSTS_DIGEST_TO", "a@example.com, b@example.com")
-    assert service.digest_recipients(db) == ["a@example.com", "b@example.com"]
+    assert service.digest_recipients() == ["a@example.com", "b@example.com"]
     monkeypatch.delenv("TREKLY_POSTS_DIGEST_TO")
-    admin = uuid.uuid4()
-    db.execute(insert(AUTH_USERS).values(id=admin, email="boss@example.com"))
-    db.commit()
-    monkeypatch.setenv("ADMIN_USER_IDS", str(admin))
-    assert service.digest_recipients(db) == ["boss@example.com"]
+    monkeypatch.setenv("ADMIN_USER_IDS", str(uuid.uuid4()))
+    assert service.digest_recipients() == []
 
 
 def test_the_lock_stops_overlapping_runs(session_factory, trails):
@@ -601,11 +652,11 @@ def test_the_lock_stops_overlapping_runs(session_factory, trails):
 @pytest.fixture
 def api(client, admin_headers, official, session_factory, trails):  # noqa: F811
     app.dependency_overrides[get_now] = lambda: NOW
-    app.dependency_overrides[get_posts_config] = lambda: config(**{"types.conditions.enabled": False})
+    app.dependency_overrides[get_posts_config] = lambda: config(auto=False, **{"types.conditions.enabled": False})
     db = session_factory()
     db.add(TreklyFact(text="Banff was founded in 1885.", source_url="https://parks.canada.ca/b", approved=True))
     db.commit()
-    run(db, config(**{"types.conditions.enabled": False}))
+    run(db, config(auto=False, **{"types.conditions.enabled": False}))
     db.close()
     yield {"client": client, "headers": admin_headers}
     app.dependency_overrides.pop(get_now, None)
@@ -619,7 +670,7 @@ def queue(api, **params):
     return response.json()
 
 
-def test_the_queue_lists_drafts_with_types_off_by_default(api):
+def test_the_queue_lists_drafts_and_each_types_auto_publish(api):
     body = queue(api)
     assert body["account"]["username"] == "trekly"
     assert all(t["auto_publish"] is False for t in body["types"])

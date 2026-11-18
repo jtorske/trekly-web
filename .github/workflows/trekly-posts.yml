@@ -1,6 +1,8 @@
-# Drafts the day's automatic @trekly posts (backend/scripts/trekly_posts.py),
-# publishes at most one if an admin approved it or its type auto-publishes,
-# and emails the review digest. Once a day: about a minute of Actions time.
+# Drafts the day's automatic @trekly posts (backend/scripts/trekly_posts.py)
+# and publishes at most one (every type auto-publishes unless an admin turned
+# it off). Posts whose AI text fails the fact check are skipped. With
+# TREKLY_POSTS_DIGEST_TO set, it emails a record of what went out. Once a day:
+# about a minute of Actions time.
 # The run is idempotent (keyed drafts, one post a day, one digest a day), so a
 # late, doubled or manually re-run job changes nothing.
 name: Trekly posts
@@ -27,11 +29,13 @@ jobs:
         working-directory: backend
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Optional: links in the email and in "New on Trekly" feature posts.
       APP_URL: ${{ secrets.APP_URL }}
       EMAIL_BACKEND: resend
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
-      # Who gets the daily digest (comma-separated).
+      # Optional: who gets the daily record of what went out (comma-separated).
+      # Needs RESEND_API_KEY and RESEND_FROM_EMAIL too. Unset: no email.
       TREKLY_POSTS_DIGEST_TO: ${{ secrets.TREKLY_POSTS_DIGEST_TO }}
       # Optional: friendlier wording through the Claude API. Without it every
       # post uses its template text.
@@ -41,16 +45,15 @@ jobs:
         id: config
         working-directory: .
         run: |
-          missing=""
-          for name in DATABASE_URL APP_URL RESEND_API_KEY RESEND_FROM_EMAIL TREKLY_POSTS_DIGEST_TO; do
-            [ -n "${!name}" ] || missing="$missing $name"
-          done
-          if [ -n "$missing" ]; then
-            echo "::warning::Trekly posts skipped; missing secrets:$missing"
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::Trekly posts skipped; missing secret: DATABASE_URL"
             echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          if [ -n "$TREKLY_POSTS_DIGEST_TO" ] && { [ -z "$RESEND_API_KEY" ] || [ -z "$RESEND_FROM_EMAIL" ]; }; then
+            echo "::warning::TREKLY_POSTS_DIGEST_TO is set but RESEND_API_KEY or RESEND_FROM_EMAIL isn't; posting without the email"
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7
         if: steps.config.outputs.ready == 'true'

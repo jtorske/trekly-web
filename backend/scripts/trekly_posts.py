@@ -8,9 +8,10 @@ Run from backend/:
 
 `run` is idempotent: drafts are keyed (dedupe_key), at most one post goes out
 a day, and the digest is sent once a day, so running it twice changes nothing.
-ANTHROPIC_API_KEY (optional) turns on the AI wording; EMAIL_BACKEND and
-RESEND_* send the digest (app/notify.py); TREKLY_POSTS_DIGEST_TO overrides
-who gets it. Exit code 0 when the run finished or was skipped, 1 on errors.
+Only DATABASE_URL is required. ANTHROPIC_API_KEY (optional) turns on the AI
+wording. TREKLY_POSTS_DIGEST_TO (optional) emails a record of what went out,
+sent through EMAIL_BACKEND and RESEND_* (app/notify.py); without it no email
+is sent and the run still drafts and publishes. Exit code 0 when the run finished or was skipped, 1 on errors.
 """
 
 import argparse
@@ -40,9 +41,16 @@ def run() -> int:
     db = SessionLocal()
     try:
         client = writer.client_from_env(config.ai.model, config.ai.max_chars) if config.ai.enabled else None
+        recipients = service.digest_recipients()
+        sender = None
+        if recipients:
+            try:
+                sender = email_sender_from_env()
+            except RuntimeError as error:  # a broken mail setup mustn't stop the posts
+                print(f"  ! digest not sent: {error}")
         report = service.run_daily(
-            db, config, now=datetime.now(timezone.utc), client=client, sender=email_sender_from_env(),
-            recipients=service.digest_recipients(db), holder=os.getenv("GITHUB_RUN_ID", "cli"),
+            db, config, now=datetime.now(timezone.utc), client=client, sender=sender,
+            recipients=recipients, holder=os.getenv("GITHUB_RUN_ID", "cli"),
         )
     finally:
         db.close()

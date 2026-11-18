@@ -24,6 +24,8 @@ class TypeConfig:
     ai: bool
     expires_after_days: int
     options: dict[str, Any] = field(default_factory=dict)
+    # The default; a row in trekly_post_type_settings (the admin toggle) overrides it.
+    auto_publish: bool = False
 
     def runs_on(self, day: date) -> bool:
         return self.enabled and WEEKDAYS[day.weekday()] in self.days
@@ -75,11 +77,12 @@ def _type(name: str, raw: dict) -> TypeConfig:
     expires = int(raw.get("expires_after_days", 3))
     if expires < 1:
         raise ConfigError(f"types.{name}.expires_after_days must be at least 1")
-    options = {k: v for k, v in raw.items() if k not in ("enabled", "days", "ai", "expires_after_days")}
+    options = {k: v for k, v in raw.items() if k not in ("enabled", "days", "ai", "expires_after_days", "auto_publish")}
     # Warnings and closures are quoted from the official source, never rewritten.
     ai = bool(raw.get("ai", False)) and name != "conditions"
     return TypeConfig(name=name, enabled=bool(raw.get("enabled", False)), days=days, ai=ai,
-                      expires_after_days=expires, options=options)
+                      expires_after_days=expires, options=options,
+                      auto_publish=bool(raw.get("auto_publish", False)))
 
 
 def parse_config(raw: dict) -> PostsConfig:

@@ -251,7 +251,7 @@ export interface TreklyPostTypeInfo {
   enabled: boolean;
   days: string[];
   ai: boolean;
-  /** Off by default: drafts wait for an admin. */
+  /** On by default (the config); turned off here, drafts wait for an admin. */
   auto_publish: boolean;
 }
 

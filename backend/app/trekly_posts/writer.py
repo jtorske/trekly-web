@@ -5,8 +5,9 @@ it, ANTHROPIC_API_KEY is set and [ai].enabled is on, the Claude API is asked to
 rewrite that text as a friendly 1-3 sentence post using only the facts given.
 Its answer is then checked (`check_ai_text`): any number, capitalised name,
 month or weekday that isn't in the input, a link, mention or hashtag, more than
-three sentences, or a text over the length limit sends the post back to the
-template. So the worst the AI can do is change the wording.
+three sentences, or a text over the length limit fails the check, and a post
+that fails is skipped (`Written.failed_check`), never posted. When the AI
+can't be reached or gives no answer, the template text is used.
 
 Conditions and warnings never reach the AI: `write` refuses them outright,
 on top of the config never allowing it (app/trekly_posts/config.py).
@@ -87,6 +88,8 @@ class Written:
     body: str
     writer: str  # "template" or "ai"
     note: str | None = None
+    # The AI's text failed the fact check: the caller skips this post.
+    failed_check: bool = False
 
 
 def _strings(value: Any) -> list[str]:
@@ -226,5 +229,6 @@ def write(post_type: str, template_body: str, data: dict, *, use_ai: bool, clien
     text = " ".join(text.split())
     problems = check_ai_text(text, data, template_body, max_chars)
     if problems:
-        return Written(template_body, "template", "AI text rejected: " + "; ".join(problems[:4]))
+        return Written(template_body, "template", "Skipped: the AI text failed the fact check: "
+                       + "; ".join(problems[:4]), failed_check=True)
     return Written(text, "ai")

@@ -4,11 +4,14 @@
 1. takes the job lease, so overlapping runs can't both act;
 2. expires drafts that have gone stale;
 3. drafts one post per type scheduled for today (config/trekly_posts.toml),
-   skipping anything already drafted (unique dedupe_key: idempotent);
+   skipping anything already drafted (unique dedupe_key: idempotent). A post
+   whose AI text fails the fact check is skipped: kept as "rejected" with the
+   reason, never queued or published;
 4. publishes at most one post: a draft an admin scheduled for today or
-   earlier, else a fresh draft of a type whose auto-publish toggle is on.
-   Pacing (`publish_refusal`) can stop it;
-5. emails the admins a digest of drafts waiting, at most once a day.
+   earlier, else a draft of a type that auto-publishes (on by default in the
+   config; the admin toggle overrides it). Pacing (`publish_refusal`) can stop it;
+5. when TREKLY_POSTS_DIGEST_TO is set, emails a record of what went out and
+   what was skipped, at most once a day. Without it, no email is sent.
 
 Pacing rules, checked for every publish (the admin page's "Publish now" too):
 - at most `max_posts_per_day` @trekly posts per local day, manual ones included;
@@ -56,6 +59,8 @@ class RunReport:
     skipped: list[str] = field(default_factory=list)
     expired: int = 0
     published: str | None = None
+    # Types whose AI text failed the fact check today (skipped, not queued).
+    failed_check: list[str] = field(default_factory=list)
     publish_note: str | None = None
     digest_sent_to: int = 0
     notes: list[str] = field(default_factory=list)
@@ -115,8 +120,14 @@ def release_lock(db: Session, now: datetime, result: str) -> None:
 
 # --- Rules -------------------------------------------------------------------
 
-def auto_publish_types(db: Session) -> set[str]:
-    return set(db.scalars(select(TreklyPostTypeSetting.post_type).where(TreklyPostTypeSetting.auto_publish)).all())
+def auto_publish_settings(db: Session, config: PostsConfig) -> dict[str, bool]:
+    """Each type's auto-publish: the config's default, unless an admin set the toggle."""
+    chosen = dict(db.execute(select(TreklyPostTypeSetting.post_type, TreklyPostTypeSetting.auto_publish)).all())
+    return {name: bool(chosen.get(name, cfg.auto_publish)) for name, cfg in config.types.items()}
+
+
+def auto_publish_types(db: Session, config: PostsConfig) -> set[str]:
+    return {name for name, on in auto_publish_settings(db, config).items() if on}
 
 
 def official_posts_on(db: Session, config: PostsConfig, day: date) -> int:
@@ -210,19 +221,21 @@ def publish(db: Session, config: PostsConfig, draft: TreklyPostDraft, now: datet
 
 def draft_from(db: Session, config: PostsConfig, candidate: Candidate, today: date, now: datetime,
                client: writer.TextClient | None) -> TreklyPostDraft | None:
-    """Insert the candidate as a draft; None if it was drafted already."""
+    """Insert the candidate as a draft; None if it was drafted already. A
+    candidate whose AI text failed the fact check is stored as rejected (a
+    record, and so the run doesn't try it again), never as a draft."""
     type_cfg = config.type(candidate.post_type)
     written = writer.write(
         candidate.post_type, candidate.template_body, candidate.data,
         use_ai=type_cfg.ai and config.ai.enabled, client=client, max_chars=config.ai.max_chars,
     )
     draft = TreklyPostDraft(
-        post_type=candidate.post_type, status="draft", dedupe_key=candidate.dedupe_key, run_date=today,
+        post_type=candidate.post_type, status="rejected" if written.failed_check else "draft", dedupe_key=candidate.dedupe_key, run_date=today,
         body=written.body, template_body=candidate.template_body, writer=written.writer, ai_note=written.note,
         trail_id=candidate.trail_id, fact_id=candidate.fact_id, source_url=candidate.source_url,
         source_label=candidate.source_label, source_date=candidate.source_date,
         data={k: v for k, v in candidate.data.items() if k != "must_mention"},
-        created_at=now, updated_at=now,
+        created_at=now, updated_at=now, decided_at=now if written.failed_check else None,
     )
     savepoint = db.begin_nested()
     db.add(draft)
@@ -249,7 +262,7 @@ def _publish_queue(db: Session, config: PostsConfig, today: date) -> list[Trekly
         select(TreklyPostDraft).where(TreklyPostDraft.status == "scheduled", TreklyPostDraft.publish_on <= today)
         .order_by(TreklyPostDraft.publish_on, TreklyPostDraft.created_at)
     ).all()
-    auto = auto_publish_types(db)
+    auto = auto_publish_types(db, config)
     order = list(GENERATORS)
     automatic = sorted(
         db.scalars(select(TreklyPostDraft).where(
@@ -297,6 +310,9 @@ def run_daily(db: Session, config: PostsConfig, *, now: datetime, client: writer
             draft = draft_from(db, config, candidate, today, now, client)
             if draft is None:
                 report.skipped.append(name)
+            elif draft.status == "rejected":
+                report.failed_check.append(name)
+                report.notes.append(f"{name}: skipped, the AI text failed the fact check")
             else:
                 report.drafted.append(name)
                 if draft.trail_id is not None:
@@ -328,61 +344,77 @@ def run_daily(db: Session, config: PostsConfig, *, now: datetime, client: writer
 
 # --- Digest ------------------------------------------------------------------
 
-def digest_recipients(db: Session) -> list[str]:
-    """TREKLY_POSTS_DIGEST_TO, else the admins' account emails."""
-    explicit = [e.strip() for e in os.getenv("TREKLY_POSTS_DIGEST_TO", "").split(",") if e.strip()]
-    if explicit:
-        return explicit
-    from app.config import admin_user_ids
-    from app.models.admin import AUTH_USERS
-
-    ids = []
-    for raw in admin_user_ids():
-        try:
-            ids.append(UUID(raw))
-        except ValueError:
-            continue
-    if not ids:
-        return []
-    return [e for e in db.scalars(select(AUTH_USERS.c.email).where(AUTH_USERS.c.id.in_(ids))).all() if e]
+def digest_recipients() -> list[str]:
+    """TREKLY_POSTS_DIGEST_TO (comma-separated); empty means no digest."""
+    return [e.strip() for e in os.getenv("TREKLY_POSTS_DIGEST_TO", "").split(",") if e.strip()]
 
 
-def digest_email(to: str, drafts: list[TreklyPostDraft], app_url: str) -> Email:
-    n = len(drafts)
-    lines = [f"{n} @trekly post{'s' if n != 1 else ''} waiting for review:", ""]
-    for draft in drafts[:20]:
-        lines.append(f"- [{draft.post_type}] {draft.body[:160]}")
-    if n > 20:
-        lines.append(f"...and {n - 20} more.")
-    lines += ["", f"Review them: {app_url}/admin/trekly-posts", "",
-              "Nothing is posted until you approve it (unless that type's auto-publish is on)."]
-    return Email(to=to, subject=f"Trekly: {n} post draft{'s' if n != 1 else ''} to review", text="\n".join(lines))
+def _today_record(db: Session, config: PostsConfig, today: date) -> tuple[list, list]:
+    start = day_start_utc(config, today)
+    published = db.scalars(
+        select(TreklyPostDraft).where(TreklyPostDraft.status == "published", TreklyPostDraft.published_at >= start,
+                                      TreklyPostDraft.published_at < start + timedelta(days=1))
+        .order_by(TreklyPostDraft.published_at)
+    ).all()
+    # Skipped by the fact check: rejected by the run itself, not by an admin.
+    skipped = db.scalars(
+        select(TreklyPostDraft).where(TreklyPostDraft.status == "rejected", TreklyPostDraft.run_date == today,
+                                      TreklyPostDraft.decided_by.is_(None))
+        .order_by(TreklyPostDraft.created_at)
+    ).all()
+    return list(published), list(skipped)
+
+
+def digest_email(to: str, published: list[TreklyPostDraft], skipped: list[TreklyPostDraft], waiting: int,
+                 app_url: str) -> Email:
+    lines: list[str] = []
+    if published:
+        lines += ["Posted as @trekly today:", ""]
+        for draft in published:
+            lines.append(f"- [{draft.post_type}] {draft.body}")
+            if draft.source_url:
+                lines.append(f"  Source: {draft.source_url}")
+    else:
+        lines.append("Nothing was posted as @trekly today.")
+    if skipped:
+        lines += ["", "Skipped (the AI text failed the fact check):", ""]
+        lines += [f"- [{draft.post_type}] {draft.ai_note or ''}" for draft in skipped]
+    if waiting:
+        lines += ["", f"{waiting} draft{'s' if waiting != 1 else ''} waiting for a later day or for review."]
+    lines += ["", f"See them all: {app_url}/admin/trekly-posts"]
+    if len(published) == 1:
+        subject = f"Trekly posted: {published[0].body[:60]}"
+    elif published:
+        subject = f"Trekly: {len(published)} posts today"
+    else:
+        subject = "Trekly: no post today"
+    return Email(to=to, subject=subject, text="\n".join(lines))
 
 
 def send_digest(db: Session, config: PostsConfig, now: datetime, today: date, sender: EmailSender | None,
                 recipients: list[str]) -> int:
+    """A record of what went out (or was skipped) today, at most once a day."""
     if not config.digest_enabled or sender is None or not recipients:
+        return 0
+    published, skipped = _today_record(db, config, today)
+    if not published and not skipped:
         return 0
     lock = _lock_row(db, DIGEST_JOB)
     if lock.last_finished_at and local_today(config, _aware(lock.last_finished_at)) == today:
         db.rollback()
         return 0
-    drafts = db.scalars(
-        select(TreklyPostDraft).where(TreklyPostDraft.status == "draft").order_by(TreklyPostDraft.created_at)
-    ).all()
-    if not drafts:
-        db.rollback()
-        return 0
+    waiting = db.scalar(select(func.count()).select_from(TreklyPostDraft).where(
+        TreklyPostDraft.status.in_(("draft", "scheduled")))) or 0
     app_url = os.getenv("APP_URL", "http://localhost:3000").rstrip("/")
     sent = 0
     for to in recipients:
         try:
-            sender.send(digest_email(to, list(drafts), app_url))
+            sender.send(digest_email(to, published, skipped, waiting, app_url))
             sent += 1
         except Exception as error:
             log.warning("Digest email failed: %s", type(error).__name__)
     if sent:
-        lock.last_finished_at, lock.last_result = now, f"digest: {len(drafts)} drafts to {sent}"
+        lock.last_finished_at, lock.last_result = now, f"digest: {len(published)} posted, {len(skipped)} skipped"
     db.commit()
     return sent
 

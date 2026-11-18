@@ -2,7 +2,7 @@
 
 Drafts come from the daily run (app/trekly_posts/service.py). Admins preview,
 edit, schedule, publish or reject them, switch each type's auto-publish on or
-off (off by default), and keep the fact bank. Every publish goes through the
+off (on by default from config/trekly_posts.toml), and keep the fact bank. Every publish goes through the
 same pacing rules as the daily run (`publish_refusal`) and is audited.
 
 A conditions draft quotes an official bulletin word for word, so its text
@@ -30,7 +30,7 @@ from app.routers.trails import live_trails
 from app.schemas.trail import TrailListItemOut
 from app.trekly_posts.config import PostsConfig, load_config
 from app.trekly_posts.service import (
-    PublishRefused, is_busy, local_today, official_posts_on, official_profile, publish, publish_refusal,
+    PublishRefused, auto_publish_settings, is_busy, local_today, official_posts_on, official_profile, publish, publish_refusal,
 )
 
 router = APIRouter(prefix="/api/admin/trekly-posts", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -117,10 +117,10 @@ def _draft_out(db, config, draft: TreklyPostDraft, now: datetime, today: date) -
 
 
 def _types(db: Session, config: PostsConfig) -> list[TypeOut]:
-    auto = dict(db.execute(select(TreklyPostTypeSetting.post_type, TreklyPostTypeSetting.auto_publish)).all())
+    auto = auto_publish_settings(db, config)
     return [
         TypeOut(post_type=name, label=TYPE_LABELS[name], enabled=config.type(name).enabled,
-                days=list(config.type(name).days), ai=config.type(name).ai, auto_publish=bool(auto.get(name)))
+                days=list(config.type(name).days), ai=config.type(name).ai, auto_publish=auto[name])
         for name in POST_TYPES
     ]
 

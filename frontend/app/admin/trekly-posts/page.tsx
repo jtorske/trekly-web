@@ -644,9 +644,10 @@ function QueueBody() {
           {data.busy && " Hikers have been busy posting, so the daily run will skip today."}
         </p>
         <p className={styles.muted}>
-          A run each morning drafts new posts from real trail data, publishes an approved one, and emails a digest of
-          what&apos;s waiting. Nothing goes out until it&apos;s approved here, unless its type auto-publishes. To write
-          a post yourself, use <Link href="/admin/posts">Write a post</Link>.
+          A run each morning drafts new posts from real trail data and publishes one: an approved draft first, else
+          one of a type that auto-publishes. A post whose AI wording fails the fact check is skipped, never posted.
+          When TREKLY_POSTS_DIGEST_TO is set, it emails a record of what went out. To write a post yourself, use{" "}
+          <Link href="/admin/posts">Write a post</Link>.
         </p>
         {!data.account && (
           <p className={page.blocked}>
@@ -660,7 +661,8 @@ function QueueBody() {
         <h2 id="queue-types" className={styles.cardTitle}>
           Post types
         </h2>
-        <p className={styles.muted}>Schedules live in backend/config/trekly_posts.toml. Auto-publish is off for every type until you turn it on.</p>
+        <p className={styles.muted}>Schedules live in backend/config/trekly_posts.toml. Every type auto-publishes by default; turn one off here
+          to review its drafts first.</p>
         <ul className={page.types}>
           {data.types.map((type) => (
             <TypeRow key={type.post_type} type={type} onChanged={reload} />

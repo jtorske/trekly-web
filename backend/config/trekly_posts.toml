@@ -1,15 +1,16 @@
 # Automatic @trekly posts (app/trekly_posts/, run daily by scripts/trekly_posts.py).
 #
 # Each type below can be switched off (`enabled`) and runs only on its `days`
-# (mon..sun, in `timezone`). A run makes at most one draft per type. Drafts
-# wait on /admin/trekly-posts until an admin approves them; the per-type
-# auto-publish toggle there (off by default for every type) lets the daily run
-# publish a type's drafts on its own.
+# (mon..sun, in `timezone`). A run makes at most one draft per type a day.
+# `auto_publish = true` lets the daily run publish a type's drafts on its own
+# (still at most one @trekly post a day); the toggle on /admin/trekly-posts
+# overrides it per type. With it off, drafts wait for an admin there.
 #
 # `ai = true` lets the Claude API rewrite the template text when
-# ANTHROPIC_API_KEY is set and [ai].enabled is true. Its text is kept only if
-# it passes the fact check; otherwise the template text is used. Conditions
-# posts never go through the AI, whatever this file says.
+# ANTHROPIC_API_KEY is set and [ai].enabled is true. Text that fails the fact
+# check is never posted: that post is skipped for the day. Without a key, the
+# template text is used. Conditions posts never go through the AI, whatever
+# this file says.
 
 timezone = "America/Edmonton"
 
@@ -29,12 +30,13 @@ model = "claude-opus-5-5"
 max_chars = 280
 
 [digest]
-# Email admins once a day when drafts are waiting. Recipients come from
-# TREKLY_POSTS_DIGEST_TO (comma-separated), else the ADMIN_USER_IDS accounts.
+# When TREKLY_POSTS_DIGEST_TO (comma-separated) is set, email a record of what
+# went out (and what was skipped), at most once a day. Unset: no email.
 enabled = true
 
 [types.trending]
 enabled = true
+auto_publish = true
 days = ["mon"]
 ai = true
 # Days a draft stays reviewable before it's marked expired.
@@ -45,6 +47,7 @@ min_hikers = 3
 
 [types.spotlight]
 enabled = true
+auto_publish = true
 days = ["wed", "sat"]
 ai = true
 expires_after_days = 5
@@ -56,6 +59,7 @@ low_elevation_max_m = 1800
 
 [types.new_on_trekly]
 enabled = true
+auto_publish = true
 days = ["tue", "fri"]
 ai = true
 expires_after_days = 7
@@ -64,6 +68,7 @@ lookback_days = 14
 
 [types.roundup]
 enabled = true
+auto_publish = true
 days = ["sun"]
 ai = true
 expires_after_days = 3
@@ -74,6 +79,7 @@ min_hikes = 8
 
 [types.fun_fact]
 enabled = true
+auto_publish = true
 days = ["thu"]
 # Approved facts are posted word for word.
 ai = false
@@ -87,6 +93,7 @@ fact_cooldown_days = 180
 # Avalanche Canada forecasts aren't included: their terms forbid reproduction
 # without written consent.
 enabled = false
+auto_publish = true
 days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 ai = false
 expires_after_days = 2
