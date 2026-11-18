@@ -14,7 +14,6 @@ import {
   Bell,
   Compass,
   LogIn,
-  Search,
   UserPlus,
   X,
   type LucideIcon,
@@ -33,8 +32,15 @@ import {
   currentMobileHref,
   isSwipeClose,
 } from "@/lib/accountMenu";
+import {
+  exploreSearchFocusPending,
+  focusExploreSearch,
+  requestExploreSearchFocus,
+} from "@/lib/exploreSearchFocus";
 import accountStyles from "./AccountMenu.module.css";
 import styles from "./MobileMenu.module.css";
+
+const EXPLORE_HREF = "/trail-list";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/trail-list": Compass,
@@ -123,7 +129,10 @@ export default function MobileMenu({
     return () => {
       dialog?.close();
       root.style.overflow = previousOverflow;
-      if (focusTarget?.isConnected) focusTarget.focus();
+      // Explore was chosen: the cursor goes to its search box (now, or when
+      // Explore mounts), not back to the menu button.
+      if (exploreSearchFocusPending()) focusExploreSearch();
+      else if (focusTarget?.isConnected) focusTarget.focus();
     };
   }, [returnFocusTo]);
 
@@ -236,16 +245,15 @@ export default function MobileMenu({
               className={row}
               {...currentProps(link.href)}
               {...(index === 0 ? { "data-autofocus": true } : {})}
-              onClick={requestClose}
+              onClick={() => {
+                if (link.href === EXPLORE_HREF) requestExploreSearchFocus();
+                requestClose();
+              }}
             >
               <RowIcon icon={NAV_ICONS[link.href]} />
               {link.label}
             </Link>
           ))}
-          <Link href="/search" className={row} {...currentProps("/search")} onClick={requestClose}>
-            <RowIcon icon={Search} />
-            Search
-          </Link>
           {identity && (
             <Link
               href="/notifications"

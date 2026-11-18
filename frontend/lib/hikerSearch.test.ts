@@ -3,12 +3,11 @@ import test from "node:test";
 import {
   commonTrailsLabel,
   hikerName,
-  initialTab,
   isLimited,
   isSearchable,
   parseTab,
-  hikerSearchHint,
   searchHref,
+  searchTab,
   searchTerm,
   suggestionReason,
   type HikerResult,
@@ -42,20 +41,23 @@ test("two characters at least", () => {
   assert.equal(isSearchable("@jo"), true);
 });
 
-test("tabs: the URL's, else the remembered one, else Trails", () => {
+test("tabs: the URL's, else Hikers for an @, else Trails", () => {
   assert.equal(parseTab("hikers"), "hikers");
   assert.equal(parseTab("people"), null);
-  assert.equal(initialTab("hikers", "trails"), "hikers");
-  assert.equal(initialTab(null, "hikers"), "hikers");
-  assert.equal(initialTab("nonsense", "hikers"), "hikers");
-  assert.equal(initialTab(null, null), "trails");
-  assert.equal(initialTab(undefined, "junk"), "trails");
+  assert.equal(searchTab("hikers", "lake"), "hikers");
+  assert.equal(searchTab("trails", "@jordan"), "trails");
+  assert.equal(searchTab(null, "@jordan"), "hikers");
+  assert.equal(searchTab(null, "  @"), "hikers");
+  assert.equal(searchTab("nonsense", "@jo"), "hikers");
+  assert.equal(searchTab(null, "lake @ banff"), "trails");
+  assert.equal(searchTab(undefined, ""), "trails");
 });
 
-test("search links", () => {
-  assert.equal(searchHref("hikers"), "/search?tab=hikers");
-  assert.equal(searchHref("hikers", " Joëlle "), "/search?tab=hikers&q=Jo%C3%ABlle");
-  assert.equal(searchHref("trails", "lake agnes"), "/search?tab=trails&q=lake+agnes");
+test("search links go to Explore", () => {
+  assert.equal(searchHref("hikers"), "/trail-list?tab=hikers");
+  assert.equal(searchHref("hikers", " Joëlle "), "/trail-list?q=Jo%C3%ABlle&tab=hikers");
+  assert.equal(searchHref("trails", "lake agnes"), "/trail-list?q=lake+agnes");
+  assert.equal(searchHref("trails"), "/trail-list");
 });
 
 test("trails in common", () => {
@@ -84,14 +86,4 @@ test("a private profile is limited until you follow it", () => {
   assert.equal(isLimited(hiker({ is_private: true })), true);
   assert.equal(isLimited(hiker({ is_private: true, follow: "requested" })), true);
   assert.equal(isLimited(hiker({ is_private: true, follow: "following" })), false);
-});
-
-test("an @ in Explore's box points to people search", () => {
-  assert.equal(hikerSearchHint("@jordan"), "/search?tab=hikers&q=jordan");
-  assert.equal(hikerSearchHint("  @Joëlle B"), "/search?tab=hikers&q=Jo%C3%ABlle+B");
-  assert.equal(hikerSearchHint("@@jo"), "/search?tab=hikers&q=jo");
-  assert.equal(hikerSearchHint("@"), null);
-  assert.equal(hikerSearchHint("@  "), null);
-  assert.equal(hikerSearchHint("lake @ banff"), null);
-  assert.equal(hikerSearchHint("lake"), null);
 });

@@ -17,12 +17,10 @@ export const MIN_QUERY = 2;
 export const MAX_QUERY = 60;
 /** Typing pauses this long before a search goes out. */
 export const SEARCH_DEBOUNCE_MS = 300;
-/** Results per page on /search. */
+/** Hikers per page on Explore's Hikers tab. */
 export const PAGE_SIZE = 20;
 /** Rows in the Activity page's "Find hikers" dropdown. */
 export const DROPDOWN_ROWS = 5;
-
-export const TAB_STORAGE_KEY = "trekly:search-tab";
 
 export interface HikerResult {
   username: string;
@@ -58,25 +56,21 @@ export function parseTab(value: string | null | undefined): SearchTab | null {
   return value === "trails" || value === "hikers" ? value : null;
 }
 
-/** The tab to open: the URL's, else the last one used, else Trails. */
-export function initialTab(fromUrl: string | null | undefined, remembered: string | null | undefined): SearchTab {
-  return parseTab(fromUrl) ?? parseTab(remembered) ?? "trails";
-}
-
-export function searchHref(tab: SearchTab, q = ""): string {
-  const params = new URLSearchParams({ tab });
-  if (q.trim()) params.set("q", q.trim());
-  return `/search?${params}`;
-}
-
 /**
- * Explore's box got "@name": the people search for "name", or null. Only a
- * leading @ counts, and there has to be something after it.
+ * The tab Explore's search shows: the URL's, else Hikers when the box starts
+ * with "@" (a username), else Trails.
  */
-export function hikerSearchHint(input: string): string | null {
-  if (!input.trimStart().startsWith("@")) return null;
-  const term = searchTerm(input);
-  return term ? searchHref("hikers", term) : null;
+export function searchTab(fromUrl: string | null | undefined, input: string): SearchTab {
+  return parseTab(fromUrl) ?? (input.trimStart().startsWith("@") ? "hikers" : "trails");
+}
+
+/** Explore with this search on a tab: where people search lives (/search redirects here). */
+export function searchHref(tab: SearchTab, q = ""): string {
+  const params = new URLSearchParams();
+  if (q.trim()) params.set("q", q.trim());
+  if (tab === "hikers") params.set("tab", "hikers");
+  const search = params.toString();
+  return search ? `/trail-list?${search}` : "/trail-list";
 }
 
 /** "You've both hiked 3 trails"; null when there's nothing to say. */

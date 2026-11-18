@@ -1,0 +1,54 @@
+/* Explore's Hikers tab (was /search). Uses Explore's page tokens. */
+
+.people {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: opacity 150ms ease;
+}
+
+.stale {
+  opacity: 0.55;
+}
+
+.hint {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.5rem 0;
+  color: var(--color-muted-text);
+  line-height: 1.5;
+}
+
+.hintIcon {
+  color: var(--ink);
+}
+
+.hintActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.rowSkeleton {
+  height: 3.6rem;
+  margin-bottom: 0.6rem;
+  border-radius: 0.8rem;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .people {
+    transition: none;
+  }
+}

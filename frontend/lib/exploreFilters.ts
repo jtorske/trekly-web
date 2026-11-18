@@ -11,7 +11,8 @@
  * The map's position (`map=lat,lng,zoom`), the phone's Map/List choice
  * (`view=map`) and "Search as I move the map" turned off (`follow=0`) are
  * view state, not filters: they ride along unchanged when a filter changes
- * (keepViewParams). The list follows the map's visible area, which lives in
+ * (keepViewParams). So is the search box's Trails/Hikers tab (`tab=hikers`),
+ * while there's a search. The list follows the map's visible area, which lives in
  * memory: it comes from the map itself, never from the URL.
  */
 
@@ -269,13 +270,18 @@ export function parseFollowMap(params: URLSearchParams): boolean {
   return params.get("follow") !== "0";
 }
 
-type ViewParam = "map" | "view" | "follow";
-const VIEW_PARAMS: ViewParam[] = ["map", "view", "follow"];
+type ViewParam = "map" | "view" | "follow" | "tab";
+const VIEW_PARAMS: ViewParam[] = ["map", "view", "follow", "tab"];
 
-/** `search` (filters only) with the view params from `current` kept. */
+/**
+ * `search` (filters only) with the view params from `current` kept. The
+ * search box's Trails/Hikers tab (`tab`) only means something while there's
+ * a search, so it goes when the search does.
+ */
 export function keepViewParams(search: string, current: URLSearchParams): string {
   const params = new URLSearchParams(search);
   for (const key of VIEW_PARAMS) {
+    if (key === "tab" && !params.get("q")) continue;
     const value = current.get(key);
     if (value !== null) params.set(key, value);
   }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Suspense,
   useCallback,
@@ -62,7 +61,9 @@ import {
 } from "@/lib/trailsApi";
 import type { UnitSystem } from "@/lib/units";
 import { useUnits } from "@/lib/useUnits";
-import { hikerSearchHint } from "@/lib/hikerSearch";
+import { SEARCH_TABS, searchTab, type SearchTab } from "@/lib/hikerSearch";
+import { EXPLORE_SEARCH_ID, focusExploreSearch } from "@/lib/exploreSearchFocus";
+import HikerResults from "./HikerResults";
 import TrailCard, { TrailCardSkeleton } from "./TrailCard";
 import styles from "./page.module.css";
 
@@ -379,7 +380,6 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   const filtersId = useId();
 
   const [input, setInput] = useState(q);
-  const hikerHint = hikerSearchHint(input);
   // Set while the box holds typing that hasn't reached the URL yet.
   const [typing, setTyping] = useState(false);
   const [seenQ, setSeenQ] = useState(q);
@@ -420,8 +420,13 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   }, []);
 
   const split = useSyncExternalStore(subscribeSplit, isSplit, () => false);
-  const view: ExploreView = parseExploreView(searchParams);
-  const mapVisible = split || view === "map";
+  // Text in the box: Trails (this page's list and map) or Hikers tabs.
+  const searching = input.trim() !== "";
+  const tab: SearchTab = searchTab(searchParams.get("tab"), input);
+  const showingHikers = searching && tab === "hikers";
+  // The Hikers tab is a plain list: no map, on any screen.
+  const view: ExploreView = showingHikers ? "list" : parseExploreView(searchParams);
+  const mapVisible = (split || view === "map") && !showingHikers;
   // Read when the map mounts: afterwards the map owns its position and writes it back.
   const getInitialMapView = useCallback(() => parseMapView(new URLSearchParams(window.location.search)), []);
   const follow = parseFollowMap(searchParams);
@@ -437,7 +442,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
 
   // View state goes straight into history: no navigation, no refetch.
-  const setViewParam = useCallback((key: "map" | "view" | "follow", value: string | null) => {
+  const setViewParam = useCallback((key: "map" | "view" | "follow" | "tab", value: string | null) => {
     const search = withViewParam(new URLSearchParams(window.location.search), key, value);
     window.history.replaceState(null, "", search ? `/trail-list?${search}` : "/trail-list");
   }, []);
@@ -446,6 +451,23 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
     [setViewParam],
   );
   const showView = (next: ExploreView) => setViewParam("view", next === "map" ? "map" : null);
+
+  // The phone menu's Explore row asked for the cursor in the box.
+  useEffect(() => {
+    focusExploreSearch();
+  }, []);
+
+  const onSearchInput = (value: string) => {
+    // A cleared box drops the tab; a newly typed "@" goes to Hikers.
+    const startsAt = (text: string) => text.trimStart().startsWith("@");
+    if (!value.trim() || (startsAt(value) && !startsAt(input))) setViewParam("tab", null);
+    setInput(value);
+    setTyping(true);
+  };
+  const chooseTab = (next: SearchTab) => {
+    setSelectedId(null);
+    setViewParam("tab", next);
+  };
 
   // Picked on the map: bring its card into view, once the list is showing.
   useEffect(() => {
@@ -684,7 +706,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   const showMapLabel = view === "map" ? "Show list" : "Show map";
 
   return (
-    <main className={styles.page} data-view={view}>
+    <main className={styles.page} data-view={view} data-tab={showingHikers ? "hikers" : undefined}>
       <h1 className={ui.srOnly}>Explore trails</h1>
 
       <div className={styles.layout}>
@@ -692,19 +714,19 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
           <div className={styles.controls}>
             <form className={styles.searchBar} onSubmit={handleSubmit} role="search">
               <input
+                id={EXPLORE_SEARCH_ID}
                 className={styles.searchInput}
                 type="search"
-                placeholder="Search trails, parks or regions…"
-                aria-label="Search trails, parks or regions"
+                placeholder="Search trails, parks, regions or @hikers"
+                aria-label="Search trails, parks, regions or @hikers"
                 autoComplete="off"
+                enterKeyHint="search"
                 value={input}
-                onChange={(event) => {
-                  setInput(event.target.value);
-                  setTyping(true);
-                }}
+                onChange={(event) => onSearchInput(event.target.value)}
               />
               <button
                 type="button"
+                hidden={showingHikers}
                 className={styles.filterButton}
                 aria-expanded={filtersOpen}
                 aria-controls={filtersId}
@@ -725,174 +747,198 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                 Search
               </button>
             </form>
-            {hikerHint && (
-              <p className={styles.hikerHint}>
-                Looking for a hiker?{" "}
-                <Link href={hikerHint} className={styles.hikerHintLink}>
-                  Search people <span aria-hidden="true">→</span>
-                </Link>
-              </p>
-            )}
-
-            {/* Shortcuts into the same filters as the panel. */}
-            <div className={styles.quickChips} role="group" aria-label="Quick filters">
-              {(["day", "overnight"] as TripType[]).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={styles.chip}
-                  aria-pressed={trip === value}
-                  onClick={() => setFilter(toggleTrip(filters, value))}
-                >
-                  {TRIP_LABELS[value]}
-                </button>
-              ))}
-              {quickParks(favourites ?? []).map(({ park, label }) => (
-                <button
-                  key={park}
-                  type="button"
-                  className={styles.chip}
-                  aria-pressed={filters.parks.includes(park)}
-                  onClick={() => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={styles.chip}
-                aria-pressed={filters.near}
-                onClick={toggleNear}
-                disabled={geo.status === "locating"}
-              >
-                <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.chipIcon}>
-                  <circle cx="10" cy="10" r="2.6" fill="currentColor" />
-                  <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" />
-                </svg>
-                {geo.status === "locating" ? "Finding you…" : "Near me"}
-              </button>
-            </div>
-            {(geo.status === "denied" || geo.status === "unavailable") && !filtersOpen && (
-              <p className={styles.geoMessage} role="status">
-                {geo.status === "denied"
-                  ? "Location access is blocked. Allow it for Trekly in your browser to search near you."
-                  : "We couldn't find your location. Try again in a moment."}
-              </p>
-            )}
-
-            {filtersOpen && (
-              <>
-                <div className={styles.sheetBackdrop} aria-hidden="true" onClick={() => setFiltersOpen(false)} />
-                <div
-                  id={filtersId}
-                  className={styles.filterPanel}
-                  role="region"
-                  aria-label="Filters"
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") setFiltersOpen(false);
-                  }}
-                >
-                  <div className={styles.sheetHandle} aria-hidden="true" />
-                  <div className={styles.filterBody}>
-                    <FilterGroup
-                      label="Trip type"
-                      options={TRIPS}
-                      labels={TRIP_LABELS}
-                      value={trip}
-                      onChange={(value) => setFilter({ ...filters, trip: value })}
-                    />
-                    <FilterGroup
-                      label="Difficulty"
-                      options={TERRAINS}
-                      labels={TERRAIN_LABELS}
-                      value={terrain}
-                      onChange={(value) => setFilter({ ...filters, terrain: value })}
-                    />
-                    <CountChipGroup
-                      label="Province"
-                      options={provinceOptions}
-                      selected={filters.provinces}
-                      onToggle={(code) =>
-                        setFilter(withProvinces(filters, toggle(filters.provinces, code), parkProvinces))
-                      }
-                    />
-                    <CountChipGroup
-                      label="Park type"
-                      options={parkTypeOptions}
-                      selected={filters.parkTypes}
-                      onToggle={(type) =>
-                        setFilter({ ...filters, parkTypes: toggle(filters.parkTypes, type as ParkTypeFilter) })
-                      }
-                    />
-                    <ParkPicker
-                      parks={facets?.parks ?? []}
-                      selected={filters.parks}
-                      provinces={filters.provinces}
-                      onToggle={(park) => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
-                    />
-                    <NearMe
-                      filters={filters}
-                      status={geo.status}
-                      units={units}
-                      onLocate={locate}
-                      onStop={stopNear}
-                      onWithin={(value) =>
-                        setFilter({
-                          ...filters,
-                          within: value ? { value, unit: units === "imperial" ? "mi" : "km" } : undefined,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className={styles.filterFooter}>
-                    {activeFilters > 0 && (
-                      <button type="button" className={ui.ghost} onClick={clearAll}>
-                        Clear all
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className={`${ui.secondary} ${styles.doneButton}`}
-                      onClick={() => setFiltersOpen(false)}
-                    >
-                      Done
-                    </button>
-                    <button type="button" className={`${ui.primary} ${styles.showButton}`} onClick={() => setFiltersOpen(false)}>
-                      {isLoading && !result ? "Show trails" : `Show ${total} ${total === 1 ? "trail" : "trails"}`}
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {removable.length > 0 && (
-              <div className={styles.activeRow}>
-                <ul className={styles.activeFilters} aria-label="Active filters">
-                  {removable.map((chip) => (
-                    <li key={chip.key}>
-                      <button
-                        type="button"
-                        className={styles.activeChip}
-                        onClick={() => {
-                          chip.onRemove?.();
-                          setFilter(chip.next);
-                        }}
-                        aria-label={`Remove filter: ${chip.label}`}
-                      >
-                        {chip.label} <span aria-hidden="true">×</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <button type="button" className={styles.clearAll} onClick={clearAll}>
-                  Clear all
-                </button>
+            {searching && (
+              <div className={styles.searchTabs} role="tablist" aria-label="Search for">
+                {SEARCH_TABS.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    role="tab"
+                    id={`explore-tab-${item.key}`}
+                    aria-selected={tab === item.key}
+                    aria-controls="explore-results"
+                    className={styles.searchTab}
+                    onClick={() => chooseTab(item.key)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
+            )}
+
+            {!showingHikers && (
+              <>
+                {/* Shortcuts into the same filters as the panel. */}
+                <div className={styles.quickChips} role="group" aria-label="Quick filters">
+                  {(["day", "overnight"] as TripType[]).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={styles.chip}
+                      aria-pressed={trip === value}
+                      onClick={() => setFilter(toggleTrip(filters, value))}
+                    >
+                      {TRIP_LABELS[value]}
+                    </button>
+                  ))}
+                  {quickParks(favourites ?? []).map(({ park, label }) => (
+                    <button
+                      key={park}
+                      type="button"
+                      className={styles.chip}
+                      aria-pressed={filters.parks.includes(park)}
+                      onClick={() => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={styles.chip}
+                    aria-pressed={filters.near}
+                    onClick={toggleNear}
+                    disabled={geo.status === "locating"}
+                  >
+                    <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.chipIcon}>
+                      <circle cx="10" cy="10" r="2.6" fill="currentColor" />
+                      <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                    </svg>
+                    {geo.status === "locating" ? "Finding you…" : "Near me"}
+                  </button>
+                </div>
+                {(geo.status === "denied" || geo.status === "unavailable") && !filtersOpen && (
+                  <p className={styles.geoMessage} role="status">
+                    {geo.status === "denied"
+                      ? "Location access is blocked. Allow it for Trekly in your browser to search near you."
+                      : "We couldn't find your location. Try again in a moment."}
+                  </p>
+                )}
+
+                {filtersOpen && (
+                  <>
+                    <div className={styles.sheetBackdrop} aria-hidden="true" onClick={() => setFiltersOpen(false)} />
+                    <div
+                      id={filtersId}
+                      className={styles.filterPanel}
+                      role="region"
+                      aria-label="Filters"
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") setFiltersOpen(false);
+                      }}
+                    >
+                      <div className={styles.sheetHandle} aria-hidden="true" />
+                      <div className={styles.filterBody}>
+                        <FilterGroup
+                          label="Trip type"
+                          options={TRIPS}
+                          labels={TRIP_LABELS}
+                          value={trip}
+                          onChange={(value) => setFilter({ ...filters, trip: value })}
+                        />
+                        <FilterGroup
+                          label="Difficulty"
+                          options={TERRAINS}
+                          labels={TERRAIN_LABELS}
+                          value={terrain}
+                          onChange={(value) => setFilter({ ...filters, terrain: value })}
+                        />
+                        <CountChipGroup
+                          label="Province"
+                          options={provinceOptions}
+                          selected={filters.provinces}
+                          onToggle={(code) =>
+                            setFilter(withProvinces(filters, toggle(filters.provinces, code), parkProvinces))
+                          }
+                        />
+                        <CountChipGroup
+                          label="Park type"
+                          options={parkTypeOptions}
+                          selected={filters.parkTypes}
+                          onToggle={(type) =>
+                            setFilter({ ...filters, parkTypes: toggle(filters.parkTypes, type as ParkTypeFilter) })
+                          }
+                        />
+                        <ParkPicker
+                          parks={facets?.parks ?? []}
+                          selected={filters.parks}
+                          provinces={filters.provinces}
+                          onToggle={(park) => setFilter({ ...filters, parks: toggle(filters.parks, park) })}
+                        />
+                        <NearMe
+                          filters={filters}
+                          status={geo.status}
+                          units={units}
+                          onLocate={locate}
+                          onStop={stopNear}
+                          onWithin={(value) =>
+                            setFilter({
+                              ...filters,
+                              within: value ? { value, unit: units === "imperial" ? "mi" : "km" } : undefined,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className={styles.filterFooter}>
+                        {activeFilters > 0 && (
+                          <button type="button" className={ui.ghost} onClick={clearAll}>
+                            Clear all
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={`${ui.secondary} ${styles.doneButton}`}
+                          onClick={() => setFiltersOpen(false)}
+                        >
+                          Done
+                        </button>
+                        <button type="button" className={`${ui.primary} ${styles.showButton}`} onClick={() => setFiltersOpen(false)}>
+                          {isLoading && !result ? "Show trails" : `Show ${total} ${total === 1 ? "trail" : "trails"}`}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {removable.length > 0 && (
+                  <div className={styles.activeRow}>
+                    <ul className={styles.activeFilters} aria-label="Active filters">
+                      {removable.map((chip) => (
+                        <li key={chip.key}>
+                          <button
+                            type="button"
+                            className={styles.activeChip}
+                            onClick={() => {
+                              chip.onRemove?.();
+                              setFilter(chip.next);
+                            }}
+                            aria-label={`Remove filter: ${chip.label}`}
+                          >
+                            {chip.label} <span aria-hidden="true">×</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <button type="button" className={styles.clearAll} onClick={clearAll}>
+                      Clear all
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
-          <section className={styles.results} aria-live="polite" aria-busy={isLoading}>
-            {failed ? (
+          <section
+            id="explore-results"
+            className={styles.results}
+            aria-live="polite"
+            aria-busy={showingHikers ? undefined : isLoading}
+            {...(searching ? { role: "tabpanel", "aria-labelledby": `explore-tab-${tab}` } : {})}
+          >
+            {showingHikers ? (
+              <div className={styles.scroller}>
+                <HikerResults q={q} />
+              </div>
+            ) : failed ? (
               <div className={styles.status} role="alert">
                 <p>We couldn&apos;t load trails. Check your connection and try again.</p>
                 <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={() => setAttempt((n) => n + 1)}>
@@ -1017,6 +1063,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
       {/* Below the split layout: one at a time. */}
       <button
         type="button"
+        hidden={showingHikers}
         className={styles.viewToggle}
         onClick={() => showView(view === "map" ? "list" : "map")}
       >

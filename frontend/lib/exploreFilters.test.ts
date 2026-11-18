@@ -191,6 +191,9 @@ test("Search as I move the map is on unless the URL turns it off, and survives f
   assert.equal(parseFollowMap(new URLSearchParams("follow=0")), false);
   assert.equal(parseFollowMap(new URLSearchParams("follow=1")), true);
   assert.equal(keepViewParams("trip=day", new URLSearchParams("q=x&follow=0")), "trip=day&follow=0");
+  // The Trails/Hikers tab stays with a search and goes with it.
+  assert.equal(keepViewParams("q=ana&trip=day", new URLSearchParams("q=an&tab=hikers")), "q=ana&trip=day&tab=hikers");
+  assert.equal(keepViewParams("trip=day", new URLSearchParams("q=an&tab=hikers")), "trip=day");
 });
 
 test("the trip quick chips swap and clear the trip type", () => {

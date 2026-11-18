@@ -40,6 +40,9 @@ const nextConfig: NextConfig = {
     return [
       // Saved trails live on a profile tab now; old links and bookmarks land there.
       { source: "/saved-trails", destination: "/profile?tab=trails", permanent: false },
+      // Search lives in Explore's box now. The query string comes along, so
+      // /search?tab=hikers&q=ana opens Explore's Hikers tab for "ana".
+      { source: "/search", destination: "/trail-list", permanent: true },
     ];
   },
   async headers() {

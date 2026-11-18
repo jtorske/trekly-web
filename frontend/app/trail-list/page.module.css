@@ -44,21 +44,41 @@
   padding: 0.4rem 0.4rem 0.4rem 1.25rem;
 }
 
-/* "@name" typed into the box: a way to people search. */
-.hikerHint {
-  margin: 0.5rem 0 0 1.25rem;
+/* Text in the box: Trails (the list and map below) or Hikers. */
+.searchTabs {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.75rem 0 0.9rem;
+  border-bottom: 1px solid var(--hair);
+}
+
+.searchTab {
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  padding: 0.5rem 0.9rem;
   color: var(--color-muted-text);
-  font-size: 0.88rem;
+  font-weight: 600;
 }
 
-.hikerHintLink {
-  color: var(--color-rust-text);
-  font-weight: 700;
+.searchTab:hover {
+  color: var(--ink);
 }
 
-.hikerHintLink:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.searchTab[aria-selected="true"] {
+  border-bottom-color: var(--color-rust);
+  color: var(--ink);
+}
+
+/* The filters and the Map/List pill don't apply to the Hikers tab. */
+.filterButton[hidden],
+.viewToggle[hidden] {
+  display: none;
+}
+
+/* Hikers tab: one column, no map. */
+.page[data-tab="hikers"] .controls,
+.page[data-tab="hikers"] .results {
+  max-width: 48rem;
 }
 
 .searchInput {
@@ -1061,6 +1081,17 @@
     padding-left: 1rem;
   }
 
+  /* Room for the whole placeholder. Typing searches anyway, and the
+     keyboard has its own Search key. The input itself stays 16px so iOS
+     doesn't zoom in on focus. */
+  .searchButton {
+    display: none;
+  }
+
+  .searchInput::placeholder {
+    font-size: 0.9rem;
+  }
+
   /* Icon + count only; the label stays for screen readers. */
   .filterLabel {
     position: absolute;
@@ -1297,6 +1328,16 @@
     width: 160px;
     height: 120px;
     aspect-ratio: auto;
+  }
+
+  .page[data-tab="hikers"] .layout {
+    grid-template-columns: minmax(0, 48rem);
+    justify-content: center;
+  }
+
+  .page[data-tab="hikers"] .controls,
+  .page[data-tab="hikers"] .results {
+    max-width: none;
   }
 
   .mapPane,
