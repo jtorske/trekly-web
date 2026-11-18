@@ -23,6 +23,7 @@ import { bestLabel, showsStreak, streakLabel, type StreakCounts } from "@/lib/vi
 import { MAX_FEATURED, badgeKey, badgeName, type FeaturedBadge } from "@/lib/featuredBadges";
 import { useQueryParam } from "@/lib/useQueryParam";
 import styles from "./shell.module.css";
+import { trailHref } from "@/lib/site";
 
 /** Which tabs this profile has, and the one open when ?tab= names none of them. */
 export interface ProfileTabConfig {
@@ -411,7 +412,7 @@ function TrailBadgeCard({
           </CardLine>
         </BadgeCardBody>
       }
-      footer={<Link href={`/trails?id=${encodeURIComponent(trail.id)}`}>Open the trail page</Link>}
+      footer={<Link href={trailHref(trail)}>Open the trail page</Link>}
     >
       {children}
     </DetailCard>

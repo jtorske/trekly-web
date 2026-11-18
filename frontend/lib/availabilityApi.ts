@@ -63,7 +63,7 @@ export interface CampgroundAlert {
   campground: string;
   site_code: string | null;
   park: string | null;
-  trail: { id: string; name: string } | null;
+  trail: { id: string; slug: string; name: string } | null;
   start_date: string;
   end_date: string;
   nights: number;

@@ -31,6 +31,7 @@ import { TripsSection } from "../profile/sections";
 import AlertDialog from "../trails/AlertDialog";
 import PlanDialog from "./PlanDialog";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 const CHECKED_AT = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const CHECKED_TIME = new Intl.DateTimeFormat("en-CA", { hour: "numeric", minute: "2-digit" });
@@ -337,7 +338,7 @@ function PlanView({ id }: { id: string }) {
 
   return (
     <article>
-      <Link href={`/trails?id=${encodeURIComponent(plan.trail.id)}`} className={styles.backLink}>
+      <Link href={trailHref(plan.trail)} className={styles.backLink}>
         ← {plan.trail.name}
       </Link>
       <header className={styles.header}>
@@ -432,6 +433,7 @@ function PlanView({ id }: { id: string }) {
       {editing && campgrounds && (
         <PlanDialog
           trailId={plan.trail.id}
+          trailSlug={plan.trail.slug}
           trailName={plan.trail.name}
           campgrounds={campgrounds}
           initial={{

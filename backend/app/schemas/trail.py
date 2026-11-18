@@ -18,6 +18,8 @@ class TrailOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
+    # The trail page is /trails/{slug}.
+    slug: str
     name: str
     region: str
     terrain: Terrain = Field(

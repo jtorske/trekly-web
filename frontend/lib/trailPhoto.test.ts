@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { creditPlace, photoCredit } from "./trailPhoto.ts";
+import { creditPlace, photoCredit, trailImageAlt } from "./trailPhoto.ts";
 import type { TrailPhoto } from "./trailsApi";
 
 const PHOTO: TrailPhoto = {
@@ -48,4 +48,12 @@ test("the credit's place is the park, else the region", () => {
   assert.equal(creditPlace({ park_name: "Fundy National Park", region: "Fundy National Park, NB" }), "Fundy National Park");
   assert.equal(creditPlace({ park_name: null, region: "Kananaskis, AB" }), "Kananaskis, AB");
   assert.equal(creditPlace({}), null);
+});
+
+test("trail images get alt text that says what they show", () => {
+  assert.equal(trailImageAlt("Lake Agnes Tea House", "photo", "trail"), "Lake Agnes Tea House");
+  assert.equal(trailImageAlt("Lake Agnes Tea House", "photo", null), "Lake Agnes Tea House");
+  assert.equal(trailImageAlt("Skyline Trail", "photo", "park"), "Scenery in the park around Skyline Trail");
+  assert.equal(trailImageAlt("Skyline Trail", "photo", "nearby"), "Scenery near Skyline Trail");
+  assert.equal(trailImageAlt("Skyline Trail", "map"), "Route map of Skyline Trail");
 });

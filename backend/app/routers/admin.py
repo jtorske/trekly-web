@@ -236,6 +236,8 @@ class AuditPage(BaseModel):
 
 class TrailRef(BaseModel):
     id: UUID
+    # The trail page is /trails/{slug}.
+    slug: str
     name: str
 
 
@@ -382,7 +384,7 @@ def _post_out(post: ActivityPost) -> ReportPost:
         id=post.id,
         kind=post.kind,
         summary=_post_summary(post),
-        trail=TrailRef(id=hike.trail.id, name=hike.trail.name) if hike else None,
+        trail=TrailRef(id=hike.trail.id, slug=hike.trail.slug, name=hike.trail.name) if hike else None,
         note=hike.note if hike else None,
         has_photo=bool(hike and hike.photo_path),
         hidden=post.hidden_at is not None,
@@ -424,7 +426,7 @@ def _reports_out(db: Session, reports: list[ProfileReport]) -> list[ReportOut]:
             reported=people[r.profile_id],
             reported_hidden=r.profile_id in hidden,
             reporter=people[r.reporter_id],
-            trail=TrailRef(id=trail.id, name=trail.name) if trail else None,
+            trail=TrailRef(id=trail.id, slug=trail.slug, name=trail.name) if trail else None,
             note=notes.get((r.profile_id, r.trail_id)) if r.trail_id else None,
             post=_post_out(post) if post else None,
         ))
@@ -547,14 +549,14 @@ def user_detail(user_id: UUID, db: Session = Depends(get_db)):
     moderation = db.get(ProfileModeration, user_id)
 
     hikes = db.execute(
-        select(HikeLog, Trail.name)
+        select(HikeLog, Trail.name, Trail.slug)
         .join(Trail, Trail.id == HikeLog.trail_id)
         .where(HikeLog.user_id == user_id)
         .order_by(HikeLog.hiked_on.desc().nulls_last(), HikeLog.created_at.desc())
     ).all()
     alert_trail = aliased(Trail)
     alerts = db.execute(
-        select(AvailabilityAlert, BackcountrySite.name, alert_trail.name)
+        select(AvailabilityAlert, BackcountrySite.name, alert_trail.name, alert_trail.slug)
         .join(BackcountrySite, BackcountrySite.id == AvailabilityAlert.site_id)
         .outerjoin(alert_trail, alert_trail.id == AvailabilityAlert.trail_id)
         .where(AvailabilityAlert.user_id == user_id)
@@ -579,18 +581,18 @@ def user_detail(user_id: UUID, db: Session = Depends(get_db)):
         hidden_reason=moderation.reason if moderation else None,
         banned_until=_aware(row.banned_until) if base["banned"] else None,
         hikes_list=[
-            HikeOut(id=log.id, trail=TrailRef(id=log.trail_id, name=name), hiked_on=log.hiked_on,
+            HikeOut(id=log.id, trail=TrailRef(id=log.trail_id, slug=slug, name=name), hiked_on=log.hiked_on,
                     note=log.note, has_photo=bool(log.photo_path), verified=bool(log.verified))
-            for log, name in hikes
+            for log, name, slug in hikes
         ],
         alerts_list=[
             AlertOut(
                 id=alert.id, site_name=site_name,
-                trail=TrailRef(id=alert.trail_id, name=trail_name) if alert.trail_id and trail_name else None,
+                trail=TrailRef(id=alert.trail_id, slug=trail_slug, name=trail_name) if alert.trail_id and trail_name else None,
                 start_date=alert.start_date, nights=alert.nights, party_size=alert.party_size,
                 status=alert.status, created_at=_aware(alert.created_at),
             )
-            for alert, site_name, trail_name in alerts
+            for alert, site_name, trail_name, trail_slug in alerts
         ],
         reports_about=_reports_out(db, list(reports)),
         reports_filed=db.scalar(

@@ -399,7 +399,7 @@ def report_email(
     reporter_name = (reporter_profile.username if reporter_profile else None) or "(no username)"
     note_lines = (
         [
-            f"Trip note on: {trip_note.trail.name} ({app_url}/trails?id={trip_note.trail_id})",
+            f"Trip note on: {trip_note.trail.name} ({app_url}/trails/{trip_note.trail.slug})",
             f"Note: {trip_note.note}",
         ]
         if trip_note
@@ -494,3 +494,36 @@ def report_profile(
         ) from error
     db.commit()
     return {"status": "sent"}
+
+
+# The sitemap's profiles. Its own prefix so no username can shadow it.
+sitemap_router = APIRouter(prefix="/api/sitemap", tags=["public profiles"])
+
+
+class ProfileSitemapEntryOut(BaseModel):
+    username: str
+    updated_at: datetime | None
+
+
+@sitemap_router.get("/profiles", response_model=list[ProfileSitemapEntryOut])
+def profile_sitemap(db: Session = Depends(get_db)):
+    """Only profiles whose owner turned on "Let search engines show my
+    profile": the same rule as the page's robots tag (allow_indexing)."""
+    from app.models.privacy import ProfileSettings
+
+    rows = db.execute(
+        select(Profile)
+        .join(ProfileSettings, ProfileSettings.user_id == Profile.id)
+        .where(
+            Profile.username.is_not(None),
+            ProfileSettings.allow_search_indexing.is_(True),
+            ProfileSettings.is_private.is_(False),
+        )
+        .order_by(Profile.username)
+    ).scalars().all()
+    out = []
+    for profile in rows:
+        if not visibility(db, profile).indexable or label_of(db, profile.id) == "demo":
+            continue
+        out.append(ProfileSitemapEntryOut(username=profile.username, updated_at=profile.updated_at))
+    return out

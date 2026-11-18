@@ -59,6 +59,7 @@ class AlertStayIn(BaseModel):
 
 class AlertTrailOut(BaseModel):
     id: UUID
+    slug: str
     name: str
 
 
@@ -90,7 +91,7 @@ def _out(alert: AvailabilityAlert) -> AlertOut:
         campground=alert.site.name,
         site_code=alert.site.site_code,
         park=alert.site.park.name if alert.site.park else None,
-        trail=AlertTrailOut(id=alert.trail.id, name=alert.trail.name) if alert.trail else None,
+        trail=AlertTrailOut(id=alert.trail.id, slug=alert.trail.slug, name=alert.trail.name) if alert.trail else None,
         start_date=alert.start_date,
         end_date=alert.start_date + timedelta(days=alert.nights),
         nights=alert.nights,

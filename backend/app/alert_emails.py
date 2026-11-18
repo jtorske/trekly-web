@@ -67,8 +67,10 @@ def _stay(alert: AvailabilityAlert) -> str:
 def _trail_url(alert: AvailabilityAlert) -> str | None:
     if not alert.trail_id:
         return None
-    return f"{APP_URL}/trails?" + urlencode({
-        "id": str(alert.trail_id), "start": alert.start_date.isoformat(),
+    if not alert.trail or not alert.trail.slug:
+        return None
+    return f"{APP_URL}/trails/{alert.trail.slug}?" + urlencode({
+        "start": alert.start_date.isoformat(),
         "nights": alert.nights, "party": alert.party_size,
     })
 

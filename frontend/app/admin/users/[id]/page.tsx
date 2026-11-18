@@ -23,6 +23,7 @@ import ConfirmDialog from "../../ConfirmDialog";
 import ReportItem from "../../reports/ReportItem";
 import { useAdminData } from "../../useAdminData";
 import styles from "../../admin.module.css";
+import { trailHref } from "@/lib/site";
 
 function Actions({ user, onDone }: { user: AdminUserDetail; onDone: () => void }) {
   const [pending, setPending] = useState<UserAction | null>(null);
@@ -169,7 +170,7 @@ function Detail({ user, reload }: { user: AdminUserDetail; reload: () => void })
               {user.hikes_list.map((hike) => (
                 <li key={hike.id} className={styles.listItem}>
                   <div className={styles.listRow}>
-                    <Link className={styles.link} href={`/trails?id=${hike.trail.id}`}>
+                    <Link className={styles.link} href={trailHref(hike.trail)}>
                       {hike.trail.name}
                     </Link>
                     <span className={`${styles.muted} ${styles.small}`}>

@@ -46,6 +46,7 @@ export interface PlanNight {
 
 export interface PlanTrail {
   id: string;
+  slug: string;
   name: string;
   region: string;
   typical_duration_nights: number | null;

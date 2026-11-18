@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import WelcomeFlow from "./WelcomeFlow";
 
 export const metadata: Metadata = {
-  title: "Welcome · Trekly",
+  title: "Welcome",
   robots: { index: false },
 };
 

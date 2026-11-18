@@ -24,6 +24,7 @@ import VerifiedCheck, { VERIFIED_LABEL } from "@/components/VerifiedCheck";
 import { undatedLabel } from "@/lib/hikeDate";
 import { entryDate, GuestCover, renderJournalPage, type PageContext } from "./JournalPages";
 import styles from "./journal.module.css";
+import { trailHref } from "@/lib/site";
 
 const stampKey = (userId: string) => `trekly:journal-stamped:${userId}`;
 
@@ -92,7 +93,7 @@ function EntryDialog({
       onClose={onClose}
       footer={
         <>
-          <Link href={`/trails?id=${encodeURIComponent(log.trail.id)}`} className={ui.ghost}>
+          <Link href={trailHref(log.trail)} className={ui.ghost}>
             View trail
           </Link>
           <button type="button" className={ui.primary} onClick={onEdit} data-autofocus>

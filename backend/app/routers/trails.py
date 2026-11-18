@@ -1,10 +1,12 @@
 import math
+from datetime import datetime
 from typing import Literal
 from functools import lru_cache
 from urllib.parse import urlencode
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy import case, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -248,15 +250,51 @@ def search_trails_with_facets(body: TrailSearchIn, db: Session = Depends(get_db)
     return TrailSearchOut(trails=trails, total=total, facets=trail_facets(db, conditions))
 
 
+class TrailSitemapEntryOut(BaseModel):
+    slug: str
+    # When the page last changed in a way worth recrawling: the trail row,
+    # its ranking, or its photo / route map.
+    updated_at: datetime | None
+
+
+@router.get("/sitemap", response_model=list[TrailSitemapEntryOut])
+def trail_sitemap(db: Session = Depends(get_db)):
+    """Every live trail's slug for the sitemap. Retired trails still resolve
+    but are left out, so search engines drop them over time."""
+    rows = db.scalars(select(Trail).where(*live_trails()).order_by(Trail.popularity_rank)).all()
+    entries = []
+    for trail in rows:
+        stamps = [trail.created_at, trail.popularity_updated_at]
+        if trail.photo is not None:
+            stamps.append(trail.photo.created_at)
+        if trail.route_map is not None:
+            stamps.append(trail.route_map.generated_at)
+        stamps = [stamp for stamp in stamps if stamp is not None]
+        entries.append(TrailSitemapEntryOut(slug=trail.slug, updated_at=max(stamps) if stamps else None))
+    return entries
+
+
+@router.get("/by-slug/{slug}", response_model=TrailDetailOut)
+def get_trail_by_slug(slug: str, db: Session = Depends(get_db)):
+    """The trail page's lookup: /trails/{slug}. Retired trails still resolve."""
+    trail = db.scalar(select(Trail).where(Trail.slug == slug.lower()))
+    if trail is None:
+        raise HTTPException(status_code=404, detail="Trail not found")
+    return trail_detail(db, trail)
+
+
 @router.get("/{trail_id}", response_model=TrailDetailOut)
 def get_trail(trail_id: UUID, db: Session = Depends(get_db)):
     trail = db.get(Trail, trail_id)
     if trail is None:
         raise HTTPException(status_code=404, detail="Trail not found")
+    return trail_detail(db, trail)
 
+
+def trail_detail(db: Session, trail: Trail) -> TrailDetailOut:
     conditions = (
         db.query(TrailSeasonalCondition)
-        .filter(TrailSeasonalCondition.trail_id == trail_id)
+        .filter(TrailSeasonalCondition.trail_id == trail.id)
         .all()
     )
     detail = with_alerts(TrailDetailOut.model_validate(trail), trail_alerts(db, [trail.id])[trail.id])

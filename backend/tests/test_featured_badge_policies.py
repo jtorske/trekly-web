@@ -85,8 +85,8 @@ def world(conn):
         trails.append(
             conn.execute(
                 text(
-                    "INSERT INTO public.trails (id, name, region, country_code, terrain_difficulty) "
-                    "VALUES (gen_random_uuid(), :name, 'Policy Test Park', 'CA', 'easy') RETURNING id"
+                    "INSERT INTO public.trails (id, name, slug, region, country_code, terrain_difficulty) "
+                    "VALUES (gen_random_uuid(), :name, 'policy-test-trail-' || gen_random_uuid(), 'Policy Test Park', 'CA', 'easy') RETURNING id"
                 ),
                 {"name": f"Policy test trail {uuid.uuid4()}"},
             ).scalar_one()

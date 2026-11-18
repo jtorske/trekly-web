@@ -628,7 +628,8 @@ def test_alert_email_content(session_factory, world):
         "resourceLocationId=-2147483592&mapId=-2147483409&bookingCategoryId=7"
         "&startDate=2026-10-20&endDate=2026-10-22"
     ) in email.text
-    assert f"/trails?id={world['trail']}&start=2026-10-20&nights=2&party=3" in email.text
+    assert f"/trails/{alert.trail.slug}?start=2026-10-20&nights=2&party=3" in email.text
+    assert alert.trail.slug and "?id=" not in email.text
     assert "/alerts" in email.text
     db.close()
 

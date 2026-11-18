@@ -51,6 +51,7 @@ export interface PersonRef {
 
 export interface TrailRef {
   id: string;
+  slug: string;
   name: string;
 }
 

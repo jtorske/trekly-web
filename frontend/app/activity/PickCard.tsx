@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import TrailPhoto from "@/components/TrailPhoto";
 import type { FeedPick } from "@/lib/activity";
 import styles from "./activity.module.css";
+import { trailHref } from "@/lib/site";
 
 /**
  * A "Trekly pick" between posts while the feed is quiet: a trail suggestion
@@ -13,7 +14,7 @@ export default function PickCard({ pick }: { pick: FeedPick }) {
   const { trail } = pick;
   return (
     <li className={styles.pickItem}>
-      <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.pick}>
+      <Link href={trailHref(trail)} className={styles.pick}>
         <span className={styles.pickThumb}>
           <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
         </span>

@@ -57,6 +57,9 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // Location only for Trekly's own pages: Explore's "Use my location".
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
+          // Only production may be indexed: previews (and local builds) say
+          // noindex on every response, as robots.txt and the page metadata do.
+          ...(process.env.VERCEL_ENV === "production" ? [] : [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]),
         ],
       },
     ];

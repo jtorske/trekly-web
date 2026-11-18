@@ -3,7 +3,8 @@ import Link from "next/link";
 import styles from "@/components/LegalPage.module.css";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · Trekly",
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
   description: "What Trekly collects, how it's used, and the choices you have.",
 };
 

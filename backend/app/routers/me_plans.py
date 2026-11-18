@@ -101,6 +101,7 @@ class NightBookedIn(BaseModel):
 
 class PlanTrailOut(BaseModel):
     id: UUID
+    slug: str
     name: str
     region: str
     typical_duration_nights: int | None
@@ -188,7 +189,7 @@ def _get(db: Session, user_id: UUID, plan_id: UUID) -> TripPlan:
 
 def _trail_out(trail: Trail) -> PlanTrailOut:
     return PlanTrailOut(
-        id=trail.id, name=trail.name, region=trail.region,
+        id=trail.id, slug=trail.slug, name=trail.name, region=trail.region,
         typical_duration_nights=trail.typical_duration_nights,
         photo=TrailPhotoOut.model_validate(trail.photo) if trail.photo is not None else None,
         route_map=TrailRouteMapOut.model_validate(trail.route_map) if trail.route_map is not None else None,

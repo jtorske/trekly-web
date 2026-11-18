@@ -7,6 +7,7 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 from app.models.catalog import JsonType
+import app.trail_slugs  # noqa: F401  (assigns slugs to new trails on flush)
 
 TERRAIN_DIFFICULTIES = ("easy", "moderate", "difficult", "extreme")
 PARK_TYPES = ("national", "provincial", "regional", "none")
@@ -31,6 +32,7 @@ class Trail(Base):
             name="trails_park_type_check",
         ),
         UniqueConstraint("name", "province_code", name="trails_name_province_key"),
+        UniqueConstraint("slug", name="trails_slug_key"),
         Index("trails_country_rank_idx", "country_code", "popularity_rank"),
         Index("trails_province_code_idx", "province_code"),
         Index("trails_park_type_idx", "park_type"),
@@ -39,6 +41,9 @@ class Trail(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(Text, nullable=False)
+    # The trail page's URL, /trails/{slug}: set once on insert and never
+    # changed (app/trail_slugs.py), so links keep working.
+    slug = Column(Text, nullable=False)
     region = Column(Text, nullable=False)
     # ISO 3166-1 alpha-2 country and the ISO 3166-2 subdivision suffix
     # (e.g. "CA" / "AB").

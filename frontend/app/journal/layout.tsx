@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 const hand = Caveat({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-hand", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Trail Journal · Trekly",
+  title: "Trail Journal",
   description: "Your private scrapbook of the trails you've hiked.",
 };
 

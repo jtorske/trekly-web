@@ -11,6 +11,7 @@ import VisitStreakWatcher from "@/components/VisitStreakWatcher";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
 import OnboardingGate from "@/components/OnboardingGate";
+import { isIndexable, SITE_NAME, SITE_URL } from "@/lib/site";
 
 // Display/heading font: organic, editorial character that complements the
 // hand-drawn Trekly logo. UI/body font: clean and highly readable so the
@@ -31,12 +32,29 @@ const sans = DM_Sans({
   display: "swap",
 });
 
+// Search Console is already verified for the production domain with this
+// token; GOOGLE_SITE_VERIFICATION (Vercel env var) overrides it when set.
+const GOOGLE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION || "eJGo3TdpJRHqJkDda3P2iOGgFzMYuAyD1PL2CKOlvAQ";
+
 export const metadata: Metadata = {
-  title: "Trekly",
-  description: "Discover hiking trails and adventures",
-  verification: {
-    google: "eJGo3TdpJRHqJkDda3P2iOGgFzMYuAyD1PL2CKOlvAQ",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Trekly: Canadian day hikes and backcountry trips",
+    // Pages set their own title; this adds the brand: "Privacy Policy | Trekly".
+    template: "%s | Trekly",
   },
+  description: "Find Canada's best hikes, from day trips to multi-night routes. Check backcountry campsites, plan your trip and pack the right gear.",
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_CA",
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "An alpine lake below snowy peaks in the Canadian Rockies" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og-default.jpg"] },
+  // Previews and local builds are never indexed (see lib/site.ts).
+  ...(isIndexable() ? {} : { robots: { index: false, follow: false } }),
+  verification: { google: GOOGLE_VERIFICATION },
 };
 
 export default function RootLayout({

@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import HikeLogButton from "@/components/HikeLogButton";
 import AlertsChip from "@/components/AlertsChip";
@@ -13,8 +13,8 @@ import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useSavedTrails } from "@/lib/useSavedTrails";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { tripLengthLabel } from "@/lib/tripLength";
+import { trailHref } from "@/lib/site";
 import {
-  getTrail,
   getTrailCampgrounds,
   type SeasonalCondition,
   type TrailCampgrounds,
@@ -148,7 +148,7 @@ function TrailView({
             saved={saved}
             pending={pending}
             onToggle={onToggleSave}
-            returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
+            returnTo={trailHref(trail)}
           />
           <HikeLogButton
             trailId={trail.id}
@@ -158,7 +158,7 @@ function TrailView({
             loading={hikeLogs.loading}
             onSave={hikeLogs.save}
             onRemove={hikeLogs.remove}
-            returnTo={`/trails?id=${encodeURIComponent(trail.id)}`}
+            returnTo={trailHref(trail)}
           />
         </div>
       </div>
@@ -237,19 +237,19 @@ function TrailView({
   );
 }
 
-function TrailContent() {
-  const searchParams = useSearchParams();
+/**
+ * The trail page's interactive half. The trail itself arrives from the
+ * server (app/trails/[slug]/page.tsx) so its name, stats, description and
+ * photo are in the first HTML; campgrounds, "Hiked by", the forecast and
+ * the save / log buttons load here in the browser.
+ */
+export default function TrailPageClient({ trail, saveParam }: { trail: TrailDetail; saveParam: string | null }) {
   const router = useRouter();
-  const id = searchParams.get("id");
+  const id = trail.id;
   const { status: authStatus } = useAuth();
   const savedTrails = useSavedTrails();
   const hikeLogs = useHikeLogs();
   const pendingSave = useRef(false);
-  const [result, setResult] = useState<{
-    id: string;
-    trail: TrailDetail | null;
-    failed: boolean;
-  } | null>(null);
   const [campgrounds, setCampgrounds] = useState<{
     id: string;
     data: TrailCampgrounds | null;
@@ -257,17 +257,8 @@ function TrailContent() {
   } | null>(null);
 
   useEffect(() => {
-    if (!id) return;
     const controller = new AbortController();
-    getTrail(id, controller.signal)
-      .then((trail) => setResult({ id, trail, failed: false }))
-      .catch((error: unknown) => {
-        if ((error as { name?: string }).name !== "AbortError") {
-          setResult({ id, trail: null, failed: true });
-        }
-      });
-    // Fetched in parallel; the page renders without it and the section
-    // appears once it arrives.
+    // The page renders without it and the section appears once it arrives.
     getTrailCampgrounds(id, controller.signal)
       .then((data) => setCampgrounds({ id, data, failed: false }))
       .catch((error: unknown) => {
@@ -279,51 +270,14 @@ function TrailContent() {
   }, [id]);
   const trailCampgrounds = campgrounds?.id === id ? campgrounds : null;
 
-  const isLoading = id !== null && result?.id !== id;
-
   // Returning from sign-in after clicking "Save trail" as a guest: finish the save.
-  const saveParam = searchParams.get("save");
   useEffect(() => {
-    if (!id || saveParam !== id || authStatus !== "signedIn" || savedTrails.loading || pendingSave.current) return;
+    if (saveParam !== id || authStatus !== "signedIn" || savedTrails.loading || pendingSave.current) return;
     pendingSave.current = true;
-    const finish = () => router.replace(`/trails?id=${encodeURIComponent(id)}`, { scroll: false });
+    const finish = () => router.replace(trailHref(trail), { scroll: false });
     if (savedTrails.savedIds.has(id)) finish();
     else savedTrails.toggle(id, true).catch(() => undefined).finally(finish);
-  }, [id, saveParam, authStatus, savedTrails, router]);
-
-  let body;
-  if (isLoading) {
-    body = <p className={styles.status}>Loading trail…</p>;
-  } else if (result?.failed) {
-    body = (
-      <p className={styles.status}>
-        We couldn&apos;t load this trail right now. Check that the trail service
-        is running and try again.
-      </p>
-    );
-  } else if (!result?.trail) {
-    body = (
-      <div className={styles.status}>
-        <h1 className={styles.notFoundTitle}>Trail not found</h1>
-        <p>This trail doesn&apos;t exist or may have been removed.</p>
-        <Link href="/trail-list" className={styles.inlineLink}>
-          Browse all trails
-        </Link>
-      </div>
-    );
-  } else {
-    body = (
-      <TrailView
-        trail={result.trail}
-        campgrounds={trailCampgrounds?.data ?? null}
-        campgroundsFailed={trailCampgrounds?.failed ?? false}
-        saved={savedTrails.savedIds.has(result.trail.id)}
-        pending={savedTrails.pending.has(result.trail.id) || (saveParam === result.trail.id && authStatus === "signedIn")}
-        onToggleSave={savedTrails.toggle}
-        hikeLogs={hikeLogs}
-      />
-    );
-  }
+  }, [id, trail, saveParam, authStatus, savedTrails, router]);
 
   return (
     <main className={styles.page}>
@@ -331,16 +285,16 @@ function TrailContent() {
         <Link href="/trail-list" className={styles.backLink}>
           ← Explore trails
         </Link>
-        {body}
+        <TrailView
+          trail={trail}
+          campgrounds={trailCampgrounds?.data ?? null}
+          campgroundsFailed={trailCampgrounds?.failed ?? false}
+          saved={savedTrails.savedIds.has(trail.id)}
+          pending={savedTrails.pending.has(trail.id) || (saveParam === trail.id && authStatus === "signedIn")}
+          onToggleSave={savedTrails.toggle}
+          hikeLogs={hikeLogs}
+        />
       </div>
     </main>
-  );
-}
-
-export default function TrailPage() {
-  return (
-    <Suspense fallback={<main className={styles.page} />}>
-      <TrailContent />
-    </Suspense>
   );
 }

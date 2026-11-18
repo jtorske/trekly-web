@@ -36,8 +36,8 @@ def world(conn):  # noqa: F811
                  {"u": f"alice_{alice.hex[:8]}", "id": alice})
     conn.execute(text("UPDATE public.profile_settings SET share_activity = true WHERE user_id = :id"), {"id": alice})
     trail = conn.execute(
-        text("INSERT INTO public.trails (id, name, region, country_code, terrain_difficulty) "
-             "VALUES (gen_random_uuid(), :n, 'Policy Test Park', 'CA', 'easy') RETURNING id"),
+        text("INSERT INTO public.trails (id, name, slug, region, country_code, terrain_difficulty) "
+             "VALUES (gen_random_uuid(), :n, 'policy-test-trail-' || gen_random_uuid(), 'Policy Test Park', 'CA', 'easy') RETURNING id"),
         {"n": f"Policy test trail {uuid.uuid4()}"},
     ).scalar_one()
     log = conn.execute(

@@ -28,6 +28,7 @@ import type { TrailCampground } from "@/lib/trailsApi";
 import { useSetups } from "../gear/useSetups";
 import { groupStops } from "../trails/campgrounds";
 import styles from "./PlanDialog.module.css";
+import { trailHref } from "@/lib/site";
 
 export interface PlanDraft {
   title: string;
@@ -54,6 +55,7 @@ function decodeNight(value: string): DraftNight {
  */
 export default function PlanDialog({
   trailId,
+  trailSlug,
   trailName,
   campgrounds,
   initial,
@@ -65,6 +67,8 @@ export default function PlanDialog({
   onSaved,
 }: {
   trailId: string;
+  /** For the guest's way back to the trail page. */
+  trailSlug?: string;
   trailName: string;
   campgrounds: TrailCampground[];
   initial: PlanDraft;
@@ -162,7 +166,7 @@ export default function PlanDialog({
           Not now
         </button>
         <Link
-          href={`/login${nextQuery(guestReturnTo ? guestReturnTo(draft) : `/trails?id=${encodeURIComponent(trailId)}`)}`}
+          href={`/login${nextQuery(guestReturnTo ? guestReturnTo(draft) : trailHref({ id: trailId, slug: trailSlug }))}`}
           className={ui.primary}
           onClick={() => onBeforeSignIn?.(draft)}
         >

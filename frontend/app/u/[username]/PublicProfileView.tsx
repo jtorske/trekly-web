@@ -56,6 +56,7 @@ import { useUnits } from "@/lib/useUnits";
 import VerifiedCheck from "@/components/VerifiedCheck";
 import { undatedLabel } from "@/lib/hikeDate";
 import styles from "./public.module.css";
+import { trailHref } from "@/lib/site";
 
 type PublicTab = "activity" | "journal" | "gear" | "trails" | "trips";
 
@@ -380,7 +381,7 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
               <TrailBadge name={entry.trail.name} terrain={entry.trail.terrain} colour={badgeColour(entry)} hiked className={styles.entryBadge} />
               <div className={styles.entryBody}>
                 <span className={styles.entryTitle}>
-                  <Link href={`/trails?id=${encodeURIComponent(entry.trail.id)}`} className={styles.entryTrail}>
+                  <Link href={trailHref(entry.trail)} className={styles.entryTrail}>
                     {entry.trail.name}
                   </Link>
                   {entry.verified && <VerifiedCheck />}
@@ -454,7 +455,7 @@ function SavedTrailsSection({ trails }: { trails: NonNullable<PublicProfile["sav
         <ul className={profileStyles.trails}>
           {trails.map((trail) => (
             <li key={trail.id} className={profileStyles.trailRow}>
-              <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={profileStyles.trailLink}>
+              <Link href={trailHref(trail)} className={profileStyles.trailLink}>
                 <TrailThumb photo={trail.photo} name={trail.name} />
                 <span className={profileStyles.trailText}>
                   <span className={profileStyles.trailName}>{trail.name}</span>
@@ -486,7 +487,7 @@ function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_pl
         <ul className={profileStyles.trips}>
           {plans.map((plan) => (
             <li key={plan.id}>
-              <Link href={`/trails?id=${encodeURIComponent(plan.trail.id)}`} className={profileStyles.tripCard}>
+              <Link href={trailHref(plan.trail)} className={profileStyles.tripCard}>
                 <TripThumb photo={plan.trail.photo} name={plan.trail.name} />
                 <span className={profileStyles.tripBody}>
                   <span className={profileStyles.tripTrail}>{plan.title ?? plan.trail.name}</span>

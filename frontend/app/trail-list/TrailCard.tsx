@@ -13,6 +13,7 @@ import type { TrailPhoto as Photo, TrailSearchItem } from "@/lib/trailsApi";
 import { tripLengthLabel } from "@/lib/tripLength";
 import { formatTrailDistance, formatTrailElevation, formatWholeDistance, type UnitSystem } from "@/lib/units";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 /** "Banff National Park, AB": the park links to Explore filtered to it. */
 function TrailPlace({ trail }: { trail: TrailSearchItem }) {
@@ -173,7 +174,7 @@ export default function TrailCard({
         <div className={styles.cardBody}>
           <div className={styles.cardMain}>
             <h2 className={styles.cardName}>
-              <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.cardLink}>
+              <Link href={trailHref(trail)} className={styles.cardLink}>
                 {title}
               </Link>
             </h2>

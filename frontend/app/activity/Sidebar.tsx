@@ -24,6 +24,7 @@ import { useRank } from "@/lib/useRank";
 import { useStreak } from "@/lib/useStreak";
 import { showsStreak, streakLabel } from "@/lib/visitStreak";
 import styles from "./activity.module.css";
+import { trailHref } from "@/lib/site";
 
 /**
  * The signed-in hiker at a glance: avatar, name, rank with its progress,
@@ -160,7 +161,7 @@ export function TrendingTrails() {
         <ol className={styles.trending}>
           {trails.map(({ trail, this_week }) => (
             <li key={trail.id}>
-              <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.trendingRow}>
+              <Link href={trailHref(trail)} className={styles.trendingRow}>
                 <span className={styles.trendingThumb}>
                   <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" mini />
                 </span>

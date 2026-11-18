@@ -56,8 +56,8 @@ class World:
     def trail(self):
         as_admin(self.conn)
         return self.conn.execute(
-            text("INSERT INTO public.trails (id, name, region, country_code, terrain_difficulty) "
-                 "VALUES (gen_random_uuid(), :n, 'Search Test Park', 'CA', 'easy') RETURNING id"),
+            text("INSERT INTO public.trails (id, name, slug, region, country_code, terrain_difficulty) "
+                 "VALUES (gen_random_uuid(), :n, 'search-test-trail-' || gen_random_uuid(), 'Search Test Park', 'CA', 'easy') RETURNING id"),
             {"n": f"Search test trail {uuid.uuid4()}"},
         ).scalar_one()
 

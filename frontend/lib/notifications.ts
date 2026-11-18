@@ -1,4 +1,5 @@
 import type { FollowState } from "./follows";
+import { trailHref } from "./site.ts";
 
 /**
  * In-app notifications. The API makes and groups them (app/notifications.py):
@@ -25,7 +26,7 @@ export interface TreklyNotification {
   actor_count: number;
   created_at: string;
   unread: boolean;
-  post: { id: string; kind: "hike" | "milestone" | "rank"; title: string; trail_id: string | null } | null;
+  post: { id: string; kind: "hike" | "milestone" | "rank"; title: string; trail_id: string | null; trail_slug?: string | null } | null;
   /** A one-person item: your follow state toward them ("Follow back"). */
   follow: FollowState | null;
 }
@@ -85,7 +86,7 @@ export function actionText(item: Pick<TreklyNotification, "kind" | "post">): str
 export function notificationHref(item: Pick<TreklyNotification, "kind" | "post" | "actors" | "actor_count">): string {
   if ((item.kind === "high_five" || item.kind === "comment") && item.post) {
     if (item.kind === "comment") return `/activity?post=${encodeURIComponent(item.post.id)}`;
-    return item.post.trail_id ? `/trails?id=${encodeURIComponent(item.post.trail_id)}` : "/profile";
+    return item.post.trail_id ? trailHref({ id: item.post.trail_id, slug: item.post.trail_slug }) : "/profile";
   }
   if (item.actor_count === 1 && item.actors[0]) return `/u/${encodeURIComponent(item.actors[0].username)}`;
   return "/profile";

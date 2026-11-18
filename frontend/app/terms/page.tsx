@@ -3,7 +3,8 @@ import Link from "next/link";
 import styles from "@/components/LegalPage.module.css";
 
 export const metadata: Metadata = {
-  title: "Terms of Use · Trekly",
+  title: "Terms of Use",
+  alternates: { canonical: "/terms" },
   description: "The rules for using Trekly, including outdoor safety and permit alerts.",
 };
 

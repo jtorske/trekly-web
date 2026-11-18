@@ -49,3 +49,14 @@ export const ROUTE_MAP_CREDIT = {
 export function creditPlace(trail: { park_name?: string | null; region?: string | null }): string | null {
   return trail.park_name?.trim() || trail.region?.trim() || null;
 }
+
+/**
+ * Alt text for a trail image: what it shows, honestly. A park-wide photo
+ * isn't of the trail itself, and a route map is a map.
+ */
+export function trailImageAlt(name: string, kind: "photo" | "map", scope?: string | null): string {
+  if (kind === "map") return `Route map of ${name}`;
+  if (scope === "park") return `Scenery in the park around ${name}`;
+  if (scope === "nearby") return `Scenery near ${name}`;
+  return `${name}`;
+}

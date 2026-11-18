@@ -8,6 +8,7 @@ import { formatDateTime, timeAgo, whoLabel } from "@/lib/adminView";
 import { toast } from "@/lib/toast";
 import ConfirmDialog from "../ConfirmDialog";
 import styles from "../admin.module.css";
+import { trailHref } from "@/lib/site";
 
 /** One report: what was reported, links to the content, and resolve / reopen (confirmed, audited). */
 export default function ReportItem({
@@ -89,12 +90,12 @@ export default function ReportItem({
           </Link>
         )}
         {report.kind === "trip_note" && report.trail && (
-          <Link className={styles.link} href={`/trails?id=${report.trail.id}`} target="_blank">
+          <Link className={styles.link} href={trailHref(report.trail)} target="_blank">
             View trail ↗
           </Link>
         )}
         {post?.trail && (
-          <Link className={styles.link} href={`/trails?id=${post.trail.id}`} target="_blank">
+          <Link className={styles.link} href={trailHref(post.trail)} target="_blank">
             View trail ↗
           </Link>
         )}

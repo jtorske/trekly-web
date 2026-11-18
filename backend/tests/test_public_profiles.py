@@ -297,6 +297,17 @@ def test_search_indexing_is_opt_in(client, alice_profile, people):
     assert public(client).json()["allow_indexing"] is True
 
 
+def test_sitemap_lists_only_profiles_that_opted_in(client, alice_profile, people):
+    _, alice = people["alice"]
+    names = lambda: [row["username"] for row in client.get("/api/sitemap/profiles").json()]
+    assert names() == []
+    set_privacy(client, alice, allow_search_indexing=True)
+    assert names() == ["alice"]
+    # Private wins over the indexing switch, as on the page itself.
+    set_privacy(client, alice, is_private=True)
+    assert names() == []
+
+
 def test_profiles_without_a_username_have_no_public_page(client, people):
     _, bob = people["bob"]
     client.get("/api/me/profile", headers=bob)

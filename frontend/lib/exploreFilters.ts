@@ -17,7 +17,7 @@
 
 import { TERRAIN_LABELS, type Terrain } from "./terrain.ts";
 import { isTrailSort, type TrailSort } from "./trailOrder.ts";
-import type { ParkTypeFilter, TripType } from "./trailsApi";
+import type { ParkTypeFilter, TrailSearchRequest, TripType } from "./trailsApi";
 import { kmFromDistance } from "./units.ts";
 
 export type DistanceUnit = "km" | "mi";
@@ -318,4 +318,34 @@ export function shouldPreselectFavourites(search: string, favouriteCount: number
 /** Day hikes and Backpacking chips: picking one replaces the other, picking it again clears it. */
 export function toggleTrip(filters: ExploreFilters, trip: TripType): ExploreFilters {
   return { ...filters, trip: filters.trip === trip ? undefined : trip };
+}
+
+/** Explore asks for at most this many trails; the API caps the catalogue there too. */
+export const RESULT_LIMIT = 100;
+
+/**
+ * The search Explore sends for these filters. Shared by the page (on the
+ * server, for the first render) and the browser, so both ask the same thing.
+ * `near` is the searcher's rounded position, only while "near me" is on.
+ */
+export function exploreRequest(
+  filters: ExploreFilters,
+  { near, bounds }: { near?: { lat: number; lng: number }; bounds?: Bounds } = {},
+): TrailSearchRequest {
+  return {
+    q: filters.q,
+    terrain: filters.terrain,
+    trip: filters.trip,
+    provinces: filters.provinces,
+    park_types: filters.parkTypes,
+    parks: filters.parks,
+    near: near ? { ...near, ...(filters.within ? { radius_km: withinKm(filters.within) } : {}) } : undefined,
+    bounds,
+    limit: RESULT_LIMIT,
+  };
+}
+
+/** Identifies one fetch of a request; "Try again" bumps `attempt`. */
+export function exploreRequestKey(request: TrailSearchRequest, attempt = 0): string {
+  return `${JSON.stringify(request)}|${attempt}`;
 }

@@ -43,6 +43,8 @@ class NotificationPost(BaseModel):
     title: str
     # A hike post's trail, to link to.
     trail_id: UUID | None = None
+    # The trail page is /trails/{trail_slug}.
+    trail_slug: str | None = None
 
 
 class NotificationOut(BaseModel):
@@ -137,6 +139,7 @@ def _list(db: Session, user_id: UUID) -> NotificationList:
             post=NotificationPost(
                 id=post.id, kind=post.kind, title=_post_title(post),
                 trail_id=post.hike_log.trail_id if post.kind == "hike" and post.hike_log else None,
+                trail_slug=post.hike_log.trail.slug if post.kind == "hike" and post.hike_log and post.hike_log.trail else None,
             ) if post else None,
             follow=states.get(group.actors[0], "none") if len(group.actors) == 1 else None,
         ))

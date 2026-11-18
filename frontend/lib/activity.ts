@@ -3,6 +3,7 @@ import type { FollowState } from "./follows";
 import type { Milestone, MilestoneBadgeInfo } from "./milestones";
 import type { PrivacySettings } from "./profilesApi";
 import type { TrailListItem } from "./trailsApi";
+import { trailHref } from "./site.ts";
 
 /**
  * The Activity feed: posts made from real activity (a shared hike, a
@@ -162,9 +163,9 @@ export function canShareHikes(
 
 /** Where tapping a post goes: the trail for a hike, the author's profile otherwise. */
 export function postHref(post: Pick<ActivityPost, "kind" | "hike" | "author" | "announcement">): string {
-  if (post.kind === "hike" && post.hike) return `/trails?id=${encodeURIComponent(post.hike.trail.id)}`;
+  if (post.kind === "hike" && post.hike) return trailHref(post.hike.trail);
   if (post.kind === "announcement" && post.announcement?.trail) {
-    return `/trails?id=${encodeURIComponent(post.announcement.trail.id)}`;
+    return trailHref(post.announcement.trail);
   }
   return `/u/${encodeURIComponent(post.author.username)}`;
 }

@@ -2,6 +2,8 @@ import type { Terrain } from "@/lib/terrain";
 
 export interface TrailSummary {
   id: string;
+  /** The trail page is /trails/{slug} (see trailHref in lib/site). */
+  slug: string;
   name: string;
   region: string;
   terrain: Terrain;

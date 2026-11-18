@@ -23,6 +23,7 @@ import {
 import AdminFrame from "../AdminFrame";
 import admin from "../admin.module.css";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 const TOPO = "topo";
 // Only this many trails (about 50 preview images) render at once.
@@ -210,7 +211,7 @@ const TrailReview = forwardRef<
       </div>
       <div className={styles.body}>
         <h2 className={styles.trailName}>
-          <Link href={`/trails?id=${encodeURIComponent(trail.id)}`}>{trail.name}</Link>
+          <Link href={trailHref(trail)}>{trail.name}</Link>
         </h2>
         <p className={styles.trailMeta}>
           #{trail.popularity_rank} · {trail.region}

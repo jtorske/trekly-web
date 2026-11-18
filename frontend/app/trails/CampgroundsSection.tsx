@@ -277,8 +277,9 @@ export default function CampgroundsSection({
 
   const urlFor = useCallback(
     (s: Stay, extra: Record<string, string> = {}) =>
-      `${pathname}?${new URLSearchParams({ id: trailId, ...stayParams(s), ...extra })}`,
-    [pathname, trailId],
+      // The path is the trail's own page (/trails/{slug}); only the stay goes in the query.
+      `${pathname}?${new URLSearchParams({ ...stayParams(s), ...extra })}`,
+    [pathname],
   );
 
   const check = useCallback(

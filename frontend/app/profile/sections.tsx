@@ -21,6 +21,7 @@ import type { TripPlanSummary } from "@/lib/plansApi";
 import { formatStay, localToday } from "@/lib/stay";
 import { formatTrailElevation, formatWeight, type UnitSystem } from "@/lib/units";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 export function EmptyState({
   icon: Icon,
@@ -141,7 +142,7 @@ export function SavedTrailList({ data, units, limit }: { data: SavedData; units:
     <ul className={styles.trails}>
       {shown.map(({ trail, saved_at }) => (
         <li key={trail.id} className={styles.trailRow}>
-          <Link href={`/trails?id=${encodeURIComponent(trail.id)}`} className={styles.trailLink}>
+          <Link href={trailHref(trail)} className={styles.trailLink}>
             <TrailThumb photo={trail.photo} routeMap={trail.route_map} name={trail.name} />
             <span className={styles.trailText}>
               <span className={styles.trailName}>{trail.name}</span>

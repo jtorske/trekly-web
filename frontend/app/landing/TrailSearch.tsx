@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { searchTrails, type TrailSummary } from "@/lib/trailsApi";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 export default function TrailSearch() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function TrailSearch() {
 
   const openTrail = (trail: TrailSummary) => {
     setIsOpen(false);
-    router.push(`/trails?id=${encodeURIComponent(trail.id)}`);
+    router.push(trailHref(trail));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { DEFAULT_TOPO_MAP, TOPO_MAPS } from "@/lib/topoMaps";
-import { photoCredit, ROUTE_MAP_CREDIT } from "@/lib/trailPhoto";
+import { photoCredit, ROUTE_MAP_CREDIT, trailImageAlt } from "@/lib/trailPhoto";
 import type { TrailPhoto as Photo, TrailRouteMap } from "@/lib/trailsApi";
 import styles from "./TrailPhoto.module.css";
 
@@ -52,7 +52,7 @@ export default function TrailPhoto({
             key={shown.url}
             className={styles.image}
             src={shown.url}
-            alt=""
+            alt={trailImageAlt(name, shown.kind, shown.kind === "photo" ? photo?.scope : null)}
             width={shown.image.width}
             height={shown.image.height}
             loading={variant === "hero" ? "eager" : "lazy"}

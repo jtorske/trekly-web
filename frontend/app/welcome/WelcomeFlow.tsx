@@ -109,6 +109,7 @@ import { pickedCount } from "@/lib/pastHikes";
 import { HikedStep } from "./HistorySteps";
 import PackStep, { type PackChoices } from "./PackStep";
 import styles from "./welcome.module.css";
+import { trailHref } from "@/lib/site";
 
 // ---------------------------------------------------------------- visuals
 
@@ -1363,7 +1364,7 @@ function FinishStep({ next }: { next: string }) {
             return (
               <li key={trail.id} className={styles.pick}>
                 <Link
-                  href={`/trails?id=${encodeURIComponent(trail.id)}`}
+                  href={trailHref(trail)}
                   className={styles.pickLink}
                 >
                   <TrailPhoto

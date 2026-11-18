@@ -13,6 +13,7 @@ import { EmptyState } from "./sections";
 import shell from "./shell.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
 import styles from "./JournalTab.module.css";
+import { trailHref } from "@/lib/site";
 
 /**
  * The profile's Journal tab: the Trail Journal in numbers (not the book).
@@ -106,7 +107,7 @@ export default function JournalTab({
         <ul className={styles.stamps}>
           {summary.recent.map(({ hike, colour }) => (
             <li key={hike.trail.id}>
-              <Link href={`/trails?id=${encodeURIComponent(hike.trail.id)}`} className={styles.stamp}>
+              <Link href={trailHref(hike.trail)} className={styles.stamp}>
                 <TrailBadge name={hike.trail.name} terrain={hike.trail.terrain} colour={colour} hiked className={styles.stampBadge} />
                 <span className={styles.stampName}>
                   {hike.trail.name}

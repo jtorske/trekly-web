@@ -8,6 +8,7 @@ import type { Bounds, MapView } from "@/lib/exploreFilters";
 import { TERRAIN_COLORS, TERRAIN_LABELS, type Terrain } from "@/lib/terrain";
 import type { TrailSearchItem } from "@/lib/trailsApi";
 import styles from "./page.module.css";
+import { trailHref } from "@/lib/site";
 
 /**
  * OpenFreeMap: free OpenStreetMap vector tiles, no key or view limits, and
@@ -70,7 +71,7 @@ const TERRAIN_COLOR: CirclePaint["circle-color"] = [
 function popupContent(trail: TrailSearchItem, title: string, onOpen: (id: string) => void): HTMLElement {
   const root = document.createElement("div");
   root.className = styles.popup;
-  const href = `/trails?id=${encodeURIComponent(trail.id)}`;
+  const href = trailHref(trail);
   if (trail.photo) {
     const img = document.createElement("img");
     img.className = styles.popupPhoto;

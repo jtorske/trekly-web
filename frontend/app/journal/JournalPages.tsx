@@ -31,6 +31,7 @@ import type { TrailListItem } from "@/lib/trailsApi";
 import type { View } from "./Book";
 import styles from "./journal.module.css";
 import MilestoneCard from "@/components/MilestoneCard";
+import { trailHref } from "@/lib/site";
 
 export const formatHikeDate = (iso: string, month: "short" | "long" = "short") =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month, day: "numeric", year: "numeric" });
@@ -262,7 +263,7 @@ function Contents({
 function Slot({ trail, group, ctx, active }: { trail: TrailListItem; group: JournalGroup; ctx: PageContext; active: boolean }) {
   const log = ctx.logs.get(trail.id);
   const photo = useHikePhoto(log?.photo_path ?? null);
-  const href = `/trails?id=${encodeURIComponent(trail.id)}`;
+  const href = trailHref(trail);
 
   if (!log) {
     return (
