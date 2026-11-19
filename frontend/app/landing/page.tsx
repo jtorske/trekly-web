@@ -9,14 +9,22 @@ import {
   pickLandingPhoto,
 } from "@/lib/landingPhotos";
 import { FEATURED_DEMO, demoProfileHref } from "@/lib/demo";
-import { absoluteUrl, SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  absoluteUrl,
+  OFFICIAL_PROFILES,
+  SITE_ALTERNATE_NAME,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 import { jsonLdScript } from "@/lib/trailSeo";
 import HeroCarousel from "./HeroCarousel";
 import TrailSearch from "./TrailSearch";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Trekly: Canadian day hikes and backcountry trips" },
+  // Brand first, so searches for "Trekly" match it at a glance.
+  title: { absolute: SITE_TITLE },
   // Served at both / and /landing; / is the one to index.
   alternates: { canonical: "/" },
   description:
@@ -46,14 +54,17 @@ const SITE_JSON_LD = {
       "@type": "Organization",
       "@id": `${SITE_URL}/#organization`,
       name: SITE_NAME,
+      alternateName: SITE_ALTERNATE_NAME,
       url: absoluteUrl("/"),
       logo: absoluteUrl("/apple-icon.png"),
+      ...(OFFICIAL_PROFILES.length ? { sameAs: OFFICIAL_PROFILES } : {}),
       description: "Canadian day hikes and backcountry trips: trails, campsites, trip plans and gear.",
     },
     {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       name: SITE_NAME,
+      alternateName: SITE_ALTERNATE_NAME,
       url: absoluteUrl("/"),
       inLanguage: "en-CA",
       publisher: { "@id": `${SITE_URL}/#organization` },
@@ -86,7 +97,7 @@ export default async function LandingPage() {
             <h1 className={styles.headline}>Your next trail is waiting</h1>
 
             <p className={styles.subtext}>
-              Find Canada&apos;s best hikes, from day trips to multi-night routes.
+              Trekly finds Canada&apos;s best hikes, from day trips to multi-night routes.
               Check backcountry campsites, plan your trip and pack the right&nbsp;gear.
             </p>
 

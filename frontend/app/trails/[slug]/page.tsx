@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
-import { absoluteUrl, trailHref } from "@/lib/site";
+import { absoluteUrl, SITE_NAME, trailHref } from "@/lib/site";
 import { jsonLdScript, trailDescription, trailImage, trailJsonLd, trailTitle } from "@/lib/trailSeo";
 import { getTrailBySlug, TrailApiUnavailable } from "@/lib/trailsServer";
 import TrailPageClient from "../TrailPageClient";
@@ -40,8 +40,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: path },
     // Retired trails still resolve for bookmarks, but leave search over time.
     ...(trail.retired_at ? { robots: { index: false, follow: true } } : {}),
+    // A page's openGraph replaces the layout's whole object, so the site
+    // name and locale have to be repeated here.
     openGraph: {
       type: "website",
+      siteName: SITE_NAME,
+      locale: "en_CA",
       url: path,
       title,
       description,

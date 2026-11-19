@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./not-found.module.css";
 
 // Replaces Next's default 404, whose dark-mode styles put white text on the
 // site's cream background.
+export const metadata: Metadata = { title: "Page not found" };
+
 export default function NotFound() {
   return (
     <main className={styles.page}>

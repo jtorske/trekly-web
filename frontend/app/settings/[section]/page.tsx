@@ -14,7 +14,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const section = findSection((await params).section);
-  return { title: section ? `${section.label} · Settings` : "Settings" };
+  return { title: section ? section.label : { absolute: "Settings | Trekly" } };
 }
 
 export default async function SettingsSectionPage({ params }: Props) {

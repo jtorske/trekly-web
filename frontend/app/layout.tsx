@@ -11,7 +11,7 @@ import VisitStreakWatcher from "@/components/VisitStreakWatcher";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
 import OnboardingGate from "@/components/OnboardingGate";
-import { isIndexable, SITE_NAME, SITE_URL } from "@/lib/site";
+import { isIndexable, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 // Display/heading font: organic, editorial character that complements the
 // hand-drawn Trekly logo. UI/body font: clean and highly readable so the
@@ -39,8 +39,8 @@ const GOOGLE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION || "eJGo3TdpJRH
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Trekly: Canadian day hikes and backcountry trips",
-    // Pages set their own title; this adds the brand: "Privacy Policy | Trekly".
+    default: SITE_TITLE,
+    // Every other page sets its own title; this adds the brand: "Privacy Policy | Trekly".
     template: "%s | Trekly",
   },
   description: "Find Canada's best hikes, from day trips to multi-night routes. Check backcountry campsites, plan your trip and pack the right gear.",

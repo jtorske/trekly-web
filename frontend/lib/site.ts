@@ -26,6 +26,19 @@ export const SITE_URL =
 
 export const SITE_NAME = "Trekly";
 
+/** The brand-first title the landing page uses (and any page without its own title). */
+export const SITE_TITLE = "Trekly – Plan Canadian hikes, gear and backcountry trips";
+
+/** Another name people search for, for the Organization/WebSite structured data. */
+export const SITE_ALTERNATE_NAME = "Trekly Hiking";
+
+/**
+ * Trekly's official profiles elsewhere (Instagram, etc.), as full URLs. They
+ * become the Organization's sameAs, which helps search engines tie them to
+ * the site. Add them here as they go live.
+ */
+export const OFFICIAL_PROFILES: string[] = [];
+
 /** True only on Vercel's production deployment. */
 export function isIndexable(env: Record<string, string | undefined> = process.env): boolean {
   return env.VERCEL_ENV === "production";
