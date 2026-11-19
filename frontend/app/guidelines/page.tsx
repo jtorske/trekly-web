@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "@/components/LegalPage.module.css";
 
 export const metadata: Metadata = {
-  title: "Community Guidelines · Trekly",
+  title: "Community Guidelines",
   description: "How to share hikes, photos and notes on Trekly: be respectful, post your own photos, no spam, and keep other people's plans private.",
 };
 
