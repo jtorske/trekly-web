@@ -1,6 +1,6 @@
 # Drafts the day's automatic @trekly posts (backend/scripts/trekly_posts.py)
-# and publishes at most one (every type auto-publishes unless an admin turned
-# it off). Posts whose AI text fails the fact check are skipped. With
+# and publishes at most one. Trending, spotlight, new-on-Trekly and roundups
+# auto-publish; fun facts and conditions wait on /admin/trekly-posts. Posts whose AI text fails the fact check are skipped. With
 # TREKLY_POSTS_DIGEST_TO set, it emails a record of what went out. Once a day:
 # about a minute of Actions time.
 # The run is idempotent (keyed drafts, one post a day, one digest a day), so a

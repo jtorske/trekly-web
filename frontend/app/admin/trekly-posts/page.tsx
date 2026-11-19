@@ -661,8 +661,8 @@ function QueueBody() {
         <h2 id="queue-types" className={styles.cardTitle}>
           Post types
         </h2>
-        <p className={styles.muted}>Schedules live in backend/config/trekly_posts.toml. Every type auto-publishes by default; turn one off here
-          to review its drafts first.</p>
+        <p className={styles.muted}>Schedules and auto-publish defaults live in backend/config/trekly_posts.toml: fun facts and conditions wait
+          for review here, the rest publish on their own. The switches override the defaults.</p>
         <ul className={page.types}>
           {data.types.map((type) => (
             <TypeRow key={type.post_type} type={type} onChanged={reload} />

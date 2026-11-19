@@ -131,10 +131,13 @@ def run(db, cfg=None, *, now=NOW, ai=None, outbox=None, fetch=None, recipients=(
 
 # ------------------------------------------------------------------ config
 
-def test_the_shipped_config_auto_publishes_every_type_and_keeps_conditions_off():
+def test_the_shipped_config_reviews_facts_and_warnings_and_auto_publishes_the_rest():
     cfg = load_config()
     assert set(cfg.types) == set(GENERATORS)
-    assert all(cfg.type(name).auto_publish for name in GENERATORS)
+    assert {name for name in GENERATORS if cfg.type(name).auto_publish} == {
+        "trending", "spotlight", "new_on_trekly", "roundup"}
+    assert cfg.type("fun_fact").auto_publish is False
+    assert cfg.type("conditions").auto_publish is False
     assert cfg.type("conditions").enabled is False
     assert cfg.type("conditions").ai is False
     assert cfg.pacing.max_posts_per_day == 1
@@ -371,6 +374,33 @@ def test_warnings_never_reach_the_ai_even_when_asked():
     written = writer.write("conditions", "Official text.", {}, use_ai=True, client=ai, max_chars=280)
     assert written.body == "Official text." and written.writer == "template"
     assert ai.calls == []
+
+
+def test_with_the_shipped_defaults_facts_and_warnings_wait_for_review(session_factory, trails):
+    import tomllib
+    from app.trekly_posts.config import CONFIG_PATH
+
+    db = session_factory()
+    make_official(db)
+    raw = tomllib.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    # Only these two types run today, with their shipped auto-publish defaults.
+    for name in raw["types"]:
+        raw["types"][name]["enabled"] = name in ("fun_fact", "conditions")
+        raw["types"][name]["days"] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    db.add(TreklyFact(text="Banff was founded in 1885.", source_url="https://parks.canada.ca/b", approved=True))
+    db.commit()
+    report = run(db, parse_config(raw), fetch=lambda url: BULLETIN_PAGE)
+    assert set(report.drafted) == {"fun_fact", "conditions"}
+    assert report.published is None and count(db, ActivityPost) == 0
+    assert count(db, TreklyPostDraft, TreklyPostDraft.status == "draft") == 2
+
+
+def test_no_code_path_from_conditions_reaches_the_ai():
+    from pathlib import Path
+
+    source = (Path(cond.__file__)).read_text(encoding="utf-8")
+    assert "writer" not in source.split('"""', 2)[2] and "anthropic" not in source.lower()
+    assert "conditions" in writer.NEVER_AI_TYPES
 
 
 def test_the_daily_run_never_sends_conditions_to_the_ai(session_factory, trails):

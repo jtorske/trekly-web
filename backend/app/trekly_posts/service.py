@@ -8,7 +8,7 @@
    whose AI text fails the fact check is skipped: kept as "rejected" with the
    reason, never queued or published;
 4. publishes at most one post: a draft an admin scheduled for today or
-   earlier, else a draft of a type that auto-publishes (on by default in the
+   earlier, else a draft of a type that auto-publishes (set per type in the
    config; the admin toggle overrides it). Pacing (`publish_refusal`) can stop it;
 5. when TREKLY_POSTS_DIGEST_TO is set, emails a record of what went out and
    what was skipped, at most once a day. Without it, no email is sent.

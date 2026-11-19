@@ -2,7 +2,7 @@
 
 Drafts come from the daily run (app/trekly_posts/service.py). Admins preview,
 edit, schedule, publish or reject them, switch each type's auto-publish on or
-off (on by default from config/trekly_posts.toml), and keep the fact bank. Every publish goes through the
+off (defaults in config/trekly_posts.toml), and keep the fact bank. Every publish goes through the
 same pacing rules as the daily run (`publish_refusal`) and is audited.
 
 A conditions draft quotes an official bulletin word for word, so its text

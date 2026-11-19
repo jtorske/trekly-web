@@ -4,7 +4,8 @@
 # (mon..sun, in `timezone`). A run makes at most one draft per type a day.
 # `auto_publish = true` lets the daily run publish a type's drafts on its own
 # (still at most one @trekly post a day); the toggle on /admin/trekly-posts
-# overrides it per type. With it off, drafts wait for an admin there.
+# overrides it per type. With it off (fun facts and conditions), drafts wait
+# for an admin there.
 #
 # `ai = true` lets the Claude API rewrite the template text when
 # ANTHROPIC_API_KEY is set and [ai].enabled is true. Text that fails the fact
@@ -79,7 +80,8 @@ min_hikes = 8
 
 [types.fun_fact]
 enabled = true
-auto_publish = true
+# Facts go to the review queue on /admin/trekly-posts before they post.
+auto_publish = false
 days = ["thu"]
 # Approved facts are posted word for word.
 ai = false
@@ -93,7 +95,8 @@ fact_cooldown_days = 180
 # Avalanche Canada forecasts aren't included: their terms forbid reproduction
 # without written consent.
 enabled = false
-auto_publish = true
+# Official warnings go to the review queue: an admin checks the bulletin first.
+auto_publish = false
 days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 ai = false
 expires_after_days = 2
