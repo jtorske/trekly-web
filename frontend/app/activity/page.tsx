@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUp, RefreshCw } from "lucide-react";
@@ -38,6 +38,30 @@ interface Feed extends FeedState {
   hikers: HikerResult[] | null;
 }
 
+type ComposerSlot = "left" | "right" | "feed";
+const WIDE = "(min-width: 1280px)";
+const MEDIUM = "(min-width: 1024px)";
+
+function subscribeToWidth(onChange: () => void) {
+  const queries = [window.matchMedia(WIDE), window.matchMedia(MEDIUM)];
+  queries.forEach((query) => query.addEventListener("change", onChange));
+  return () => queries.forEach((query) => query.removeEventListener("change", onChange));
+}
+
+/**
+ * Where "Log a hike" goes: under your card in the left column from 1280px,
+ * under it at the top of the right column from 1024px (no left column
+ * there), and a bar at the top of the feed below that. One composer, so a
+ * draft isn't split between copies; null until the width is known.
+ */
+function useComposerSlot(): ComposerSlot | null {
+  return useSyncExternalStore<ComposerSlot | null>(
+    subscribeToWidth,
+    () => (window.matchMedia(WIDE).matches ? "left" : window.matchMedia(MEDIUM).matches ? "right" : "feed"),
+    () => null,
+  );
+}
+
 /** How often to check for new posts from people you follow, while the tab is visible. */
 const NEW_POSTS_EVERY_MS = 60_000;
 const PROMPT_DISMISSED = "trekly.activity.followPromptDismissed";
@@ -52,10 +76,11 @@ const PROMPT_DISMISSED = "trekly.activity.followPromptDismissed";
  * follow post, and on phones pulling down from the top refreshes.
  *
  * From 1280px it's three columns in a one-screen shell, as on the profile:
- * your card on the left, the feed (with "Log a hike" on top) in the middle,
- * trending trails and your latest milestone on the right; only the feed
- * scrolls. From 1024px the card moves to the top of the right column; below
- * that it's one column with the composer folded into a bar.
+ * your card and "Log a hike" on the left, the feed alone in the middle,
+ * trending trails and your latest milestone on the right; each column
+ * scrolls on its own. From 1024px the card and composer move to the top of
+ * the right column; below that it's one column with the composer folded
+ * into a bar at the top of the feed.
  */
 export default function ActivityPage() {
   const { status } = useAuth();
@@ -76,6 +101,7 @@ export default function ActivityPage() {
   const scroller = useRef<HTMLDivElement>(null);
   const composer = useRef<ComposerHandle>(null);
   const isHidden = useHidden();
+  const slot = useComposerSlot();
   const current = feed?.key === status ? feed : null;
 
   /** A page of the feed: the first (starting over) when `cursor` is null. */
@@ -318,15 +344,28 @@ export default function ActivityPage() {
       trailsHiked={signedIn && !hikeLogs.loading ? hikeLogs.logs.length : null}
       signedIn={signedIn}
       signInHref={signInHref}
-      onLogHike={openComposer}
     />
   );
+  const composerFor = (where: ComposerSlot) =>
+    slot === where &&
+    // Guests' card beside it already invites them to sign in.
+    (where === "feed" || signedIn) && (
+      <Composer
+        handle={composer}
+        logs={hikeLogs.byTrail}
+        save={hikeLogs.save}
+        onPosted={() => void refresh()}
+        signInHref={signInHref}
+        placement={where === "feed" ? "feed" : "side"}
+      />
+    );
 
   return (
     <main className={styles.page}>
       <div className={styles.columns}>
         <aside className={styles.left} aria-label="You">
           {card}
+          {composerFor("left")}
         </aside>
 
         <div ref={scroller} className={styles.feedColumn}>
@@ -347,13 +386,7 @@ export default function ActivityPage() {
               </div>
             )}
             <h1 className={styles.title}>Activity</h1>
-            <Composer
-              handle={composer}
-              logs={hikeLogs.byTrail}
-              save={hikeLogs.save}
-              onPosted={() => void refresh()}
-              signInHref={signInHref}
-            />
+            {composerFor("feed")}
 
             {newCount > 0 && (
               <div className={styles.newPostsBar}>
@@ -382,7 +415,10 @@ export default function ActivityPage() {
         </div>
 
         <aside className={styles.right} aria-label="Around Trekly">
-          <div className={styles.rightCard}>{card}</div>
+          <div className={styles.rightCard}>
+            {card}
+            {composerFor("right")}
+          </div>
           {signedIn && <FindHikers />}
           <TrendingTrails />
           {signedIn && <RecentlyEarned />}

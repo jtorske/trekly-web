@@ -37,6 +37,13 @@
   display: none;
 }
 
+/* 1024–1279px: your card and "Log a hike" at the top of the right column. */
+.rightCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .feedInner {
   display: flex;
   flex-direction: column;
@@ -177,6 +184,24 @@
   box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
+/* In a side column, under your card: a card like the others there. */
+.composerSide .composerBody {
+  padding: 1rem 1rem 0.75rem;
+}
+
+.composerSide .composerTitle {
+  font-size: 0.95rem;
+}
+
+.composerSide .picked {
+  gap: 0.6rem;
+}
+
+.composerSide .pickedThumb {
+  width: 3.5rem;
+  height: 2.75rem;
+}
+
 .composerGuest {
   display: flex;
   flex-wrap: wrap;
@@ -289,12 +314,11 @@
   padding-left: 2.4rem;
 }
 
+/* Placed by the composer (position: fixed, from the search box's rect),
+   so no scrolling column or card edge clips it. */
 .results {
-  position: absolute;
-  z-index: 5;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  left: 0;
+  position: fixed;
+  z-index: 20;
   max-height: 22rem;
   overflow-y: auto;
   border: 1px solid var(--hair);

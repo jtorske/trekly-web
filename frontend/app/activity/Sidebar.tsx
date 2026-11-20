@@ -28,21 +28,19 @@ import { trailHref } from "@/lib/site";
 
 /**
  * The signed-in hiker at a glance: avatar, name, rank with its progress,
- * streak, trails hiked and milestones, and a big "Log a hike". Guests get
- * an invitation instead.
+ * streak, trails hiked and milestones; the "Log a hike" composer sits right
+ * below it. Guests get an invitation instead.
  */
 export function ProfileCard({
   profile,
   trailsHiked,
   signedIn,
   signInHref,
-  onLogHike,
 }: {
   profile: Profile | null;
   trailsHiked: number | null;
   signedIn: boolean;
   signInHref: string;
-  onLogHike: () => void;
 }) {
   const { rank } = useRank();
   const { streak } = useStreak();
@@ -118,10 +116,6 @@ export function ProfileCard({
         )}
       </dl>
 
-      <button type="button" className={`${ui.primary} ${styles.logButton}`} onClick={onLogHike}>
-        <Mountain size={18} aria-hidden="true" />
-        Log a hike
-      </button>
     </section>
   );
 }

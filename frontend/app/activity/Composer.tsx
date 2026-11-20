@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useImperativeHandle, useMemo, useRef, useState, type Ref } from "react";
+import { useEffect, useId, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Ref } from "react";
 import Link from "next/link";
 import { ImagePlus, Mountain, Search, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
@@ -8,6 +8,7 @@ import DateInput from "@/components/DateInput";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import { activityBlocker, canShareHikes } from "@/lib/activity";
+import { floatingBox } from "@/lib/floatingBox";
 import { undatedLabel } from "@/lib/hikeDate";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
 import { PHOTO_ACCEPT, PREPARING_PHOTO, photoProblemMessage } from "@/lib/photoPrep";
@@ -29,8 +30,12 @@ export interface ComposerHandle {
 
 const SEARCH_LIMIT = 8;
 
+/** The fixed site navbar's height (the page's --nav-h): a dropdown flipped up stops below it. */
+const NAV_H = 84;
+
 /**
- * "Log a hike" at the top of the feed: pick a trail, a date (today, or "I
+ * "Log a hike": in the left column under your card from 1280px, under it in
+ * the right column from 1024px, and a bar at the top of the feed below that. pick a trail, a date (today, or "I
  * don't remember"), an optional note and photo, and whether to share it.
  * Saving goes through the journal's own save (useHikeLogs → PUT
  * /api/me/hike-logs, add_hikes on the server), so stamps, milestones, points
@@ -43,6 +48,7 @@ export default function Composer({
   save,
   onPosted,
   signInHref,
+  placement = "feed",
 }: {
   handle: Ref<ComposerHandle>;
   logs: Map<string, HikeLog>;
@@ -50,6 +56,8 @@ export default function Composer({
   /** After a save, so the feed can show the new post. */
   onPosted: () => void;
   signInHref: string;
+  /** "side": a card in a side column (always open); "feed": the bar on phones. */
+  placement?: "side" | "feed";
 }) {
   const { status, user } = useAuth();
   const today = localToday();
@@ -119,6 +127,27 @@ export default function Composer({
   }, [trimmed, trail]);
   const shown = trimmed && results?.query === trimmed ? results.trails : null;
 
+  // The results float over the page (position: fixed), placed from the search
+  // box, so a scrolling column or the card's edge never clips them.
+  const [box, setBox] = useState<CSSProperties | null>(null);
+  const open = Boolean(shown);
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const field = searchRef.current?.getBoundingClientRect();
+      if (!field) return;
+      setBox(floatingBox(field, { width: window.innerWidth, height: window.innerHeight }, { topInset: NAV_H }));
+    };
+    place();
+    window.addEventListener("resize", place);
+    // Capture: the side columns and the feed scroll inside themselves.
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
   const preview = useMemo(() => (photo ? URL.createObjectURL(photo) : null), [photo]);
   useEffect(() => (preview ? () => URL.revokeObjectURL(preview) : undefined), [preview]);
 
@@ -184,7 +213,12 @@ export default function Composer({
   }
 
   return (
-    <section ref={rootRef} className={styles.composer} data-expanded={expanded} aria-labelledby={searchId}>
+    <section
+      ref={rootRef}
+      className={`${styles.composer} ${placement === "side" ? styles.composerSide : ""}`}
+      data-expanded={expanded}
+      aria-labelledby={searchId}
+    >
       {/* Phones and tablets: a bar that opens the composer. */}
       <button
         type="button"
@@ -255,7 +289,7 @@ export default function Composer({
               }}
             />
             {shown && (
-              <ul id={listId} role="listbox" className={styles.results}>
+              <ul id={listId} role="listbox" className={styles.results} style={box ?? undefined}>
                 {shown.length === 0 && <li className={styles.noResults}>No trails match “{trimmed}”.</li>}
                 {shown.map((option) => (
                   <li key={option.id} role="option" aria-selected={false}>
