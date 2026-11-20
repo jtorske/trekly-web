@@ -39,6 +39,7 @@ from app.activity import (
     folded_where, is_visible, readable_query,
 )
 from app import feed as blend
+from app.comments import CommentOut, blocked_either_way, previews
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
 from app.follows import FollowState
@@ -149,6 +150,13 @@ class ActivityPostOut(BaseModel):
     # The Activity feed only: why it's in your feed. "suggested" posts get a
     # "Suggested for you" line and a Follow button.
     reason: FeedReason | None = None
+    # Comments this reader can see, and the newest few (oldest first; app/comments.py).
+    comment_count: int = 0
+    comments: list[CommentOut] = []
+    # Its author turned comments off: no box, "Comments are off".
+    comments_off: bool = False
+    # Signed in and comments are on (posting checks the rest).
+    can_comment: bool = False
 
 
 class ProfileActivityPage(BaseModel):
@@ -465,6 +473,13 @@ def _hydrate(db: Session, rows: list, viewer: CurrentUser | None, today: date) -
     ]
     _fold_earned(db, kept, today, viewer.id if viewer else None, badge_dates)
     _overlay_reviews(db, kept)
+    talk = previews(db, [row[0] for _, row in kept], viewer.id if viewer else None)
+    for item, row in kept:
+        found = talk.get(item.id)
+        if found is not None:
+            item.comment_count, item.comments = found.count, found.preview
+        item.comments_off = bool(row[0].comments_off)
+        item.can_comment = viewer is not None and not item.comments_off
     labels = labels_for(db, (row[0].user_id for _, row in kept))
     for item, row in kept:
         item.author.label = labels.get(row[0].user_id)
@@ -686,6 +701,39 @@ def high_fivers(
     return HighFiversOut(high_fives=total, hikers=out, others=total - len(hikers))
 
 
+@router.get("/{post_id}", response_model=ActivityPostOut)
+def one_post(
+    post_id: UUID,
+    response: Response,
+    viewer: CurrentUser | None = Depends(optional_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    """One post's own page (/activity/{id}), by the feed's rules: anyone may
+    see it, or it's yours; never between blocked hikers. A milestone or rank
+    folded into its hike shows as that hike."""
+    response.headers.update(NO_STORE)
+    viewer_id = viewer.id if viewer else None
+    query = readable_query(today, viewer_id).where(ActivityPost.id == post_id)
+    if viewer_id is not None:
+        query = query.where(~blocked_either_way(ActivityPost.user_id, viewer_id))
+    row = db.execute(query.options(joinedload(HikeLog.trail), joinedload(ActivityPost.trail))).unique().first()
+    if row is not None and db.scalar(select(exists(
+        _cards(today, viewer_id).where(ActivityPost.id == post_id).with_only_columns(ActivityPost.id)
+    ))) is False:
+        # Folded into its hike: show that.
+        hike = db.execute(
+            readable_query(today, viewer_id)
+            .where(ActivityPost.kind == "hike", ActivityPost.hike_log_id == row[0].hike_log_id)
+            .options(joinedload(HikeLog.trail), joinedload(ActivityPost.trail))
+        ).unique().first()
+        row = hike or row
+    items = _hydrate(db, [row], viewer, today) if row is not None else []
+    if not items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return items[0]
+
+
 @router.put("/{post_id}/high-five", response_model=HighFiveOut)
 def high_five(
     post_id: UUID,
@@ -781,6 +829,8 @@ def profile_activity(
     profile = db.scalar(select(Profile).where(Profile.username == username.strip().lower()))
     seen = visibility(db, profile) if profile is not None else None
     if seen is None or not seen.listed or not activity_open(seen):
+        raise HTTPException(status_code=404, detail="No activity to show")
+    if viewer is not None and viewer.id != profile.id and db.scalar(select(blocked_either_way(profile.id, viewer.id))):
         raise HTTPException(status_code=404, detail="No activity to show")
     query = _profile_cards(profile, today, viewer.id if viewer else None)
     items, next_cursor = _page(db, query, cursor, limit, viewer, today)

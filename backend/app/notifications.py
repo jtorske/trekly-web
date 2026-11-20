@@ -7,6 +7,12 @@ Made by the API when something happens to you:
 - request_approved: someone approved your request to follow them.
 - high_five: someone high-fived one of your posts.
 - comment: someone commented on one of your posts.
+- comment_reply: someone replied to your comment.
+- mention: someone @mentioned you in a comment on a post you can see.
+
+Comment notifications point at their comment, so deleting it, or moderation
+holding it, takes them back (app/comments.py). Nothing is ever made
+between two hikers when either has blocked the other.
 
 Undoing the action takes the notification back (unfollowing, cancelling a
 request, taking back a high five), so nothing points at something that no
@@ -30,7 +36,7 @@ from sqlalchemy.orm import Session
 
 from app.models.account import Profile
 from app.models.privacy import ProfileModeration
-from app.models.social import NOTIFICATION_KINDS, Follow, Notification, NotificationPreferences
+from app.models.social import NOTIFICATION_KINDS, Block, Follow, Notification, NotificationPreferences
 
 # The newest notifications read for the list; older ones fall off it.
 WINDOW = 300
@@ -38,7 +44,9 @@ MAX_GROUPS = 60
 SHOWN_ACTORS = 3
 # Kept this long; older ones are deleted when new ones are made.
 KEEP = timedelta(days=180)
-GROUPED_BY_POST = {"high_five", "comment"}
+GROUPED_BY_POST = {"high_five", "comment", "comment_reply", "mention"}
+# Each comment is its own event: a second one never replaces the first.
+PER_COMMENT = {"comment", "comment_reply", "mention"}
 
 
 def _now() -> datetime:
@@ -78,14 +86,22 @@ def retract(db: Session, recipient: UUID, actor: UUID, kind: str, post_id: UUID 
     db.execute(delete(Notification).where(*where))
 
 
-def notify(db: Session, recipient: UUID, actor: UUID, kind: str, post_id: UUID | None = None) -> bool:
+def _blocked(db: Session, a: UUID, b: UUID) -> bool:
+    return db.scalar(select(Block.blocker_id).where(
+        ((Block.blocker_id == a) & (Block.blocked_id == b)) | ((Block.blocker_id == b) & (Block.blocked_id == a))
+    ).limit(1)) is not None
+
+
+def notify(db: Session, recipient: UUID, actor: UUID, kind: str, post_id: UUID | None = None,
+           comment_id: UUID | None = None) -> bool:
     """Make one (replacing the same one from before). False when skipped."""
-    if recipient == actor or not preferences(db, recipient)[kind]:
+    if recipient == actor or not preferences(db, recipient)[kind] or _blocked(db, recipient, actor):
         return False
-    if kind != "comment":
+    if kind not in PER_COMMENT:
         retract(db, recipient, actor, kind, post_id)
     now = _now()
-    db.add(Notification(user_id=recipient, actor_id=actor, kind=kind, post_id=post_id, created_at=now))
+    db.add(Notification(user_id=recipient, actor_id=actor, kind=kind, post_id=post_id, comment_id=comment_id,
+                        created_at=now))
     db.execute(delete(Notification).where(Notification.user_id == recipient, Notification.created_at < now - KEEP))
     db.flush()
     return True

@@ -216,7 +216,7 @@ def test_signed_out_gets_nothing(client):
 def test_settings_default_on_and_turning_off_stops_and_hides(client, ana, ben, cam, ana_post):
     settings = client.get("/api/me/notification-settings", headers=ana["headers"]).json()
     assert settings == {"new_follower": True, "follow_request": True, "request_approved": True,
-                        "high_five": True, "comment": True}
+                        "high_five": True, "comment": True, "comment_reply": True, "mention": True}
     high_five(client, ben, ana_post)
     response = client.patch("/api/me/notification-settings", json={"high_five": False}, headers=ana["headers"])
     assert response.json()["high_five"] is False and response.json()["new_follower"] is True

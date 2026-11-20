@@ -2,6 +2,7 @@ from app.models.account import Profile, SavedTrail
 from app.models.account_label import AccountLabel
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.admin import AdminAuditLog
+from app.models.comment import ActivityComment
 from app.models.availability import AvailabilityAlert, AvailabilityCache, JobLock, ProviderRequestBudget
 from app.models.backcountry import BackcountryPark, BackcountrySite
 from app.models.catalog import (
@@ -36,6 +37,7 @@ from app.models.visit_streak import VisitStreak
 from app.models.trekly_post import TreklyFact, TreklyPostDraft, TreklyPostTypeSetting
 
 __all__ = [
+    "ActivityComment",
     "AccountRestriction",
     "ModerationItem",
     "AccountLabel",

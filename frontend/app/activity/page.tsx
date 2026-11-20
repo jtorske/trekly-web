@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowUp, RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
 import {
   deleteKey, feedRows, mergeFeedPage, type ActivityPost, type FeedState,
+  postPagePath,
 } from "@/lib/activity";
 import { getActivity, getNewPosts } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
@@ -103,6 +104,13 @@ export default function ActivityPage() {
   const isHidden = useHidden();
   const slot = useComposerSlot();
   const current = feed?.key === status ? feed : null;
+  const router = useRouter();
+
+  // Old comment notifications linked to /activity?post=ID: that's the post's own page now.
+  useEffect(() => {
+    const postId = new URLSearchParams(window.location.search).get("post");
+    if (postId) router.replace(postPagePath(postId));
+  }, [router]);
 
   /** A page of the feed: the first (starting over) when `cursor` is null. */
   const load = useCallback(

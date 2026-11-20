@@ -56,7 +56,9 @@ class Block(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
-NOTIFICATION_KINDS = ("new_follower", "follow_request", "request_approved", "high_five", "comment")
+NOTIFICATION_KINDS = (
+    "new_follower", "follow_request", "request_approved", "high_five", "comment", "comment_reply", "mention",
+)
 
 
 class Notification(Base):
@@ -66,7 +68,8 @@ class Notification(Base):
     __tablename__ = "notifications"
     __table_args__ = (
         CheckConstraint(
-            "kind in ('new_follower', 'follow_request', 'request_approved', 'high_five', 'comment')",
+            "kind in ('new_follower', 'follow_request', 'request_approved', 'high_five', 'comment',"
+            " 'comment_reply', 'mention')",
             name="notifications_kind_check",
         ),
         CheckConstraint("user_id <> actor_id", name="notifications_not_self_check"),
@@ -80,6 +83,9 @@ class Notification(Base):
     actor_id = Column(Uuid, nullable=False)
     kind = Column(Text, nullable=False)
     post_id = Column(Uuid, ForeignKey("activity_posts.id", ondelete="CASCADE"))
+    # comment, comment_reply and mention: the comment, so deleting or holding
+    # it takes the notification back.
+    comment_id = Column(Uuid, ForeignKey("activity_comments.id", ondelete="CASCADE"), index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     read_at = Column(DateTime(timezone=True))
 
@@ -95,4 +101,6 @@ class NotificationPreferences(Base):
     request_approved = Column(Boolean, nullable=False, default=True, server_default=true())
     high_five = Column(Boolean, nullable=False, default=True, server_default=true())
     comment = Column(Boolean, nullable=False, default=True, server_default=true())
+    comment_reply = Column(Boolean, nullable=False, default=True, server_default=true())
+    mention = Column(Boolean, nullable=False, default=True, server_default=true())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

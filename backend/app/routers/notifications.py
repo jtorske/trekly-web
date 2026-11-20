@@ -27,7 +27,9 @@ from app.points_config import RANKS
 router = APIRouter(prefix="/api/me", tags=["notifications"])
 
 NO_STORE = {"Cache-Control": "no-store"}
-NotificationKind = Literal["new_follower", "follow_request", "request_approved", "high_five", "comment"]
+NotificationKind = Literal[
+    "new_follower", "follow_request", "request_approved", "high_five", "comment", "comment_reply", "mention",
+]
 
 
 class NotificationActor(BaseModel):
@@ -85,6 +87,8 @@ class PreferencesOut(BaseModel):
     request_approved: bool
     high_five: bool
     comment: bool
+    comment_reply: bool
+    mention: bool
 
 
 class PreferencesIn(BaseModel):
@@ -95,6 +99,8 @@ class PreferencesIn(BaseModel):
     request_approved: bool | None = None
     high_five: bool | None = None
     comment: bool | None = None
+    comment_reply: bool | None = None
+    mention: bool | None = None
 
 
 def _post_title(post: ActivityPost) -> str:

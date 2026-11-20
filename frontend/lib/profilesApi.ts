@@ -157,7 +157,7 @@ export const reportProfile = (
   username: string,
   reason: ReportReason,
   details: string,
-  about: { trailId?: string; postId?: string } = {},
+  about: { trailId?: string; postId?: string; commentId?: string } = {},
 ) =>
   apiFetch<{ status: string }>(`/api/profiles/${encodeURIComponent(username)}/report`, {
     method: "POST",
@@ -166,6 +166,7 @@ export const reportProfile = (
       details: details.trim() || null,
       ...(about.trailId ? { trail_id: about.trailId } : {}),
       ...(about.postId ? { post_id: about.postId } : {}),
+      ...(about.commentId ? { comment_id: about.commentId } : {}),
     },
     auth: true,
   });

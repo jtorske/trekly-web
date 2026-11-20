@@ -118,6 +118,8 @@ class ProfileReport(Base):
     trail_id = Column(Uuid, ForeignKey("trails.id", ondelete="SET NULL"))
     # Set when reporting one of their Activity posts.
     post_id = Column(Uuid, ForeignKey("activity_posts.id", ondelete="SET NULL"))
+    # Set when reporting one of their comments.
+    comment_id = Column(Uuid, ForeignKey("activity_comments.id", ondelete="SET NULL"))
     status = Column(Text, nullable=False, default="open", server_default="open")
     resolved_at = Column(DateTime(timezone=True))
     resolved_by = Column(Uuid)

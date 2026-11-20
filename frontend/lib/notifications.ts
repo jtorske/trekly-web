@@ -1,5 +1,6 @@
 import type { FollowState } from "./follows";
 import { trailHref } from "./site.ts";
+import { postPagePath } from "./activity.ts";
 
 /**
  * In-app notifications. The API makes and groups them (app/notifications.py):
@@ -7,7 +8,17 @@ import { trailHref } from "./site.ts";
  * post, arrive as one item. Read state lives on the server.
  */
 
-export type NotificationKind = "new_follower" | "follow_request" | "request_approved" | "high_five" | "comment";
+export type NotificationKind =
+  | "new_follower"
+  | "follow_request"
+  | "request_approved"
+  | "high_five"
+  | "comment"
+  | "comment_reply"
+  | "mention";
+
+/** About a comment: opens the post's own page, where the comments are. */
+const ABOUT_A_COMMENT: NotificationKind[] = ["comment", "comment_reply", "mention"];
 
 export interface NotificationActor {
   username: string;
@@ -45,6 +56,8 @@ export const NOTIFICATION_TYPES: { kind: NotificationKind; label: string; hint: 
   { kind: "request_approved", label: "Accepted requests", hint: "When someone approves your request to follow them." },
   { kind: "high_five", label: "High fives", hint: "When someone high-fives one of your posts." },
   { kind: "comment", label: "Comments", hint: "When someone comments on one of your posts." },
+  { kind: "comment_reply", label: "Replies", hint: "When someone replies to one of your comments." },
+  { kind: "mention", label: "Mentions", hint: "When someone @mentions you in a comment on a post you can see." },
 ];
 
 const nameOf = (actor: NotificationActor) => actor.display_name?.trim() || `@${actor.username}`;
@@ -79,13 +92,17 @@ export function actionText(item: Pick<TreklyNotification, "kind" | "post">): str
       return `high-fived ${postText(item.post)}`;
     case "comment":
       return `commented on ${postText(item.post)}`;
+    case "comment_reply":
+      return "replied to your comment";
+    case "mention":
+      return "mentioned you in a comment";
   }
 }
 
 /** Where tapping the item goes. */
 export function notificationHref(item: Pick<TreklyNotification, "kind" | "post" | "actors" | "actor_count">): string {
-  if ((item.kind === "high_five" || item.kind === "comment") && item.post) {
-    if (item.kind === "comment") return `/activity?post=${encodeURIComponent(item.post.id)}`;
+  if (ABOUT_A_COMMENT.includes(item.kind) && item.post) return postPagePath(item.post.id);
+  if (item.kind === "high_five" && item.post) {
     return item.post.trail_id ? trailHref({ id: item.post.trail_id, slug: item.post.trail_slug }) : "/profile";
   }
   if (item.actor_count === 1 && item.actors[0]) return `/u/${encodeURIComponent(item.actors[0].username)}`;

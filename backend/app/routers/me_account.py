@@ -19,6 +19,7 @@ from app.admin_access import is_admin
 from app import follows
 from app.auth import CurrentUser, get_current_user
 from app.database import get_db
+from app.models.comment import ActivityComment
 from app.models.account import Profile, SavedTrail
 from app.models.hike_log import HikeLog
 from app.models.nudge import NudgeDismissal
@@ -359,6 +360,9 @@ def delete_account(
     db.flush()
     db.execute(delete(UserGearItem).where(UserGearItem.user_id == user.id))
     db.execute(delete(SavedTrail).where(SavedTrail.user_id == user.id))
+    # Their comments (and the replies under them); auth.users' cascade does it
+    # too, but not every database has that foreign key.
+    db.execute(delete(ActivityComment).where(ActivityComment.user_id == user.id))
     db.execute(delete(HikeLog).where(HikeLog.user_id == user.id))
     db.execute(delete(ProfileReport).where(
         (ProfileReport.reporter_id == user.id) | (ProfileReport.profile_id == user.id)

@@ -2,7 +2,7 @@
 limits, account restrictions and the admin digest.
 
 Screening (screen_content), on every create or edit of a hike note or
-photo, a bio or a profile photo (and comments, once they exist):
+photo, a bio, a profile photo or a comment (app/comments.py):
 
 - passed: published as usual. The scores are kept on the item.
 - flagged: held. The content is withheld from its column (see
@@ -42,19 +42,20 @@ from typing import Callable, Iterable, Protocol
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import moderation_config as config
 from app.models.account import Profile
 from app.models.activity import ActivityPost
+from app.models.comment import ActivityComment
 from app.models.admin import AUTH_USERS, SYSTEM_ADMIN_ID, AdminAuditLog
 from app.models.availability import JobLock
 from app.models.hike_log import HikeLog
 from app.models.moderation import AccountRestriction, ModerationItem
 from app.models.privacy import ProfileModeration, ProfileReport
-from app.models.social import Block
+from app.models.social import Block, Notification
 
 log = logging.getLogger(__name__)
 
@@ -283,12 +284,13 @@ def ensure_can_comment(db: Session, user_id: UUID, count_since: Callable[[dateti
 def _enforce(limits, count_since: Callable[[datetime], int], at: datetime, noun: str) -> None:
     for most, window in limits:
         if count_since(at - window) >= most:
-            span = "hour" if window <= timedelta(hours=1) else "day"
-            raise HTTPException(
-                status_code=429,
-                detail=f"You've reached the limit of {most} {noun} an {span}. Try again a little later."
-                if span == "hour" else f"You've reached the limit of {most} {noun} a {span}. Try again tomorrow.",
-            )
+            if window <= timedelta(minutes=1):
+                detail = "You're commenting very quickly. Wait a minute, then try again." if noun == "comments"                     else f"You've reached the limit of {most} {noun} a minute. Wait a minute, then try again."
+            elif window <= timedelta(hours=1):
+                detail = f"You've reached the limit of {most} {noun} an hour. Try again a little later."
+            else:
+                detail = f"You've reached the limit of {most} {noun} a day. Try again tomorrow."
+            raise HTTPException(status_code=429, detail=detail)
 
 
 def ensure_post_rate(db: Session, user_id: UUID) -> None:
@@ -352,6 +354,9 @@ def _fields(db: Session, item: ModerationItem) -> list[tuple[object, str, str]]:
             "avatar": [(profile, "avatar_path", "photo_path")],
             "profile": [(profile, "bio", "text"), (profile, "avatar_path", "photo_path")],
         }[item.kind]
+    if item.kind == "comment":
+        comment = db.get(ActivityComment, item.target_id)
+        return [(comment, "body", "text")] if comment else []
     if item.kind == "post":
         post = db.get(ActivityPost, item.target_id)
         if post is None or post.kind != "hike" or post.hike_log_id is None:
@@ -368,6 +373,9 @@ def withhold(db: Session, item: ModerationItem, state: str) -> None:
         if value is not None:
             setattr(item, attribute, value)
             setattr(row, column, None)
+    if item.kind == "comment":
+        # Nobody keeps a notification about a comment they can't see.
+        db.execute(delete(Notification).where(Notification.comment_id == item.target_id))
     if item.kind == "post":
         post = db.get(ActivityPost, item.target_id)
         if post is not None and post.hidden_at is None:
@@ -588,8 +596,11 @@ def lock_account(db: Session, services: Services, user_id: UUID, reason: str) ->
 # ------------------------------------------------------------------ reports
 
 
-def report_target(post: ActivityPost | None, trip_note: HikeLog | None, profile: Profile) -> tuple[str, UUID, str | None, str | None]:
+def report_target(post: ActivityPost | None, trip_note: HikeLog | None, profile: Profile,
+                  comment: ActivityComment | None = None) -> tuple[str, UUID, str | None, str | None]:
     """(kind, target id, text, photo path) of what a report is about."""
+    if comment is not None:
+        return "comment", comment.id, comment.body, None
     if post is not None:
         hike = post.hike_log if post.kind == "hike" else None
         return "post", post.id, (hike.note if hike else post.body), (hike.photo_path if hike else None)

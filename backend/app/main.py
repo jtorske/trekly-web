@@ -12,6 +12,7 @@ from app.routers import (
     admin_trail_photos,
     admin_trekly_posts,
     availability,
+    comments,
     follows,
     gear,
     hiker_search,
@@ -78,6 +79,8 @@ app.include_router(trail_hikers.router)
 app.include_router(activity.router)
 app.include_router(activity.profile_router)
 app.include_router(activity.me_router)
+app.include_router(comments.router)
+app.include_router(comments.comment_router)
 app.include_router(follows.router)
 app.include_router(hiker_search.router)
 app.include_router(notifications.router)

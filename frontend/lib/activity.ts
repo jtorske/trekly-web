@@ -76,7 +76,77 @@ export interface ActivityPost {
   review?: ReviewState | null;
   /** The Activity feed only: why it's in your feed ("suggested": "Suggested for you" and a Follow button). */
   reason?: FeedReason | null;
+  /** Comments this reader can see, and the newest two (oldest first). */
+  comment_count?: number;
+  comments?: ActivityComment[];
+  /** Its author turned comments off. */
+  comments_off?: boolean;
+  /** Signed in and comments are on (posting checks the rest). */
+  can_comment?: boolean;
 }
+
+/** A comment on a post (backend app/comments.py). Plain text; links aren't links. */
+export interface ActivityComment {
+  id: string;
+  /** A reply: the top-level comment it's under. */
+  parent_id: string | null;
+  author: Omit<ActivityAuthor, "follow">;
+  body: string;
+  created_at: string;
+  /** Set once its author changed it. */
+  edited_at: string | null;
+  mine: boolean;
+  /** Yours, or on your post. */
+  can_delete: boolean;
+  /** Your own, held by moderation ("pending") or removed ("hidden"). */
+  review?: ReviewState | null;
+}
+
+export interface CommentList {
+  comments: ActivityComment[];
+  count: number;
+  comments_off: boolean;
+  can_comment: boolean;
+  post_mine: boolean;
+}
+
+export const COMMENT_LIMIT = 500;
+
+/** "1 comment", "14 comments". */
+export function commentCount(count: number): string {
+  return `${count} comment${count === 1 ? "" : "s"}`;
+}
+
+/** The link under a post's preview: "View all 14 comments", or null when the preview shows them all. */
+export function viewAllLabel(count: number, shown: number): string | null {
+  if (count <= shown) return null;
+  return count === 2 ? "View both comments" : `View all ${count} comments`;
+}
+
+/** What a reply box starts with: "@ana " (unless it already mentions them). */
+export function replyPrefix(username: string, current = ""): string {
+  const mention = `@${username}`;
+  const already = new RegExp(`(^|\\s)${mention}(?![\\w])`, "i");
+  if (already.test(current)) return current;
+  return current ? `${mention} ${current}` : `${mention} `;
+}
+
+/** A comment as the server keeps it: trimmed, plain newlines, at most one blank line in a row. */
+export function cleanComment(text: string): string {
+  return text
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** The Undo key for deleting a comment. */
+export const commentDeleteKey = (commentId: string) => `comment:${commentId}`;
+
+/** A post's own page (comments in full). */
+export const postPagePath = (postId: string) => `/activity/${encodeURIComponent(postId)}`;
 
 export type FeedReason = "own" | "following" | "suggested" | "trekly" | "demo";
 

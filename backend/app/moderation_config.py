@@ -40,8 +40,9 @@ NEW_ACCOUNT_PERIOD = timedelta(hours=24)
 # Trail Journal entry (the "Log a hike" composer, a trail's dialog).
 POST_LIMITS = ((30, timedelta(hours=1)), (100, timedelta(days=1)))
 NEW_ACCOUNT_POST_LIMITS = ((5, timedelta(hours=1)), (15, timedelta(days=1)))
-COMMENT_LIMITS = ((30, timedelta(hours=1)), (200, timedelta(days=1)))
-NEW_ACCOUNT_COMMENT_LIMITS = ((5, timedelta(hours=1)), (20, timedelta(days=1)))
+# Comments: new ones only (an edit isn't a new comment).
+COMMENT_LIMITS = ((10, timedelta(minutes=1)), (60, timedelta(hours=1)), (300, timedelta(days=1)))
+NEW_ACCOUNT_COMMENT_LIMITS = ((3, timedelta(minutes=1)), (15, timedelta(hours=1)), (40, timedelta(days=1)))
 
 # Photos (hike photos, profile photos) and comments wait for a confirmed email.
 PHOTOS_NEED_CONFIRMED_EMAIL = True

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, EyeOff, Flag, Hand, Sparkles, Trash2 } from "lucide-react";
+import { ExternalLink, EyeOff, Flag, Hand, MessageCircle, MessageCircleOff, Sparkles, Trash2 } from "lucide-react";
 import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
 import HikePhoto from "@/components/HikePhoto";
+import MoreMenu, { type MoreMenuItem } from "@/components/MoreMenu";
 import MilestoneBadge from "@/components/MilestoneBadge";
 import MilestoneBadgeCard from "@/components/MilestoneBadgeCard";
 import RankEmblem from "@/components/RankEmblem";
@@ -15,14 +16,15 @@ import ReviewNotice from "@/components/ReviewNotice";
 import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
-import { ONLY_YOU_LABEL, UNSHARED_LABEL, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
-import { deleteActivityPost, setHighFive } from "@/lib/activityApi";
+import { ONLY_YOU_LABEL, UNSHARED_LABEL, commentCount, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
+import { deleteActivityPost, setCommentsOff, setHighFive } from "@/lib/activityApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
 import { TERRAIN_LABELS } from "@/lib/terrain";
 import { toast } from "@/lib/toast";
 import { removeWithUndo } from "@/lib/undo";
 import { sectionHref } from "@/app/settings/settingsSections";
+import Comments from "./Comments";
 import HighFiveCount from "./HighFiveCount";
 import styles from "./activity.module.css";
 
@@ -31,7 +33,8 @@ import styles from "./activity.module.css";
  * says "Hiked <trail>", with whatever that hike earned folded into the same
  * line and shown as small badges, then their note, photo and the trail. A
  * milestone or rank that no shared hike explains is a post of its own.
- * Your own posts offer Delete (with Undo); others' offer Report.
+ * Under it, the comments (Comments.tsx). Your own posts have a "⋯" menu
+ * (turn comments off/on, Delete with Undo); others' offer Report.
  */
 export default function PostCard({
   post,
@@ -39,8 +42,11 @@ export default function PostCard({
   signInHref,
   viewer,
   onChange,
+  commentsOpen = false,
 }: {
   post: ActivityPost;
+  /** Every comment shown from the start (the post's own page). */
+  commentsOpen?: boolean;
   signedIn: boolean;
   /** The signed-in viewer's username, so their own high five reads "You". */
   viewer: string | null;
@@ -49,6 +55,8 @@ export default function PostCard({
   onChange: (id: string, change: Partial<ActivityPost> | null) => void;
 }) {
   const [reporting, setReporting] = useState(false);
+  const [showAll, setShowAll] = useState(commentsOpen);
+  const [focusKey, setFocusKey] = useState(0);
   const name = displayName(post.author);
   const profileHref = publicProfilePath(post.author.username);
 
@@ -72,6 +80,48 @@ export default function PostCard({
       what: "delete the post",
       onCommitted: () => onChange(post.id, null),
     });
+
+  const toggleComments = async () => {
+    const off = !post.comments_off;
+    onChange(post.id, { comments_off: off, can_comment: !off });
+    try {
+      const result = await setCommentsOff(post.id, off);
+      onChange(post.id, { comments_off: result.comments_off, can_comment: !result.comments_off });
+      toast.success(result.comments_off ? "Comments are off for this post." : "Comments are on again.");
+    } catch (caught) {
+      onChange(post.id, { comments_off: !off, can_comment: off });
+      toast.failure(off ? "turn comments off" : "turn comments on", caught);
+    }
+  };
+
+  const ownMenu: MoreMenuItem[] = post.mine
+    ? [
+        ...(post.only_you
+          ? []
+          : [{
+              label: post.comments_off ? "Turn comments on" : "Turn comments off",
+              icon: post.comments_off ? <MessageCircle size={15} aria-hidden="true" /> : <MessageCircleOff size={15} aria-hidden="true" />,
+              onSelect: () => void toggleComments(),
+            }]),
+        { label: "Delete", icon: <Trash2 size={15} aria-hidden="true" />, onSelect: remove, danger: true },
+      ]
+    : [];
+
+  const comments = post.comment_count ?? 0;
+  const commentsButton = !post.only_you && (comments > 0 || (signedIn && post.can_comment)) && (
+    <button
+      type="button"
+      className={styles.fiveCount}
+      onClick={() => {
+        setShowAll(true);
+        setFocusKey((key) => key + 1);
+      }}
+      aria-label={comments ? `${commentCount(comments)}. Show them` : "Comment"}
+    >
+      <MessageCircle size={15} aria-hidden="true" />
+      {comments ? commentCount(comments) : "Comment"}
+    </button>
+  );
 
   const when = post.posted_at && (
     <time dateTime={post.posted_at} title={new Date(post.posted_at).toLocaleString("en-CA")}>
@@ -151,17 +201,15 @@ export default function PostCard({
         </Link>
       ) : null}
       {!post.only_you && <HighFiveCount post={post} signedIn={signedIn} viewer={viewer} />}
+      {commentsButton}
       <span className={styles.spacer} />
       {post.mine ? (
-        <button type="button" className={styles.iconAction} onClick={remove}>
-          <Trash2 size={15} aria-hidden="true" />
-          Delete
-        </button>
+        <MoreMenu label="Post options" items={ownMenu} />
       ) : (
         signedIn && post.author.label !== "official" && (
           <button type="button" className={styles.iconAction} onClick={() => setReporting(true)}>
             <Flag size={15} aria-hidden="true" />
-            Report
+            <span className={styles.reportLabel}>Report</span>
           </button>
         )
       )}
@@ -169,6 +217,26 @@ export default function PostCard({
         <ReportDialog username={post.author.username} name={name} postId={post.id} onClose={() => setReporting(false)} />
       )}
     </div>
+  );
+
+  const footer = (
+    <>
+      {actions}
+      {!post.only_you && (
+        <Comments
+          post={post}
+          signedIn={signedIn}
+          signInHref={signInHref}
+          open={showAll}
+          onOpen={() => {
+            setShowAll(true);
+            setFocusKey((key) => key + 1);
+          }}
+          onPost={(change) => onChange(post.id, change)}
+          focusKey={focusKey}
+        />
+      )}
+    </>
   );
 
   const onlyYou = post.review ? (
@@ -232,7 +300,7 @@ export default function PostCard({
             <span className={ui.srOnly}> (opens in a new tab)</span>
           </a>
         )}
-        {actions}
+        {footer}
       </li>
     );
   }
@@ -264,7 +332,7 @@ export default function PostCard({
             </span>
           </Link>
         )}
-        {actions}
+        {footer}
       </li>
     );
   }
@@ -316,7 +384,7 @@ export default function PostCard({
           </span>
         </span>
       </Link>
-      {actions}
+      {footer}
     </li>
   );
 }

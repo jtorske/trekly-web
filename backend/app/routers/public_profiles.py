@@ -39,6 +39,8 @@ from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import MAX_REPORT_DETAILS, ProfileReport
 from app import moderation_config
+from app.comments import is_blocked, readable_post
+from app.models.comment import ActivityComment
 from app.moderation import Services, get_moderation_services, record_report, report_target
 from app.models.setup import GearSetup
 from app.models.trip_plan import TripPlan
@@ -367,6 +369,8 @@ class ReportIn(BaseModel):
     trail_id: UUID | None = None
     # Set when reporting one of their posts on the Activity page.
     post_id: UUID | None = None
+    # Set when reporting one of their comments.
+    comment_id: UUID | None = None
 
     @field_validator("details", mode="before")
     @classmethod
@@ -420,6 +424,16 @@ def report_profile(
         )
         if post is None or not is_visible(db, post.id, today):
             raise HTTPException(status_code=404, detail="Post not found")
+    comment = None
+    if payload.comment_id is not None:
+        if trip_note is not None or post is not None:
+            raise HTTPException(status_code=422, detail="Report one thing at a time.")
+        comment = db.get(ActivityComment, payload.comment_id)
+        # Only a comment the reporter can see right now.
+        if (comment is None or comment.user_id != profile.id or comment.body is None
+                or is_blocked(db, user.id, profile.id)
+                or readable_post(db, comment.post_id, user.id, today) is None):
+            raise HTTPException(status_code=404, detail="Comment not found")
     since = _now() - timedelta(days=1)
     recent = db.scalars(
         select(ProfileReport.profile_id).where(
@@ -434,10 +448,10 @@ def report_profile(
     report = ProfileReport(reporter_id=user.id, profile_id=profile.id, reason=payload.reason,
                            details=payload.details, created_at=_now(),
                            trail_id=trip_note.trail_id if trip_note else None,
-                           post_id=post.id if post else None)
+                           post_id=post.id if post else None, comment_id=comment.id if comment else None)
     db.add(report)
     db.flush()
-    kind, target_id, content, photo = report_target(post, trip_note, profile)
+    kind, target_id, content, photo = report_target(post, trip_note, profile, comment)
     record_report(db, services, report, kind=kind, target_id=target_id, author_id=profile.id,
                   text=content, photo_path=photo)
     db.commit()

@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { ActivityPage, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
+import type { ActivityComment, ActivityPage, ActivityPost, CommentList, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
 
 /** One page of the blended feed. Signed in, the token is sent (who you follow, your trails, "high-fived"). */
 export const getActivity = (cursor: string | null, signedIn: boolean, signal?: AbortSignal) => {
@@ -55,4 +55,36 @@ export const getProfileActivity = (
   apiFetch<ProfileActivityPage>(`/api/profiles/${encodeURIComponent(username)}/activity${pageQuery(cursor, limit)}`, {
     auth: signedIn,
     signal,
+  });
+
+// ------------------------------------------------------------ comments
+
+export const getPost = (postId: string, signedIn: boolean, signal?: AbortSignal) =>
+  apiFetch<ActivityPost>(`/api/activity/${encodeURIComponent(postId)}`, { auth: signedIn, signal });
+
+export const getComments = (postId: string, signedIn: boolean, signal?: AbortSignal) =>
+  apiFetch<CommentList>(`/api/activity/${encodeURIComponent(postId)}/comments`, { auth: signedIn, signal });
+
+export const addComment = (postId: string, body: string, parentId?: string | null) =>
+  apiFetch<ActivityComment>(`/api/activity/${encodeURIComponent(postId)}/comments`, {
+    method: "POST",
+    body: parentId ? { body, parent_id: parentId } : { body },
+    auth: true,
+  });
+
+export const editComment = (commentId: string, body: string) =>
+  apiFetch<ActivityComment>(`/api/comments/${encodeURIComponent(commentId)}`, {
+    method: "PATCH",
+    body: { body },
+    auth: true,
+  });
+
+export const deleteComment = (commentId: string) =>
+  apiFetch<void>(`/api/comments/${encodeURIComponent(commentId)}`, { method: "DELETE", auth: true });
+
+export const setCommentsOff = (postId: string, off: boolean) =>
+  apiFetch<{ comments_off: boolean }>(`/api/activity/${encodeURIComponent(postId)}/comments-off`, {
+    method: "PUT",
+    body: { off },
+    auth: true,
   });

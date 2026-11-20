@@ -33,3 +33,13 @@ test("badge", () => {
   assert.equal(badgeText(3), "3");
   assert.equal(badgeText(12), "9+");
 });
+
+test("comment notifications say what happened and open the post's own page", () => {
+  const post = { id: "p9", kind: "hike" as const, title: "Lake Agnes", trail_id: "t1" };
+  assert.equal(actionText({ kind: "comment", post }), "commented on your hike on Lake Agnes");
+  assert.equal(actionText({ kind: "comment_reply", post }), "replied to your comment");
+  assert.equal(actionText({ kind: "mention", post }), "mentioned you in a comment");
+  for (const kind of ["comment", "comment_reply", "mention"] as const) {
+    assert.equal(notificationHref({ kind, post, actors: [], actor_count: 1 }), "/activity/p9");
+  }
+});

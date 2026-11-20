@@ -30,6 +30,7 @@ from app.activity import MILESTONES
 from app.admin_access import audit, is_admin, require_admin
 from app.auth import CurrentUser
 from app.database import get_db
+from app.models.comment import ActivityComment
 from app.models.activity import ActivityPost
 from app.models.admin import AUTH_USERS
 from app.models.hike_log import HikeLog
@@ -137,6 +138,15 @@ def _context(db: Session, item: ModerationItem) -> tuple[str | None, TrailRef | 
         if hike is None:
             return "The hike has since been deleted", None
         return f"On {hike.trail.name}", TrailRef(id=hike.trail.id, slug=hike.trail.slug, name=hike.trail.name)
+    if item.kind == "comment":
+        comment = db.get(ActivityComment, item.target_id)
+        if comment is None:
+            return "The comment has since been deleted", None
+        post = db.get(ActivityPost, comment.post_id)
+        if post is not None and post.kind == "hike" and post.hike_log is not None:
+            trail = post.hike_log.trail
+            return f"Comment on a hike of {trail.name}", TrailRef(id=trail.id, slug=trail.slug, name=trail.name)
+        return "Comment on an Activity post", None
     if item.kind == "post":
         post = db.get(ActivityPost, item.target_id)
         if post is None:
