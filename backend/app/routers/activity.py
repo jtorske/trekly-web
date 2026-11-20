@@ -1,10 +1,12 @@
 """The Activity page: a feed of what hikers have recently done.
 
-GET /api/activity is open to guests. Signed in, each post also says whether
-you high-fived it, whether it's yours and whether you follow its author;
-"Following" shows posts from people you follow (by the same rules as
-everyone's), and "From my province" works once you've set a home province. Posts come and go by the rules in
-app/activity.py; nothing is cached, so a privacy change applies to the
+GET /api/activity is open to guests: one blended feed (no tabs), arranged by
+app/feed.py: posts from people you follow first, then suggestions ranked for
+you, @trekly posts mixed in, demo accounts last and "Trekly picks" so it's
+never empty. Signed in, each post also says whether you high-fived it,
+whether it's yours and whether you follow its author, and why it's in your
+feed (`reason`). Posts come and go by the rules in app/activity.py (and
+blocks, app/feed.py); nothing is cached, so a privacy change applies to the
 next request. Your own posts that others can't see come back to you alone,
 flagged only_you. The milestones and rank a hike earned ride inside that
 hike's post (`earned`).
@@ -33,9 +35,10 @@ from app.account_labels import AccountLabelName, labels_for, may_interact, real_
 from app.picks import SPARSE_BELOW, PickKind, picks, real_posts_this_week
 from app.trail_photos import public_photo_url
 from app.activity import (
-    MILESTONES, UNPOSTED_CATEGORIES, activity_open, backfill_posts, can_share, past_hikes_waiting, share_past_hikes, folded_where, following_where, is_visible,
-    province_where, readable_query,
+    MILESTONES, UNPOSTED_CATEGORIES, activity_open, backfill_posts, can_share, past_hikes_waiting, share_past_hikes,
+    folded_where, is_visible, readable_query,
 )
+from app import feed as blend
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
 from app.follows import FollowState
@@ -117,6 +120,9 @@ class ActivityAnnouncement(BaseModel):
     source_date: date | None = None
 
 
+FeedReason = Literal["own", "following", "suggested", "trekly", "demo"]
+
+
 class ActivityPostOut(BaseModel):
     id: UUID
     kind: Literal["hike", "milestone", "rank", "announcement"]
@@ -140,6 +146,9 @@ class ActivityPostOut(BaseModel):
     # Your own post only: held for review ("pending") or removed by a
     # moderator ("hidden"), wholly or its note or photo. Nobody else sees it.
     review: Literal["pending", "hidden"] | None = None
+    # The Activity feed only: why it's in your feed. "suggested" posts get a
+    # "Suggested for you" line and a Follow button.
+    reason: FeedReason | None = None
 
 
 class ProfileActivityPage(BaseModel):
@@ -163,14 +172,55 @@ class PastHikesOut(BaseModel):
     shared: int
 
 
+class FeedHiker(BaseModel):
+    """A hiker the "Follow hikers to see their hikes here" card suggests
+    (the same fields as people search, app/routers/hiker_search.py)."""
+
+    username: str
+    display_name: str | None
+    avatar_path: str | None
+    is_private: bool
+    follow: FollowState
+    rank: ActivityRank | None = None
+    home_province: str | None = None
+    common_trails: int | None = None
+    same_province: bool = False
+
+
+class PickOut(BaseModel):
+    kind: PickKind
+    title: str
+    text: str
+    trail: TrailListItemOut
+
+
+class FeedEntryOut(BaseModel):
+    """One slot in the feed, in order: a post (in `items`), the "You're all
+    caught up" divider, or a "Trekly pick"."""
+
+    type: Literal["post", "caught_up", "pick"]
+    post_id: UUID | None = None
+    pick: PickOut | None = None
+
+
 class ActivityPage(BaseModel):
+    # This page's posts, in feed order.
     items: list[ActivityPostOut]
+    # The page in order, posts by id, with the divider and picks between them.
+    entries: list[FeedEntryOut]
     # Pass back as `cursor` for the next page; None at the end.
     next_cursor: str | None
-    # Signed in with a home province: "From my province" can be offered.
-    province: str | None = None
-    # Signed in and following someone: "Following" is the default tab.
+    # When the feed was arranged; GET /api/activity/new counts posts since.
+    as_of: datetime
+    # Signed in and following someone.
     follows_anyone: bool = False
+    # The first page, signed in and following nobody: up to three hikers to follow.
+    suggested_hikers: list[FeedHiker] | None = None
+
+
+class NewPostsOut(BaseModel):
+    # Posts from people you follow since `since`, that the feed would show.
+    count: int
 
 
 class HighFiveOut(BaseModel):
@@ -357,13 +407,6 @@ def trending_trails(db: Session, limit: int) -> list[TrendingTrailOut]:
     return out
 
 
-class PickOut(BaseModel):
-    kind: PickKind
-    title: str
-    text: str
-    trail: TrailListItemOut
-
-
 class PicksOut(BaseModel):
     # True while real hikers shared fewer than ~10 posts this week: show the picks.
     sparse: bool
@@ -404,7 +447,11 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
     ).unique().all()
     more = len(rows) > limit
     rows = rows[:limit]
+    return _hydrate(db, rows, viewer, today), (_cursor(rows[-1][0]) if more else None)
 
+
+def _hydrate(db: Session, rows: list, viewer: CurrentUser | None, today: date) -> list[ActivityPostOut]:
+    """Cards for rows of readable_query, in their order (dropping any that can't show)."""
     post_ids = [row[0].id for row in rows]
     counts = _counts(db, post_ids)
     mine_ids = set(db.scalars(
@@ -427,7 +474,7 @@ def _page(db: Session, query, cursor: str | None, limit: int, viewer: CurrentUse
         for item, row in kept:
             if not item.mine:
                 item.author.follow = states.get(row[0].user_id, "none")
-    return [item for item, _ in kept], (_cursor(rows[-1][0]) if more else None)
+    return [item for item, _ in kept]
 
 
 def _overlay_reviews(db: Session, kept: list) -> None:
@@ -461,32 +508,134 @@ def _count(db: Session, query) -> int:
     return db.scalar(select(func.count()).select_from(query.with_only_columns(ActivityPost.id).subquery())) or 0
 
 
+def _feed_picks(db: Session, today: date) -> tuple[list[PickOut], bool]:
+    """The picks the feed closes with, and whether it's quiet (mix them in early)."""
+    sparse = real_posts_this_week(db, today) < SPARSE_BELOW
+    chosen = picks(db, today, trending_trails(db, 1), live_trails())
+    return [
+        PickOut(kind=p.kind, title=p.title, text=p.text, trail=TrailListItemOut.model_validate(p.trail))
+        for p in chosen
+    ], sparse
+
+
+SUGGESTED_HIKERS = 3
+
+
+def _suggested_hikers(db: Session, viewer: CurrentUser, entries: list[blend.Entry],
+                      finder) -> list[FeedHiker]:
+    """For someone who follows nobody: "Hikers you might know" first, then the
+    authors of the feed's top suggested posts (public, real hikers), leaving
+    out anyone they follow or asked to."""
+    from app.hiker_search import cards
+    from app.routers.hiker_search import _out
+
+    picked: list[tuple[UUID, bool, int | None, bool]] = []
+    try:
+        with db.begin_nested():
+            for hit in finder.suggest(db, viewer.id, SUGGESTED_HIKERS):
+                picked.append((hit.user_id, True, hit.common_trails, hit.same_province))
+    except Exception:  # noqa: BLE001 - the suggestions are optional (and Postgres-only)
+        picked = []
+    taken = {entry[0] for entry in picked}
+    states = follows.states(db, viewer.id, [e.post.user_id for e in entries if e.post is not None])
+    for entry in entries:
+        if len(picked) >= SUGGESTED_HIKERS:
+            break
+        post = entry.post
+        if post is None or post.reason != "suggested" or post.user_id in taken or post.user_id in states:
+            continue
+        taken.add(post.user_id)
+        picked.append((post.user_id, True, None, False))
+    found = cards(db, viewer.id, picked[:SUGGESTED_HIKERS])
+    return [FeedHiker(**hiker.model_dump()) for hiker in _out(db, viewer.id, found)]
+
+
+def get_feed_finder():
+    """The finder for "Hikers you might know" (overridden in tests)."""
+    from app.routers.hiker_search import get_hiker_finder
+
+    return get_hiker_finder()
+
+
 @router.get("", response_model=ActivityPage)
 def feed(
     response: Response,
-    scope: Literal["everyone", "following", "province"] = "everyone",
     cursor: str | None = Query(default=None, max_length=120),
     limit: int = Query(default=PAGE_SIZE, ge=1, le=50),
     viewer: CurrentUser | None = Depends(optional_user),
     db: Session = Depends(get_db),
     today: date = Depends(get_today),
+    finder=Depends(get_feed_finder),
 ):
+    """One page of the blended feed (app/feed.py). The first page fixes the
+    moment it was arranged (`as_of`); later pages, by cursor, arrange the same
+    posts the same way, so nothing repeats."""
     response.headers.update(NO_STORE)
-    viewer_profile = db.get(Profile, viewer.id) if viewer else None
-    province = viewer_profile.home_province if viewer_profile else None
     viewer_id = viewer.id if viewer else None
+    if cursor:
+        try:
+            as_of, offset = blend.parse_cursor(cursor)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail="That page link isn't valid.") from error
+    else:
+        as_of, offset = datetime.now(timezone.utc), 0
+    reader = blend.reader_for(db, viewer_id)
+    pool = blend.candidates(db, today, reader, as_of)
+    pick_cards, sparse = _feed_picks(db, today)
+    entries = blend.arrange(pool, reader, as_of, picks=len(pick_cards), sparse=sparse)
+    window = entries[offset:offset + limit]
 
-    query = _cards(today, viewer_id)
-    if scope == "province":
-        query = query.where(province_where(province))
-    elif scope == "following":
-        # Guests follow nobody.
-        query = query.where(following_where(viewer_id) if viewer_id else false())
-    items, next_cursor = _page(db, query, cursor, limit, viewer, today)
+    ids = [entry.post.id for entry in window if entry.post is not None]
+    rows = db.execute(
+        readable_query(today, viewer_id).where(ActivityPost.id.in_(ids))
+        .options(joinedload(HikeLog.trail), joinedload(ActivityPost.trail))
+    ).unique().all() if ids else []
+    by_id = {row[0].id: row for row in rows}
+    items = _hydrate(db, [by_id[i] for i in ids if i in by_id], viewer, today)
+    reasons = {entry.post.id: entry.post.reason for entry in window if entry.post is not None}
+    for item in items:
+        item.reason = reasons.get(item.id)
+    shown = {item.id for item in items}
+    out = []
+    for entry in window:
+        if entry.type == "post":
+            if entry.post.id in shown:
+                out.append(FeedEntryOut(type="post", post_id=entry.post.id))
+        elif entry.type == "pick":
+            out.append(FeedEntryOut(type="pick", pick=pick_cards[entry.pick]))
+        else:
+            out.append(FeedEntryOut(type="caught_up"))
+
+    end = offset + limit
+    hikers = None
+    if viewer is not None and offset == 0 and not reader.following:
+        hikers = _suggested_hikers(db, viewer, entries, finder)
     return ActivityPage(
-        items=items, next_cursor=next_cursor, province=province,
-        follows_anyone=follows.follows_anyone(db, viewer_id) if viewer_id else False,
+        items=items,
+        entries=out,
+        next_cursor=blend.make_cursor(as_of, end) if end < len(entries) else None,
+        as_of=as_of,
+        follows_anyone=bool(reader.following),
+        suggested_hikers=hikers,
     )
+
+
+@router.get("/new", response_model=NewPostsOut)
+def new_posts(
+    response: Response,
+    since: datetime = Query(...),
+    viewer: CurrentUser | None = Depends(optional_user),
+    db: Session = Depends(get_db),
+    today: date = Depends(get_today),
+):
+    """How many posts from people you follow arrived after `since` (the
+    page's `as_of`), for the "New posts" pill. Guests: always 0."""
+    response.headers.update(NO_STORE)
+    if viewer is None:
+        return NewPostsOut(count=0)
+    reader = blend.reader_for(db, viewer.id)
+    since = since if since.tzinfo else since.replace(tzinfo=timezone.utc)
+    return NewPostsOut(count=blend.new_since(db, today, reader, since))
 
 
 def _visible_or_404(db: Session, post_id: UUID, today: date) -> None:

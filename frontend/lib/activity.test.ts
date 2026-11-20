@@ -4,8 +4,10 @@ import {
   activityBlocker,
   appendPage,
   canShareHikes,
-  defaultScope,
   earnedPhrases,
+  feedRows,
+  FOLLOW_PROMPT_AT,
+  mergeFeedPage,
   highFiversLine,
   joinWords,
   latestEarned,
@@ -14,6 +16,8 @@ import {
   shortAgo,
   type ActivityEarned,
   type ActivityPost,
+  type FeedEntry,
+  type FeedPick,
 } from "./activity.ts";
 import type { Milestone } from "./milestones.ts";
 import type { TrailListItem } from "./trailsApi.ts";
@@ -103,9 +107,50 @@ test("the most recently earned milestone", () => {
   assert.equal(latestEarned([m("a", "2026-10-01"), m("b", "2026-11-02"), m("c", "2026-11-02")])?.id, "b");
 });
 
-test("Following is the default tab once you follow anyone", () => {
-  assert.equal(defaultScope(false, 3), "everyone");
-  assert.equal(defaultScope(true, 0), "everyone");
-  assert.equal(defaultScope(true, null), "everyone");
-  assert.equal(defaultScope(true, 1), "following");
+const feedPost = (id: string) => ({ id }) as ActivityPost;
+const postEntry = (id: string): FeedEntry => ({ type: "post", post_id: id });
+const pickEntry = (trail: string): FeedEntry => ({
+  type: "pick",
+  pick: { kind: "trending", title: "", text: "", trail: { id: trail } as FeedPick["trail"] },
+});
+const rowShape = (rows: ReturnType<typeof feedRows>) =>
+  rows.map((row) => (row.type === "post" ? row.post.id : row.type === "pick" ? `pick:${row.pick.trail.id}` : row.type)).join(" ");
+
+test("pages join without repeating a post, pick or the divider", () => {
+  const first = mergeFeedPage(null, {
+    items: [feedPost("a"), feedPost("b")],
+    entries: [postEntry("a"), postEntry("b"), { type: "caught_up" }],
+  });
+  const both = mergeFeedPage(first, {
+    items: [feedPost("b"), feedPost("c")],
+    entries: [postEntry("b"), { type: "caught_up" }, postEntry("c"), pickEntry("t1")],
+  });
+  assert.equal(rowShape(feedRows(both)), "a b caught_up c pick:t1");
+  // A pick that came already isn't added again.
+  const again = mergeFeedPage(both, { items: [], entries: [pickEntry("t1")] });
+  assert.equal(again.entries.length, both.entries.length);
+});
+
+test("an entry whose post didn't come back is skipped", () => {
+  const feed = mergeFeedPage(null, { items: [feedPost("a")], entries: [postEntry("a"), postEntry("gone")] });
+  assert.equal(rowShape(feedRows(feed)), "a");
+});
+
+test("hidden posts drop out, and a divider needs a post before it", () => {
+  const feed = mergeFeedPage(null, {
+    items: [feedPost("a"), feedPost("b")],
+    entries: [postEntry("a"), { type: "caught_up" }, postEntry("b")],
+  });
+  assert.equal(rowShape(feedRows(feed, { hidden: (id) => id === "a" })), "b");
+  assert.equal(rowShape(feedRows(feed, { hidden: (id) => id === "b" })), "a caught_up");
+});
+
+test("the follow card goes near the top, or last in a short feed", () => {
+  const feed = mergeFeedPage(null, {
+    items: ["a", "b", "c"].map(feedPost),
+    entries: ["a", "b", "c"].map(postEntry),
+  });
+  const rows = feedRows(feed, { followPrompt: true });
+  assert.equal(rows[FOLLOW_PROMPT_AT].type, "follow_prompt");
+  assert.equal(rowShape(feedRows(mergeFeedPage(null, { items: [], entries: [] }), { followPrompt: true })), "follow_prompt");
 });

@@ -106,19 +106,16 @@ export function ProfileCard({
           <dt>Milestones</dt>
           <dd>{milestones ? earnedCount(milestones) : "–"}</dd>
         </div>
-        <div>
-          <dt>Streak</dt>
-          <dd className={styles.streak}>
-            {showsStreak(streak) ? (
-              <>
-                <StreakFlame size={15} />
-                <span aria-label={streakLabel(streak.current)}>{streak.current}d</span>
-              </>
-            ) : (
-              "–"
-            )}
-          </dd>
-        </div>
+        {/* Only with a streak going (2 days or more): no dash for none. */}
+        {showsStreak(streak) && (
+          <div>
+            <dt>Streak</dt>
+            <dd className={styles.streak}>
+              <StreakFlame size={15} />
+              <span aria-label={streakLabel(streak.current)}>{streak.current}d</span>
+            </dd>
+          </div>
+        )}
       </dl>
 
       <button type="button" className={`${ui.primary} ${styles.logButton}`} onClick={onLogHike}>

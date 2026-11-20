@@ -45,7 +45,7 @@ from dataclasses import dataclass, replace
 from datetime import date, datetime, time, timedelta, timezone
 from uuid import UUID
 
-from sqlalchemy import and_, case, exists, false, or_, select
+from sqlalchemy import and_, case, exists, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased, joinedload
 
@@ -57,7 +57,6 @@ from app.models.account import Profile
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
-from app.models.social import Follow
 from app.points import rank_for, score
 from app.privacy import Visibility, visibility
 
@@ -367,20 +366,6 @@ def readable_query(today: date, viewer_id: UUID | None):
 
 def is_visible(db: Session, post_id: UUID, today: date) -> bool:
     return db.scalar(select(exists(visible_query(today).where(ActivityPost.id == post_id)))) or False
-
-
-def following_where(viewer_id: UUID):
-    """Posts by people the viewer follows (approved follows only)."""
-    return ActivityPost.user_id.in_(
-        select(Follow.followee_id).where(Follow.follower_id == viewer_id, Follow.status == "accepted")
-    )
-
-
-def province_where(province: str | None):
-    """Authors from this province who show it on their profile; nothing without one."""
-    if not province:
-        return false()
-    return and_(Profile.home_province == province, ProfileSettings.show_home_province)
 
 
 def activity_open(seen: Visibility) -> bool:

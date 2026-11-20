@@ -1,12 +1,15 @@
 import { apiFetch } from "./api";
-import type { ActivityPage, ActivityScope, FeedPicks, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
+import type { ActivityPage, HighFivers, ProfileActivityPage, TrendingTrail } from "./activity";
 
-/** Signed in, the token is sent (for "high-fived", "yours" and the province); guests get the same posts. */
-export const getActivity = (scope: ActivityScope, cursor: string | null, signedIn: boolean, signal?: AbortSignal) => {
-  const query = new URLSearchParams({ scope });
-  if (cursor) query.set("cursor", cursor);
-  return apiFetch<ActivityPage>(`/api/activity?${query}`, { auth: signedIn, signal });
+/** One page of the blended feed. Signed in, the token is sent (who you follow, your trails, "high-fived"). */
+export const getActivity = (cursor: string | null, signedIn: boolean, signal?: AbortSignal) => {
+  const query = cursor ? `?${new URLSearchParams({ cursor })}` : "";
+  return apiFetch<ActivityPage>(`/api/activity${query}`, { auth: signedIn, signal });
 };
+
+/** How many posts from people you follow arrived since the feed's `as_of`. */
+export const getNewPosts = (since: string, signal?: AbortSignal) =>
+  apiFetch<{ count: number }>(`/api/activity/new?${new URLSearchParams({ since })}`, { auth: true, signal });
 
 export const setHighFive = (postId: string, on: boolean) =>
   apiFetch<{ high_fives: number; high_fived: boolean }>(`/api/activity/${encodeURIComponent(postId)}/high-five`, {
@@ -26,9 +29,6 @@ export const getHighFivers = (postId: string, signedIn: boolean, signal?: AbortS
   apiFetch<HighFivers>(`/api/activity/${encodeURIComponent(postId)}/high-fives`, { auth: signedIn, signal });
 
 /** Most logged or saved this week, topped up with popular trails. */
-/** "Trekly picks" while the feed is quiet; `sparse` false once it isn't. */
-export const getPicks = (signal?: AbortSignal) => apiFetch<FeedPicks>("/api/activity/picks", { signal });
-
 export const getTrending = (signal?: AbortSignal) =>
   apiFetch<{ trails: TrendingTrail[] }>("/api/activity/trending", { signal });
 

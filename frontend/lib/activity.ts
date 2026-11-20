@@ -4,12 +4,15 @@ import type { FollowState } from "./follows";
 import type { Milestone, MilestoneBadgeInfo } from "./milestones";
 import type { PrivacySettings } from "./profilesApi";
 import type { TrailListItem } from "./trailsApi";
+import type { HikerResult } from "./hikerSearch";
 import { trailHref } from "./site.ts";
 
 /**
  * The Activity feed: posts made from real activity (a shared hike, a
  * milestone, a new rank), never free-form, plus announcements from the
- * official @trekly account (written by admins). The API decides who appears:
+ * official @trekly account (written by admins). One blended feed, arranged
+ * by the API (backend app/feed.py): people you follow first, then
+ * suggestions, with Trekly picks so it's never empty. The API decides who appears:
  * only people with a public profile who turned on "Share my activity in the
  * feed", following their section switches and hidden dates. Trip plans,
  * alerts and future dates are never posted.
@@ -71,7 +74,11 @@ export interface ActivityPost {
   unshared?: boolean;
   /** Your own post only: held for review, or removed by a moderator (lib/moderation.ts). */
   review?: ReviewState | null;
+  /** The Activity feed only: why it's in your feed ("suggested": "Suggested for you" and a Follow button). */
+  reason?: FeedReason | null;
 }
+
+export type FeedReason = "own" | "following" | "suggested" | "trekly" | "demo";
 
 export interface HighFivers {
   high_fives: number;
@@ -81,36 +88,12 @@ export interface HighFivers {
   others: number;
 }
 
-/** A "Trekly pick" shown between posts while the feed is quiet. */
+/** A "Trekly pick": mixed in while the feed is quiet, and closing it. */
 export interface FeedPick {
   kind: "trending" | "new_photos" | "seasonal";
   title: string;
   text: string;
   trail: TrailListItem;
-}
-
-export interface FeedPicks {
-  /** Fewer than ~10 real posts this week: mix the picks in. */
-  sparse: boolean;
-  picks: FeedPick[];
-}
-
-/** Every how many posts a pick goes in. */
-export const PICK_EVERY = 4;
-
-/**
- * Posts with picks between them: one after every PICK_EVERY posts, and one
- * at the end of a shorter list, until the picks run out. Only while sparse.
- */
-export function withPicks<P>(posts: P[], picks: FeedPicks | null): ({ post: P } | { pick: FeedPick })[] {
-  const out: ({ post: P } | { pick: FeedPick })[] = [];
-  const queue = picks?.sparse ? [...picks.picks] : [];
-  posts.forEach((post, index) => {
-    out.push({ post });
-    if ((index + 1) % PICK_EVERY === 0 && queue.length) out.push({ pick: queue.shift()! });
-  });
-  if (queue.length && posts.length % PICK_EVERY !== 0) out.push({ pick: queue.shift()! });
-  return out;
 }
 
 export interface TrendingTrail {
@@ -123,13 +106,89 @@ export const ONLY_YOU_LABEL = "Only you can see this. Turn on sharing to post it
 /** On a hike you never shared: sharing your activity doesn't show it. */
 export const UNSHARED_LABEL = "Only you can see this hike. You haven't shared it.";
 
+/** One slot in the feed, in order: a post (by id), the "caught up" divider, or a Trekly pick. */
+export type FeedEntry =
+  | { type: "post"; post_id: string; pick?: null }
+  | { type: "caught_up"; post_id?: null; pick?: null }
+  | { type: "pick"; post_id?: null; pick: FeedPick };
+
 export interface ActivityPage {
+  /** This page's posts, in feed order. */
   items: ActivityPost[];
+  /** The page in order: posts by id, with the divider and picks between them. */
+  entries: FeedEntry[];
   next_cursor: string | null;
-  /** The viewer's home province, when signed in with one. */
-  province: string | null;
+  /** When the feed was arranged; the "New posts" pill counts from here. */
+  as_of: string;
   /** Signed in and following someone. */
   follows_anyone: boolean;
+  /** The first page, signed in and following nobody: hikers to follow. */
+  suggested_hikers: HikerResult[] | null;
+}
+
+/** The feed so far: its entries in order, and the posts they point at. */
+export interface FeedState {
+  entries: FeedEntry[];
+  posts: Record<string, ActivityPost>;
+}
+
+const entryKey = (entry: FeedEntry) =>
+  entry.type === "post" ? `post:${entry.post_id}` : entry.type === "pick" ? `pick:${entry.pick.kind}:${entry.pick.trail.id}` : "caught_up";
+
+/**
+ * Adds a page to the feed (or starts it, with `current` null), never showing
+ * a post, pick or the divider twice in one visit.
+ */
+export function mergeFeedPage(current: FeedState | null, page: Pick<ActivityPage, "items" | "entries">): FeedState {
+  const posts = { ...(current?.posts ?? {}) };
+  const seen = new Set((current?.entries ?? []).map(entryKey));
+  const entries = [...(current?.entries ?? [])];
+  const fresh = new Map(page.items.map((post) => [post.id, post]));
+  for (const entry of page.entries) {
+    const key = entryKey(entry);
+    if (seen.has(key)) continue;
+    if (entry.type === "post") {
+      const post = fresh.get(entry.post_id);
+      if (!post) continue;
+      posts[post.id] = post;
+    }
+    seen.add(key);
+    entries.push(entry);
+  }
+  return { entries, posts };
+}
+
+export type FeedRow =
+  | { type: "post"; key: string; post: ActivityPost }
+  | { type: "caught_up"; key: string }
+  | { type: "pick"; key: string; pick: FeedPick }
+  | { type: "follow_prompt"; key: string };
+
+/** Where the "Follow hikers" card goes: after this many rows. */
+export const FOLLOW_PROMPT_AT = 2;
+
+/**
+ * The rows to draw: the feed's entries, less posts that are hidden (a pending
+ * delete), with the "Follow hikers" card near the top when asked for. A
+ * divider with nothing after it yet stays; one with nothing before it goes.
+ */
+export function feedRows(
+  feed: FeedState,
+  { hidden = () => false, followPrompt = false }: { hidden?: (postId: string) => boolean; followPrompt?: boolean } = {},
+): FeedRow[] {
+  const rows: FeedRow[] = [];
+  for (const entry of feed.entries) {
+    if (entry.type === "post") {
+      const post = feed.posts[entry.post_id];
+      if (post && !hidden(post.id)) rows.push({ type: "post", key: post.id, post });
+    } else if (entry.type === "pick") {
+      rows.push({ type: "pick", key: entryKey(entry), pick: entry.pick });
+    } else if (rows.some((row) => row.type === "post")) {
+      rows.push({ type: "caught_up", key: "caught_up" });
+    }
+  }
+  if (followPrompt) rows.splice(Math.min(FOLLOW_PROMPT_AT, rows.length), 0, { type: "follow_prompt", key: "follow_prompt" });
+  return rows;
 }
 
 /** A profile's Activity tab, newest first. */
@@ -142,13 +201,6 @@ export interface ProfileActivityPage {
   sharing: boolean | null;
   /** The owner's first page only: hikes the one-time "Share your past hikes?" prompt offers (0: don't ask). */
   past_hikes?: number | null;
-}
-
-export type ActivityScope = "following" | "everyone" | "province";
-
-/** Following is the default once you follow anyone; Everyone otherwise (and for guests). */
-export function defaultScope(signedIn: boolean, followingCount: number | null | undefined): ActivityScope {
-  return signedIn && (followingCount ?? 0) > 0 ? "following" : "everyone";
 }
 
 /** Why posts can't show in the feed, or null when sharing works. */

@@ -137,7 +137,9 @@ def test_sharing_is_off_by_default(client, make_token):
 
 
 def test_the_feed_starts_empty_for_guests(client):
-    assert feed(client) == {"items": [], "next_cursor": None, "province": None, "follows_anyone": False}
+    body = feed(client)
+    assert body["items"] == [] and body["entries"] == [] and body["next_cursor"] is None
+    assert body["follows_anyone"] is False and body["suggested_hikers"] is None
 
 
 def test_a_shared_hike_posts_with_its_milestones(client, trails, person):
@@ -498,20 +500,22 @@ def test_only_visible_posts_of_that_profile_can_be_reported(client, trails, pers
 # ------------------------------------------------------ province and paging
 
 
-def test_from_my_province_needs_the_author_to_show_theirs(client, trails, person):
+def test_province_ranks_but_never_filters(client, trails, person):
+    """There's no province filter any more: everyone's posts show, and the
+    viewer's province only lifts those it matches (when the author shows it)."""
     viewer = person("viewer", province="AB")
     shows = person("shows", province="AB", show_home_province=True)
     quiet = person("quiet", province="AB")  # same province, but it's hidden
     other = person("other", province="BC", show_home_province=True)
-    for who, trail_id in ((shows, trails[0]), (quiet, trails[1]), (other, trails[2])):
+    for who, trail_id in ((other, trails[2]), (quiet, trails[1]), (shows, trails[0])):
         log(client, who, trail_id)
 
-    body = feed(client, viewer["headers"], scope="province")
-    assert body["province"] == "AB"
-    assert {u for u, _ in kinds(body)} == {"shows"}
-    assert {u for u, _ in kinds(feed(client, viewer["headers"]))} == {"shows", "quiet", "other"}
-    # Guests and people without a province get nothing from the filter.
-    assert feed(client, scope="province")["items"] == []
+    body = feed(client, viewer["headers"])
+    assert "province" not in body
+    order = [u for u, _ in kinds(body)]
+    assert set(order) == {"shows", "quiet", "other"}
+    assert order[0] == "shows"
+    assert all(item["reason"] == "suggested" for item in body["items"])
 
 
 def test_newest_first_with_a_cursor(client, trails, person):

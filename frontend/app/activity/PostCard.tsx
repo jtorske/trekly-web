@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, EyeOff, Flag, Hand, Trash2 } from "lucide-react";
+import { ExternalLink, EyeOff, Flag, Hand, Sparkles, Trash2 } from "lucide-react";
 import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
@@ -79,8 +79,13 @@ export default function PostCard({
     </time>
   );
 
+  // In the feed, a suggestion says so and offers a Follow.
+  const suggested = post.reason === "suggested";
   // Signed in and someone else's post. Feed authors always have public profiles.
-  const follow = post.author.follow !== null && post.author.follow !== undefined && !post.mine && (
+  // In the feed only suggestions offer it (you already follow the rest);
+  // elsewhere (a profile's Activity tab) every post does.
+  const offersFollow = post.reason === undefined || post.reason === null || suggested;
+  const follow = offersFollow && post.author.follow !== null && post.author.follow !== undefined && !post.mine && (
     <FollowButton
       username={post.author.username}
       name={name}
@@ -92,6 +97,13 @@ export default function PostCard({
   );
 
   const head = (
+    <>
+    {suggested && (
+      <p className={styles.suggested}>
+        <Sparkles size={13} aria-hidden="true" />
+        Suggested for you
+      </p>
+    )}
     <div className={styles.head}>
       <Link href={profileHref} className={styles.avatarLink} aria-label={`${name}'s profile`}>
         <Avatar path={post.author.avatar_path} name={post.author.display_name ?? post.author.username} email={null} size={44} />
@@ -111,6 +123,7 @@ export default function PostCard({
       </div>
       {follow}
     </div>
+    </>
   );
 
   const highFiveLabel = (

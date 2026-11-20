@@ -143,7 +143,6 @@ def test_followers_dont_put_a_private_profile_in_public_features(client, trails,
     follow(client, ben, ana)
     approve(client, ana, ben)
     assert client.get(f"/api/trails/{trails[0]}/hikers", headers=ben["headers"]).json()["hikers"] == []
-    assert kinds(feed(client, ben["headers"], scope="following")) == []
     assert kinds(feed(client, ben["headers"])) == []
 
 
@@ -267,42 +266,50 @@ def test_hidden_accounts_leave_lists_and_counts(client, session_factory, ana, be
 # ------------------------------------------------------------ the Following feed
 
 
-def test_the_following_feed(client, trails, ana, ben, cam):
+def followed(body):
+    return [(i["author"]["username"], i["kind"]) for i in body["items"] if i["reason"] == "following"]
+
+
+def test_followed_posts_lead_the_feed(client, trails, ana, ben, cam):
     log(client, ana, trails[0])
     log(client, cam, trails[1])
-    assert feed(client, ben["headers"])["follows_anyone"] is False
-    assert kinds(feed(client, ben["headers"], scope="following")) == []
+    body = feed(client, ben["headers"])
+    assert body["follows_anyone"] is False
+    assert followed(body) == []
+    assert {i["reason"] for i in body["items"]} == {"suggested"}
 
     follow(client, ben, ana)
-    body = feed(client, ben["headers"], scope="following")
+    body = feed(client, ben["headers"])
     assert body["follows_anyone"] is True
-    assert {author for author, _ in kinds(body)} == {"ana"}
-    assert all(item["author"]["follow"] == "following" for item in body["items"])
-    # Everyone still has both, and says whom Ben follows.
-    everyone = feed(client, ben["headers"])
-    assert {author for author, _ in kinds(everyone)} == {"ana", "cam"}
-    assert {i["author"]["username"]: i["author"]["follow"] for i in everyone["items"]} == {"ana": "following",
-                                                                                         "cam": "none"}
+    assert followed(body) == [("ana", "hike")]
+    # Ana's (followed) post first, then the divider, then Cam's suggestion.
+    entries = [e["type"] for e in body["entries"]]
+    assert entries[:3] == ["post", "caught_up", "post"]
+    assert body["items"][0]["author"]["username"] == "ana"
+    assert {i["author"]["username"]: (i["author"]["follow"], i["reason"]) for i in body["items"]} == {
+        "ana": ("following", "following"), "cam": ("none", "suggested")}
 
 
-def test_the_following_feed_keeps_the_feed_rules(client, trails, ana, ben):
+def test_followed_posts_keep_the_feed_rules(client, trails, ana, ben):
     log(client, ana, trails[0])
     follow(client, ben, ana)
     set_privacy(client, ana, share_activity=False)
-    assert kinds(feed(client, ben["headers"], scope="following")) == []
+    assert kinds(feed(client, ben["headers"])) == []
 
 
-def test_requests_dont_count_for_the_following_feed(client, trails, ana, ben):
+def test_requests_dont_count_as_following(client, trails, ana, ben):
     log(client, ana, trails[0])
     set_privacy(client, ana, is_private=True)
     follow(client, ben, ana)
-    body = feed(client, ben["headers"], scope="following")
+    body = feed(client, ben["headers"])
     assert body["items"] == [] and body["follows_anyone"] is False
 
 
-def test_guests_following_feed_is_empty(client, trails, ana):
+def test_guests_follow_nobody(client, trails, ana):
     log(client, ana, trails[0])
-    assert feed(client, scope="following")["items"] == []
+    body = feed(client)
+    assert [i["reason"] for i in body["items"]] == ["suggested"]
+    assert "caught_up" not in [e["type"] for e in body["entries"]]
 
 
 # ------------------------------------------------------------ account deletion

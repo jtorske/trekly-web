@@ -3,13 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ArrowUp, RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import ui from "@/components/ui.module.css";
 import {
-  appendPage, defaultScope, deleteKey, withPicks, type ActivityPost, type ActivityScope, type FeedPicks,
+  deleteKey, feedRows, mergeFeedPage, type ActivityPost, type FeedState,
 } from "@/lib/activity";
-import { getActivity, getPicks } from "@/lib/activityApi";
+import { getActivity, getNewPosts } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
+import type { HikerResult } from "@/lib/hikerSearch";
+import { province as provinceFor } from "@/lib/provinces";
 import { useHidden } from "@/lib/useHidden";
 import { useHikeLogs } from "@/lib/useHikeLogs";
 import { useProfile } from "@/lib/useProfile";
@@ -17,23 +20,36 @@ import Composer, { type ComposerHandle } from "./Composer";
 import Nudge from "@/components/Nudge";
 import { toast } from "@/lib/toast";
 import { useNudge } from "@/lib/useNudge";
+import FollowPrompt from "./FollowPrompt";
 import PickCard from "./PickCard";
 import PostCard from "./PostCard";
 import FindHikers from "./FindHikers";
 import { HikersYouMightKnow, ProfileCard, RecentlyEarned, TrendingTrails } from "./Sidebar";
+import { PULL_THRESHOLD, usePullToRefresh } from "./usePullToRefresh";
 import styles from "./activity.module.css";
 
-interface Feed {
+interface Feed extends FeedState {
+  /** Whose feed this is ("signedIn" / "signedOut"); a sign-in change starts over. */
   key: string;
-  posts: ActivityPost[];
   cursor: string | null;
   done: boolean;
+  asOf: string;
+  followsAnyone: boolean;
+  hikers: HikerResult[] | null;
 }
 
+/** How often to check for new posts from people you follow, while the tab is visible. */
+const NEW_POSTS_EVERY_MS = 60_000;
+const PROMPT_DISMISSED = "trekly.activity.followPromptDismissed";
+
 /**
- * The Activity page: what hikers have recently done, newest first, loading
- * more as you scroll. Anyone can read it; logging, high fives and reports
- * need an account. The API decides who appears (app/activity.py).
+ * The Activity page: one feed, arranged by the API (backend app/feed.py):
+ * posts from people you follow first, a "You're all caught up" divider, then
+ * suggested posts, with @trekly posts and Trekly picks mixed in. Anyone can
+ * read it; logging, high fives and follows need an account.
+ *
+ * It loads more as you scroll; a "New posts" pill appears when people you
+ * follow post, and on phones pulling down from the top refreshes.
  *
  * From 1280px it's three columns in a one-screen shell, as on the profile:
  * your card on the left, the feed (with "Log a hike" on top) in the middle,
@@ -47,78 +63,57 @@ export default function ActivityPage() {
   const hikeLogs = useHikeLogs();
   const pathname = usePathname();
   const signedIn = status === "signedIn";
-  const [chosen, setScope] = useState<ActivityScope | null>(null);
-  // Until they pick a tab: Following once they follow anyone, Everyone otherwise.
-  const scope: ActivityScope = chosen ?? defaultScope(signedIn, profile?.counts?.following);
-  const decided = status !== "loading" && (!signedIn || chosen !== null || profile !== null);
-  // One feed per filter, kept for the visit, so switching back is instant.
-  const [feeds, setFeeds] = useState<Record<string, Feed>>({});
-  const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
-  const [failure, setFailure] = useState<{ key: string; message: string } | null>(null);
-  const firstPages = useRef(new Set<string>());
+  const [feed, setFeed] = useState<Feed | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [newCount, setNewCount] = useState(0);
+  const [promptDismissed, setPromptDismissed] = useState(
+    () => typeof window !== "undefined" && window.localStorage.getItem(PROMPT_DISMISSED) === "1",
+  );
+  const busy = useRef(false);
   const sentinel = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const composer = useRef<ComposerHandle>(null);
   const isHidden = useHidden();
-  const requestKey = `${status}:${scope}`;
-  const current = feeds[requestKey] ?? null;
-  const loading = Boolean(loadingKeys[requestKey]);
-  const error = failure?.key === requestKey ? failure.message : null;
-  const province = profile?.home_province ?? null;
-  // "Trekly picks" between posts while real activity is quiet (Everyone only).
-  const [picks, setPicks] = useState<FeedPicks | null>(null);
-  useEffect(() => {
-    const controller = new AbortController();
-    getPicks(controller.signal).then(setPicks, () => undefined);
-    return () => controller.abort();
-  }, []);
-  const shownPicks = scope === "everyone" ? picks : null;
+  const current = feed?.key === status ? feed : null;
 
-  // A page of one filter's feed; the first page only once at a time (a hover
-  // prefetch and the click that follows share it).
-  const fetchFeed = useCallback(
-    async (target: ActivityScope, cursor: string | null, signal?: AbortSignal) => {
-      const key = `${status}:${target}`;
-      if (cursor === null) {
-        if (firstPages.current.has(key)) return;
-        firstPages.current.add(key);
-      }
-      setLoadingKeys((prev) => ({ ...prev, [key]: true }));
-      setFailure((prev) => (prev?.key === key ? null : prev));
+  /** A page of the feed: the first (starting over) when `cursor` is null. */
+  const load = useCallback(
+    async (cursor: string | null, signal?: AbortSignal) => {
+      if (busy.current) return;
+      busy.current = true;
+      setLoading(true);
+      setError(null);
       try {
-        const page = await getActivity(target, cursor, signedIn, signal);
-        setFeeds((prev) => {
-          const before = prev[key];
+        const page = await getActivity(cursor, signedIn, signal);
+        setFeed((prev) => {
+          const continuing = cursor !== null && prev?.key === status;
+          const merged = mergeFeedPage(continuing ? prev : null, page);
           return {
-            ...prev,
-            [key]: {
-              key,
-              posts: cursor && before ? appendPage(before.posts, page.items) : page.items,
-              cursor: page.next_cursor,
-              done: page.next_cursor === null,
-            },
+            ...merged,
+            key: status,
+            cursor: page.next_cursor,
+            done: page.next_cursor === null,
+            asOf: continuing ? prev.asOf : page.as_of,
+            followsAnyone: page.follows_anyone,
+            hikers: continuing ? prev.hikers : page.suggested_hikers,
           };
         });
+        if (cursor === null) setNewCount(0);
       } catch (caught) {
         if ((caught as { name?: string }).name === "AbortError") return;
-        setFailure({ key, message: caught instanceof Error ? caught.message : "The feed didn't load." });
+        setError(caught instanceof Error ? caught.message : "The feed didn't load.");
       } finally {
-        if (cursor === null) firstPages.current.delete(key);
-        setLoadingKeys((prev) => ({ ...prev, [key]: false }));
+        busy.current = false;
+        setLoading(false);
       }
     },
     [status, signedIn],
   );
-  const load = useCallback(
-    (cursor: string | null, signal?: AbortSignal) => fetchFeed(scope, cursor, signal),
-    [fetchFeed, scope],
-  );
-  /** Loads a filter's first page ahead of a click (hover, focus, idle). */
-  const prefetch = (target: ActivityScope) => {
-    if (decided && !feeds[`${status}:${target}`]) void fetchFeed(target, null);
-  };
 
-  // The first page whenever the filter or sign-in changes, unless it's already here.
+  // The first page once sign-in is known, and again whenever it changes.
+  const decided = status !== "loading";
   const cached = Boolean(current);
   useEffect(() => {
     if (!decided || cached) return;
@@ -126,24 +121,42 @@ export default function ActivityPage() {
     queueMicrotask(() => {
       if (!controller.signal.aborted) void load(null, controller.signal);
     });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      busy.current = false;
+    };
   }, [decided, cached, load]);
 
-  // Once the open feed is in, the other filters load quietly, so a tap on a
-  // phone (no hover to prefetch on) doesn't wait either.
-  const others = [signedIn && "following", "everyone", province && "province"].filter(
-    (s): s is ActivityScope => Boolean(s) && s !== scope,
-  );
-  const idleKey = cached ? others.map((s) => `${status}:${s}`).filter((key) => !feeds[key]).join(",") : "";
+  /** Starts the feed over from the top (pull to refresh, the pill, a new post of yours). */
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    const column = scroller.current;
+    if (column && getComputedStyle(column).overflowY === "auto") column.scrollTo({ top: 0, behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+    await load(null);
+    setRefreshing(false);
+  }, [load]);
+
+  const pull = usePullToRefresh(() => void refresh(), decided);
+
+  // "New posts": a quiet check every minute while the tab is in view.
+  const asOf = current?.asOf ?? null;
+  const watch = signedIn && Boolean(current?.followsAnyone) && asOf !== null;
   useEffect(() => {
-    if (!idleKey) return;
-    const run = () => {
-      for (const key of idleKey.split(",")) void fetchFeed(key.slice(key.indexOf(":") + 1) as ActivityScope, null);
+    if (!watch || !asOf) return;
+    const controller = new AbortController();
+    const check = () => {
+      if (document.visibilityState !== "visible") return;
+      getNewPosts(asOf, controller.signal).then((body) => setNewCount(body.count), () => undefined);
     };
-    // A beat after the open feed paints (requestIdleCallback is missing in older Safari).
-    const handle = window.setTimeout(run, 400);
-    return () => window.clearTimeout(handle);
-  }, [idleKey, fetchFeed]);
+    const handle = window.setInterval(check, NEW_POSTS_EVERY_MS);
+    document.addEventListener("visibilitychange", check);
+    return () => {
+      controller.abort();
+      window.clearInterval(handle);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [watch, asOf]);
 
   // Not sharing yet? A small card offers the setting until they put it away
   // or turn it on (the API decides; it never shows to guests).
@@ -169,40 +182,38 @@ export default function ActivityPage() {
     return () => observer.disconnect();
   }, [current, loading, error, load]);
 
-  // A post can sit in several filters' feeds; change it in all of them.
+  /** A post changed (null: it's gone). A follow change applies to all of that author's posts. */
   const update = (id: string, change: Partial<ActivityPost> | null) =>
-    setFeeds((prev) =>
-      Object.fromEntries(
-        Object.entries(prev).map(([key, feed]) => [
-          key,
-          {
-            ...feed,
-            posts: change === null
-              ? feed.posts.filter((post) => post.id !== id)
-              : feed.posts.map((post) => (post.id === id ? { ...post, ...change } : post)),
-          },
-        ]),
-      ),
-    );
+    setFeed((prev) => {
+      if (!prev || !prev.posts[id]) return prev;
+      const posts = { ...prev.posts };
+      if (change === null) {
+        delete posts[id];
+        return { ...prev, posts, entries: prev.entries.filter((e) => e.type !== "post" || e.post_id !== id) };
+      }
+      const author = prev.posts[id].author.username;
+      for (const [key, post] of Object.entries(posts)) {
+        if (key === id) posts[key] = { ...post, ...change };
+        else if (change.author && post.author.username === author) {
+          posts[key] = { ...post, author: { ...post.author, follow: change.author.follow } };
+        }
+      }
+      return { ...prev, posts };
+    });
+
+  const dismissPrompt = () => {
+    window.localStorage.setItem(PROMPT_DISMISSED, "1");
+    setPromptDismissed(true);
+  };
 
   const signInHref = `/login${nextQuery(pathname)}`;
   const openComposer = () => composer.current?.open();
-  const followsSomeone = (profile?.counts?.following ?? 0) > 0;
-  const emptyTitle =
-    scope === "province"
-      ? "Nothing from your province yet"
-      : scope === "following"
-        ? followsSomeone
-          ? "Nothing new from the hikers you follow"
-          : "Follow hikers to see their hikes here"
-        : "The trail's quiet right now";
-  const emptyText =
-    scope === "province"
-      ? "Hikers from your province appear here once they share their activity and show their home province."
-      : scope === "following"
-        ? "Posts from people you follow show up here. Find hikers on Everyone, or in a trail's “Hiked by”."
-        : "When hikers share a hike or earn a badge, it shows up here. Log a hike and be the first.";
-  const posts = current?.posts.filter((post) => !isHidden(deleteKey(post.id))) ?? null;
+  const showPrompt =
+    signedIn && !promptDismissed && Boolean(current && !current.followsAnyone && current.hikers?.length);
+  const rows = current
+    ? feedRows(current, { hidden: (postId) => isHidden(deleteKey(postId)), followPrompt: showPrompt })
+    : null;
+  const place = provinceFor(profile?.home_province ?? null)?.name ?? null;
 
   let body;
   if (!current && error) {
@@ -214,25 +225,33 @@ export default function ActivityPage() {
         </button>
       </div>
     );
-  } else if (!current || !posts) {
+  } else if (!current || !rows) {
     body = (
       <ul className={styles.list} aria-busy="true" aria-label="Loading the feed">
         {[0, 1, 2].map((n) => (
-          <li key={n} className={`${ui.skeleton} ${styles.skeletonCard}`} />
+          <li key={n} className={styles.skeletonPost} aria-hidden="true">
+            <span className={styles.skeletonHead}>
+              <span className={`${ui.skeleton} ${styles.skeletonAvatar}`} />
+              <span className={styles.skeletonLines}>
+                <span className={`${ui.skeleton} ${styles.skeletonLine}`} />
+                <span className={`${ui.skeleton} ${styles.skeletonLineShort}`} />
+              </span>
+            </span>
+            <span className={`${ui.skeleton} ${styles.skeletonLine}`} />
+            <span className={`${ui.skeleton} ${styles.skeletonMedia}`} />
+          </li>
         ))}
       </ul>
     );
-  } else if (posts.length === 0) {
+  } else if (rows.length === 0) {
     body = (
       <div className={styles.empty}>
-        <p className={styles.emptyTitle}>{emptyTitle}</p>
-        <p className={styles.emptyText}>{emptyText}</p>
+        <p className={styles.emptyTitle}>The trail&apos;s quiet right now</p>
+        <p className={styles.emptyText}>
+          When hikers share a hike or earn a badge, it shows up here. Log a hike and be the first.
+        </p>
         <div className={styles.emptyActions}>
-          {scope === "following" ? (
-            <button type="button" className={ui.primary} onClick={() => setScope("everyone")}>
-              See everyone
-            </button>
-          ) : signedIn ? (
+          {signedIn ? (
             <button type="button" className={ui.primary} onClick={openComposer}>
               Log a hike
             </button>
@@ -245,36 +264,41 @@ export default function ActivityPage() {
             Explore trails
           </Link>
         </div>
-        {shownPicks?.sparse && shownPicks.picks.length > 0 && (
-          <ul className={`${styles.list} ${styles.emptyPicks}`} aria-label="Trekly picks">
-            {shownPicks.picks.map((pick) => (
-              <PickCard key={`${pick.kind}:${pick.trail.id}`} pick={pick} />
-            ))}
-          </ul>
-        )}
       </div>
     );
   } else {
     body = (
       <>
         <ul className={styles.list}>
-          {withPicks(posts, shownPicks).map((item) =>
-            "pick" in item ? (
-              <PickCard key={`pick:${item.pick.kind}:${item.pick.trail.id}`} pick={item.pick} />
-            ) : (
+          {rows.map((row) => {
+            if (row.type === "pick") return <PickCard key={row.key} pick={row.pick} />;
+            if (row.type === "follow_prompt") {
+              return <FollowPrompt key={row.key} hikers={current.hikers ?? []} place={place} onDismiss={dismissPrompt} />;
+            }
+            if (row.type === "caught_up") {
+              return (
+                <li key={row.key} className={styles.caughtUp}>
+                  <span className={styles.caughtUpText}>
+                    <strong>You&apos;re all caught up</strong>
+                    <span>You&apos;ve seen the latest from the hikers you follow. Here&apos;s more from around Trekly.</span>
+                  </span>
+                </li>
+              );
+            }
+            return (
               <PostCard
-                key={item.post.id}
-                post={item.post}
+                key={row.key}
+                post={row.post}
                 signedIn={signedIn}
                 signInHref={signInHref}
                 viewer={profile?.username ?? null}
                 onChange={update}
               />
-            ),
-          )}
+            );
+          })}
         </ul>
         <div ref={sentinel} className={styles.sentinel} aria-hidden="true" />
-        {loading && <p className={styles.more} role="status">Loading more…</p>}
+        {loading && !refreshing && <p className={styles.more} role="status">Loading more…</p>}
         {error && (
           <p className={styles.more}>
             <span className={ui.error}>{error}</span>{" "}
@@ -283,7 +307,7 @@ export default function ActivityPage() {
             </button>
           </p>
         )}
-        {current.done && posts.length > 5 && <p className={styles.more}>You&apos;re all caught up.</p>}
+        {current.done && rows.length > 5 && <p className={styles.more}>That&apos;s everything for now.</p>}
       </>
     );
   }
@@ -307,57 +331,38 @@ export default function ActivityPage() {
 
         <div ref={scroller} className={styles.feedColumn}>
           <div className={styles.feedInner}>
+            {(pull > 0 || refreshing) && (
+              <div
+                className={styles.pullIndicator}
+                style={{ height: refreshing ? PULL_THRESHOLD * 0.6 : pull * 0.6 }}
+                role={refreshing ? "status" : undefined}
+              >
+                <RefreshCw
+                  size={20}
+                  aria-hidden="true"
+                  className={refreshing ? styles.spinning : undefined}
+                  style={refreshing ? undefined : { transform: `rotate(${(pull / PULL_THRESHOLD) * 270}deg)` }}
+                />
+                <span className={ui.srOnly}>{refreshing ? "Refreshing the feed" : "Pull to refresh"}</span>
+              </div>
+            )}
             <h1 className={styles.title}>Activity</h1>
             <Composer
               handle={composer}
               logs={hikeLogs.byTrail}
               save={hikeLogs.save}
-              onPosted={() => {
-                // The other filters may now be missing the post; they load again when opened.
-                setFeeds((prev) => (prev[requestKey] ? { [requestKey]: prev[requestKey] } : {}));
-                void load(null);
-              }}
+              onPosted={() => void refresh()}
               signInHref={signInHref}
             />
 
-            <div className={styles.toolbar}>
-              <div className={styles.tabs} role="group" aria-label="Show activity from">
-                {signedIn && (
-                  <button
-                    type="button"
-                    className={styles.tab}
-                    aria-pressed={scope === "following"}
-                    onClick={() => setScope("following")}
-                    onPointerEnter={() => prefetch("following")}
-                    onFocus={() => prefetch("following")}
-                  >
-                    Following
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className={styles.tab}
-                  aria-pressed={scope === "everyone"}
-                  onClick={() => setScope("everyone")}
-                  onPointerEnter={() => prefetch("everyone")}
-                  onFocus={() => prefetch("everyone")}
-                >
-                  Everyone
+            {newCount > 0 && (
+              <div className={styles.newPostsBar}>
+                <button type="button" className={styles.newPosts} onClick={() => void refresh()}>
+                  <ArrowUp size={16} aria-hidden="true" />
+                  {newCount === 1 ? "1 new post" : `${newCount} new posts`}
                 </button>
-                {province && (
-                  <button
-                    type="button"
-                    className={styles.tab}
-                    aria-pressed={scope === "province"}
-                    onClick={() => setScope("province")}
-                    onPointerEnter={() => prefetch("province")}
-                    onFocus={() => prefetch("province")}
-                  >
-                    From my province
-                  </button>
-                )}
               </div>
-            </div>
+            )}
 
             {nudge.show && (
               <Nudge
@@ -372,7 +377,7 @@ export default function ActivityPage() {
               </Nudge>
             )}
 
-            {body}
+            <div className={styles.feedBody}>{body}</div>
           </div>
         </div>
 
