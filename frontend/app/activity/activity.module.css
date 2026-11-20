@@ -151,12 +151,17 @@
 
 /* ------------------------------------------------------------- header */
 
+/* Visually hidden: the header already says where you are; the h1 stays for screen readers. */
 .title {
-  margin-bottom: 0.9rem;
-  font-family: var(--display);
-  font-size: clamp(1.7rem, 3vw, 2rem);
-  font-weight: 600;
-  line-height: 1.1;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .nudge {
