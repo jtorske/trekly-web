@@ -183,7 +183,9 @@ def test_deleting_the_hike_deletes_its_featured_badge(conn, world):
     act_as(conn, alice)
     feature(conn, alice, 0, trail=world["hiked"])
     feature(conn, alice, 1, milestone="first-hike")
+    conn.execute(text("RESET ROLE"))  # the API deletes hikes (clients can't, migration a6e3c9f2d8b4)
     conn.execute(text("DELETE FROM public.hike_logs WHERE user_id = :u AND trail_id = :t"), {"u": alice, "t": world["hiked"]})
+    act_as(conn, alice)
     rows = conn.execute(text("SELECT milestone FROM public.featured_badges WHERE user_id = :u"), {"u": alice}).scalars().all()
     # The milestone row is the API's to prune (app/featured.py); the trail badge is gone at once.
     assert rows == ["first-hike"]

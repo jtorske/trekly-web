@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, EyeOff, Flag, Hand, MessageCircle, MessageCircleOff, Sparkles, Trash2 } from "lucide-react";
+import { ExternalLink, EyeOff, Flag, Hand, MessageCircle, MessageCircleOff, Pencil, Sparkles, Trash2 } from "lucide-react";
 import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
 import FollowButton from "@/components/FollowButton";
@@ -17,7 +17,7 @@ import TrailPhoto from "@/components/TrailPhoto";
 import ui from "@/components/ui.module.css";
 import VerifiedCheck from "@/components/VerifiedCheck";
 import { ONLY_YOU_LABEL, UNSHARED_LABEL, commentCount, deleteKey, earnedPhrases, formatSourceDate, postHref, shortAgo, type ActivityEarned, type ActivityPost } from "@/lib/activity";
-import { deleteActivityPost, setCommentsOff, setHighFive } from "@/lib/activityApi";
+import { deleteActivityPost, getPost, setCommentsOff, setHighFive } from "@/lib/activityApi";
 import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName, formatHikeDate } from "@/lib/publicProfile";
 import { TERRAIN_LABELS } from "@/lib/terrain";
@@ -25,6 +25,7 @@ import { toast } from "@/lib/toast";
 import { removeWithUndo } from "@/lib/undo";
 import { sectionHref } from "@/app/settings/settingsSections";
 import Comments from "./Comments";
+import EditPostDialog from "./EditPostDialog";
 import HighFiveCount from "./HighFiveCount";
 import styles from "./activity.module.css";
 
@@ -34,7 +35,9 @@ import styles from "./activity.module.css";
  * line and shown as small badges, then their note, photo and the trail. A
  * milestone or rank that no shared hike explains is a post of its own.
  * Under it, the comments (Comments.tsx). Your own posts have a "⋯" menu
- * (turn comments off/on, Delete with Undo); others' offer Report.
+ * (Edit a hike post, turn comments off/on once there are some, Delete with
+ * Undo); others' offer Report. "Edited" follows the time once its author
+ * changed it.
  */
 export default function PostCard({
   post,
@@ -55,6 +58,7 @@ export default function PostCard({
   onChange: (id: string, change: Partial<ActivityPost> | null) => void;
 }) {
   const [reporting, setReporting] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [showAll, setShowAll] = useState(commentsOpen);
   const [focusKey, setFocusKey] = useState(0);
   const name = displayName(post.author);
@@ -94,9 +98,21 @@ export default function PostCard({
     }
   };
 
+  const reload = async () => {
+    try {
+      onChange(post.id, await getPost(post.id, true));
+    } catch {
+      // Saved; the card catches up on the next load.
+    }
+  };
+
+  const hasComments = (post.comment_count ?? 0) > 0 || Boolean(post.comments_off);
   const ownMenu: MoreMenuItem[] = post.mine
     ? [
-        ...(post.only_you
+        ...(post.kind === "hike" && post.hike
+          ? [{ label: "Edit", icon: <Pencil size={15} aria-hidden="true" />, onSelect: () => setEditing(true) }]
+          : []),
+        ...(post.only_you || !hasComments
           ? []
           : [{
               label: post.comments_off ? "Turn comments on" : "Turn comments off",
@@ -169,6 +185,17 @@ export default function PostCard({
         <span className={styles.meta}>
           @{post.author.username}
           {when && <> · {when}</>}
+          {post.edited && (
+            <>
+              {" · "}
+              <span
+                className={styles.edited}
+                title={post.edited_at ? `Edited ${new Date(post.edited_at).toLocaleString("en-CA")}` : undefined}
+              >
+                Edited
+              </span>
+            </>
+          )}
         </span>
       </div>
       {follow}
@@ -216,6 +243,7 @@ export default function PostCard({
       {reporting && (
         <ReportDialog username={post.author.username} name={name} postId={post.id} onClose={() => setReporting(false)} />
       )}
+      {editing && <EditPostDialog post={post} onSaved={reload} onClose={() => setEditing(false)} />}
     </div>
   );
 

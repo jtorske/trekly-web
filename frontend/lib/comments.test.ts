@@ -33,3 +33,10 @@ test("comment text is cleaned like the server does", () => {
 test("a post's own page", () => {
   assert.equal(postPagePath("abc-123"), "/activity/abc-123");
 });
+
+test("high-five counts, including the author's zero", async () => {
+  const { highFivesLabel } = await import("./activity.ts");
+  assert.equal(highFivesLabel(0), "No high fives yet");
+  assert.equal(highFivesLabel(1), "1 high five");
+  assert.equal(highFivesLabel(2), "2 high fives");
+});

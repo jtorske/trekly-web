@@ -27,6 +27,10 @@ and the owner's own responses show it with `review` ("pending" while it's
 being reviewed, "hidden" once a moderator has removed it). New entries
 follow the post rate limits, and photos need a confirmed email.
 
+An edit that changes the note, photo or date marks the hike's post
+"Edited"; a new date also re-evaluates the journal (`progress`) and keeps the
+post's milestones and rank in step (app/activity.py after_hike_edited).
+
 `share` ("Share to Activity" in the dialog) posts the hike, and any milestone
 or rank it earns, to the Activity feed; false removes the hike's post; left
 out, nothing changes (app/activity.py). POST /past never posts.
@@ -34,7 +38,7 @@ out, nothing changes (app/activity.py). POST /past never posts.
 
 import re
 from typing import Literal
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -42,12 +46,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.activity import after_hike_saved, standing
+from app.activity import after_hike_edited, after_hike_saved, hike_post, standing, standing_from
 from app.auth import get_current_user_id
 from app.database import get_db
 from app.featured import prune_featured
 from app.hike_service import NewHike, Progress, add_hikes
-from app.milestones import MilestoneBadgeOut, badge_out
+from app.hike_service import standing as journal_standing
+from app.milestones import MilestoneBadgeOut, badge_out, gather
 from app.models.activity import ActivityPost
 from app.moderation import (
     Services, content_removed, ensure_can_add_photo, ensure_can_publish, ensure_post_rate, get_moderation_services,
@@ -149,7 +154,7 @@ def progress_out(progress: Progress) -> JournalProgressOut:
 
 
 class HikeSavedOut(HikeLogOut):
-    # Set when the entry is new; None for an edit.
+    # Set when the entry is new or its date changed; None for other edits.
     progress: JournalProgressOut | None = None
 
 
@@ -354,13 +359,26 @@ def put_hike_log(
             )
         # A concurrent duplicate request created it first; apply this one on top.
         log = _find(db, user_id, trail_id)
+    # What the owner sees now (withheld content included), to tell an edit.
+    shown = _one(db, log, set())
+    edited = (payload.hiked_on, payload.note, payload.photo_path) != (shown.hiked_on, shown.note, shown.photo_path)
+    redated = payload.hiked_on != log.hiked_on
+    facts_before = gather(db, user_id) if redated else None
     _apply(log, payload, values)
     record(log)
+    post = hike_post(db, log.id) if edited else None
+    if post is not None:
+        post.edited_at = datetime.now(timezone.utc)
     db.commit()
     services.run_after_commit()
     log = _find(db, user_id, trail_id)
     after_hike_saved(db, user_id, log, payload.share, before, today)
-    return HikeSavedOut(**_one(db, log, _shared_ids(db, user_id)).model_dump())
+    progress = None
+    if facts_before is not None:
+        # A new date can earn or lose seasonal and calendar milestones (and so points and rank).
+        after_hike_edited(db, user_id, log, standing_from(facts_before))
+        progress = progress_out(Progress(journal_standing(facts_before), journal_standing(gather(db, user_id))))
+    return HikeSavedOut(**_one(db, log, _shared_ids(db, user_id)).model_dump(), progress=progress)
 
 
 @router.post("/past", response_model=PastHikesOut, status_code=status.HTTP_201_CREATED)

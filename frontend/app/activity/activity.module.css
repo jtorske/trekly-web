@@ -1794,3 +1794,70 @@
     white-space: nowrap;
   }
 }
+
+/* ------------------------------------------------------------ high fives */
+
+/* The author's own count before anyone has high-fived. */
+.fiveNone {
+  padding: 0.25rem 0.7rem;
+  color: var(--soft-ink);
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.fiverList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fiverRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+}
+
+.fiverWho {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.6rem;
+}
+
+.fiverText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.fiverName {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  color: var(--color-dark-olive);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fiverWho:hover .fiverName {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.fiverHandle {
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+/* "· Edited" after a post's time. */
+.edited {
+  cursor: help;
+}

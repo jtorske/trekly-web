@@ -43,7 +43,7 @@ export function useHikeLogs() {
   const logs = current?.logs;
 
   const save = useCallback(
-    async (trailId: string, input: HikeLogInput): Promise<HikeLog> => {
+    async (trailId: string, input: HikeLogInput, edited = "Hike log updated"): Promise<HikeLog> => {
       const previous = logs?.find((log) => log.trail.id === trailId);
       const saved = await putHikeLog(trailId, input);
       setState((s) => (s ? { ...s, logs: [saved, ...s.logs.filter((log) => log.trail.id !== trailId)] } : s));
@@ -54,7 +54,7 @@ export function useHikeLogs() {
       } else {
         void refreshAfterHikesAdded();
       }
-      if (previous) toast.success("Hike log updated");
+      if (previous) toast.success(edited);
       else toast.success("Stamped in your Trail Journal", { link: { label: "Open journal", href: "/journal" } });
       if (previous?.photo_path && previous.photo_path !== saved.photo_path) {
         await removeImages("hike-photos", [previous.photo_path]).catch(() => undefined);

@@ -3,13 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity } from "lucide-react";
+import { Activity, Hand } from "lucide-react";
 import ui from "@/components/ui.module.css";
 import PostCard from "@/app/activity/PostCard";
 import feedStyles from "@/app/activity/activity.module.css";
 import type { PostPages } from "@/app/activity/usePostPages";
 import { sectionHref } from "@/app/settings/settingsSections";
-import { activityBlocker, deleteKey } from "@/lib/activity";
+import { activityBlocker, deleteKey, highFivesLabel, postPagePath, type ActivitySummary } from "@/lib/activity";
 import { answerPastHikes } from "@/lib/activityApi";
 import { nextQuery } from "@/lib/authLogic";
 import { updatePrivacy, type PrivacySettings } from "@/lib/profilesApi";
@@ -254,8 +254,36 @@ export default function ActivityTab({
   return (
     <div className={styles.tab}>
       {owner && <PastHikesPrompt pages={pages} />}
+      {owner && pages.summary && Boolean(shown?.length) && <HighFiveSummary summary={pages.summary} />}
       {banner}
       {body}
     </div>
+  );
+}
+
+/** The owner's own tab only: high fives their posts have received, and the top one. */
+function HighFiveSummary({ summary }: { summary: ActivitySummary }) {
+  const top = summary.top_post;
+  return (
+    <section className={styles.summary} aria-label="High fives on your posts">
+      <Hand size={20} aria-hidden="true" className={styles.summaryIcon} />
+      <p className={styles.summaryText}>
+        <strong>{summary.high_fives === 0 ? "No high fives yet" : highFivesLabel(summary.high_fives)}</strong>
+        {summary.high_fives === 0 ? (
+          <span> When hikers high-five your posts, you&apos;ll see the total here.</span>
+        ) : (
+          <span>
+            {" "}
+            received in all.
+            {top && (
+              <>
+                {" "}
+                Most: <Link href={postPagePath(top.id)} className={styles.summaryLink}>{top.title}</Link> ({top.high_fives}).
+              </>
+            )}
+          </span>
+        )}
+      </p>
+    </section>
   );
 }

@@ -664,7 +664,8 @@ def test_who_high_fived_lists_public_profiles_only(client, trails, person):
     assert response.status_code == 200 and response.headers["cache-control"] == "no-store"
     body = response.json()
     assert body["high_fives"] == 2 and body["others"] == 1
-    assert body["hikers"] == [{"username": "bob", "display_name": "Bob", "avatar_path": None, "label": None}]
+    assert body["hikers"] == [{"username": "bob", "display_name": "Bob", "avatar_path": None, "label": None,
+                              "follow": None, "is_private": False}]
     assert str(carol["id"]) not in response.text and "@example.com" not in response.text
     assert client.get(f"/api/activity/{uuid.uuid4()}/high-fives").status_code == 404
 

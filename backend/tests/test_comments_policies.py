@@ -65,18 +65,18 @@ def test_comments_go_with_the_post_and_their_parent(conn, world, post, comment):
                       "VALUES (:b, :a, 'comment_reply', :p, :r)"),
                  {"a": world["alice"], "b": world["bob"], "p": post, "r": reply})
     conn.execute(text("DELETE FROM public.activity_comments WHERE id = :c"), {"c": comment})
-    assert conn.execute(text("SELECT count(*) FROM public.activity_comments")).scalar_one() == 0
-    assert conn.execute(text("SELECT count(*) FROM public.notifications WHERE comment_id IS NOT NULL")).scalar_one() == 0
+    assert conn.execute(text("SELECT count(*) FROM public.activity_comments WHERE post_id = :p"), {"p": post}).scalar_one() == 0
+    assert conn.execute(text("SELECT count(*) FROM public.notifications WHERE comment_id = :r"), {"r": reply}).scalar_one() == 0
     conn.execute(text("INSERT INTO public.activity_comments (post_id, user_id, body) VALUES (:p, :b, 'Again')"),
                  {"p": post, "b": world["bob"]})
     conn.execute(text("DELETE FROM public.activity_posts WHERE id = :p"), {"p": post})
-    assert conn.execute(text("SELECT count(*) FROM public.activity_comments")).scalar_one() == 0
+    assert conn.execute(text("SELECT count(*) FROM public.activity_comments WHERE post_id = :p"), {"p": post}).scalar_one() == 0
 
 
 def test_comments_go_with_the_account(conn, world, post, comment):  # noqa: F811
     as_admin(conn)
     conn.execute(text("DELETE FROM auth.users WHERE id = :b"), {"b": world["bob"]})
-    assert conn.execute(text("SELECT count(*) FROM public.activity_comments")).scalar_one() == 0
+    assert conn.execute(text("SELECT count(*) FROM public.activity_comments WHERE id = :c"), {"c": comment}).scalar_one() == 0
 
 
 def test_comment_text_is_bounded_by_the_database_too(conn, world, post):  # noqa: F811

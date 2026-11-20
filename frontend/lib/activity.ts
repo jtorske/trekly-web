@@ -41,6 +41,10 @@ export interface ActivityPost {
   author: ActivityAuthor;
   /** null when the author hides their hike dates. */
   posted_at: string | null;
+  /** Its author changed the hike (note, photo or date) since posting: "Edited". */
+  edited?: boolean;
+  /** When; null while they hide their hike dates. */
+  edited_at?: string | null;
   hike: {
     trail: TrailListItem;
     /** null when hidden, or for a hike from before Trekly. */
@@ -150,11 +154,17 @@ export const postPagePath = (postId: string) => `/activity/${encodeURIComponent(
 
 export type FeedReason = "own" | "following" | "suggested" | "trekly" | "demo";
 
+export interface HighFiver extends Omit<ActivityAuthor, "follow"> {
+  /** Signed in, and not you: your follow state toward them. */
+  follow: FollowState | null;
+  is_private: boolean;
+}
+
 export interface HighFivers {
   high_fives: number;
-  /** Newest first; only hikers with a public profile. */
-  hikers: ActivityAuthor[];
-  /** Private profiles, and anyone past the list. */
+  /** Newest first: hikers you may see (public profiles, ones you follow, you). */
+  hikers: HighFiver[];
+  /** "and 2 others": private profiles, blocked hikers, and anyone past the list. */
   others: number;
 }
 
@@ -271,6 +281,18 @@ export interface ProfileActivityPage {
   sharing: boolean | null;
   /** The owner's first page only: hikes the one-time "Share your past hikes?" prompt offers (0: don't ask). */
   past_hikes?: number | null;
+  /** The owner's first page only: high fives received, and the most high-fived post. */
+  summary?: ActivitySummary | null;
+}
+
+export interface ActivitySummary {
+  high_fives: number;
+  top_post: { id: string; title: string; high_fives: number } | null;
+}
+
+/** "No high fives yet", "1 high five", "3 high fives". */
+export function highFivesLabel(count: number): string {
+  return count === 0 ? "No high fives yet" : `${count} high five${count === 1 ? "" : "s"}`;
 }
 
 /** Why posts can't show in the feed, or null when sharing works. */

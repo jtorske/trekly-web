@@ -164,7 +164,7 @@ def test_owners_change_only_their_own_sharing_switch(conn, world):  # noqa: F811
 
 
 def test_deleting_the_hike_deletes_its_posts_and_reactions(conn, world):  # noqa: F811
-    act_as(conn, world["alice"])
+    as_admin(conn)  # the API deletes hikes (clients can't, migration a6e3c9f2d8b4)
     conn.execute(text("DELETE FROM public.hike_logs WHERE id = :h"), {"h": world["log"]})
     as_admin(conn)
     assert rows(conn, "SELECT id FROM public.activity_posts WHERE user_id = :u", {"u": world["alice"]}) == []

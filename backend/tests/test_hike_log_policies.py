@@ -92,6 +92,8 @@ def refused(conn, statement, params, reason="row-level security"):
 
 
 def add_log(conn, user, trail, note="Lovely day", photo=None):
+    """As the API does it (clients can't write the journal, migration a6e3c9f2d8b4)."""
+    conn.execute(text("RESET ROLE"))
     conn.execute(text(INSERT_LOG), {"user": user, "trail": trail, "note": note, "photo": photo})
 
 
@@ -99,23 +101,19 @@ def photo_name(user):
     return f"{user}/{uuid.uuid4()}.webp"
 
 
-def test_owner_can_create_read_update_and_delete_own_entry(conn, users, trail):
+def test_owners_read_their_entries_but_only_the_api_writes_them(conn, users, trail):
+    """Every write goes through the API, which screens notes and photos and
+    keeps the feed in step (migration a6e3c9f2d8b4)."""
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
+    act_as(conn, alice)
     # Scoped to this test's trail: other users' public journals are readable too.
     assert conn.execute(text("SELECT note FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).scalars().all() == ["Lovely day"]
-    updated = conn.execute(text("UPDATE public.hike_logs SET note = 'Edited' WHERE trail_id = :trail"), {"trail": trail})
-    assert updated.rowcount == 1
-    deleted = conn.execute(text("DELETE FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail})
-    assert deleted.rowcount == 1
-
-
-def test_user_id_defaults_to_the_caller(conn, users, trail):
-    alice, _ = users
-    act_as(conn, alice)
-    conn.execute(text("INSERT INTO public.hike_logs (trail_id, hiked_on) VALUES (:trail, '2026-08-14')"), {"trail": trail})
-    assert conn.execute(text("SELECT user_id FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).scalar_one() == alice
+    denied = "permission denied"
+    assert refused(conn, "UPDATE public.hike_logs SET note = 'Edited' WHERE trail_id = :trail", {"trail": trail}, reason=denied)
+    assert refused(conn, "UPDATE public.hike_logs SET hiked_on = '2020-01-01' WHERE trail_id = :trail", {"trail": trail}, reason=denied)
+    assert refused(conn, "DELETE FROM public.hike_logs WHERE trail_id = :trail", {"trail": trail}, reason=denied)
+    assert refused(conn, "INSERT INTO public.hike_logs (trail_id, hiked_on) VALUES (gen_random_uuid(), '2026-08-14')", {}, reason=denied)
 
 
 def test_entries_are_private_to_their_owner(conn, users, trail):
@@ -123,35 +121,20 @@ def test_entries_are_private_to_their_owner(conn, users, trail):
     sees the entries; and nobody else can ever change them. Public journals
     are covered in test_profile_privacy_policies.py."""
     alice, bob = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
 
     act_as(conn, bob)
     assert conn.execute(text("SELECT count(*) FROM public.hike_logs WHERE user_id = :a"), {"a": alice}).scalar_one() == 0
-    updated = conn.execute(text("UPDATE public.hike_logs SET note = 'Hacked'"))
-    deleted = conn.execute(text("DELETE FROM public.hike_logs"))
-    assert updated.rowcount == 0 and deleted.rowcount == 0
+    assert refused(conn, "UPDATE public.hike_logs SET note = 'Hacked'", {}, reason="permission denied")
+    assert refused(conn, "DELETE FROM public.hike_logs", {}, reason="permission denied")
+    assert refused(conn, INSERT_LOG, {"user": alice, "trail": trail, "note": None, "photo": None}, reason="permission denied")
 
     conn.execute(text("RESET ROLE"))
     assert conn.execute(text("SELECT note FROM public.hike_logs WHERE user_id = :u"), {"u": alice}).scalar_one() == "Lovely day"
 
 
-def test_user_cannot_create_an_entry_for_someone_else(conn, users, trail):
-    alice, bob = users
-    act_as(conn, bob)
-    assert refused(conn, INSERT_LOG, {"user": alice, "trail": trail, "note": None, "photo": None})
-
-
-def test_user_cannot_hand_an_entry_to_someone_else(conn, users, trail):
-    alice, bob = users
-    act_as(conn, alice)
-    add_log(conn, alice, trail)
-    assert refused(conn, "UPDATE public.hike_logs SET user_id = :bob", {"bob": bob})
-
-
 def test_anon_has_no_access(conn, users, trail):
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
     act_as(conn, None)
     assert refused(conn, "SELECT * FROM public.hike_logs", {}, reason="permission denied")
@@ -160,14 +143,13 @@ def test_anon_has_no_access(conn, users, trail):
 
 def test_one_entry_per_trail(conn, users, trail):
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
     assert refused(conn, INSERT_LOG, {"user": alice, "trail": trail, "note": None, "photo": None}, reason="hike_logs_user_trail_key")
 
 
 def test_entry_photo_must_be_in_the_owners_folder(conn, users, trail):
     alice, bob = users
-    act_as(conn, alice)
+    conn.execute(text("RESET ROLE"))
     assert refused(conn, INSERT_LOG, {"user": alice, "trail": trail, "note": None, "photo": photo_name(bob)}, reason="hike_logs_photo_owner_check")
     assert refused(conn, INSERT_LOG, {"user": alice, "trail": trail, "note": None, "photo": f"{alice}/photo.png"}, reason="check constraint")
     add_log(conn, alice, trail, photo=photo_name(alice))
@@ -175,17 +157,13 @@ def test_entry_photo_must_be_in_the_owners_folder(conn, users, trail):
 
 def test_trails_with_entries_cannot_be_deleted(conn, users, trail):
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
-    conn.execute(text("RESET ROLE"))
     assert refused(conn, "DELETE FROM public.trails WHERE id = :trail", {"trail": trail}, reason="foreign key")
 
 
 def test_deleting_a_user_removes_their_entries(conn, users, trail):
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
-    conn.execute(text("RESET ROLE"))
     conn.execute(text("DELETE FROM auth.users WHERE id = :id"), {"id": alice})
     assert conn.execute(text("SELECT count(*) FROM public.hike_logs WHERE user_id = :id"), {"id": alice}).scalar_one() == 0
 
@@ -258,39 +236,24 @@ def test_only_processed_photo_names_are_accepted(conn, users, name):
 
 def test_clients_cannot_write_the_verification_columns(conn, users, trail):
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
+    act_as(conn, alice)
     for column, value in (("verified", "true"), ("match_score", "0.9"), ("nights", "2")):
         assert refused(conn, f"UPDATE public.hike_logs SET {column} = {value} WHERE trail_id = :trail", {"trail": trail},
                        reason="permission denied"), column
-    assert refused(
-        conn,
-        "INSERT INTO public.hike_logs (user_id, trail_id, hiked_on, verified, match_score) "
-        "VALUES (:user, gen_random_uuid(), '2026-08-14', true, 0.9)",
-        {"user": alice},
-        reason="permission denied",
-    )
-    # Undated hikes are allowed.
-    assert conn.execute(text("UPDATE public.hike_logs SET hiked_on = NULL WHERE trail_id = :trail"), {"trail": trail}).rowcount == 1
 
 
-def test_a_client_date_change_drops_verification(conn, users, trail):
+def test_a_date_change_drops_verification(conn, users, trail):
+    """The trigger still guards it, whoever changes the date."""
     alice, _ = users
-    act_as(conn, alice)
     add_log(conn, alice, trail)
-    conn.execute(text("RESET ROLE"))  # the API marks it verified
     conn.execute(
         text("UPDATE public.hike_logs SET verified = true, match_score = 0.9, nights = 1 WHERE trail_id = :trail"),
         {"trail": trail},
     )
-    act_as(conn, alice)
     conn.execute(text("UPDATE public.hike_logs SET note = 'Still verified' WHERE trail_id = :trail"), {"trail": trail})
-    conn.execute(text("RESET ROLE"))
-    row = conn.execute(text("SELECT verified FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).one()
-    assert row.verified is True
-    act_as(conn, alice)
+    assert conn.execute(text("SELECT verified FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}).scalar_one() is True
     conn.execute(text("UPDATE public.hike_logs SET hiked_on = '2020-01-01' WHERE trail_id = :trail"), {"trail": trail})
-    conn.execute(text("RESET ROLE"))
     row = conn.execute(
         text("SELECT verified, match_score, nights FROM public.hike_logs WHERE trail_id = :trail"), {"trail": trail}
     ).one()

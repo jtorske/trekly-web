@@ -44,12 +44,14 @@ def test_every_entry_point_gives_the_same_result(client, auth_headers, trails):
     assert rank_and_milestones(client, one_by_one) == rank_and_milestones(client, in_bulk)
 
 
-def test_editing_a_hike_reports_no_progress(client, auth_headers, alice, trails):
+def test_editing_a_hike_reports_progress_only_for_a_new_date(client, auth_headers, alice, trails):
     headers = auth_headers(alice)
     assert put(client, headers, trails[0], "2026-07-01").json()["progress"]["new_stamps"] == 1
-    edited = put(client, headers, trails[0], "2026-07-02", note="Windy")
-    assert edited.status_code == 200
-    assert edited.json()["progress"] is None
+    noted = put(client, headers, trails[0], "2026-07-01", note="Windy")
+    assert noted.status_code == 200 and noted.json()["progress"] is None
+    # A new date re-evaluates the journal (seasonal and calendar milestones can change).
+    redated = put(client, headers, trails[0], "2026-07-02", note="Windy").json()["progress"]
+    assert redated["new_stamps"] == 0 and redated["stamps"] == 1
 
 
 def test_a_bulk_add_evaluates_the_journal_once(client, auth_headers, alice, trails, monkeypatch):

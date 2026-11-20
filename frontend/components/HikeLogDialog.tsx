@@ -29,6 +29,10 @@ import styles from "./HikeLogDialog.module.css";
  * Add or edit a Trail Journal entry: the date (or "I don't remember", for a
  * hike from before Trekly), an optional note and an optional photo. The photo is resized and re-encoded on the device (which
  * strips its GPS location) before it's uploaded to the user's private folder.
+ *
+ * `post`: editing a hike from its Activity post ("Edit post"). The trail
+ * can't change and the hike can't be removed here (delete the post and log
+ * it again), and sharing stays as it is.
  */
 export default function HikeLogDialog({
   trailName,
@@ -36,12 +40,14 @@ export default function HikeLogDialog({
   onSave,
   onRemove,
   onClose,
+  post = false,
 }: {
   trailName: string;
   entry: HikeLog | null;
   onSave: (input: HikeLogInput) => Promise<unknown>;
-  onRemove: () => Promise<void>;
+  onRemove?: () => Promise<void>;
   onClose: () => void;
+  post?: boolean;
 }) {
   const { user } = useAuth();
   const today = localToday();
@@ -106,8 +112,8 @@ export default function HikeLogDialog({
         hiked_on: undated ? null : date,
         note: note.trim() || null,
         photo_path: photoPath,
-        // Only sent when it can take effect (or to take a post down).
-        ...(shareAllowed || (entry?.shared && !share) ? { share } : {}),
+        // Only sent when it can take effect (or to take a post down); never from a post's own Edit.
+        ...(!post && (shareAllowed || (entry?.shared && !share)) ? { share } : {}),
       });
       // They saw the offer and decided: it doesn't come back.
       if (showNudge) nudge.dismiss();
@@ -126,7 +132,7 @@ export default function HikeLogDialog({
     setBusy("remove");
     setError(null);
     try {
-      await onRemove();
+      await onRemove?.();
       onClose();
     } catch (caught) {
       toast.failure("remove this hike", caught, () => void remove());
@@ -146,7 +152,7 @@ export default function HikeLogDialog({
     </>
   ) : (
     <>
-      {entry && (
+      {entry && onRemove && !post && (
         <button type="button" className={`${ui.ghost} ${styles.removeButton}`} onClick={() => setConfirmRemove(true)} disabled={busy !== null}>
           Remove from journal
         </button>
@@ -162,7 +168,7 @@ export default function HikeLogDialog({
 
   return (
     <Dialog
-      title={entry ? "Edit your hike" : "Mark as hiked"}
+      title={post ? "Edit post" : entry ? "Edit your hike" : "Mark as hiked"}
       subtitle={trailName}
       onClose={onClose}
       busy={busy !== null}
@@ -265,6 +271,11 @@ export default function HikeLogDialog({
           </span>
         </div>
 
+        {post ? (
+          <span className={ui.hint}>
+            To change the trail, delete this post and log the hike again.
+          </span>
+        ) : (
         <div className={ui.field}>
           <label className={`${styles.undated} ${!shareAllowed && !entry?.shared ? styles.shareOff : ""}`}>
             <input
@@ -305,6 +316,7 @@ export default function HikeLogDialog({
             </span>
           )}
         </div>
+        )}
 
         {error && (
           <p className={ui.error} role="alert">

@@ -95,6 +95,10 @@ def standing(db: Session, user_id: UUID) -> Standing:
     return _standing(gather(db, user_id))
 
 
+def standing_from(facts: Facts) -> Standing:
+    return _standing(facts)
+
+
 def _standing(facts: Facts) -> Standing:
     return Standing(milestones=frozenset(earned_ids(facts)), rank_level=rank_for(score(facts).total).level)
 
@@ -157,6 +161,48 @@ def after_hike_saved(
         ):
             db.add(ActivityPost(user_id=user_id, kind="rank", hike_log_id=log.id, rank_level=after.rank_level,
                                 created_at=now + timedelta(microseconds=2)))
+    db.commit()
+
+
+def after_hike_edited(db: Session, user_id: UUID, log: HikeLog, before: Standing) -> None:
+    """Keeps a posted hike's badges true after its date changed: what the new
+    date earns is posted with it (as shared as the hike's post is), and
+    milestones or ranks the journal no longer earns lose their posts. Nothing
+    for a hike that was never posted."""
+    post = hike_post(db, log.id)
+    if post is None:
+        return
+    after = standing(db, user_id)
+    lost = before.milestones - after.milestones
+    if lost:
+        for stale in db.scalars(select(ActivityPost).where(
+            ActivityPost.user_id == user_id, ActivityPost.kind == "milestone", ActivityPost.milestone.in_(lost),
+        )):
+            db.delete(stale)
+    for stale in db.scalars(select(ActivityPost).where(
+        ActivityPost.user_id == user_id, ActivityPost.kind == "rank", ActivityPost.rank_level > after.rank_level,
+    )):
+        db.delete(stale)
+    db.flush()
+    # Folded into the hike's post, right after it.
+    when = post.created_at
+    for milestone_id in sorted(after.milestones - before.milestones):
+        milestone = MILESTONES.get(milestone_id)
+        if milestone is None or milestone.category in UNPOSTED_CATEGORIES:
+            continue
+        if _has(db, ActivityPost.user_id == user_id, ActivityPost.kind == "milestone",
+                ActivityPost.milestone == milestone_id):
+            continue
+        db.add(ActivityPost(
+            user_id=user_id, kind="milestone", hike_log_id=log.id, milestone=milestone_id,
+            reveals_date=milestone.category == "seasons", created_at=when + timedelta(microseconds=1),
+            owner_only=post.owner_only,
+        ))
+    if after.rank_level > before.rank_level and not _has(
+        db, ActivityPost.user_id == user_id, ActivityPost.kind == "rank", ActivityPost.rank_level == after.rank_level
+    ):
+        db.add(ActivityPost(user_id=user_id, kind="rank", hike_log_id=log.id, rank_level=after.rank_level,
+                            created_at=when + timedelta(microseconds=2), owner_only=post.owner_only))
     db.commit()
 
 

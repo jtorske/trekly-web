@@ -102,6 +102,8 @@ class ActivityPost(Base):
     hidden_reason = Column(Text)
     # Its author turned comments off: no new ones (those already there stay).
     comments_off = Column(Boolean, nullable=False, default=False, server_default=false())
+    # A hike post: when its author last changed the hike's note, photo or date ("Edited").
+    edited_at = Column(DateTime(timezone=True))
 
     hike_log = relationship("HikeLog")
     trail = relationship("Trail")

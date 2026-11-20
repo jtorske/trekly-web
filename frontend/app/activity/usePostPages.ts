@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { appendPage, deleteKey, type ActivityPost, type ProfileActivityPage } from "@/lib/activity";
+import { appendPage, deleteKey, type ActivityPost, type ActivitySummary, type ProfileActivityPage } from "@/lib/activity";
 import { useHidden } from "@/lib/useHidden";
 
 export type FetchPostPage = (cursor: string | null, signal?: AbortSignal) => Promise<ProfileActivityPage>;
@@ -14,6 +14,7 @@ interface Pages {
   total: number | null;
   sharing: boolean | null;
   pastHikes: number;
+  summary: ActivitySummary | null;
 }
 
 export interface PostPages {
@@ -24,6 +25,8 @@ export interface PostPages {
   sharing: boolean | null;
   /** Owner only: hikes the "Share your past hikes?" prompt offers (0: don't ask). */
   pastHikes: number;
+  /** Owner only: high fives received, and the most high-fived post. */
+  summary: ActivitySummary | null;
   loading: boolean;
   error: string | null;
   done: boolean;
@@ -67,6 +70,7 @@ export function usePostPages(key: string | null, fetchPage: FetchPostPage): Post
             total: continuing ? prev.total : page.total,
             sharing: continuing ? prev.sharing : page.sharing,
             pastHikes: continuing ? prev.pastHikes : page.past_hikes ?? 0,
+            summary: continuing ? prev.summary : page.summary ?? null,
           };
         });
       } catch (caught) {
@@ -130,6 +134,7 @@ export function usePostPages(key: string | null, fetchPage: FetchPostPage): Post
     total,
     sharing: current?.sharing ?? null,
     pastHikes: current?.pastHikes ?? 0,
+    summary: current?.summary ?? null,
     loading,
     error: shownError,
     done: current?.done ?? false,

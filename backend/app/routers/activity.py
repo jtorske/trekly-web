@@ -11,7 +11,8 @@ next request. Your own posts that others can't see come back to you alone,
 flagged only_you. The milestones and rank a hike earned ride inside that
 hike's post (`earned`).
 
-Who high-fived lists only hikers with a public profile; the rest are a count.
+Who high-fived lists hikers the reader may see (public profiles, ones they
+follow); private profiles and blocked hikers are only a count.
 Trending trails are counts across everyone, never who.
 
 Every response is built from the models below, so only declared fields
@@ -39,7 +40,7 @@ from app.activity import (
     folded_where, is_visible, readable_query,
 )
 from app import feed as blend
-from app.comments import CommentOut, blocked_either_way, previews
+from app.comments import CommentOut, blocked_either_way, is_blocked, previews
 from app.auth import CurrentUser, TokenVerifier, bearer_scheme, get_current_user, get_verifier_dependency
 from app.database import get_db
 from app.follows import FollowState
@@ -51,6 +52,7 @@ from app.models.account import Profile, SavedTrail
 from app.models.activity import ActivityPost, ActivityReaction
 from app.models.hike_log import HikeLog
 from app.models.privacy import ProfileModeration, ProfileSettings
+from app.models.social import Follow
 from app.models.trail import Trail
 from app.points_config import RANKS
 from app.privacy import Visibility, ensure_settings, visibility
@@ -130,6 +132,10 @@ class ActivityPostOut(BaseModel):
     author: ActivityAuthor
     # When it was posted; None when the owner hides their hike dates.
     posted_at: datetime | None
+    # Its author changed the hike's note, photo or date since posting ("Edited"),
+    # and when (None while they hide their hike dates).
+    edited: bool = False
+    edited_at: datetime | None = None
     hike: ActivityHike | None = None
     announcement: ActivityAnnouncement | None = None
     milestone: MilestoneBadgeOut | None = None
@@ -159,6 +165,21 @@ class ActivityPostOut(BaseModel):
     can_comment: bool = False
 
 
+class TopPost(BaseModel):
+    id: UUID
+    # What it's about: a trail, a badge or a rank name.
+    title: str
+    high_fives: int
+
+
+class ActivitySummary(BaseModel):
+    """The owner's own Activity tab only: what their posts have received."""
+
+    high_fives: int
+    # Their most high-fived post (the newest of any tie); None until one has a high five.
+    top_post: TopPost | None = None
+
+
 class ProfileActivityPage(BaseModel):
     items: list[ActivityPostOut]
     # Pass back as `cursor` for the next page; None at the end.
@@ -170,6 +191,8 @@ class ProfileActivityPage(BaseModel):
     # The owner's first page only: how many never-shared hikes the one-time
     # "Share your past hikes?" prompt offers to share (0: don't ask; None: not the owner).
     past_hikes: int | None = None
+    # The owner's first page only: high fives received and their top post.
+    summary: ActivitySummary | None = None
 
 
 class PastHikesIn(BaseModel):
@@ -236,11 +259,19 @@ class HighFiveOut(BaseModel):
     high_fived: bool
 
 
+class HighFiver(ActivityHiker):
+    # Signed in, and not you: whether you follow them (the list's Follow button).
+    follow: FollowState | None = None
+    is_private: bool = False
+
+
 class HighFiversOut(BaseModel):
     high_fives: int
-    # Newest first; only hikers whose profile is public.
-    hikers: list[ActivityHiker]
-    # The rest: private profiles, and anyone past the list's length.
+    # Newest first: hikers this reader may see (a public profile, one they
+    # follow, or themselves), never anyone blocked either way.
+    hikers: list[HighFiver]
+    # The rest ("and 2 others"): private profiles, blocked hikers, and anyone
+    # past the list's length.
     others: int
 
 
@@ -332,6 +363,8 @@ def _out(post, profile, settings, log, public, counts, mine_ids, viewer, badge_d
         mine=mine,
         only_you=mine and not public,
         unshared=mine and bool(post.owner_only),
+        edited=post.edited_at is not None,
+        edited_at=None if hide_dates else post.edited_at,
     )
     if post.kind == "hike":
         out.hike = ActivityHike(
@@ -672,33 +705,48 @@ def high_fivers(
     db: Session = Depends(get_db),
     today: date = Depends(get_today),
 ):
-    """Who high-fived a post anyone can see (or your own): hikers with a public
-    profile by name, newest first; everyone else only in the count."""
+    """Who high-fived a post anyone can see (or your own), newest first: hikers
+    with a public profile, ones you follow and you yourself by name, with your
+    follow state toward each; private profiles and anyone blocked either way
+    only in the count. Never between you and a post's author who blocked you
+    (or whom you blocked)."""
     response.headers.update(NO_STORE)
     post = db.get(ActivityPost, post_id)
     own = post is not None and viewer is not None and post.user_id == viewer.id and post.hidden_at is None
-    if post is None or not (own or is_visible(db, post_id, today)):
+    blocked = post is not None and viewer is not None and not own and is_blocked(db, post.user_id, viewer.id)
+    if post is None or blocked or not (own or is_visible(db, post_id, today)):
         raise HTTPException(status_code=404, detail="Post not found")
     total = db.scalar(
         select(func.count()).select_from(ActivityReaction).where(ActivityReaction.post_id == post_id)
     ) or 0
-    hikers = db.scalars(
-        select(Profile)
+    viewer_id = viewer.id if viewer else None
+    seen = ~ProfileSettings.is_private
+    if viewer_id is not None:
+        followed = exists().where(Follow.follower_id == viewer_id, Follow.followee_id == Profile.id,
+                                  Follow.status == "accepted")
+        seen = and_(or_(seen, followed, Profile.id == viewer_id), ~blocked_either_way(Profile.id, viewer_id))
+    rows = db.execute(
+        select(Profile, ProfileSettings.is_private)
         .join(ActivityReaction, ActivityReaction.user_id == Profile.id)
         .join(ProfileSettings, ProfileSettings.user_id == Profile.id)
         .where(
             ActivityReaction.post_id == post_id,
             Profile.username.is_not(None),
-            ~ProfileSettings.is_private,
             ~exists().where(ProfileModeration.user_id == Profile.id),
+            seen,
         )
         .order_by(ActivityReaction.created_at.desc(), Profile.username)
         .limit(HIGH_FIVERS_SHOWN)
     ).all()
-    labels = labels_for(db, (p.id for p in hikers))
-    out = [ActivityHiker(**_author(p).model_dump(include={"username", "display_name", "avatar_path"}),
-                         label=labels.get(p.id)) for p in hikers]
-    return HighFiversOut(high_fives=total, hikers=out, others=total - len(hikers))
+    labels = labels_for(db, (p.id for p, _ in rows))
+    states = follows.states(db, viewer_id, [p.id for p, _ in rows if p.id != viewer_id]) if viewer_id else {}
+    out = [
+        HighFiver(**_author(p).model_dump(include={"username", "display_name", "avatar_path"}),
+                  label=labels.get(p.id), is_private=bool(private),
+                  follow=None if viewer_id is None or p.id == viewer_id else states.get(p.id, "none"))
+        for p, private in rows
+    ]
+    return HighFiversOut(high_fives=total, hikers=out, others=total - len(out))
 
 
 @router.get("/{post_id}", response_model=ActivityPostOut)
@@ -864,6 +912,33 @@ def my_activity(
         total=None if cursor else _count(db, query),
         sharing=sharing,
         past_hikes=past_hikes_waiting(db, user.id) if ask else 0,
+        summary=None if cursor else _summary(db, user.id),
+    )
+
+
+def _summary(db: Session, user_id: UUID) -> ActivitySummary:
+    """High fives on all their posts, and the post with the most (by anyone,
+    whoever can see it now: it's their own count)."""
+    from app.routers.notifications import _post_title
+
+    counts = (
+        select(ActivityReaction.post_id, func.count().label("n"))
+        .join(ActivityPost, ActivityPost.id == ActivityReaction.post_id)
+        .where(ActivityPost.user_id == user_id)
+        .group_by(ActivityReaction.post_id)
+        .subquery()
+    )
+    total = db.scalar(select(func.coalesce(func.sum(counts.c.n), 0))) or 0
+    top = db.execute(
+        select(ActivityPost, counts.c.n)
+        .join(counts, counts.c.post_id == ActivityPost.id)
+        .options(joinedload(ActivityPost.hike_log).joinedload(HikeLog.trail))
+        .order_by(counts.c.n.desc(), ActivityPost.created_at.desc())
+        .limit(1)
+    ).first()
+    return ActivitySummary(
+        high_fives=int(total),
+        top_post=TopPost(id=top[0].id, title=_post_title(top[0]), high_fives=top[1]) if top else None,
     )
 
 

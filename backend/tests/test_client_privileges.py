@@ -128,7 +128,7 @@ def test_tables_created_later_do_not_get_them_either(conn):
 
 def test_data_grants_that_rls_guards_are_unchanged(conn):
     # The REST API still works for the tables clients use directly.
-    for table, privilege in (("trails", "SELECT"), ("saved_trails", "INSERT"), ("hike_logs", "DELETE"), ("profiles", "UPDATE")):
+    for table, privilege in (("trails", "SELECT"), ("saved_trails", "INSERT"), ("saved_trails", "DELETE"), ("profiles", "UPDATE")):
         assert conn.execute(
             text("SELECT has_table_privilege('authenticated', :table, :privilege)"),
             {"table": f"public.{table}", "privilege": privilege},
@@ -164,3 +164,16 @@ def test_nudge_dismissals_are_out_of_reach_of_clients(conn, role):
     assert refused(conn, "SELECT * FROM public.nudge_dismissals")
     assert refused(conn, "INSERT INTO public.nudge_dismissals (user_id, nudge) VALUES (gen_random_uuid(), 'hiked_by')")
     assert refused(conn, "DELETE FROM public.nudge_dismissals")
+
+
+def test_only_the_api_writes_the_journal(conn):
+    # Edits are screened and mark the post edited (migration a6e3c9f2d8b4).
+    for privilege in ("INSERT", "UPDATE", "DELETE"):
+        assert not conn.execute(
+            text("SELECT has_table_privilege('authenticated', 'public.hike_logs', :privilege)"), {"privilege": privilege}
+        ).scalar_one(), privilege
+        if privilege != "DELETE":
+            assert not conn.execute(
+                text("SELECT has_any_column_privilege('authenticated', 'public.hike_logs', :privilege)"),
+                {"privilege": privilege},
+            ).scalar_one(), privilege

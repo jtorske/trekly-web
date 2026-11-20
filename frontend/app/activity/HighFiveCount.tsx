@@ -1,119 +1,139 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import AccountBadge from "@/components/AccountBadge";
 import Avatar from "@/components/Avatar";
-import { highFiversLine, type ActivityPost, type HighFivers } from "@/lib/activity";
+import Dialog from "@/components/Dialog";
+import FollowButton from "@/components/FollowButton";
+import ui from "@/components/ui.module.css";
+import { highFivesLabel, type ActivityPost, type HighFiver, type HighFivers } from "@/lib/activity";
 import { getHighFivers } from "@/lib/activityApi";
+import { publicProfilePath } from "@/lib/profilesApi";
 import { displayName } from "@/lib/publicProfile";
-import { labeledName } from "@/lib/accountLabels";
 import styles from "./activity.module.css";
 
 /**
- * "3 high fives". Hovering, focusing or tapping it shows who: hikers with a
- * public profile by name, everyone else as "N others". Loaded on first open,
- * and again whenever the count changes.
+ * "3 high fives" in a post's footer; clicking it lists who: avatar, name,
+ * @username and a Follow button for each hiker the reader may see (public
+ * profiles, ones they follow), and "and 2 others" for the rest (private
+ * profiles, blocked hikers). The post's author always sees their count,
+ * "No high fives yet" included; others see nothing until there's one.
  */
 export default function HighFiveCount({
   post,
   signedIn,
   viewer,
 }: {
-  post: Pick<ActivityPost, "id" | "high_fives">;
+  post: Pick<ActivityPost, "id" | "high_fives" | "mine">;
   signedIn: boolean;
   viewer: string | null;
 }) {
   const [open, setOpen] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const [loaded, setLoaded] = useState<{ count: number; data: HighFivers } | null>(null);
-  const [failed, setFailed] = useState(false);
-  const wrap = useRef<HTMLSpanElement>(null);
-  const popId = useId();
   const count = post.high_fives;
-  const fresh = loaded?.count === count ? loaded.data : null;
+
+  if (count === 0) {
+    return post.mine ? <span className={styles.fiveNone}>{highFivesLabel(0)}</span> : null;
+  }
+  return (
+    <>
+      <button
+        type="button"
+        className={styles.fiveCount}
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+      >
+        {highFivesLabel(count)}
+        <span className={ui.srOnly}>: show who</span>
+      </button>
+      {open && <HighFiversDialog postId={post.id} count={count} signedIn={signedIn} viewer={viewer} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function HighFiversDialog({
+  postId,
+  count,
+  signedIn,
+  viewer,
+  onClose,
+}: {
+  postId: string;
+  count: number;
+  signedIn: boolean;
+  viewer: string | null;
+  onClose: () => void;
+}) {
+  const [data, setData] = useState<HighFivers | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (!open || fresh || count === 0) return;
     const controller = new AbortController();
-    getHighFivers(post.id, signedIn, controller.signal)
-      .then((data) => setLoaded({ count, data }))
+    getHighFivers(postId, signedIn, controller.signal)
+      .then(setData)
       .catch((error: unknown) => {
         if ((error as { name?: string }).name !== "AbortError") setFailed(true);
       });
     return () => controller.abort();
-  }, [open, fresh, count, post.id, signedIn]);
+  }, [postId, signedIn, count]);
 
-  // A tap pins it open; tapping elsewhere or Escape closes it.
-  useEffect(() => {
-    if (!pinned) return;
-    const away = (event: PointerEvent) => {
-      if (!wrap.current?.contains(event.target as Node)) {
-        setPinned(false);
-        setOpen(false);
-      }
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPinned(false);
-        setOpen(false);
-      }
-    };
-    document.addEventListener("pointerdown", away);
-    document.addEventListener("keydown", escape);
-    return () => {
-      document.removeEventListener("pointerdown", away);
-      document.removeEventListener("keydown", escape);
-    };
-  }, [pinned]);
-
-  if (count === 0) return null;
-  const label = `${count} high five${count === 1 ? "" : "s"}`;
+  const setFollow = (hiker: HighFiver, state: HighFiver["follow"]) =>
+    setData((current) =>
+      current && {
+        ...current,
+        hikers: current.hikers.map((h) => (h.username === hiker.username ? { ...h, follow: state } : h)),
+      },
+    );
 
   return (
-    <span
-      ref={wrap}
-      className={styles.fiveWrap}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => !pinned && setOpen(false)}
-    >
-      <button
-        type="button"
-        className={styles.fiveCount}
-        aria-expanded={open}
-        aria-controls={popId}
-        aria-label={`${label}. Show who`}
-        onFocus={() => setOpen(true)}
-        onBlur={(event) => {
-          if (!pinned && !wrap.current?.contains(event.relatedTarget as Node)) setOpen(false);
-        }}
-        onClick={() => {
-          setPinned(!pinned);
-          setOpen(!pinned);
-        }}
-      >
-        {label}
-      </button>
-      {open && (
-        <span id={popId} role="status" className={styles.fivePop}>
-          {fresh ? (
-            <>
-              {fresh.hikers.length > 0 && (
-                <span className={styles.fiveFaces} aria-hidden="true">
-                  {fresh.hikers.slice(0, 6).map((hiker) => (
-                    <Avatar key={hiker.username} path={hiker.avatar_path} name={hiker.display_name ?? hiker.username} email={null} size={24} />
-                  ))}
-                </span>
-              )}
-              <span>{highFiversLine(fresh, (hiker) =>
-                  hiker.username === viewer ? "You" : labeledName(displayName(hiker), hiker.label),
-                )}</span>
-            </>
-          ) : failed ? (
-            "Couldn't load who high-fived."
-          ) : (
-            "Loading…"
+    <Dialog title="High fives" subtitle={highFivesLabel(data?.high_fives ?? count)} size="sm" onClose={onClose}>
+      {failed ? (
+        <p className={ui.error}>Couldn&apos;t load who high-fived. Try again in a moment.</p>
+      ) : !data ? (
+        <p className={ui.hint} role="status">
+          Loading…
+        </p>
+      ) : (
+        <>
+          <ul className={styles.fiverList}>
+            {data.hikers.map((hiker) => {
+              const name = displayName(hiker);
+              const you = hiker.username === viewer;
+              return (
+                <li key={hiker.username} className={styles.fiverRow}>
+                  <Link href={publicProfilePath(hiker.username)} className={styles.fiverWho} onClick={onClose}>
+                    <Avatar path={hiker.avatar_path} name={hiker.display_name ?? hiker.username} email={null} size={40} />
+                    <span className={styles.fiverText}>
+                      <span className={styles.fiverName}>
+                        {you ? "You" : name}
+                        <AccountBadge label={hiker.label} compact />
+                      </span>
+                      <span className={styles.fiverHandle}>@{hiker.username}</span>
+                    </span>
+                  </Link>
+                  {hiker.follow !== null && !you && (
+                    <FollowButton
+                      username={hiker.username}
+                      name={name}
+                      state={hiker.follow}
+                      isPrivate={hiker.is_private}
+                      size="sm"
+                      onChange={(state) => setFollow(hiker, state)}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {data.others > 0 && (
+            <p className={ui.hint}>
+              {data.hikers.length > 0 ? "and " : ""}
+              {data.others === 1 ? "1 other hiker" : `${data.others} other hikers`}
+              {data.hikers.length === 0 ? " high-fived this" : ""}
+            </p>
           )}
-        </span>
+        </>
       )}
-    </span>
+    </Dialog>
   );
 }

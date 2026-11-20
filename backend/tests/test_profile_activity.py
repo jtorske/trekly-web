@@ -189,7 +189,8 @@ def test_no_tab_on_a_profile_hidden_by_admins_or_unknown(client, trails, person,
 def test_sharing_on_with_nothing_posted_is_an_empty_tab(client, person):
     person("alice")
     assert profile_count(client, "alice") == 0
-    assert visit(client, "alice") == {"items": [], "next_cursor": None, "total": 0, "sharing": None, "past_hikes": None}
+    assert visit(client, "alice") == {"items": [], "next_cursor": None, "total": 0, "sharing": None, "past_hikes": None,
+                                     "summary": None}
 
 
 def test_a_hidden_journal_leaves_only_rank_posts(client, trails, person):
