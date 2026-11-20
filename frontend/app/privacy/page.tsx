@@ -210,7 +210,9 @@ export default function PrivacyPage() {
           display name and profile picture, plus the note and photo on that hike, without dates if
           you&apos;ve chosen to hide them. Trip plans, alerts and future dates are never shared.
           Turning it off hides your posts right away, and you can delete any post. Other users can
-          give a post a high five or report it; a report includes the post.
+          give a post a high five or report it; a report includes the post. We order your Activity
+          feed using trails you&apos;ve hiked or saved, places on your radar and your home province;
+          this is used only for your own feed and is never shown to others.
         </p>
         <p>
           Trekly shows you notifications in the app when someone follows you, asks to follow you,
