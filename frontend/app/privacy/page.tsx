@@ -210,13 +210,20 @@ export default function PrivacyPage() {
           display name and profile picture, plus the note and photo on that hike, without dates if
           you&apos;ve chosen to hide them. Trip plans, alerts and future dates are never shared.
           Turning it off hides your posts right away, and you can delete any post. Other users can
-          give a post a high five or report it; a report includes the post. We order your Activity
+          give a post a high five or report it; a report includes the post. Signed-in users who can
+          see a post can also comment on it. Your comments show with your username, display name and
+          profile picture to anyone who can see that post, even if your profile is private. You can
+          edit or delete your comments at any time, and a post&apos;s author can delete comments on
+          their post or turn comments off. Comments are checked by our automated moderation like
+          other content. If you and another user have blocked each other, neither of you sees the
+          other&apos;s comments. We order your Activity
           feed using trails you&apos;ve hiked or saved, places on your radar and your home province;
           this is used only for your own feed and is never shown to others.
         </p>
         <p>
           Trekly shows you notifications in the app when someone follows you, asks to follow you,
-          approves your request to follow them, or gives one of your posts a high five. A
+          approves your request to follow them, gives one of your posts a high five, comments on
+          your post, replies to your comment, or mentions you in a comment on a post you can see. A
           notification shows the other person&apos;s username, display name and profile picture,
           and only you can see your notifications. If someone takes back what they did, for example
           by unfollowing you or taking back a high five, its notification is removed. You can turn
@@ -225,7 +232,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           Other signed-in users can report a profile they believe breaks our Terms of Use. A report
-          includes the profile, the trip note if one was reported, the reason and any details
+          includes the profile, the trip note or comment if one was reported, the reason and any details
           given, and the reporter&apos;s account so we can follow up. It&apos;s sent only to us, and
           we never tell the reported person who reported them.
         </p>
@@ -295,7 +302,8 @@ export default function PrivacyPage() {
           limited time under their own retention policies. Moderation records about content you
           posted (scores, reports and decisions) are deleted with your account, except where
           the law requires us to keep them, such as material reported to the police.
-          Reports you sent about others are deleted with your account too.
+          Reports you sent about others are deleted with your account too. Your comments are deleted
+          with your account, along with any replies to them.
         </p>
 
         <h2>Your choices and rights</h2>
