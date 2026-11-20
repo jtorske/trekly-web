@@ -11,6 +11,7 @@ import VisitStreakWatcher from "@/components/VisitStreakWatcher";
 import Toaster from "@/components/Toaster";
 import TopoBackground from "@/components/TopoBackground";
 import OnboardingGate from "@/components/OnboardingGate";
+import PageMemory from "@/components/PageMemory";
 import { isIndexable, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 // Display/heading font: organic, editorial character that complements the
@@ -80,6 +81,7 @@ export default function RootLayout({
           <RankCelebration />
           <MilestoneWatcher />
           <VisitStreakWatcher />
+          <PageMemory />
         </AuthProvider>
       </body>
     </html>

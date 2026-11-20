@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import ReviewNotice from "@/components/ReviewNotice";
 import { partsLabel } from "@/lib/moderation";
 import Link from "next/link";
@@ -17,6 +17,7 @@ import { usernameReady } from "@/lib/usernames";
 import { BIO_LIMIT, initialValues, isDirty, profileUpdate, validateProfile } from "./editProfileForm";
 import { useProfilePhoto } from "./ProfilePhoto";
 import { PHOTO_HINT } from "@/lib/photoPrep";
+import { PROFILE_HREF } from "@/lib/returnTo";
 import { sectionHref } from "./settingsSections";
 import styles from "./settings.module.css";
 
@@ -35,7 +36,13 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
   const [saving, setSaving] = useState(false);
   const usernameStatus = useUsernameStatus(values.username, profile.username);
   const name = profile.display_name || profile.username || "Your";
-  const photo = useProfilePhoto(profile, { size: 64, alt: `${name}'s profile photo` });
+  const changePhoto = useRef<HTMLButtonElement>(null);
+  const photo = useProfilePhoto(profile, {
+    size: 64,
+    alt: `${name}'s profile photo`,
+    href: PROFILE_HREF,
+    triggerRef: changePhoto,
+  });
 
   const dirty = isDirty(values, initial);
   const home = province(values.home_province);
@@ -89,7 +96,9 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
       setValues(next);
       setTriedSave(false);
       const renamed = result.username && result.username !== profile.username;
-      toast.success(renamed ? `Username changed to @${result.username}` : "Profile saved");
+      toast.success(renamed ? `Username changed to @${result.username}` : "Profile saved", {
+        link: { label: "View profile", href: PROFILE_HREF },
+      });
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
         setErrors({ username: caught.message });
@@ -106,12 +115,26 @@ export default function EditProfileSection({ profile }: { profile: Profile }) {
       <div className={`${styles.card} ${styles.identityCard}`}>
         <div className={styles.identity}>
           {photo.avatar}
-          <div className={styles.identityText}>
+          <Link href={PROFILE_HREF} className={styles.identityText}>
             {profile.username && <span className={styles.identityUsername}>@{profile.username}</span>}
             <span className={styles.identityName}>{profile.display_name || "No display name yet"}</span>
-          </div>
+            <span className={ui.srOnly}>View profile</span>
+          </Link>
           <div className={styles.photoButtons}>
-            <button type="button" className={ui.primary} onClick={photo.open} disabled={photo.busy} aria-describedby="photo-hint">
+            <Link href={PROFILE_HREF} className={styles.viewProfile}>
+              View profile
+            </Link>
+            <button
+              ref={changePhoto}
+              type="button"
+              className={ui.primary}
+              onClick={photo.open}
+              disabled={photo.busy}
+              aria-describedby="photo-hint"
+              aria-haspopup={photo.phone ? "dialog" : "menu"}
+              aria-expanded={photo.menuOpen}
+              aria-controls={photo.menuOpen && !photo.phone ? photo.menuId : undefined}
+            >
               {photo.hasPhoto ? "Change photo" : "Add photo"}
             </button>
           </div>

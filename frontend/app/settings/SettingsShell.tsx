@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, Suspense, useContext, useEffect, useRef, type ReactNode } from "react";
+import { createContext, Suspense, useContext, useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { Bell, LogOut, Mail, Mountain, Ruler, ShieldCheck, Trash2, UserRound, type LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import RequireAuth from "@/components/RequireAuth";
 import ui from "@/components/ui.module.css";
 import type { Profile } from "@/lib/accountApi";
 import { useProfile } from "@/lib/useProfile";
+import { backLabel, backLink, LAST_PAGE_KEY, PROFILE_HREF } from "@/lib/returnTo";
 import {
   SETTINGS_GROUPS,
   SETTINGS_HREF,
@@ -73,6 +74,30 @@ function SettingsNav({ current }: { current: string | null }) {
   );
 }
 
+/** Where "← Back to profile" goes: read in the browser (sessionStorage and
+ * the referrer don't exist on the server), /profile until then. The page it
+ * remembers can't change while Settings is open, so there's nothing to watch. */
+const noSubscription = () => () => {};
+
+function backHref(): string {
+  let remembered: string | null = null;
+  try {
+    remembered = sessionStorage.getItem(LAST_PAGE_KEY);
+  } catch {
+    // Storage blocked: the referrer or /profile will do.
+  }
+  return backLink(remembered, document.referrer, window.location.origin).href;
+}
+
+function BackToProfile() {
+  const href = useSyncExternalStore(noSubscription, backHref, () => PROFILE_HREF);
+  return (
+    <Link href={href} className={styles.backToProfile}>
+      <span aria-hidden="true">←</span> {backLabel(href)}
+    </Link>
+  );
+}
+
 function SectionSkeleton() {
   return <div className={`${ui.skeleton} ${styles.skeletonSection}`} aria-busy="true" aria-label="Loading" />;
 }
@@ -109,6 +134,7 @@ function Shell({ children }: { children: ReactNode }) {
     <main className={styles.page} data-view={view}>
       <div className={styles.layout}>
         <div ref={navRef} className={styles.sidebar}>
+          <BackToProfile />
           <h1 id="settings-title" className={styles.title}>
             Settings
           </h1>

@@ -9,7 +9,9 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
+  type RefObject,
 } from "react";
+import Link from "next/link";
 import { Camera, ImageUp, LoaderCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
@@ -54,11 +56,24 @@ const isPhone = () => window.matchMedia(PHONE).matches;
  * Returns the pieces for the caller to place: `avatar` (the button and its
  * menu), `open` (for a separate "Change photo" button), and `status`
  * (progress and errors, as a live region).
+ *
+ * With `href`, the photo is a link there instead (Edit profile's "View
+ * profile"), and the caller's own "Change photo" button, passed as
+ * `triggerRef`, opens the menu and gets focus back when it closes.
  */
-export function useProfilePhoto(profile: Profile, { size, alt }: { size: number; alt: string }) {
+export function useProfilePhoto(
+  profile: Profile,
+  { size, alt, href, triggerRef: callerTrigger }: {
+    size: number;
+    alt: string;
+    href?: string;
+    triggerRef?: RefObject<HTMLButtonElement | null>;
+  },
+) {
   const { user } = useAuth();
   const menuId = useId();
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const ownTrigger = useRef<HTMLButtonElement>(null);
+  const triggerRef = callerTrigger ?? ownTrigger;
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const phone = useSyncExternalStore(subscribePhone, isPhone, () => false);
@@ -96,7 +111,7 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [menu, phone]);
+  }, [menu, phone, triggerRef]);
 
   const choosePhoto = () => {
     setError(null);
@@ -250,6 +265,21 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
 
   const avatar = (
     <div className={styles.wrap}>
+      {href ? (
+        <Link
+          href={href}
+          className={styles.trigger}
+          style={{ "--photo-size": `${size}px` } as CSSProperties}
+          aria-label="View profile"
+        >
+          <Avatar path={profile.avatar_path} preview={preview} name={profile.display_name} email={profile.email} size={size} alt={alt} />
+          {busy && (
+            <span className={`${styles.overlay} ${styles.overlayBusy}`} aria-hidden="true">
+              <LoaderCircle className={styles.spinner} size={24} />
+            </span>
+          )}
+        </Link>
+      ) : (
       <button
         ref={triggerRef}
         type="button"
@@ -283,6 +313,7 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
           </span>
         )}
       </button>
+      )}
 
       <input
         ref={inputRef}
@@ -346,5 +377,5 @@ export function useProfilePhoto(profile: Profile, { size, alt }: { size: number;
     </div>
   );
 
-  return { avatar, open, status, hasPhoto, busy };
+  return { avatar, open, status, hasPhoto, busy, menuOpen: menu !== "closed", menuId, phone };
 }
