@@ -42,6 +42,7 @@ from sqlalchemy.orm import Session
 
 from app.models.account import Profile
 from app.models.privacy import ProfileSettings
+from app.provinces import PROVINCE_CODES
 
 MIN_QUERY = 2
 MAX_QUERY = 60
@@ -110,28 +111,49 @@ class HikerCard:
     same_province: bool = False
 
 
-def cards(db: Session, viewer_id: UUID, entries: list[tuple[UUID, bool, int | None, bool]]) -> list[HikerCard]:
-    """(user_id, opened, common_trails, same_province) -> what each row may show, in order."""
+def cards(db: Session, viewer_id: UUID, entries: list[tuple[UUID, bool, int | None, bool | None]]) -> list[HikerCard]:
+    """(user_id, opened, common_trails, match_province) -> what each row may show, in order.
+
+    match_province asks for the "from your home province" flag (suggestions
+    only). The flag itself is worked out here, never taken from the query:
+    true only when both provinces are known, real provinces (not "Outside
+    Canada"), shown to the viewer, and equal. A missing or hidden province is
+    simply false (the SQL comparison gives NULL there).
+    """
     ids = [entry[0] for entry in entries]
     if not ids:
         return []
     profiles = {p.id: p for p in db.scalars(select(Profile).where(Profile.id.in_(ids)))}
     settings = {s.user_id: s for s in db.scalars(select(ProfileSettings).where(ProfileSettings.user_id.in_(ids)))}
+    viewer_province = None
+    if any(entry[3] for entry in entries):
+        viewer_province = db.scalar(select(Profile.home_province).where(Profile.id == viewer_id))
     out = []
-    for user_id, opened, common_trails, same_province in entries:
+    for user_id, opened, common_trails, match_province in entries:
         profile, setting = profiles.get(user_id), settings.get(user_id)
         if profile is None or setting is None or not profile.username:
             continue  # gone since the search ran
+        show_province = bool(opened and setting.show_home_province and profile.home_province is not None)
         out.append(HikerCard(
             profile=profile,
             is_private=bool(setting.is_private),
-            opened=opened,
-            show_rank=opened and bool(setting.show_rank),
-            show_province=opened and bool(setting.show_home_province) and profile.home_province is not None,
+            opened=bool(opened),
+            show_rank=bool(opened and setting.show_rank),
+            show_province=show_province,
             common_trails=common_trails if opened and setting.show_journal else None,
-            same_province=same_province,
+            same_province=same_province(bool(match_province) and show_province, viewer_province, profile.home_province),
         ))
     return out
+
+
+def same_province(visible: bool, viewer_province: str | None, their_province: str | None) -> bool:
+    """Always a real boolean (see cards)."""
+    return bool(
+        visible
+        and viewer_province in PROVINCE_CODES
+        and their_province in PROVINCE_CODES
+        and viewer_province == their_province
+    )
 
 
 class SearchLimiter:

@@ -492,3 +492,16 @@ def test_the_follow_card_puts_database_suggestions_first(client, person, crowd):
     hikers = get(client, viewer)["suggested_hikers"]
     assert hikers[0]["username"] == "hiker7" and hikers[0]["common_trails"] == 2
     assert len(hikers) == 3
+
+
+def test_a_failing_follow_card_doesnt_fail_the_feed(client, person, crowd, monkeypatch):
+    """Building "Hikers you might know" is optional: if it breaks, the feed
+    still loads, with the box empty (production 500, 2026-11-21)."""
+    import app.hiker_search
+
+    def broken(*args, **kwargs):
+        raise ValueError("boom")
+
+    monkeypatch.setattr(app.hiker_search, "cards", broken)
+    body = get(client, person("viewer"))
+    assert body["suggested_hikers"] == [] and len(body["items"]) > 0

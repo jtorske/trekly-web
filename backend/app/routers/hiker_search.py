@@ -78,12 +78,12 @@ def _out(db: Session, viewer_id: UUID, found: list[HikerCard]) -> list[HikerOut]
             username=card.profile.username,
             display_name=card.profile.display_name,
             avatar_path=card.profile.avatar_path,
-            is_private=card.is_private,
-            follow=states.get(card.profile.id, "none"),
+            is_private=bool(card.is_private),
+            follow=states.get(card.profile.id) or "none",
             rank=rank,
             home_province=card.profile.home_province if card.show_province else None,
             common_trails=card.common_trails,
-            same_province=card.same_province,
+            same_province=card.same_province is True,
         ))
     return items
 
@@ -128,5 +128,5 @@ def suggested_hikers(
     response.headers.update(NO_STORE)
     hits = finder.suggest(db, user.id, SUGGESTIONS)
     # Suggestions are all community members: public, journal shown.
-    found = cards(db, user.id, [(hit.user_id, True, hit.common_trails, hit.same_province) for hit in hits])
+    found = cards(db, user.id, [(hit.user_id, True, hit.common_trails, True) for hit in hits])
     return Suggestions(items=_out(db, user.id, found))

@@ -265,3 +265,66 @@ def test_findable_is_off_by_default_and_can_be_turned_on(client, viewer):
     assert client.get("/api/me/privacy", headers=headers).json()["findable_in_search"] is False
     set_privacy(client, viewer, findable_in_search=True)
     assert client.get("/api/me/privacy", headers=headers).json()["findable_in_search"] is True
+
+
+# ------------------------------------- same_province is always a real boolean
+#
+# Production 500 (2026-11-21): suggest_hikers() compares provinces in SQL, so
+# a viewer or hiker without one gave NULL, and HikerOut refused None. The
+# flag is now worked out in Python; these cover every way it can be missing.
+
+PROVINCE_CASES = [
+    # viewer province, their province, they show it, what SQL said, expected
+    pytest.param(None, None, False, None, False, id="neither-has-one"),
+    pytest.param(None, "AB", True, None, False, id="viewer-has-none"),
+    pytest.param("AB", None, False, None, False, id="hiker-has-none"),
+    pytest.param("AB", "AB", False, None, False, id="hiker-hides-it"),
+    pytest.param("outside", "outside", True, True, False, id="both-outside-canada"),
+    pytest.param("AB", "outside", True, None, False, id="hiker-outside-canada"),
+    pytest.param("AB", "BC", True, False, False, id="different-provinces"),
+    pytest.param("AB", "AB", True, False, True, id="same-province-shown"),
+]
+
+
+def province_pair(person, mine, theirs, shown):  # noqa: F811
+    viewer = person("viewer", province=mine)
+    them = person("them", province=theirs, show_home_province=shown)
+    return viewer, them
+
+
+@pytest.mark.parametrize("mine, theirs, shown, from_sql, expected", PROVINCE_CASES)
+def test_suggested_hikers_same_province_never_null(client, finder, person, mine, theirs, shown, from_sql, expected):  # noqa: F811
+    viewer, them = province_pair(person, mine, theirs, shown)
+    finder.suggestions = [Suggestion(them["id"], 1, from_sql)]
+    response = client.get("/api/me/suggested-hikers", headers=viewer["headers"])
+    assert response.status_code == 200, response.text
+    assert only(response.json())["same_province"] is expected
+
+
+@pytest.mark.parametrize("mine, theirs, shown, from_sql, expected", PROVINCE_CASES)
+def test_activity_feed_suggested_hikers_same_province_never_null(
+    client, person, mine, theirs, shown, from_sql, expected,  # noqa: F811
+):
+    from app.routers.activity import get_feed_finder
+
+    viewer, them = province_pair(person, mine, theirs, shown)
+
+    class One:
+        def suggest(self, db, viewer_id, limit):
+            return [Suggestion(them["id"], 1, from_sql)]
+
+    app.dependency_overrides[get_feed_finder] = lambda: One()
+    try:
+        response = client.get("/api/activity", headers=viewer["headers"])
+    finally:
+        app.dependency_overrides.pop(get_feed_finder, None)
+    assert response.status_code == 200, response.text
+    hikers = response.json()["suggested_hikers"]
+    assert [h["username"] for h in hikers] == ["them"]
+    assert hikers[0]["same_province"] is expected
+
+
+def test_search_rows_never_claim_same_province(client, finder, limiter, viewer, person):  # noqa: F811
+    jordan = person("jordan", province="AB", show_home_province=True)
+    finder.hits = [hit(jordan)]
+    assert only(search(client, viewer))["same_province"] is False

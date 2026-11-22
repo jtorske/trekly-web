@@ -20,6 +20,7 @@ leave the API: never a user id, email, the hike's created date, or the
 date of a hike whose owner hides dates.
 """
 
+import logging
 from datetime import date, datetime, timedelta, timezone
 from typing import Literal
 from uuid import UUID
@@ -59,6 +60,8 @@ from app.privacy import Visibility, ensure_settings, visibility
 from app.routers.availability import get_today
 from app.routers.trails import live_trails
 from app.schemas.trail import TrailListItemOut
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/activity", tags=["activity"])
 # A profile's Activity tab (/u/{username}), and the owner's own view of theirs (/profile).
@@ -581,8 +584,9 @@ def _suggested_hikers(db: Session, viewer: CurrentUser, entries: list[blend.Entr
     try:
         with db.begin_nested():
             for hit in finder.suggest(db, viewer.id, SUGGESTED_HIKERS):
-                picked.append((hit.user_id, True, hit.common_trails, hit.same_province))
+                picked.append((hit.user_id, True, hit.common_trails, True))
     except Exception:  # noqa: BLE001 - the suggestions are optional (and Postgres-only)
+        logger.warning("suggest_hikers failed for the feed", exc_info=True)
         picked = []
     taken = {entry[0] for entry in picked}
     states = follows.states(db, viewer.id, [e.post.user_id for e in entries if e.post is not None])
@@ -657,7 +661,13 @@ def feed(
     end = offset + limit
     hikers = None
     if viewer is not None and offset == 0 and not reader.following:
-        hikers = _suggested_hikers(db, viewer, entries, finder)
+        # Optional: a failure here leaves the box empty, never fails the feed.
+        try:
+            with db.begin_nested():
+                hikers = _suggested_hikers(db, viewer, entries, finder)
+        except Exception:  # noqa: BLE001
+            logger.exception("suggested hikers failed; feed served without them")
+            hikers = []
     return ActivityPage(
         items=items,
         entries=out,

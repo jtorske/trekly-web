@@ -1,7 +1,9 @@
+import logging
 import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse
 
 from app.routers import (
     activity,
@@ -71,6 +73,49 @@ app = FastAPI(
     **({} if docs_enabled() else {"docs_url": None, "redoc_url": None, "openapi_url": None})
 )
 
+logger = logging.getLogger("app.errors")
+
+
+class JsonServerErrors:
+    """Unexpected exceptions become a JSON 500 *inside* CORSMiddleware.
+
+    Starlette's own handler for them sits outside every middleware, so its
+    plain-text 500 carries no CORS headers and the browser reports a CORS
+    block instead of the real error. This one is added before CORS (so it
+    runs inside it) and its response gets the headers like any other.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        started = False
+
+        async def tracking_send(message):
+            nonlocal started
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, tracking_send)
+        except Exception:
+            logger.exception("Unhandled error on %s %s", scope.get("method"), scope.get("path"))
+            if started:
+                raise  # too late to send a different response
+            response = JSONResponse(
+                {"detail": "Something went wrong on our side. Try again in a moment."},
+                status_code=500,
+                headers={"Cache-Control": "no-store"},
+            )
+            await response(scope, receive, send)
+
+
+# Order matters: the last added runs first, so CORS wraps the error handler.
+app.add_middleware(JsonServerErrors)
 app.add_middleware(CORSMiddleware, **cors_options())
 
 app.include_router(trails.router)

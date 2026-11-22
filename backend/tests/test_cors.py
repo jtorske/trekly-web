@@ -71,3 +71,28 @@ def test_api_docs_are_on_locally_and_off_on_render():
     assert docs_enabled({"RENDER": "true", "API_DOCS": "true"}) is True
     assert docs_enabled({"API_DOCS": "false"}) is False
 
+
+
+def test_unexpected_errors_are_json_with_cors_headers():
+    """A crash still reaches the browser as a readable JSON 500, not a CORS block."""
+    from app.main import JsonServerErrors
+
+    app = FastAPI()
+    app.add_middleware(JsonServerErrors)
+    app.add_middleware(CORSMiddleware, **cors_options({}))
+
+    @app.get("/boom")
+    def boom():
+        raise RuntimeError("boom")
+
+    response = TestClient(app).get("/boom", headers={"Origin": "http://localhost:3000"})
+    assert response.status_code == 500
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+    assert response.json() == {"detail": "Something went wrong on our side. Try again in a moment."}
+
+
+def test_the_real_app_puts_the_error_handler_inside_cors():
+    from app.main import JsonServerErrors, app
+
+    order = [m.cls for m in app.user_middleware]  # outermost first
+    assert order.index(CORSMiddleware) < order.index(JsonServerErrors)
