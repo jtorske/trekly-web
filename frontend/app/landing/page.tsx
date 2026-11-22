@@ -25,8 +25,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   // Brand first, so searches for "Trekly" match it at a glance.
   title: { absolute: SITE_TITLE },
-  // Served at both / and /landing; / is the one to index.
-  alternates: { canonical: "/" },
+  alternates: { canonical: absoluteUrl("/") },
   description:
     "Find Canada's best hikes, from day trips to multi-night routes. Check backcountry campsites, plan your trip and pack the right gear.",
 };

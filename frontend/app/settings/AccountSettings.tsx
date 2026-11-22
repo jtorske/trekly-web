@@ -213,7 +213,7 @@ export function SignOut() {
 
   const go = async () => {
     setBusy(true);
-    await signOut("/landing");
+    await signOut("/");
   };
 
   return confirming ? (
@@ -252,7 +252,7 @@ export function DeleteAccount() {
         await removeImages(bucket, paths);
       }
       await deleteAccount(typed);
-      await signOut("/landing?account=deleted");
+      await signOut("/?account=deleted");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "We couldn't delete your account. Nothing was removed from it.");
       setBusy(false);

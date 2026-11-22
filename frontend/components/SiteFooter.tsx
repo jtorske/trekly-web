@@ -29,7 +29,7 @@ export default function SiteFooter() {
   const pathname = usePathname();
   // The landing hero carries its own footer, overlaid on the photo; the
   // Trail Journal is a single screen that never scrolls.
-  if (pathname === "/landing" || pathname === "/" || pathname === "/journal" || isFullPage(pathname)) return null;
+  if (pathname === "/" || pathname === "/journal" || isFullPage(pathname)) return null;
   // Profiles are one screen on desktop too, with the tab content scrolling.
   const shell = pathname === "/profile" || pathname.startsWith("/u/");
   // So is the gear page, from 1100px.

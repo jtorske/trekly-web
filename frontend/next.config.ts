@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The landing page is served at / only; old links and bookmarks to
+      // /landing get a 301 so search engines fold them into /.
+      { source: "/landing", destination: "/", statusCode: 301 },
       // Saved trails live on a profile tab now; old links and bookmarks land there.
       { source: "/saved-trails", destination: "/profile?tab=trails", permanent: false },
       // Search lives in Explore's box now. The query string comes along, so

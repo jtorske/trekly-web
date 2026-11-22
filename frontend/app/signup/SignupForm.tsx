@@ -131,7 +131,7 @@ export default function SignupForm() {
         <div className={styles.shade} />
         <p className={styles.tagline}>Every great trip starts with a plan.</p>
       </div>
-      <Link href="/landing" className={styles.logoLink} aria-label="Trekly home">
+      <Link href="/" className={styles.logoLink} aria-label="Trekly home">
         <span className={styles.logo} />
       </Link>
 

@@ -35,7 +35,7 @@ export default function Navbar() {
   const isAuthPage = /^\/(login|signup|forgot-password|reset-password|auth)/.test(pathname);
   // Only the landing hero (a dark photo) keeps the see-through cream bar;
   // everywhere else the header is paper, blending into the topo background.
-  const hasHero = pathname === "/landing" || pathname === "/";
+  const hasHero = pathname === "/";
   const overHero = hasHero && !isPastHero;
   const returnTo = isAuthPage ? "" : nextQuery(pathname);
 
@@ -105,7 +105,7 @@ export default function Navbar() {
         overHero ? styles.hero : isScrolled ? styles.scrolled : ""
       }`}
     >
-      <Link href="/landing" aria-label="Trekly home" className={styles.logoLink}>
+      <Link href="/" aria-label="Trekly home" className={styles.logoLink}>
         {/* The logo SVG as a mask, filled with the current text colour: ink on
             paper, cream over the hero photo. */}
         <span className={styles.logo} />

@@ -100,7 +100,7 @@ export function LogOutRow({ item = {}, className = "" }: { item?: ItemProps; cla
       disabled={signingOut}
       onClick={() => {
         setSigningOut(true);
-        void signOut("/landing");
+        void signOut("/");
       }}
     >
       <RowIcon icon={LogOut} />

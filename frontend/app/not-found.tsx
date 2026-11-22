@@ -16,7 +16,7 @@ export default function NotFound() {
           The page you&apos;re looking for doesn&apos;t exist or has moved.
         </p>
         <div className={styles.links}>
-          <Link href="/landing" className={styles.link}>
+          <Link href="/" className={styles.link}>
             Back to Trekly
           </Link>
           <Link href="/trail-list" className={styles.link}>
