@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 import PublicProfileNotice from "@/components/PublicProfileNotice";
@@ -83,6 +84,8 @@ export default function RootLayout({
           <VisitStreakWatcher />
           <PageMemory />
         </AuthProvider>
+        {/* Vercel Web Analytics: page views, posted same-origin to /_vercel/insights. */}
+        <Analytics />
       </body>
     </html>
   );

@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
     "@swc/helpers": "^0.5.23",
+    "@vercel/analytics": "^2.0.1",
     "heic-to": "1.6.6",
     "lucide-react": "^1.63.0",
     "maplibre-gl": "6.14.0",
