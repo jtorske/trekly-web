@@ -248,6 +248,16 @@ docs/                Design notes: accounts and RLS, gear catalogue, backcountry
 render.yaml          Render Blueprint for the API
 ```
 
+## Known follow-ups
+
+- **supabase-js on every page.** The root layout's `AuthProvider` imports
+  `@supabase/supabase-js`, so every page, signed in or not, downloads a
+  ~65 KB chunk that Lighthouse reports as ~83% unused (realtime, storage and
+  PostgREST code the page never calls). Loading the client lazily, or only
+  the auth part, would trim it, but it means restructuring how the session
+  is restored on load. Deferred on purpose (2026-11-23): auth is too risky
+  to reshuffle for 65 KB.
+
 ## Copyright
 
 © 2026 Jordan Torske. All rights reserved. The source is public for reference
