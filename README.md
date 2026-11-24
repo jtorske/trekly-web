@@ -196,7 +196,7 @@ workflow sets these:
 
 | Piece | Where | How |
 | --- | --- | --- |
-| Frontend | Vercel project `trekly-web`, Root Directory `frontend` | Deployed with the Vercel CLI; the GitHub integration isn't connected yet |
+| Frontend | Vercel project `trekly-web`, Root Directory `frontend` | Git integration: every push to `master` deploys to production |
 | API | Render web service `trekly-api` | Blueprint in [`render.yaml`](render.yaml): Docker build from `backend/`, auto-deploys on push |
 | Alert poller | GitHub Actions | [`.github/workflows/alert-poller.yml`](.github/workflows/alert-poller.yml), every 30 minutes plus manual runs |
 | Database & auth | Supabase hosted project | Migrations and seed scripts are run by hand from `backend/` |
@@ -204,10 +204,12 @@ workflow sets these:
 **Where each secret goes**
 
 - **Vercel** (Preview and Production): `NEXT_PUBLIC_SUPABASE_URL`,
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_API_URL`.
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_API_URL`. Production only:
+  `NEXT_PUBLIC_SENTRY_DSN`, and optionally `SENTRY_AUTH_TOKEN`,
+  `SENTRY_ORG`, `SENTRY_PROJECT` (see Error monitoring below).
 - **Render** (entered in the dashboard, never in `render.yaml`):
   `DATABASE_URL`, `SUPABASE_URL`, `CORS_ORIGINS`, `CORS_ORIGIN_REGEX`,
-  `APP_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (the API sends the
+  `APP_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `SENTRY_DSN` (the API sends the
   "we're watching" and "check now" emails). Use Supabase's pooler connection string (session mode) for
   `DATABASE_URL`, because the direct database host is IPv6-only and Render
   can't reach it.
@@ -215,6 +217,37 @@ workflow sets these:
   `RESEND_API_KEY`, `RESEND_FROM_EMAIL`. Until all four are set, the
   workflow skips the run with a warning instead of using up alerts without
   sending email.
+
+### Error monitoring (Sentry)
+
+Sentry (free tier) collects unexpected errors from the site and the API, in
+organization `trekly-zo`: project `trekly-frontend` (Next.js: browser,
+server and edge) and project `trekly-server` (FastAPI). Each side stays off
+until its DSN is set: `NEXT_PUBLIC_SENTRY_DSN` in Vercel, `SENTRY_DSN` on
+Render.
+
+- **What's sent:** errors only, plus a 10% sample of production traces.
+  Expected errors are dropped: API 4xx answers (401, 403, 404, moderation
+  rejections, rate limits), Supabase sign-in 4xx and aborted requests. No
+  Session Replay.
+- **No personal data:** `sendDefaultPii` is off, tracebacks carry no local
+  variables, and every event is scrubbed of email addresses, JWTs, auth
+  headers, cookies, request bodies and token/code/email URL parameters
+  (Supabase puts session tokens in the URL hash). The user is reduced to its
+  id. The rules are in `frontend/lib/sentryScrub.ts` and
+  `backend/app/observability.py`, with tests.
+- **Tags:** `environment` is `production`, `preview` or `local`; `release`
+  is the git commit SHA (`VERCEL_GIT_COMMIT_SHA`, `RENDER_GIT_COMMIT`).
+- **The DSN is read at build time** on the frontend: after changing
+  `NEXT_PUBLIC_SENTRY_DSN`, redeploy, or nothing changes. The build also
+  adds the DSN's ingest host to the Content-Security-Policy `connect-src`.
+- **Readable frontend stack traces** need source maps uploaded at build
+  time: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` (`trekly-zo`) and
+  `SENTRY_PROJECT` (`trekly-frontend`) in Vercel. Without them, production
+  frames are minified. Backend traces are always readable.
+- **Checking it works:** `POST /api/admin/sentry-test` (admins only) raises
+  on purpose and should appear in `trekly-server`; an uncaught error thrown
+  in the live site should appear in `trekly-frontend`.
 
 Supabase dashboard settings (email confirmation, redirect URLs, password
 policy, SMTP) are listed in
