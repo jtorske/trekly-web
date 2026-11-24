@@ -28,7 +28,8 @@ WINTER_PATH = Path(__file__).resolve().parents[1] / "catalog_data" / "trail_wint
 WINTER_ACTIVITIES = ("winter_hike", "snowshoe", "xc_ski")
 AVALANCHE_EXPOSURES = ("none", "simple", "challenging", "complex", "unknown")
 FIELDS = ("winter_activities", "avalanche_exposure", "avalanche_source_url",
-          "winter_access_note", "winter_notes", "winter_route_ends", "winter_source_url")
+          "winter_access_note", "winter_notes", "winter_route_ends", "winter_source_url",
+          "winter_report_url")
 DEFAULTS = {
     "winter_activities": [],
     "avalanche_exposure": "unknown",
@@ -37,6 +38,7 @@ DEFAULTS = {
     "winter_notes": None,
     "winter_route_ends": None,
     "winter_source_url": None,
+    "winter_report_url": None,
 }
 
 
@@ -64,7 +66,7 @@ def validate(entry: dict) -> dict:
         raise WinterDataError(f"{label}: winter_route_ends only applies to a winter route")
     if activities and not values["winter_source_url"]:
         raise WinterDataError(f"{label}: winter activities need a source URL")
-    for field in ("avalanche_source_url", "winter_source_url"):
+    for field in ("avalanche_source_url", "winter_source_url", "winter_report_url"):
         url = values[field]
         if url and not url.startswith("https://"):
             raise WinterDataError(f"{label}: {field} must be an https URL")

@@ -94,6 +94,8 @@ class Trail(Base):
     # summer distance and gain then don't describe the winter outing.
     winter_route_ends = Column(Text)
     winter_source_url = Column(Text)
+    # The official grooming / trail conditions report to check before going.
+    winter_report_url = Column(Text)
     # Catalogue ordering. popularity_source says where the score came from
     # ('editorial' today; a blend with saved_trails counts later), so ranks can
     # be recomputed without another schema change. Null for retired trails.

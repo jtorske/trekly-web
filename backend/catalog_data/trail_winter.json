@@ -629,6 +629,209 @@
    "winter_route_ends": null,
    "winter_source_url": "https://algonquinpark.on.ca/pdf/winter_guide_algonquin_park.pdf",
    "review_flag": "Source is the park's winter guide PDF (Friends of Algonquin site)"
+  },
+  {
+   "name": "Moraine Lake Road",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe",
+    "xc_ski"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": "Closed to vehicles in winter. No dogs.",
+   "winter_notes": "Groomed: double track-set with a skating lane; Parks Canada grooms its Lake Louise ski trails about twice a week. Track-setting ends at the Consolation Valley viewpoint; past it the road crosses large avalanche paths.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Lake Louise Lakeshore",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "The trail beyond the end of the lake leads to dangerous avalanche terrain: turn back at the end of the lake.",
+   "winter_route_ends": "The end of the lake (2.3 km one way).",
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Great Divide (Lake Louise)",
+   "province_code": "AB",
+   "winter_activities": [
+    "xc_ski"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Groomed: double track-set with a skating lane, about twice a week (Parks Canada). Grooming is irregular past the Alberta-BC border.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Louise Creek",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Starts on the downstream side of the Bow River bridge, near Samson Mall.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Fenland Trail",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Flat; icy sections are common.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Marsh Loop",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Starts at the Cave and Basin National Historic Site parking lot.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Spray River West",
+   "province_code": "AB",
+   "winter_activities": [
+    "xc_ski"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": "Trailhead past the Fairmont Banff Springs Hotel. Bikes are prohibited in winter.",
+   "winter_notes": "Groomed: double track-set with a skate-skiing lane (Parks Canada). Avalanche paths from Sulphur Mountain cross the trail 4.5-5 km from the trailhead: do not stop in this area.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/banff",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/banff/activ/randonnee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Moose Lake Loop",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "User-tracked, not groomed. Starts from the Bald Hills parking area. Ensure safe ice before going onto a lake.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/lac-maligne-lake",
+   "winter_report_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins"
+  },
+  {
+   "name": "Wapta Falls",
+   "province_code": "BC",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": "Eastbound access only from Highway 1, at the Wapta Falls winter parking lot.",
+   "winter_notes": "Mist makes the lower section by the falls icy.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails",
+   "winter_report_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/randonnee-hike/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Ross Lake",
+   "province_code": "BC",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Follow Lake O'Hara Road to the Ross Lake trailhead. Beyond the Ross Lake loop, the Lake O'Hara Fire Road travels through avalanche zones.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails",
+   "winter_report_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/randonnee-hike/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Meadows in the Sky Parkway",
+   "province_code": "BC",
+   "winter_activities": [
+    "xc_ski",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": "Closed to vehicles past the gate by the Welcome Kiosk; park at the turnaround before the gate. The road is plowed as a secondary road after big snowfalls.",
+   "winter_notes": "Track-set by the Illecillewaet Greenbelt Society for 6.5 km to the Monashee Cabin. Only the lower parkway is rated Simple; Mount Revelstoke is avalanche country.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter",
+   "winter_report_url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/randonee-hiking/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Chignecto Ski Trails",
+   "province_code": "NB",
+   "winter_activities": [
+    "xc_ski",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Start at the Chignecto Recreation Area parking lot.",
+   "winter_notes": "Over 18 km of groomed ski trails in loops of different lengths (for example Blue 6.2 km, Black 4.6 km). Classic skiers only on the set track; other users stay on the other half.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://www.parks.canada.ca/pn-np/nb/fundy/activ/hiver-winter/ski",
+   "winter_report_url": "https://parks.canada.ca/pn-np/nb/fundy/visit/etat-sentiers-trail-conditions"
+  },
+  {
+   "name": "Gros Morne Visitor Centre Ski Trails",
+   "province_code": "NL",
+   "winter_activities": [
+    "xc_ski"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "10.8 km in seven connected loops, regularly groomed by the park with the Gros Morne Co-operating Association, mostly for classic skiing. The Owl Trail is lit until 10 pm. Season: January to April.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/xcountryski",
+   "winter_report_url": null
+  },
+  {
+   "name": "Cyprus Lake Ski Trail",
+   "province_code": "ON",
+   "winter_activities": [
+    "xc_ski"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Register your vehicle at the Cyprus Lake Office (5 km in from Highway 6). Snow tires recommended.",
+   "winter_notes": "Groomed only when conditions allow, as a single classic track. Open 9 am to 5 pm. For conditions, call the Cyprus Lake Campground Office at 519 596 2233.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/on/bruce/activ/hiver-winter/hiver-winter-activ",
+   "winter_report_url": null
   }
  ]
 }

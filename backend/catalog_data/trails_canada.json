@@ -5000,6 +5000,625 @@
           "elevation_gain_m: not sourced yet"
         ]
       }
+    },
+    {
+      "rank": 132,
+      "name": "Moraine Lake Road",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.413474,
+      "longitude": -116.190901,
+      "route_type": "out_and_back",
+      "distance_km": 17.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": 435,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "The closed Moraine Lake Road, track-set for classic and skate skiing to a view of the Ten Peaks.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/301425022",
+          "feature": "Moraine Lake Road",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 133,
+      "name": "Lake Louise Lakeshore",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.41715,
+      "longitude": -116.2185,
+      "route_type": "out_and_back",
+      "distance_km": 4.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": 200,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A winter walk from the Chateau along the frozen shore of Lake Louise.",
+      "verification": {
+        "coordinates": {
+          "osm": "relation/18238906",
+          "feature": "The Fairmont Chateau Lake Louise",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": []
+    },
+    {
+      "rank": 134,
+      "name": "Great Divide (Lake Louise)",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.423278,
+      "longitude": -116.210596,
+      "route_type": "out_and_back",
+      "distance_km": 19.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": 320,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "The old Highway 1A from Lake Louise to the Great Divide, track-set for classic and skate skiing.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1559341503",
+          "feature": "Old Highway 1A",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 135,
+      "name": "Louise Creek",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.419066,
+      "longitude": -116.182905,
+      "route_type": "out_and_back",
+      "distance_km": 5.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": 205,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A forest trail beside Louise Creek from the village up to Lake Louise.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/445116428",
+          "feature": "Louise Creek Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": []
+    },
+    {
+      "rank": 136,
+      "name": "Fenland Trail",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.181293,
+      "longitude": -115.579278,
+      "route_type": "loop",
+      "distance_km": 2.1,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A flat forest loop beside Forty Mile Creek on the edge of Banff.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/24785579",
+          "feature": "Fenland Trail",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+          ],
+          "note": "the park's loop length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": []
+    },
+    {
+      "rank": 137,
+      "name": "Marsh Loop",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.169688,
+      "longitude": -115.589041,
+      "route_type": "loop",
+      "distance_km": 2.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A loop through the warm-spring marshes below the Cave and Basin.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/10908385271",
+          "feature": "Cave and Basin gift shop",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+          ],
+          "note": "the park's loop length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": []
+    },
+    {
+      "rank": 138,
+      "name": "Spray River West",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Banff National Park, AB",
+      "park_name": "Banff National Park",
+      "park_type": "national",
+      "latitude": 51.160959,
+      "longitude": -115.559827,
+      "route_type": "out_and_back",
+      "distance_km": 11.2,
+      "max_elevation_m": null,
+      "elevation_gain_m": 175,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A track-set ski trail up the Spray River valley from the Banff Springs to the Spray River bridge.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/532857294",
+          "feature": "Spray River West Trailhead",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/banff"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/banff"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 139,
+      "name": "Moose Lake Loop",
+      "country_code": "CA",
+      "province_code": "AB",
+      "region": "Jasper National Park, AB",
+      "park_name": "Jasper National Park",
+      "park_type": "national",
+      "latitude": 52.728239,
+      "longitude": -117.644372,
+      "route_type": "loop",
+      "distance_km": 2.6,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A short forest loop to Moose Lake near the north end of Maligne Lake.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/4336196152",
+          "feature": "Maligne lake outlet",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/lac-maligne-lake"
+          ],
+          "note": "the park's loop length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": []
+    },
+    {
+      "rank": 140,
+      "name": "Wapta Falls",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Yoho National Park, BC",
+      "park_name": "Yoho National Park",
+      "park_type": "national",
+      "latitude": 51.218128,
+      "longitude": -116.59258,
+      "route_type": "out_and_back",
+      "distance_km": 8.8,
+      "max_elevation_m": null,
+      "elevation_gain_m": 310,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A snowshoe along the closed access road and forest trail to the Kicking Horse River's biggest falls.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/157804025",
+          "feature": "Wapta Falls Road",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+          ],
+          "note": "one-way gain plus loss from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 141,
+      "name": "Ross Lake",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Yoho National Park, BC",
+      "park_name": "Yoho National Park",
+      "park_type": "national",
+      "latitude": 51.44465,
+      "longitude": -116.329381,
+      "route_type": "loop",
+      "distance_km": 8.2,
+      "max_elevation_m": null,
+      "elevation_gain_m": 260,
+      "terrain_difficulty": "moderate",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "A snowshoe loop from the Lake O'Hara parking lot to Ross Lake below Mount Niblock.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/298739416",
+          "feature": "Lake O'Hara parking",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+          ],
+          "note": "loop gain from the park's table"
+        },
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+          ],
+          "note": "the park's loop length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 142,
+      "name": "Meadows in the Sky Parkway",
+      "country_code": "CA",
+      "province_code": "BC",
+      "region": "Mount Revelstoke National Park, BC",
+      "park_name": "Mount Revelstoke National Park",
+      "park_type": "national",
+      "latitude": 51.018373,
+      "longitude": -118.205194,
+      "route_type": "out_and_back",
+      "distance_km": 13.0,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "alpine",
+      "description": "The parkway up Mount Revelstoke, closed to cars in winter and track-set to the Monashee Cabin.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/6939784159",
+          "feature": "Meadows-in-the-Sky Parkway winter gate",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": {
+          "source": "published",
+          "sources": [
+            "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter"
+          ],
+          "note": "round trip: twice the park's one-way length"
+        },
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 143,
+      "name": "Chignecto Ski Trails",
+      "country_code": "CA",
+      "province_code": "NB",
+      "region": "Fundy National Park, NB",
+      "park_name": "Fundy National Park",
+      "park_type": "national",
+      "latitude": 45.602876,
+      "longitude": -64.987278,
+      "route_type": null,
+      "distance_km": null,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Fundy's colour-coded loops of groomed ski and snowshoe trails at the Chignecto Recreation Area.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/357542572",
+          "feature": "Chignecto Recreation Area",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": null,
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "distance_km: a trail network, no single length"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 144,
+      "name": "Gros Morne Visitor Centre Ski Trails",
+      "country_code": "CA",
+      "province_code": "NL",
+      "region": "Gros Morne National Park, NL",
+      "park_name": "Gros Morne National Park",
+      "park_type": "national",
+      "latitude": 49.57221,
+      "longitude": -57.875035,
+      "route_type": null,
+      "distance_km": null,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "coastal_temperate",
+      "description": "Seven connected loops of groomed ski trails at the park's visitor centre near Rocky Harbour.",
+      "verification": {
+        "coordinates": {
+          "osm": "node/475756548",
+          "feature": "Gros Morne Visitor Information Centre",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": null,
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "distance_km: a trail network, no single length"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
+    },
+    {
+      "rank": 145,
+      "name": "Cyprus Lake Ski Trail",
+      "country_code": "CA",
+      "province_code": "ON",
+      "region": "Bruce Peninsula National Park, ON",
+      "park_name": "Bruce Peninsula National Park",
+      "park_type": "national",
+      "latitude": 45.225534,
+      "longitude": -81.524803,
+      "route_type": null,
+      "distance_km": null,
+      "max_elevation_m": null,
+      "elevation_gain_m": null,
+      "terrain_difficulty": "easy",
+      "typical_duration_nights": 0,
+      "climate_zone": "temperate",
+      "description": "A 4.5 km forest ski trail around Cyprus Lake, groomed as a single classic track.",
+      "verification": {
+        "coordinates": {
+          "osm": "way/1070102266",
+          "feature": "Cyprus Lake Campground Information Office",
+          "role": "start"
+        },
+        "province": true,
+        "max_elevation_m": null,
+        "elevation_gain_m": null,
+        "distance_km": null,
+        "added": "2026-11-24, official winter trails (approved)",
+        "flags": [
+          "max_elevation_m: not sourced yet",
+          "distance_km: a trail network, no single length"
+        ]
+      },
+      "tags": [
+        "winter_only"
+      ]
     }
   ]
 }

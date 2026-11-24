@@ -74,6 +74,8 @@ def test_activities_are_stored_in_a_fixed_order():
 def test_rejects_plain_http_sources():
     with pytest.raises(WinterDataError, match="https"):
         validate(winter_entry(winter_source_url="http://example.test"))
+    with pytest.raises(WinterDataError, match="https"):
+        validate(winter_entry(winter_report_url="http://example.test/report"))
 
 
 def test_duplicate_entries_are_rejected(tmp_path):
@@ -94,7 +96,11 @@ def test_committed_file_is_valid_and_conservative():
     # Partial winter routes say where they end (the user's rule for Minnewanka, Wilcox, Jacques Lake).
     for key in [("Lake Minnewanka Shoreline Trail", "AB"), ("Wilcox Pass", "AB"), ("Jacques Lake", "AB")]:
         assert winter[key]["winter_route_ends"], key
-    # Backcountry touring terrain is never recommended.
+    # Groomed ski trails say so and name where to check grooming (the user's rule for new XC trails).
+    for key, values in winter.items():
+        if "xc_ski" in values["winter_activities"]:
+            assert "groom" in (values["winter_notes"] or "").lower() or "track-set" in (values["winter_notes"] or "").lower(), key
+        # Backcountry touring terrain is never recommended.
     assert winter[("Elfin Lakes", "BC")]["winter_activities"] == []
     # Every rated trail points at an official source.
     for key, values in winter.items():

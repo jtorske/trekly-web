@@ -182,10 +182,12 @@ def test_shipped_catalogue_is_valid():
     data = load_catalog()
     trails = data["trails"]
     assert data["meta"]["popularity_source"] == "editorial"
-    # The editorial top 100, plus the Parks Canada backcountry trails added 2026-11-03.
-    assert len(trails) == TRAIL_CATALOG_LIMIT == 131
-    assert sorted(t["rank"] for t in trails) == list(range(1, 132))
-    assert len({(t["name"], t["province_code"]) for t in trails}) == 131
+    # The editorial top 100, the Parks Canada backcountry trails added 2026-11-03 and
+    # the official winter trails added 2026-11-24 (ranks 132-145, mostly tagged winter_only).
+    assert len(trails) == TRAIL_CATALOG_LIMIT == 145
+    assert sorted(t["rank"] for t in trails) == list(range(1, 146))
+    assert len({(t["name"], t["province_code"]) for t in trails}) == 145
+    assert sum("winter_only" in (t.get("tags") or []) for t in trails) == 9
     for t in trails:
         assert t["country_code"] == "CA", t["name"]
         assert t["province_code"] in CA_PROVINCES, t["name"]

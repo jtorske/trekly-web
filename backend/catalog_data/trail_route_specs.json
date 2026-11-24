@@ -2982,5 +2982,250 @@
     "url": "https://parks.canada.ca/pn-np/ab/jasper/activ/passez-stay/arrierepays-backcountry/sugg-sentiers_trip-ideas/chaba"
    }
   }
+ },
+ "moraine-lake-road-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.413474,
+    -116.190901
+   ],
+   [
+    51.355372,
+    -116.165406
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Moraine Lake Road"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 17.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   },
+   "elevation_gain_m": {
+    "value": 435,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   }
+  }
+ },
+ "lake-louise-lakeshore-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.41715,
+    -116.2185
+   ],
+   [
+    51.408196,
+    -116.239481
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Plain of Six Glaciers Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 4.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   },
+   "elevation_gain_m": {
+    "value": 200,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   }
+  }
+ },
+ "great-divide-lake-louise-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.423278,
+    -116.210596
+   ],
+   [
+    51.450837,
+    -116.286027
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Old Highway 1A"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 19.6,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   },
+   "elevation_gain_m": {
+    "value": 320,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/skidefond-xcski/lakelouise"
+   }
+  }
+ },
+ "louise-creek-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.419066,
+    -116.182905
+   ],
+   [
+    51.41729,
+    -116.205985
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Louise Creek Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 5.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   },
+   "elevation_gain_m": {
+    "value": 205,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+   }
+  }
+ },
+ "fenland-trail-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.181293,
+    -115.579278
+   ],
+   [
+    51.186072,
+    -115.589011
+   ],
+   [
+    51.181293,
+    -115.579278
+   ]
+  ],
+  "line": "loop",
+  "prefer_names": [
+   "Fenland Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 2.1,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+   }
+  }
+ },
+ "marsh-loop-ab": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.170771,
+    -115.588002
+   ],
+   [
+    51.169368,
+    -115.60345
+   ],
+   [
+    51.170771,
+    -115.588002
+   ]
+  ],
+  "line": "loop",
+  "prefer_names": [
+   "Marsh Loop"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 2.8,
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+   },
+   "route_type": {
+    "value": "loop",
+    "url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+   }
+  }
+ },
+ "wapta-falls-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.218128,
+    -116.59258
+   ],
+   [
+    51.187325,
+    -116.575792
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_names": [
+   "Wapta Falls Road",
+   "Wapta Falls Trail"
+  ],
+  "published": {
+   "distance_km": {
+    "value": 8.8,
+    "url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+   },
+   "elevation_gain_m": {
+    "value": 310,
+    "url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails"
+   }
+  }
+ },
+ "meadows-in-the-sky-parkway-bc": {
+  "method": "waypoints",
+  "waypoints": [
+   [
+    51.018373,
+    -118.205194
+   ],
+   [
+    51.016074,
+    -118.174264
+   ]
+  ],
+  "line": "out_and_back",
+  "prefer_ways": [
+   164835235
+  ],
+  "published": {
+   "distance_km": {
+    "value": 13.0,
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter"
+   },
+   "route_type": {
+    "value": "out_and_back",
+    "url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter"
+   }
+  }
  }
 }
