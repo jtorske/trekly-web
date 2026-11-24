@@ -364,7 +364,7 @@ def _closest_hike(profile: HikerProfile, trail: TrailFacts):
 
 def _comparison(profile: HikerProfile, trail: TrailFacts, request: GuideRequest) -> str | None:
     if request.winter and not trail.winter_measures_known():
-        return f"The winter route is shorter than the summer trail: it ends at {trail.winter_route_ends}."
+        return f"The winter route is shorter than the summer trail: it ends at {trail.winter_route_ends.rstrip('.')}."
     km, gain = trail.per_day_km, trail.per_day_gain
     if km is None:
         return None

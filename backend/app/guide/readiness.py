@@ -99,7 +99,7 @@ def _history_checks(profile: HikerProfile, trail: TrailFacts, winter: bool) -> l
     exp = profile.experience
     out: list[Reason] = []
     if winter and not trail.winter_measures_known():
-        out.append(Reason("distance", "info", f"In winter the route ends at {trail.winter_route_ends}, "
+        out.append(Reason("distance", "info", f"In winter the route ends at {trail.winter_route_ends.rstrip('.')}, "
                                               "so it's shorter than the summer trail."))
     else:
         if trail.per_day_km is not None:

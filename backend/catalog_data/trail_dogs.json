@@ -1,7 +1,708 @@
 {
   "meta": {
-    "description": "Dog rules per trail for Trekly Guide's dog filter (app/trail_dogs.py). Official park sources only; a trail not listed is 'unknown'.",
-    "updated": "2026-11-24"
+    "description": "Dog rules per trail for Trekly Guide (app/trail_dogs.py). One official source per park (Parks Canada, Alberta Parks, BC Parks, Ontario Parks, NS Parks, NWT Parks) or the trail's official manager; trail-level bans cite their own official page. Not listed = 'unknown'.",
+    "researched": "2026-11-24"
   },
-  "trails": []
+  "trails": [
+    {
+      "name": "Lake Agnes Tea House",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Johnston Canyon to the Ink Pots",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Plain of Six Glaciers",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Joffre Lakes",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/joffre-lakes-park/"
+    },
+    {
+      "name": "West Coast Trail",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/pacificrim/visit/chiens-dogs",
+      "dog_policy_note": "Certified service dogs excepted."
+    },
+    {
+      "name": "Sentinel Pass via Larch Valley",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Garibaldi Lake",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/garibaldi-park/",
+      "dog_policy_note": "Accredited service dogs only."
+    },
+    {
+      "name": "Berg Lake Trail",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/mount-robson-park/",
+      "dog_policy_note": "Leashed dogs only on parts of the trail as a day hike; never on overnight trips."
+    },
+    {
+      "name": "Tunnel Mountain",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Skyline Trail",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Stawamus Chief",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://bcparks.ca/stawamus-chief-park/",
+      "dog_policy_note": "BC Parks: backcountry areas aren't suitable for pets."
+    },
+    {
+      "name": "Cyprus Lake to the Grotto",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/on/bruce/securite-safety/regle_regu"
+    },
+    {
+      "name": "Elizabeth Parker Hut / Lake O'Hara",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/yoho/visit/regs"
+    },
+    {
+      "name": "Iceline Trail",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/yoho/visit/regs"
+    },
+    {
+      "name": "Ha Ling Peak",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "In Bow Valley Wildland Provincial Park."
+    },
+    {
+      "name": "Skyline Trail",
+      "province_code": "NS",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ns/cbreton/securite-safety"
+    },
+    {
+      "name": "Panorama Ridge",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/garibaldi-park/",
+      "dog_policy_note": "Accredited service dogs only."
+    },
+    {
+      "name": "Maligne Canyon",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Crypt Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "Grassi Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "In winter, dogs aren't permitted on groomed ski trails."
+    },
+    {
+      "name": "Emerald Lake Loop",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/yoho/visit/regs"
+    },
+    {
+      "name": "Mount Assiniboine via Sunshine Meadows",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://bcparks.ca/mount-assiniboine-park/",
+      "dog_policy_note": "BC Parks: backcountry areas aren't suitable for pets (bears and other wildlife)."
+    },
+    {
+      "name": "Valley of the Five Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Rawson Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Path of the Glacier and Cavell Meadows",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Parker Ridge",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Wilcox Pass",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Juan de Fuca Marine Trail",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://bcparks.ca/juan-de-fuca-park/",
+      "dog_policy_note": "BC Parks recommends leaving pets at home for the marine trail."
+    },
+    {
+      "name": "Lion's Head",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://brucetrail.org/dogs-on-the-trail/"
+    },
+    {
+      "name": "Rockwall Trail",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/voyage-travel/regles-rules"
+    },
+    {
+      "name": "Stanley Glacier",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/voyage-travel/regles-rules"
+    },
+    {
+      "name": "Bow Glacier Falls",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Chester Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Ptarmigan Cirque",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Top of the Giant",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/sleepinggiant/rules"
+    },
+    {
+      "name": "Bertha Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "Elfin Lakes",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/garibaldi-park/",
+      "dog_policy_note": "Accredited service dogs only."
+    },
+    {
+      "name": "Marble Canyon",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/voyage-travel/regles-rules"
+    },
+    {
+      "name": "Sunshine Meadows",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Cape Split",
+      "province_code": "NS",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.novascotia.ca/park/cape-split"
+    },
+    {
+      "name": "Tonquin Valley",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Mount Yamnuska",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/"
+    },
+    {
+      "name": "Prairie Mountain",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Helen Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Consolation Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Sulphur Skyline",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Centennial Ridges",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/algonquin/rules"
+    },
+    {
+      "name": "La Cloche Silhouette Trail",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/killarney/rules"
+    },
+    {
+      "name": "The Crack",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/killarney/rules"
+    },
+    {
+      "name": "Carthew-Alderson Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "Skoki Valley Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Egypt Lake / Healy Pass",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Burstall Pass",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Boom Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Tent Ridge Horseshoe",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Galatea Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Eiffel Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "C-Level Cirque",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Bald Hills",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Lake Superior Coastal Trail",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/lakesuperior/rules"
+    },
+    {
+      "name": "Les Graves",
+      "province_code": "QC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/qc/forillon/info/reglements-regulations"
+    },
+    {
+      "name": "Franey Trail",
+      "province_code": "NS",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ns/cbreton/securite-safety"
+    },
+    {
+      "name": "Cape Scott Trail",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/cape-scott-park/",
+      "dog_policy_note": "Dogs are permitted in San Josef Bay only."
+    },
+    {
+      "name": "Sunshine Coast Trail",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://sunshinecoasttrail.com/faq/",
+      "dog_policy_note": "Dogs aren't allowed in the huts."
+    },
+    {
+      "name": "Wedgemount Lake",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/garibaldi-park/",
+      "dog_policy_note": "Accredited service dogs only."
+    },
+    {
+      "name": "Lookout Trail",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/algonquin/rules"
+    },
+    {
+      "name": "Highland Backpacking Trail",
+      "province_code": "ON",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.ontarioparks.ca/park/algonquin/rules"
+    },
+    {
+      "name": "King's Throne",
+      "province_code": "YT",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/yt/kluane/visit/regles-rules"
+    },
+    {
+      "name": "Shadow Lake - Twin Lakes - Redearth Creek Loop",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Glacier Lake Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Ball Pass",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Mystic Pass Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Northover Ridge / Three Isle Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Elbow Lake to Rae Glacier",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/activities-events/permitted-activities-regulations/",
+      "dog_policy_note": "Leash required in provincial and wildland parks; recommended elsewhere in Kananaskis."
+    },
+    {
+      "name": "Greenwich Dunes Trail",
+      "province_code": "PE",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/pe/pei-ipe/visit/chien-dog",
+      "dog_policy_note": "Pets aren't allowed on the park's beaches Apr 1 to Oct 15."
+    },
+    {
+      "name": "Grey Owl Trail",
+      "province_code": "SK",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/sk/princealbert/securite-safety/reglementation-guidelines"
+    },
+    {
+      "name": "Kokanee Glacier via Gibson Lake",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://bcparks.ca/kokanee-glacier-park/"
+    },
+    {
+      "name": "Cameron Falls",
+      "province_code": "NT",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://www.nwtparks.ca/plan-your-trip/visit-responsibly/pets-parks"
+    },
+    {
+      "name": "Brazeau Loop",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Fundy Circuit",
+      "province_code": "NB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/nb/fundy/visit/regles-rules"
+    },
+    {
+      "name": "Mount Assiniboine via Bryant Creek",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Lake Minnewanka Shoreline Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Tamarack Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "North Molar Pass to Fish Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Fryatt Valley",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Sawback Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "North Boundary Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Eva Lake",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/visit/chiens-dogs",
+      "dog_policy_note": "Starts in the summit area, where dogs aren't allowed (above Columbia Viewpoint)."
+    },
+    {
+      "name": "Taylor Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Jonas Pass - Poboktan Creek",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Fishing Cove Trail",
+      "province_code": "NS",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ns/cbreton/securite-safety"
+    },
+    {
+      "name": "Maligne Pass",
+      "province_code": "AB",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/bulletins/8F15EB04-9397-4BB9-B654-ADB299A9E4A8",
+      "dog_policy_note": "Jasper's dogs-in-sensitive-habitat restriction (bulletin to Dec 31, 2026): re-check after it ends."
+    },
+    {
+      "name": "Les Crêtes",
+      "province_code": "QC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/qc/forillon/info/reglements-regulations"
+    },
+    {
+      "name": "Jade Lakes",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/visit/chiens-dogs",
+      "dog_policy_note": "Starts in the summit area, where dogs aren't allowed (above Columbia Viewpoint)."
+    },
+    {
+      "name": "Athabasca Pass",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Geraldine Lakes",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Jacques Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Goat Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "Waterton Lakeshore Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "Crandell Lake",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/waterton/visit/regles-rules"
+    },
+    {
+      "name": "South Boundary Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Saturday Night Lake Loop",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Hermit Trail",
+      "province_code": "BC",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/glacier/visit/chiens-dogs",
+      "dog_policy_note": "In winter, pets aren't permitted in the park's backcountry."
+    },
+    {
+      "name": "Fiddle River",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Chaba Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Lake Louise Lakeshore",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Louise Creek",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Fenland Trail",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Marsh Loop",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/banff/securite-safety/regles-rules"
+    },
+    {
+      "name": "Moose Lake Loop",
+      "province_code": "AB",
+      "dog_policy": "on_leash",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/ab/jasper/securite-safety/regles-rules"
+    },
+    {
+      "name": "Meadows in the Sky Parkway",
+      "province_code": "BC",
+      "dog_policy": "not_allowed",
+      "dog_policy_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/visit/chiens-dogs",
+      "dog_policy_note": "No dogs above Columbia Viewpoint (12 km), year-round."
+    }
+  ]
 }
