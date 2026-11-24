@@ -239,8 +239,12 @@ Render.
 - **Tags:** `environment` is `production`, `preview` or `local`; `release`
   is the git commit SHA (`VERCEL_GIT_COMMIT_SHA`, `RENDER_GIT_COMMIT`).
 - **The DSN is read at build time** on the frontend: after changing
-  `NEXT_PUBLIC_SENTRY_DSN`, redeploy, or nothing changes. The build also
-  adds the DSN's ingest host to the Content-Security-Policy `connect-src`.
+  `NEXT_PUBLIC_SENTRY_DSN`, redeploy, or nothing changes.
+- **Ad blockers:** browsers send events to a same-site path (random per
+  build, `tunnelRoute` in `next.config.ts`) that Vercel rewrites to Sentry,
+  because blockers commonly block `*.ingest.sentry.io`. The build also adds
+  the ingest host to the Content-Security-Policy `connect-src` for any
+  direct calls.
 - **Readable frontend stack traces** need source maps uploaded at build
   time: set `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` (`trekly-zo`) and
   `SENTRY_PROJECT` (`trekly-frontend`) in Vercel. Without them, production

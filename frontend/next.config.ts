@@ -95,4 +95,8 @@ export default withSentryConfig(nextConfig, {
   sourcemaps: { disable: !uploadSourceMaps, deleteSourcemapsAfterUpload: true },
   release: { name: process.env.VERCEL_GIT_COMMIT_SHA, create: uploadSourceMaps },
   widenClientFileUpload: uploadSourceMaps,
+  // The browser sends events to a path on this site (random per build) that
+  // Vercel rewrites to Sentry's ingest, so ad and tracker blockers, which
+  // block *.ingest.sentry.io, don't swallow visitors' errors.
+  tunnelRoute: true,
 });
