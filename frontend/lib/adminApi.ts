@@ -146,6 +146,8 @@ export interface Overview {
   open_reports: number;
   /** Held, reported and unscreened items waiting in /admin/moderation. */
   moderation_queue: number;
+  /** Trekly Guide dog rules past their expiry date: re-check the official source. */
+  dog_rules_expired: number;
   poller: { last_started_at: string | null; last_finished_at: string | null; last_result: string | null; running: boolean } | null;
 }
 

@@ -19,10 +19,11 @@ from app.trail_dogs import load_dogs, sync_dogs, unmatched  # noqa: E402
 
 def cmd_report(_args):
     dogs = load_dogs()
-    print("| Trail | Dogs | Note | Source |")
-    print("|---|---|---|---|")
+    print("| Trail | Dogs | Note | Source | Checked | Expires |")
+    print("|---|---|---|---|---|---|")
     for (name, province), d in dogs.items():
-        print(f"| {name} ({province}) | {d['dog_policy']} | {d['dog_policy_note'] or ''} | {d['dog_policy_source_url'] or ''} |")
+        print(f"| {name} ({province}) | {d['dog_policy']} | {d['dog_policy_note'] or ''} "
+              f"| {d['dog_policy_source_url'] or ''} | {d['checked_on'] or ''} | {d['expires_on'] or ''} |")
 
 
 def cmd_sync_db(args):

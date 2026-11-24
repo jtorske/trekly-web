@@ -54,8 +54,8 @@ def load_catalogue(db: Session) -> dict[UUID, Trail]:
     return {t.id: t for t in db.scalars(select(Trail).where(*live_trails()).order_by(Trail.popularity_rank))}
 
 
-def facts_of(trails: dict[UUID, Trail]) -> list[TrailFacts]:
-    return [TrailFacts.from_trail(t) for t in trails.values()]
+def facts_of(trails: dict[UUID, Trail], today: date) -> list[TrailFacts]:
+    return [TrailFacts.from_trail(t, today) for t in trails.values()]
 
 
 def resolve_date(value: str | None, today: date) -> date:
@@ -234,7 +234,7 @@ def recommend_trails(
         exclude_ids=frozenset(body.exclude_ids), limit=body.limit,
     )
     catalogue = load_catalogue(db)
-    result = recommend(profile, request, facts_of(catalogue))
+    result = recommend(profile, request, facts_of(catalogue, today))
     return RecommendOut(
         date=on_date,
         winter=request.winter,
@@ -295,7 +295,7 @@ def check_readiness(
     on_date = resolve_date(date_, today) if date_ else today
     profile = get_hiker_profile(db, user.id)
     catalogue = load_catalogue(db)
-    result = readiness(profile, TrailFacts.from_trail(trail), on_date, facts_of(catalogue))
+    result = readiness(profile, TrailFacts.from_trail(trail, today), on_date, facts_of(catalogue, today))
     return ReadinessOut(
         verdict=result.verdict,
         label=LABELS[result.verdict],

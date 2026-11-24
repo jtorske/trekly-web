@@ -204,6 +204,19 @@ def test_overview(client, admin, users, report):
     assert body["poller"]["running"] is False
 
 
+def test_overview_counts_expired_dog_rules(client, admin):
+    from datetime import date
+
+    from app.routers.availability import get_today
+
+    # Jasper's bulletin bans run to 2026-12-31 (catalog_data/trail_dogs.json).
+    app.dependency_overrides[get_today] = lambda: date(2026, 12, 31)
+    assert client.get("/api/admin/overview", headers=admin).json()["dog_rules_expired"] == 0
+    app.dependency_overrides[get_today] = lambda: date(2027, 1, 1)
+    assert client.get("/api/admin/overview", headers=admin).json()["dog_rules_expired"] == 7
+    del app.dependency_overrides[get_today]
+
+
 def test_users_table(client, admin, users):
     page = client.get("/api/admin/users", headers=admin).json()
     assert page["total"] == 4

@@ -35,6 +35,8 @@ from app.models.account_label import AccountLabel
 from app.models.activity import ActivityPost
 from app.models.admin import AUTH_USERS, AdminAuditLog
 from app.models.availability import AvailabilityAlert, JobLock
+from app.routers.availability import get_today
+from app.trail_dogs import expired_rules
 from app.models.backcountry import BackcountrySite
 from app.models.hike_log import HikeLog
 from app.models.moderation import ModerationItem
@@ -211,6 +213,9 @@ class OverviewOut(BaseModel):
     open_reports: int
     # Held, reported and unscreened items waiting in /admin/moderation.
     moderation_queue: int = 0
+    # Trekly Guide dog rules past their expires_on (catalog_data/trail_dogs.json):
+    # they now show as "Check dog rules" until someone re-checks the source.
+    dog_rules_expired: int = 0
     poller: PollerOut | None
 
 
@@ -472,7 +477,7 @@ def sentry_test():
 
 
 @router.get("/overview", response_model=OverviewOut)
-def overview(db: Session = Depends(get_db)):
+def overview(db: Session = Depends(get_db), today: date = Depends(get_today)):
     now = _now()
     this_week = (now - timedelta(days=now.weekday())).date()
     first_week = this_week - timedelta(weeks=SIGNUP_WEEKS - 1)
@@ -515,6 +520,7 @@ def overview(db: Session = Depends(get_db)):
             select(func.count()).select_from(ModerationItem).where(ModerationItem.in_queue.is_(True))
         ) or 0,
         poller=poller,
+        dog_rules_expired=len(expired_rules(today)),
     )
 
 

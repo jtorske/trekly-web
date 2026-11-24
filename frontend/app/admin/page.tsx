@@ -140,6 +140,13 @@ function OverviewBody() {
       href: "/admin/moderation",
     },
   ];
+  if (overview.dog_rules_expired > 0) {
+    tiles.push({
+      label: "Dog rules expired",
+      value: overview.dog_rules_expired,
+      note: "Re-check them (catalog_data/trail_dogs.json)",
+    });
+  }
   return (
     <>
       <div className={styles.tiles}>

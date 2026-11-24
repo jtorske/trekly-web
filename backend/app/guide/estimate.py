@@ -111,7 +111,10 @@ class TrailFacts:
         return not self.winter_route_ends
 
     @classmethod
-    def from_trail(cls, trail) -> "TrailFacts":
+    def from_trail(cls, trail, today: date | None = None) -> "TrailFacts":
+        """The trail as of `today` (default: now). An expired dog rule counts as 'unknown'."""
+        from app.trail_dogs import effective_policy
+
         return cls(
             id=trail.id,
             slug=trail.slug,
@@ -129,7 +132,8 @@ class TrailFacts:
             winter_activities=tuple(trail.winter_activities or ()),
             avalanche_exposure=trail.avalanche_exposure or "unknown",
             winter_route_ends=trail.winter_route_ends,
-            dog_policy=getattr(trail, "dog_policy", None) or "unknown",
+            dog_policy=effective_policy(trail.name, trail.province_code,
+                                        getattr(trail, "dog_policy", None) or "unknown", today or date.today()),
             popularity_rank=trail.popularity_rank,
             has_photo=trail.photo is not None,
         )

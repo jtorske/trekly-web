@@ -104,6 +104,14 @@ DOG_NOTES = {
     "on_leash": "Dogs allowed on a leash (official park rule).",
     "unknown": "Check dog rules: Trekly doesn't have this park's rule yet.",
 }
+# Groomed and winter-only routes with no rule on file.
+SKI_DOG_NOTE = "Check dog rules. Many groomed ski trails don't allow dogs."
+
+
+def dog_note(trail: TrailFacts) -> str | None:
+    if trail.dog_policy == "unknown" and "winter_only" in trail.tags:
+        return SKI_DOG_NOTE
+    return DOG_NOTES.get(trail.dog_policy)
 
 ACTIVITY_LABELS = {
     "hike": "hike",
@@ -457,7 +465,7 @@ def recommend(profile: HikerProfile, request: GuideRequest, trails: Iterable[Tra
             components=parts,
             reasons=reasons[:2],
             est_hours=None if request.winter and not trail.winter_measures_known() else est_hours(profile, trail),
-            dog_note=DOG_NOTES.get(trail.dog_policy) if request.dog else None,
+            dog_note=dog_note(trail) if request.dog else None,
             distance_ratio=distance_ratio,
             gain_ratio=gain_ratio,
         ))
