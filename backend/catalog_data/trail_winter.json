@@ -1,0 +1,634 @@
+{
+ "meta": {
+  "generated": "2026-11-23",
+  "rules": [
+   "Only official sources (Parks Canada, Alberta Parks, BC Parks, park winter guides).",
+   "winter_activities lists only what a source names for this trail; empty means not recommended.",
+   "avalanche_exposure is set only from an official ATES rating for this trip; otherwise 'unknown'.",
+   "Trails not listed here keep the defaults: no winter activities, ATES unknown.",
+   "review_flag is for the human review only; the sync ignores it."
+  ],
+  "sources": {
+   "ates": {
+    "simple": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+    "challenging": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+    "complex": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex"
+   }
+  }
+ },
+ "trails": [
+  {
+   "name": "Lake Agnes Tea House",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada: not safe in winter (November to June) without avalanche training and equipment. The teahouses are closed in winter.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise",
+   "review_flag": "Not on Parks Canada's ATES lists; their Lake Louise page says avalanche terrain, so ATES stays unknown"
+  },
+  {
+   "name": "Johnston Canyon to the Ink Pots",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": "From Oct 13, 2026 the canyon trail from the P1 lot is closed for maintenance. Reach the Upper Falls and Ink Pots from the Moose Meadows trailhead.",
+   "winter_notes": "Very icy; ice cleats strongly recommended.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/banff"
+  },
+  {
+   "name": "Plain of Six Glaciers",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "complex",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex",
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada: not safe in winter (November to June) without avalanche training and equipment. The teahouses are closed in winter.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+  },
+  {
+   "name": "Sentinel Pass via Larch Valley",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Moraine Lake Road is closed to vehicles in winter and becomes a ski and snowshoe trail. Past the Consolation Valley viewpoint it crosses large avalanche paths.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+  },
+  {
+   "name": "Tunnel Mountain",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Steep and can be extremely icy. Poles and ice cleats strongly recommended.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff",
+   "review_flag": "Not ATES-rated; a low forested hill, but stays unknown (no official rating)"
+  },
+  {
+   "name": "Bow Glacier Falls",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada rates the Bow Hut approach (same valley, past the falls) as Complex avalanche terrain.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "ATES unknown: the falls themselves aren't rated"
+  },
+  {
+   "name": "Sunshine Meadows",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada rates the Sunshine Village backcountry as Challenging avalanche terrain.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "ATES unknown: the meadows trail isn't rated by name"
+  },
+  {
+   "name": "Helen Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Consolation Lakes",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Moraine Lake Road is closed to vehicles in winter and becomes a ski and snowshoe trail. Past the Consolation Valley viewpoint it crosses large avalanche paths.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+  },
+  {
+   "name": "Skoki Valley Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Rated Simple ('Skoki via Boulder/Deception Passes') but it's a ski-touring trip, so no winter activities"
+  },
+  {
+   "name": "Egypt Lake / Healy Pass",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Boom Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Eiffel Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Moraine Lake Road is closed to vehicles in winter and becomes a ski and snowshoe trail. Past the Consolation Valley viewpoint it crosses large avalanche paths.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/raquette-snowshoeing/lakelouise"
+  },
+  {
+   "name": "Shadow Lake - Twin Lakes - Redearth Creek Loop",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Loop uses Redearth Creek (Challenging) and Twin Lakes from Hwy 1 (Simple): stored as the more severe"
+  },
+  {
+   "name": "Glacier Lake Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Rated Simple but not on any winter trail list"
+  },
+  {
+   "name": "Ball Pass",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "complex",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Mystic Pass Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "complex",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Parker Ridge",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Mount Assiniboine via Bryant Creek",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada rates Bryant Creek as Simple; Assiniboine Pass beyond it isn't rated.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "ATES unknown: only part of the route is rated"
+  },
+  {
+   "name": "Lake Minnewanka Shoreline Trail",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Can be very icy, especially in spring.",
+   "winter_route_ends": "Stewart Canyon bridge, 1.5 km from the Lake Minnewanka day-use area (3 km return).",
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/banff/activ/marchehiver-winterwalking/banff"
+  },
+  {
+   "name": "Taylor Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Rated Simple but not on any winter trail list"
+  },
+  {
+   "name": "Skyline Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Maligne Canyon",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Closed until further notice after the 2024 Jasper wildfire.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/randohiver-winterwalk"
+  },
+  {
+   "name": "Valley of the Five Lakes",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Wetland Way, Emerald Circuit and Valley Loop are listed as winter walks.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/randohiver-winterwalk"
+  },
+  {
+   "name": "Wilcox Pass",
+   "province_code": "AB",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": "Icefields Parkway: winter tires or chains required Nov 1 - Mar 31.",
+   "winter_notes": "Avalanche terrain exists beyond the Red Chairs. The pass itself is rated Challenging.",
+   "winter_route_ends": "The Red Chairs viewpoint (about 3.4 km return).",
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/randohiver-winterwalk"
+  },
+  {
+   "name": "Tonquin Valley",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Astoria approach Simple, Portal Creek approach Challenging: stored as the more severe"
+  },
+  {
+   "name": "Bald Hills",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "'Bald Hills area' Challenging; only the lookout trail to the hitching rail is Simple"
+  },
+  {
+   "name": "Fryatt Valley",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Maligne Pass",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Jacques Lake",
+   "province_code": "AB",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "User-tracked, not groomed.",
+   "winter_route_ends": "Beaver Lake (4 km return) or Summit Lakes (10 km return).",
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/jasper/activ/experience/hiver-winter/lac-maligne-lake"
+  },
+  {
+   "name": "Jonas Pass - Poboktan Creek",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada rates Poboktan Creek as Simple; Jonas Pass isn't rated.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "ATES unknown: partly rated"
+  },
+  {
+   "name": "Bertha Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": "The trailhead is in an avalanche path. Check the daily Bertha-Townsite avalanche advisory.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/hiver-winter"
+  },
+  {
+   "name": "Carthew-Alderson Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "complex",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Crandell Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada lists it as a winter fat-bike trail off the Akamina Parkway.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/hiver-winter",
+   "review_flag": "Rated Simple; Parks Canada names it for fat biking, not walking or snowshoeing"
+  },
+  {
+   "name": "Goat Lake",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Red Rock Parkway is closed to vehicles from November to May.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/ab/waterton/activ/experiences/hiver-winter"
+  },
+  {
+   "name": "Waterton Lakeshore Trail",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": null
+  },
+  {
+   "name": "Chester Lake",
+   "province_code": "AB",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "The first 0.2 km is shared with skiers; then follow the snowshoe trail signs. Check the Alberta Parks trail report for closures before you go.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/trail-reports/peter-lougheed/chester-lake-snowshoe"
+  },
+  {
+   "name": "Ptarmigan Cirque",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Highway 40 is closed from Peter Lougheed Provincial Park to Highwood House junction, Dec 1 - Jun 14.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://albertaparks.ca/parks/kananaskis/kananaskis-country/advisories-public-safety/annual-road-closures/"
+  },
+  {
+   "name": "Burstall Pass",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Alberta Parks shows avalanche terrain near Burstall Pass at treeline.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Only a photo caption ('Challenging Terrain'), not a formal rating: left unknown"
+  },
+  {
+   "name": "Tent Ridge Horseshoe",
+   "province_code": "AB",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Alberta Parks shows Tent Ridge as an example of Complex avalanche terrain.",
+   "winter_route_ends": null,
+   "winter_source_url": null,
+   "review_flag": "Only a photo caption ('Complex Terrain'), not a formal rating: left unknown"
+  },
+  {
+   "name": "Elizabeth Parker Hut / Lake O'Hara",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "simple",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/simple-1",
+   "winter_access_note": null,
+   "winter_notes": "Beyond the Ross Lake loop the Lake O'Hara Fire Road travels through avalanche zones (Parks Canada).",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails",
+   "review_flag": "Rated Simple ('Lake O'Hara Road to Elizabeth Parker Hut') but it's a ski-touring approach: no activities"
+  },
+  {
+   "name": "Emerald Lake Loop",
+   "province_code": "BC",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "There is a large avalanche slide path on the left side of the lake (Parks Canada).",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/yoho/activ/pistesdhiver-wintertrails",
+   "review_flag": "ATES left unknown: only the nearby Nordic trails are rated Simple"
+  },
+  {
+   "name": "Stanley Glacier",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "complex",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/complexe-complex",
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada does not maintain or patrol winter trails in Kootenay.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/kootenay/activ/hivernales-winter"
+  },
+  {
+   "name": "Eva Lake",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": "Meadows in the Sky Parkway is closed to vehicles past the gate at the Welcome Kiosk in winter.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter"
+  },
+  {
+   "name": "Jade Lakes",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Meadows in the Sky Parkway is closed to vehicles past the gate at the Welcome Kiosk in winter.",
+   "winter_notes": null,
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/revelstoke/activ/hiver-winter"
+  },
+  {
+   "name": "Hermit Trail",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "challenging",
+   "avalanche_source_url": "https://parks.canada.ca/pn-np/mtn/securiteenmontagne-mountainsafety/avalanche/echelle-ratings/eeta-ates-2/exigeant-challenging",
+   "winter_access_note": null,
+   "winter_notes": "Many areas of Rogers Pass have restricted or prohibited access in winter.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/bc/glacier/visit/hiver-winter"
+  },
+  {
+   "name": "Joffre Lakes",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Vehicle access is weather-dependent from November to May.",
+   "winter_notes": "BC Parks: in fall, winter and spring you are exposed to avalanche risk. Bring an avalanche transceiver, probe and shovel. No winter camping.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://bcparks.ca/joffre-lakes-park/"
+  },
+  {
+   "name": "Elfin Lakes",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Chains are mandatory on the access road from October to May.",
+   "winter_notes": "BC Parks calls Diamond Head a backcountry touring area and expects avalanche training and gear (transceiver, probe, shovel).",
+   "winter_route_ends": null,
+   "winter_source_url": "https://bcparks.ca/garibaldi-park/diamond-head-area/"
+  },
+  {
+   "name": "Garibaldi Lake",
+   "province_code": "BC",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "BC Parks: avalanche and glacier hazards exist year-round.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://bcparks.ca/garibaldi-park/"
+  },
+  {
+   "name": "Cyprus Lake to the Grotto",
+   "province_code": "ON",
+   "winter_activities": [
+    "winter_hike",
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "Register your vehicle at the Cyprus Lake office. Snow tires recommended.",
+   "winter_notes": "Reach the Grotto by the Georgian Bay, Marr Lake or Horse Lake trails. Trails aren't maintained. The shoreline at the Grotto is icy: stay back from the edge.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/on/bruce/activ/hiver-winter/hiver-winter-activ"
+  },
+  {
+   "name": "Gros Morne Mountain",
+   "province_code": "NL",
+   "winter_activities": [],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": null,
+   "winter_notes": "Parks Canada does not recommend climbing the mountain in winter: icy and treacherous. The Ferry Gulch section crosses active avalanche zones.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://parks.canada.ca/pn-np/nl/grosmorne/activ/experiences/snowshoe"
+  },
+  {
+   "name": "Centennial Ridges",
+   "province_code": "ON",
+   "winter_activities": [
+    "snowshoe"
+   ],
+   "avalanche_exposure": "unknown",
+   "avalanche_source_url": null,
+   "winter_access_note": "The road is closed in winter: park at the locked gate on Highway 60 (about 2 km each way).",
+   "winter_notes": "For experienced snowshoers; a difficult route.",
+   "winter_route_ends": null,
+   "winter_source_url": "https://algonquinpark.on.ca/pdf/winter_guide_algonquin_park.pdf",
+   "review_flag": "Source is the park's winter guide PDF (Friends of Algonquin site)"
+  }
+ ]
+}

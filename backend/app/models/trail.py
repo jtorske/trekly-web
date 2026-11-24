@@ -31,6 +31,15 @@ class Trail(Base):
             "park_type in ('national','provincial','regional','none')",
             name="trails_park_type_check",
         ),
+        CheckConstraint(
+            "avalanche_exposure in ('none','simple','challenging','complex','unknown')",
+            name="trails_avalanche_exposure_check",
+        ),
+        # A rating, 'none' included, needs the official source it came from.
+        CheckConstraint(
+            "avalanche_exposure = 'unknown' or avalanche_source_url is not null",
+            name="trails_avalanche_source_check",
+        ),
         UniqueConstraint("name", "province_code", name="trails_name_province_key"),
         UniqueConstraint("slug", name="trails_slug_key"),
         Index("trails_country_rank_idx", "country_code", "popularity_rank"),
@@ -71,6 +80,20 @@ class Trail(Base):
     # their autumn larches (the Larch madness milestone).
     tags = Column(JsonType, nullable=False, default=list, server_default="[]")
     description = Column(Text)
+    # Winter use, from catalog_data/trail_winter.json (app/trail_winter.py).
+    # winter_activities: any of winter_hike, snowshoe, xc_ski; empty means
+    # not recommended in winter. avalanche_exposure is the Avalanche Terrain
+    # Exposure Scale class from an official rating (its URL in
+    # avalanche_source_url); without one it stays 'unknown', never 'none'.
+    winter_activities = Column(JsonType, nullable=False, default=list, server_default="[]")
+    avalanche_exposure = Column(Text, nullable=False, default="unknown", server_default="unknown")
+    avalanche_source_url = Column(Text)
+    winter_access_note = Column(Text)
+    winter_notes = Column(Text)
+    # Set when only part of the trail is a winter route: where it ends. The
+    # summer distance and gain then don't describe the winter outing.
+    winter_route_ends = Column(Text)
+    winter_source_url = Column(Text)
     # Catalogue ordering. popularity_source says where the score came from
     # ('editorial' today; a blend with saved_trails counts later), so ranks can
     # be recomputed without another schema change. Null for retired trails.
