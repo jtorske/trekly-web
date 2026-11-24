@@ -38,6 +38,7 @@ import {
   RegionPicker,
 } from "@/components/OnboardingChoices";
 import ui from "@/components/ui.module.css";
+import GuideLauncher from "@/components/guide/GuideLauncher";
 import {
   getProfile,
   updateProfile,
@@ -1335,6 +1336,8 @@ function FinishStep({ next }: { next: string }) {
           </Link>
         </section>
       )}
+
+      <GuideLauncher hint="Tell it when and how far, and get three trails picked for you." />
 
       {picks === null && !failed && (
         <ul

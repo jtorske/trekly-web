@@ -6,6 +6,7 @@ import { ChangeEmail, ChangePassword, DeleteAccount, SignOut, UnitsSetting } fro
 import EditProfileSection from "./EditProfileSection";
 import NotificationSettings from "./NotificationSettings";
 import PrivacySettingsForm from "./PrivacySettings";
+import GuideSettings from "./GuideSettings";
 import TrailPreferences from "./TrailPreferences";
 import { useSettingsProfile } from "./SettingsShell";
 import { findSection, sectionHref } from "./settingsSections";
@@ -27,6 +28,8 @@ const DESCRIPTIONS: Record<string, string> = {
   "trail-preferences":
     "Private to you: Trekly uses these only to pick trails for you, and never shows them on your profile.",
   notifications: "What Trekly tells you about, under the bell. In the app only: no emails or push notifications.",
+  "trekly-guide":
+    "Private to you. Trekly Guide works out its picks on each visit and doesn't store them.",
   units: "Distances, elevations, gear weights and weather across Trekly.",
   "sign-out": "Ends your session in this browser. Your data stays saved to your account.",
 };
@@ -61,6 +64,13 @@ export default function SettingsSection({ slug }: { slug: string }) {
       body = (
         <Card>
           <TrailPreferences />
+        </Card>
+      );
+      break;
+    case "trekly-guide":
+      body = (
+        <Card>
+          <GuideSettings />
         </Card>
       );
       break;

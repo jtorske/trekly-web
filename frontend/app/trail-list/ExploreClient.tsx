@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useFavouriteParks } from "@/lib/useFavouriteParks";
 import ui from "@/components/ui.module.css";
+import GuideLauncher from "@/components/guide/GuideLauncher";
 import {
   PARK_TYPE_LABELS,
   PROVINCE_NAMES,
@@ -813,6 +814,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                       : "We couldn't find your location. Try again in a moment."}
                   </p>
                 )}
+                {!searching && <GuideLauncher className={styles.guideLauncher} />}
 
                 {filtersOpen && (
                   <>

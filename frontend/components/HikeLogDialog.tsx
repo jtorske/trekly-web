@@ -9,6 +9,7 @@ import ReviewNotice from "./ReviewNotice";
 import { partsLabel } from "@/lib/moderation";
 import { useAuth } from "./AuthProvider";
 import { HIKE_NOTE_MAX, type HikeLog, type HikeLogInput } from "@/lib/hikeLogsApi";
+import { fromMinutes, toMinutes } from "@/lib/hikeDuration";
 import { undatedLabel } from "@/lib/hikeDate";
 import { VERIFIED_LABEL } from "./VerifiedCheck";
 import { PHOTO_ACCEPT, PHOTO_HINT, PREPARING_PHOTO, photoProblemMessage } from "@/lib/photoPrep";
@@ -56,6 +57,11 @@ export default function HikeLogDialog({
   const [undated, setUndated] = useState(entry ? entry.hiked_on === null : false);
   const dateChanged = entry?.verified && (undated || date !== entry.hiked_on);
   const [note, setNote] = useState(entry?.note ?? "");
+  const savedTime = fromMinutes(entry?.duration_minutes);
+  const [hours, setHours] = useState(savedTime.hours);
+  const [minutes, setMinutes] = useState(savedTime.minutes);
+  const duration = toMinutes(hours, minutes);
+  const timeId = useId();
   // `undefined` keeps the saved photo; `null` removes it; a File replaces it.
   const [photo, setPhoto] = useState<File | null | undefined>(undefined);
   const [busy, setBusy] = useState<"save" | "remove" | null>(null);
@@ -111,6 +117,7 @@ export default function HikeLogDialog({
       await onSave({
         hiked_on: undated ? null : date,
         note: note.trim() || null,
+        duration_minutes: duration === "invalid" ? (entry?.duration_minutes ?? null) : duration,
         photo_path: photoPath,
         // Only sent when it can take effect (or to take a post down); never from a post's own Edit.
         ...(!post && (shareAllowed || (entry?.shared && !share)) ? { share } : {}),
@@ -160,7 +167,7 @@ export default function HikeLogDialog({
       <button type="button" className={ui.secondary} onClick={onClose} disabled={busy !== null}>
         Cancel
       </button>
-      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || preparing || (!undated && !date)}>
+      <button type="button" className={ui.primary} onClick={() => void save()} disabled={busy !== null || preparing || (!undated && !date) || duration === "invalid"}>
         {busy === "save" ? "Saving…" : entry ? "Save changes" : "Add to journal"}
       </button>
     </>
@@ -201,6 +208,43 @@ export default function HikeLogDialog({
             </span>
           )}
         </div>
+
+        <fieldset className={ui.field} aria-describedby={`${timeId}-hint`}>
+          <legend className={ui.label}>
+            Time on trail <span className={styles.optional}>(optional)</span>
+          </legend>
+          <div className={styles.timeRow}>
+            <label className={styles.timePart}>
+              <input
+                className={ui.input}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={3}
+                value={hours}
+                onChange={(event) => setHours(event.target.value)}
+                aria-invalid={duration === "invalid"}
+              />
+              <span>h</span>
+            </label>
+            <label className={styles.timePart}>
+              <input
+                className={ui.input}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={2}
+                value={minutes}
+                onChange={(event) => setMinutes(event.target.value)}
+                aria-invalid={duration === "invalid"}
+              />
+              <span>min</span>
+            </label>
+          </div>
+          <span id={`${timeId}-hint`} className={duration === "invalid" ? ui.fieldError : ui.hint}>
+            {duration === "invalid"
+              ? "Enter hours and minutes (0-59), at least 10 minutes."
+              : "Start to finish. Only you see it; Trekly Guide uses it to learn your pace."}
+          </span>
+        </fieldset>
 
         <div className={ui.field}>
           <label className={ui.label} htmlFor={noteId}>

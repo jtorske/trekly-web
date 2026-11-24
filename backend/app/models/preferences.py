@@ -6,8 +6,8 @@ only its own row and nobody write. A missing row means nothing answered yet
 and the setup flow not finished.
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, Text, Uuid
-from sqlalchemy.sql import func
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Text, Uuid
+from sqlalchemy.sql import false, func, true
 
 from app.database import Base
 from app.models.catalog import JsonType
@@ -37,6 +37,14 @@ class ProfilePreferences(Base):
     # Unused since the interests step was removed (migration c7e3a9f1d5b2); kept for now.
     interests = Column(JsonType, nullable=False, default=list, server_default="[]")
     favourite_regions = Column(JsonType, nullable=False, default=list, server_default="[]")
+    # Trekly Guide (migration e1a7c4b9d2f6). "Use my history to personalize
+    # Trekly Guide": off means the Guide ignores their hikes, saved trails and
+    # gear and works from what they enter in the planner alone.
+    guide_use_history = Column(Boolean, nullable=False, default=True, server_default=true())
+    # "I usually hike with a dog": the planner's dog question starts on yes.
+    hikes_with_dog = Column(Boolean, nullable=False, default=False, server_default=false())
+    # Scenery they like (app/guide/estimate.py SCENERY_KEYS); nudges the ranking only.
+    scenery = Column(JsonType, nullable=False, default=list, server_default="[]")
     # The /welcome screen to resume at (ONBOARDING_STEPS).
     onboarding_step = Column(Text)
     # Null until they finish ("completed") or leave with "Skip for now" ("skipped").

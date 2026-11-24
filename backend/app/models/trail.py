@@ -10,6 +10,7 @@ from app.models.catalog import JsonType
 import app.trail_slugs  # noqa: F401  (assigns slugs to new trails on flush)
 
 TERRAIN_DIFFICULTIES = ("easy", "moderate", "difficult", "extreme")
+DOG_POLICIES = ("on_leash", "not_allowed", "unknown")
 PARK_TYPES = ("national", "provincial", "regional", "none")
 
 
@@ -39,6 +40,14 @@ class Trail(Base):
         CheckConstraint(
             "avalanche_exposure = 'unknown' or avalanche_source_url is not null",
             name="trails_avalanche_source_check",
+        ),
+        CheckConstraint(
+            "dog_policy in ('on_leash','not_allowed','unknown')", name="trails_dog_policy_check",
+        ),
+        # Like avalanche ratings: a dog rule needs the official page it came from.
+        CheckConstraint(
+            "dog_policy = 'unknown' or dog_policy_source_url is not null",
+            name="trails_dog_policy_source_check",
         ),
         UniqueConstraint("name", "province_code", name="trails_name_province_key"),
         UniqueConstraint("slug", name="trails_slug_key"),
@@ -96,6 +105,12 @@ class Trail(Base):
     winter_source_url = Column(Text)
     # The official grooming / trail conditions report to check before going.
     winter_report_url = Column(Text)
+    # Dogs, from catalog_data/trail_dogs.json (app/trail_dogs.py): on_leash
+    # (allowed on a leash), not_allowed, or unknown when no official source
+    # says. Trekly Guide's dog filter keeps on_leash trails only.
+    dog_policy = Column(Text, nullable=False, default="unknown", server_default="unknown")
+    dog_policy_source_url = Column(Text)
+    dog_policy_note = Column(Text)
     # Catalogue ordering. popularity_source says where the score came from
     # ('editorial' today; a blend with saved_trails counts later), so ranks can
     # be recomputed without another schema change. Null for retired trails.

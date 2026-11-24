@@ -344,6 +344,10 @@
   opacity: 0.7;
 }
 
+.guideLauncher {
+  margin-top: 0.75rem;
+}
+
 .geoMessage {
   margin-top: 0.5rem;
   color: #7a3f0d;

@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "description": "Dog rules per trail for Trekly Guide's dog filter (app/trail_dogs.py). Official park sources only; a trail not listed is 'unknown'.",
+    "updated": "2026-11-24"
+  },
+  "trails": []
+}

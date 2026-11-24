@@ -19,6 +19,7 @@ from app.routers import (
     comments,
     follows,
     gear,
+    guide,
     hiker_search,
     me_account,
     me_alerts,
@@ -125,6 +126,8 @@ app.add_middleware(JsonServerErrors)
 app.add_middleware(CORSMiddleware, **cors_options())
 
 app.include_router(trails.router)
+app.include_router(guide.router)
+app.include_router(guide.settings_router)
 app.include_router(signup_email.router)
 app.include_router(trail_hikers.router)
 app.include_router(activity.router)

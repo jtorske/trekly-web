@@ -40,6 +40,8 @@ class NewHike:
     hiked_on: date | None = None
     note: str | None = None
     photo_path: str | None = None
+    # "Time on trail" in minutes, for Trekly Guide's pace.
+    duration_minutes: int | None = None
 
 
 @dataclass(frozen=True)
@@ -91,7 +93,8 @@ def _insert(db: Session, user_id: UUID, hikes: list[NewHike]) -> list[UUID]:
 
     def row(hike: NewHike) -> HikeLog:
         return HikeLog(
-            user_id=user_id, trail_id=hike.trail_id, hiked_on=hike.hiked_on, note=hike.note, photo_path=hike.photo_path
+            user_id=user_id, trail_id=hike.trail_id, hiked_on=hike.hiked_on, note=hike.note, photo_path=hike.photo_path,
+            duration_minutes=hike.duration_minutes,
         )
 
     for hike in hikes:

@@ -7,6 +7,8 @@ import { useAuth } from "@/components/AuthProvider";
 import HikeLogButton from "@/components/HikeLogButton";
 import AlertsChip from "@/components/AlertsChip";
 import SaveTrailButton from "@/components/SaveTrailButton";
+import ReadinessCard from "@/components/guide/ReadinessCard";
+import ui from "@/components/ui.module.css";
 import TrailPhoto, { PhotoCredit } from "@/components/TrailPhoto";
 import { creditPlace } from "@/lib/trailPhoto";
 import { useHikeLogs } from "@/lib/useHikeLogs";
@@ -99,6 +101,7 @@ function TrailView({
   const [units] = useUnits();
   const forecast = useTrailForecast(trail);
   const nights = trail.typical_duration_nights;
+  const [readinessOpen, setReadinessOpen] = useState(false);
   const hasLocation = trail.latitude != null && trail.longitude != null;
 
   const stats: StatItem[] = [];
@@ -160,7 +163,18 @@ function TrailView({
             onRemove={hikeLogs.remove}
             returnTo={trailHref(trail)}
           />
+          {trail.retired_at === null && (
+            <button
+              type="button"
+              className={ui.secondary}
+              aria-expanded={readinessOpen}
+              onClick={() => setReadinessOpen((open) => !open)}
+            >
+              Am I ready?
+            </button>
+          )}
         </div>
+        {readinessOpen && <ReadinessCard slug={trail.slug} onClose={() => setReadinessOpen(false)} />}
       </div>
 
       <section className={styles.section}>

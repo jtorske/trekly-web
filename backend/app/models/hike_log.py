@@ -25,6 +25,9 @@ from sqlalchemy.sql import false, func
 from app.database import Base
 
 MAX_NOTE_LENGTH = 500
+# "Time on trail", minutes: 10 minutes up to two weeks.
+MIN_DURATION_MINUTES = 10
+MAX_DURATION_MINUTES = 14 * 24 * 60
 
 
 class HikeLog(Base):
@@ -40,6 +43,10 @@ class HikeLog(Base):
         ),
         CheckConstraint("nights is null or (nights >= 0 and nights <= 60)", name="hike_logs_nights_check"),
         CheckConstraint(
+            f"duration_minutes is null or duration_minutes between {MIN_DURATION_MINUTES} and {MAX_DURATION_MINUTES}",
+            name="hike_logs_duration_check",
+        ),
+        CheckConstraint(
             "not verified or (hiked_on is not null and match_score is not null)", name="hike_logs_verified_check"
         ),
     )
@@ -53,6 +60,9 @@ class HikeLog(Base):
     note = Column(Text)
     # `{user_id}/{uuid}.webp|jpg` in the private hike-photos bucket.
     photo_path = Column(Text)
+    # Optional "Time on trail" the owner entered, start to finish. Owner-only:
+    # Trekly Guide compares it with the trail's estimate for their pace.
+    duration_minutes = Column(Integer)
     # Matched against a GPS track (the track itself is never kept).
     verified = Column(Boolean, nullable=False, default=False, server_default="false")
     # 0-1: how much of the trail's route the track covered.

@@ -1,0 +1,44 @@
+# Trekly Guide evals: the engine's unit tests, its API tests and the persona
+# evals (backend/tests/guide/), run against the committed trail catalogue in an
+# in-memory database. No secrets, no network beyond installing packages. The
+# markdown table of every persona's answers is attached to each run.
+name: Guide evals
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "backend/**"
+      - ".github/workflows/guide-evals.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/guide-evals.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt "pytest>=8.3" "httpx>=0.28"
+      - name: Run the Guide tests and persona evals
+        env:
+          DATABASE_URL: "sqlite://"
+          GUIDE_EVAL_REPORT: guide-evals.md
+        run: python -m pytest tests/guide -q
+      - name: Attach the eval table
+        if: always()
+        run: cat guide-evals.md >> "$GITHUB_STEP_SUMMARY" || true

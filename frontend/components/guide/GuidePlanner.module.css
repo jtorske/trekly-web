@@ -1,0 +1,352 @@
+/* Trekly Guide's planner: a short conversation, mobile first. */
+
+.planner {
+  --hair: color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  --soft: color-mix(in srgb, var(--color-olive) 12%, var(--color-cream));
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pair {
+  display: contents;
+}
+
+.guideRow,
+.youRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.youRow {
+  justify-content: flex-end;
+}
+
+.avatar {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.avatar svg {
+  width: 60%;
+  height: 60%;
+}
+
+.avatarSm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.bubble {
+  display: flex;
+  max-width: min(85%, 30rem);
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 1.1rem 1.1rem 1.1rem 0.3rem;
+  background: var(--soft);
+  padding: 0.6rem 0.9rem;
+  line-height: 1.45;
+}
+
+.you {
+  border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.note {
+  color: var(--color-muted-text);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--color-rust-text);
+}
+
+.typing {
+  flex-direction: row;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+}
+
+.typing span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--color-olive);
+  animation: bounce 1s infinite ease-in-out;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { opacity: 0.35; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-0.2rem); }
+}
+
+.enter {
+  animation: enter 0.28s ease-out both;
+}
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(0.4rem); }
+  to { opacity: 1; transform: none; }
+}
+
+.composer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  min-height: 2.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border: 1.5px solid var(--color-dark-olive);
+  border-radius: 1.2rem;
+  padding: 0.45rem 1rem;
+  color: var(--color-dark-olive);
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chip:hover {
+  background: var(--color-dark-olive);
+  color: var(--color-cream);
+}
+
+.chipHint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.datePick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.datePick input {
+  flex: 1 1 10rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.linkButton {
+  align-self: flex-start;
+  color: var(--color-rust-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-left: 2.5rem;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  gap: 0.75rem;
+  border: 1px solid var(--hair);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 55%, var(--color-cream));
+  padding: 0.6rem;
+}
+
+.cardPhoto {
+  overflow: hidden;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 0.7rem;
+}
+
+.cardPhoto > * {
+  width: 100%;
+  height: 100%;
+}
+
+.cardBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cardName {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cardLink {
+  color: inherit;
+}
+
+.cardLink:hover {
+  text-decoration: underline;
+}
+
+.cardRegion,
+.cardMeta {
+  color: var(--color-muted-text);
+  font-size: 0.82rem;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.reasons li {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.reasons li::before {
+  position: absolute;
+  top: 0.55em;
+  left: 0.2rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--color-rust);
+  content: "";
+}
+
+.cardSave {
+  align-self: start;
+}
+
+@media (max-width: 640px) {
+  .cards {
+    margin-left: 0;
+  }
+
+  .card {
+    grid-template-columns: 4.5rem 1fr auto;
+  }
+
+  .cardPhoto {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .bubble {
+    max-width: 88%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .typing span {
+    animation: none;
+  }
+}
+
+/* The launcher on Explore and at the end of /welcome. */
+.launcher {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  border: 1px solid var(--hair, color-mix(in srgb, var(--color-dark-olive) 14%, transparent));
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--color-olive) 10%, var(--color-cream));
+  padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+  color: var(--color-dark-olive);
+  text-align: left;
+}
+
+.launcher:hover {
+  background: color-mix(in srgb, var(--color-olive) 18%, var(--color-cream));
+}
+
+.launcherText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.launcherTitle {
+  font-weight: 700;
+}
+
+.launcherHint {
+  color: var(--color-muted-text);
+  font-size: 0.85rem;
+}
+
+.launcherArrow {
+  font-size: 1.2rem;
+}
+
+.inlineLink {
+  color: var(--color-rust-text);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dogOk,
+.dogCheck {
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.dogOk {
+  color: var(--color-olive);
+}
+
+.dogCheck {
+  color: var(--color-rust-text);
+}

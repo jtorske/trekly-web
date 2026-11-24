@@ -58,7 +58,7 @@ from app.moderation import (
     Services, content_removed, ensure_can_add_photo, ensure_can_publish, ensure_post_rate, get_moderation_services,
     publishable, record_screening, review_state, run_screening, unchanged, withheld_items,
 )
-from app.models.hike_log import MAX_NOTE_LENGTH, HikeLog
+from app.models.hike_log import MAX_DURATION_MINUTES, MAX_NOTE_LENGTH, MIN_DURATION_MINUTES, HikeLog
 from app.models.trail import Trail
 from app.routers.availability import get_today
 from app.schemas.trail import TrailListItemOut
@@ -82,6 +82,9 @@ class HikeLogIn(BaseModel):
     hiked_on: date | None
     note: str | None = Field(default=None, max_length=MAX_NOTE_LENGTH)
     photo_path: str | None = Field(default=None, max_length=200)
+    # "Time on trail" in minutes (optional, owner-only): Trekly Guide's pace.
+    # Left out, an edit keeps the stored time; null clears it.
+    duration_minutes: int | None = Field(default=None, ge=MIN_DURATION_MINUTES, le=MAX_DURATION_MINUTES)
     # "Share to Activity": True posts it, False removes its post, None leaves it.
     share: bool | None = None
 
@@ -103,6 +106,7 @@ class HikeLogOut(BaseModel):
     verified: bool
     # The track's nights for an overnight trip; None means the trail's typical nights.
     nights: int | None
+    duration_minutes: int | None = None
     logged_at: datetime
     updated_at: datetime
     # Posted to the Activity feed (whether or not the feed shows it right now).
@@ -207,6 +211,7 @@ def _out(log: HikeLog, shared: set[UUID] = frozenset(), held: tuple = (None, Non
         photo_path=photo,
         verified=bool(log.verified),
         nights=log.nights,
+        duration_minutes=log.duration_minutes,
         logged_at=log.created_at,
         updated_at=log.updated_at,
         shared=log.id in shared,
@@ -282,6 +287,8 @@ def _apply(log: HikeLog, payload: HikeLogIn, values: dict) -> None:
     if log.verified and payload.hiked_on != log.hiked_on:
         log.verified, log.match_score, log.nights = False, None, None
     log.hiked_on, log.note, log.photo_path = payload.hiked_on, values["note"], values["photo_path"]
+    if "duration_minutes" in payload.model_fields_set:
+        log.duration_minutes = payload.duration_minutes
 
 
 def _find(db: Session, user_id: UUID, trail_id: UUID) -> HikeLog | None:
@@ -345,7 +352,7 @@ def put_hike_log(
     before = standing(db, user_id) if payload.share else None
     if log is None:
         result = add_hikes(
-            db, user_id, [NewHike(trail_id, payload.hiked_on, values["note"], values["photo_path"])]
+            db, user_id, [NewHike(trail_id, payload.hiked_on, values["note"], values["photo_path"], payload.duration_minutes)]
         )
         if result.added:
             response.status_code = status.HTTP_201_CREATED

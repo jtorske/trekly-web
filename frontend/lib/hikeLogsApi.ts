@@ -15,6 +15,8 @@ export interface HikeLog {
   verified: boolean;
   /** The track's nights for an overnight trip; null means the trail's typical nights. */
   nights: number | null;
+  /** "Time on trail" in minutes; private to the owner. */
+  duration_minutes?: number | null;
   logged_at: string;
   updated_at: string;
   /** Posted to the Activity feed. */
@@ -28,6 +30,8 @@ export interface HikeLogInput {
   hiked_on: string | null;
   note: string | null;
   photo_path: string | null;
+  /** Minutes on trail; left out keeps the saved time, null clears it. */
+  duration_minutes?: number | null;
   /** "Share to Activity": true posts it, false removes its post, left out changes nothing. */
   share?: boolean;
 }

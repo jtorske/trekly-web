@@ -1,5 +1,7 @@
 # Trekly
 
+[![Guide evals](https://github.com/jtorske/trekly-web/actions/workflows/guide-evals.yml/badge.svg)](https://github.com/jtorske/trekly-web/actions/workflows/guide-evals.yml)
+
 A backpacking-first hiking app for Canada, centred on the Rockies. Find a
 trail, see its backcountry campgrounds, plan each night of the trip, and get
 an email when a sold-out Parks Canada campsite opens up.
@@ -22,6 +24,12 @@ an email when a sold-out Parks Canada campsite opens up.
   night, then check every night's availability at once.
 - **Campground alerts:** watch a sold-out stay and get an email when it opens
   up. A scheduled poller checks Parks Canada every 30 minutes.
+- **Trekly Guide:** a personal trail assistant with no AI in the loop. A few
+  quick questions give three trails with reasons built from real numbers
+  ("Like Ha Ling, which you did, but 300 m less gain"). "Am I ready?" on
+  every trail page compares the trail with your Trail Journal: Ready,
+  Stretch or Not yet, your estimated time, and trails to build up with.
+  Code in `backend/app/guide/`; about 30 persona evals run in CI.
 - **Gear:** pick items from a curated product catalogue, track the gear you
   own, and save named setups.
 - **Accounts:** email sign-up with confirmation, password reset, saved
