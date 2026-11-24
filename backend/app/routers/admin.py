@@ -460,6 +460,17 @@ def whoami():
     return {"admin": True}
 
 
+class SentryTestError(RuntimeError):
+    """Raised on purpose by POST /api/admin/sentry-test."""
+
+
+@router.post("/sentry-test")
+def sentry_test():
+    """Admins only: fails on purpose, to check a 500 reaches Sentry
+    (app/observability.py). Returns the usual JSON 500."""
+    raise SentryTestError("Trekly Sentry test (backend): raised on purpose from /api/admin/sentry-test")
+
+
 @router.get("/overview", response_model=OverviewOut)
 def overview(db: Session = Depends(get_db)):
     now = _now()

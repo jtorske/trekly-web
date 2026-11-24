@@ -146,13 +146,17 @@ In `.env.local`, set `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:44321` and
 
 ### Frontend (`frontend/.env.local`)
 
-All three are public and end up in the browser bundle.
+The `NEXT_PUBLIC_` ones are public and end up in the browser bundle.
 
 | Variable | Purpose | Required |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon (publishable) key | Yes |
 | `NEXT_PUBLIC_API_URL` | FastAPI base URL | No (default `http://localhost:8000`) |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN (browser, server and edge); Sentry stays off without it. Set in Vercel for Production only | No |
+| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` | Build-time only: upload source maps so Sentry shows readable stack traces. All three, or none | No |
+
+Environment (`production`/`preview`/`local`) and release (the git SHA) are set at build time from Vercel's own variables; see `frontend/lib/sentryOptions.ts`.
 
 ### Backend (`backend/.env`)
 
@@ -170,6 +174,8 @@ All three are public and end up in the browser bundle.
 | `MAILPIT_URL` | Local Mailpit address | Only with `mailpit` |
 | `AVAILABILITY_CACHE_MINUTES` | How long Parks Canada responses are cached | No (default 5) |
 | `AVAILABILITY_REQUESTS_PER_MINUTE` | Global cap on live Parks Canada requests | No (default 20) |
+| `SENTRY_DSN` | Sentry DSN; Sentry stays off without it (`app/observability.py`). Environment is `production` on Render, release is `RENDER_GIT_COMMIT` | No |
+| `SENTRY_ENVIRONMENT` | Overrides the Sentry environment name | No |
 
 ### Alert poller (GitHub Actions secrets)
 

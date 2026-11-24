@@ -10,6 +10,7 @@
     "test": "node --test app/**/*.test.ts lib/**/*.test.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "10.78.0",
     "@supabase/supabase-js": "^2.115.0",
     "@swc/helpers": "^0.5.23",
     "@vercel/analytics": "^2.0.1",

@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+from app.observability import init_sentry
+
 from app.routers import (
     activity,
     admin,
@@ -68,6 +70,10 @@ def docs_enabled(env=os.environ) -> bool:
         return setting.strip().lower() in ("1", "true", "yes")
     return not env.get("RENDER")
 
+
+# Before the app exists, so Sentry's FastAPI integration can hook it. Off
+# unless SENTRY_DSN is set (app/observability.py).
+init_sentry()
 
 app = FastAPI(
     **({} if docs_enabled() else {"docs_url": None, "redoc_url": None, "openapi_url": None})

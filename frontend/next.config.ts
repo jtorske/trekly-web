@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 function origin(url: string | undefined, fallback: string): string {
   try {
@@ -24,12 +25,21 @@ function connectSources(): string {
     "https://api.open-meteo.com",
     "https://tiles.openfreemap.org",
   ];
+  // Sentry's ingest host, only once a DSN is set (lib/sentryOptions.ts).
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN) sources.push(origin(process.env.NEXT_PUBLIC_SENTRY_DSN, "https://sentry.io"));
   // Vercel's comments toolbar on preview deployments.
   if (process.env.VERCEL_ENV === "preview") sources.push("https://vercel.live", "wss://ws-us3.pusher.com");
   return sources.join(" ");
 }
 
 const nextConfig: NextConfig = {
+  // Inlined at build time for Sentry (lib/sentryOptions.ts): which
+  // deployment this is, and the commit it was built from.
+  env: {
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT:
+      process.env.VERCEL_ENV === "production" ? "production" : process.env.VERCEL_ENV ? "preview" : "local",
+    NEXT_PUBLIC_SENTRY_RELEASE: process.env.VERCEL_GIT_COMMIT_SHA ?? "",
+  },
   // Lets a second instance (e.g. the local end-to-end stack on another port)
   // run alongside `npm run dev` without sharing build output.
   distDir: process.env.NEXT_DIST_DIR || ".next",
@@ -72,4 +82,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Source maps go to Sentry only when SENTRY_AUTH_TOKEN (with SENTRY_ORG and
+// SENTRY_PROJECT) is set in Vercel; without it the build skips the upload.
+const uploadSourceMaps = Boolean(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
+
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  telemetry: false,
+  sourcemaps: { disable: !uploadSourceMaps, deleteSourcemapsAfterUpload: true },
+  release: { name: process.env.VERCEL_GIT_COMMIT_SHA, create: uploadSourceMaps },
+  widenClientFileUpload: uploadSourceMaps,
+});

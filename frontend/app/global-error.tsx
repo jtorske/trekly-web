@@ -1,5 +1,6 @@
 "use client"; // Error boundaries must be Client Components
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import StatusPage from "@/components/StatusPage";
 import ui from "@/components/ui.module.css";
@@ -20,6 +21,8 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    // A no-op until Sentry is configured (lib/sentryOptions.ts).
+    Sentry.captureException(error);
   }, [error]);
 
   return (
