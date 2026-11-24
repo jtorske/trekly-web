@@ -31,6 +31,8 @@ class TrailPhotoOut(BaseModel):
     """What the page needs to show a trail photo and its credit line."""
 
     hero_url: str
+    # ~1000 px, for phones (in the hero's srcset); null when there's none.
+    medium_url: str | None = None
     thumb_url: str
     width: int
     height: int
@@ -51,6 +53,7 @@ class TrailPhotoOut(BaseModel):
         if hasattr(value, "hero_path"):
             return {
                 "hero_url": public_photo_url(value.hero_path),
+                "medium_url": public_photo_url(value.medium_path) if getattr(value, "medium_path", None) else None,
                 "thumb_url": public_photo_url(value.thumb_path),
                 "width": value.hero_width,
                 "height": value.hero_height,

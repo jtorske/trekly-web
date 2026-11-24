@@ -171,18 +171,20 @@ def test_approve_publishes_webp_files_and_the_credit(client, auth_headers, setup
     assert setup["fetched"] == ["https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Lake_Agnes.jpg/1920px-Lake_Agnes.jpg"]
 
     files = setup["storage"].files
-    assert len(files) == 2 and all(path.startswith(f"{setup['agnes']}/") and path.endswith(".webp") for path in files)
+    assert len(files) == 3 and all(path.startswith(f"{setup['agnes']}/") and path.endswith(".webp") for path in files)
     sizes = {}
     for path, data in files.items():
         image = Image.open(io.BytesIO(data))
         assert image.format == "WEBP"
         assert not image.getexif(), "metadata (including GPS) must be stripped"
-        sizes["hero" if path.endswith("-hero.webp") else "thumb"] = image.width
-    assert sizes == {"hero": 1600, "thumb": 640}
+        sizes[path.rsplit("-", 1)[1].removesuffix(".webp")] = image.width
+    assert sizes == {"hero": 1600, "medium": 1000, "thumb": 640}
 
     trail = client.get(f"/api/trails/{setup['agnes']}").json()
     assert trail["photo"]["hero_url"].startswith(
         f"https://test-project.supabase.co/storage/v1/object/public/trail-photos/{setup['agnes']}/")
+    # The medium shares the hero's name: {uuid}-hero.webp / {uuid}-medium.webp.
+    assert trail["photo"]["medium_url"] == trail["photo"]["hero_url"].replace("-hero.webp", "-medium.webp")
     assert trail["photo"]["origin"] == "Wikimedia Commons"
     listed = client.get("/api/trails").json()
     assert next(t for t in listed if t["id"] == setup["agnes"])["photo"]["thumb_url"].endswith("-thumb.webp")
@@ -202,7 +204,7 @@ def test_approving_again_replaces_the_files(client, auth_headers, setup):
     response = client.post(url, json={"candidate_id": "commons:2"}, headers=auth_headers(ADMIN))
     assert response.json()["photographer"] == "Someone Else"
     assert set(setup["storage"].deleted) == first
-    assert len(setup["storage"].files) == 2 and not first & set(setup["storage"].files)
+    assert len(setup["storage"].files) == 3 and not first & set(setup["storage"].files)
 
 
 def test_reject_falls_back_to_topo_but_keeps_your_own_photo(client, auth_headers, setup, session_factory):
@@ -561,3 +563,98 @@ def test_trails_carry_their_route_map(client, setup, session_factory):
     listed = {t["id"]: t for t in client.get("/api/trails").json()}
     assert listed[setup["joffre"]]["route_map"]["thumb_url"].endswith("-thumb.webp")
     assert listed[setup["agnes"]]["route_map"] is None
+
+
+# ---------------------------------------------------------------- medium renditions
+
+_medium_spec = importlib.util.spec_from_file_location(
+    "trail_photo_medium", Path(__file__).resolve().parent.parent / "scripts" / "trail_photo_medium.py"
+)
+medium_script = importlib.util.module_from_spec(_medium_spec)
+_medium_spec.loader.exec_module(medium_script)
+
+
+def webp(width, height):
+    out = io.BytesIO()
+    Image.new("RGB", (width, height), (90, 130, 160)).save(out, "WEBP")
+    return out.getvalue()
+
+
+def test_medium_is_made_only_for_heroes_wider_than_1000px():
+    medium = trail_photos.medium_from_hero(webp(1600, 1200))
+    image = Image.open(io.BytesIO(medium))
+    assert (image.format, image.size) == ("WEBP", (1000, 750))
+    assert trail_photos.medium_from_hero(webp(1000, 700)) is None
+    assert trail_photos.process_image(jpeg(1000, 700)).medium is None
+
+
+def test_medium_path_sits_next_to_the_hero():
+    assert trail_photos.medium_path_for("abc/123-hero.webp") == "abc/123-medium.webp"
+    with pytest.raises(ValueError):
+        trail_photos.medium_path_for("abc/route-map-1-thumb.webp")
+
+
+class DownloadingStorage(FakeStorage):
+    def download(self, path, limit=0):
+        return self.files[path], "image/webp"
+
+    def upload(self, path, data, upsert=False):
+        assert not upsert, "the backfill must never overwrite"
+        if path in self.files:
+            raise trail_photos.StorageError("exists")
+        self.files[path] = data
+
+
+def test_backfill_is_additive_and_skips_done_and_narrow_photos(trails, session_factory, monkeypatch):
+    from types import SimpleNamespace
+
+    from app import database
+    from app.models.trail_photo import TrailPhoto
+
+    agnes, joffre = trails
+    session = session_factory()
+    common = dict(source="owner", photographer="Jordan", approved_by=ADMIN)
+    session.add_all([
+        TrailPhoto(trail_id=uuid.UUID(agnes), hero_path=f"{agnes}/a-hero.webp", thumb_path=f"{agnes}/a-thumb.webp",
+                   hero_width=1600, hero_height=1200, **common),
+        TrailPhoto(trail_id=uuid.UUID(joffre), hero_path=f"{joffre}/j-hero.webp", thumb_path=f"{joffre}/j-thumb.webp",
+                   hero_width=900, hero_height=600, **common),
+    ])
+    session.commit()
+    session.close()
+
+    storage = DownloadingStorage()
+    storage.files = {f"{agnes}/a-hero.webp": webp(1600, 1200), f"{agnes}/a-thumb.webp": b"thumb",
+                     f"{joffre}/j-hero.webp": webp(900, 600), f"{joffre}/j-thumb.webp": b"thumb"}
+    originals = dict(storage.files)
+    monkeypatch.setattr(database, "SessionLocal", session_factory)
+    monkeypatch.setattr(database, "engine", SimpleNamespace(url=SimpleNamespace(host="localhost")))
+    monkeypatch.setattr(trail_photos, "storage_from_env", lambda: storage)
+
+    assert medium_script.main([]) == 0  # dry run
+    assert storage.files == originals
+
+    assert medium_script.main(["--apply"]) == 0
+    assert set(storage.files) == set(originals) | {f"{agnes}/a-medium.webp"}
+    assert all(storage.files[path] == data for path, data in originals.items())
+    assert storage.deleted == []
+    session = session_factory()
+    rows = {str(row.trail_id): row for row in session.query(TrailPhoto)}
+    assert rows[agnes].medium_path == f"{agnes}/a-medium.webp"
+    assert rows[agnes].hero_path == f"{agnes}/a-hero.webp" and rows[agnes].thumb_path == f"{agnes}/a-thumb.webp"
+    assert rows[joffre].medium_path is None
+    session.close()
+
+    # A second run finds nothing to do.
+    assert medium_script.main(["--apply"]) == 0
+    assert len(storage.files) == len(originals) + 1
+
+
+def test_backfill_refuses_a_remote_database_without_confirmation(monkeypatch):
+    from types import SimpleNamespace
+
+    from app import database
+
+    monkeypatch.setattr(database, "engine", SimpleNamespace(url=SimpleNamespace(host="db.example.supabase.co")))
+    with pytest.raises(SystemExit, match="Refusing"):
+        medium_script.main(["--apply"])

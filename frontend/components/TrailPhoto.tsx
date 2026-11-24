@@ -55,6 +55,7 @@ export default function TrailPhoto({
             key={shown.url}
             className={styles.image}
             src={shown.url}
+            {...heroSources(variant, shown.kind === "photo" ? photo : null)}
             alt={trailImageAlt(name, shown.kind, shown.kind === "photo" ? photo?.scope : null)}
             width={shown.image.width}
             height={shown.image.height}
@@ -77,6 +78,23 @@ export default function TrailPhoto({
       )}
     </div>
   );
+}
+
+/**
+ * The trail page hero's srcset: the ~1000 px rendition for phones, the
+ * 1600 px hero for wider or denser screens. The hero spans the page up to
+ * 48rem (app/trails/page.module.css .wrap). Nothing for thumbs, route maps
+ * or photos without a medium file, which keep the plain src.
+ */
+export function heroSources(
+  variant: "hero" | "thumb",
+  photo: Pick<Photo, "hero_url" | "medium_url" | "width"> | null | undefined,
+): { srcSet?: string; sizes?: string } {
+  if (variant !== "hero" || !photo?.medium_url) return {};
+  return {
+    srcSet: `${photo.medium_url} 1000w, ${photo.hero_url} ${photo.width}w`,
+    sizes: "(max-width: 48rem) 100vw, 48rem",
+  };
 }
 
 /**

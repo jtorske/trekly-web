@@ -38,6 +38,7 @@ from app.trail_photos import (
     StorageError,
     fetch_image,
     fetch_urls,
+    medium_path_for,
     new_paths,
     process_image,
     storage_from_env,
@@ -159,19 +160,23 @@ def _delete_quietly(storage: PhotoStorage, paths: list[str]) -> None:
 def _publish(db: Session, storage: PhotoStorage, trail: Trail, photo: ProcessedPhoto, credit: dict,
              decision: str, admin: CurrentUser) -> TrailPhoto:
     hero_path, thumb_path = new_paths(trail.id)
+    medium_path = medium_path_for(hero_path) if photo.medium else None
+    new_files = [path for path in (hero_path, thumb_path, medium_path) if path]
     try:
         storage.upload(hero_path, photo.hero)
         storage.upload(thumb_path, photo.thumb)
+        if medium_path:
+            storage.upload(medium_path, photo.medium)
     except StorageError as error:
-        _delete_quietly(storage, [hero_path])
+        _delete_quietly(storage, new_files)
         raise HTTPException(status_code=502, detail="Couldn't upload the photo to storage. Try again.") from error
 
     row = db.get(TrailPhoto, trail.id)
-    old_paths = [row.hero_path, row.thumb_path] if row else []
+    old_paths = [path for path in (row.hero_path, row.thumb_path, row.medium_path) if path] if row else []
     row = row or TrailPhoto(trail_id=trail.id)
     for key, value in credit.items():
         setattr(row, key, value)
-    row.hero_path, row.thumb_path = hero_path, thumb_path
+    row.hero_path, row.thumb_path, row.medium_path = hero_path, thumb_path, medium_path
     row.hero_width, row.hero_height = photo.hero_width, photo.hero_height
     row.approved_by = admin.id
     db.add(row)
@@ -180,7 +185,7 @@ def _publish(db: Session, storage: PhotoStorage, trail: Trail, photo: ProcessedP
         db.commit()
     except Exception:
         db.rollback()
-        _delete_quietly(storage, [hero_path, thumb_path])
+        _delete_quietly(storage, new_files)
         raise
     _delete_quietly(storage, old_paths)
     db.refresh(row)
@@ -191,7 +196,7 @@ def _remove_photo(db: Session, storage: PhotoStorage, trail_id: UUID) -> None:
     row = db.get(TrailPhoto, trail_id)
     if row is None:
         return
-    paths = [row.hero_path, row.thumb_path]
+    paths = [path for path in (row.hero_path, row.thumb_path, row.medium_path) if path]
     db.delete(row)
     db.flush()
     # Deleted once the caller commits; a failed delete only leaves unreferenced files.

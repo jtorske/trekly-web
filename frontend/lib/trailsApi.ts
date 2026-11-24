@@ -14,6 +14,8 @@ export type RouteType = "out_and_back" | "loop" | "point_to_point";
 /** An approved, credited trail photo (null on a trail means the topo fallback). */
 export interface TrailPhoto {
   hero_url: string;
+  /** ~1000 px rendition for phones (the hero's srcset); null when there's none. */
+  medium_url?: string | null;
   thumb_url: string;
   width: number;
   height: number;

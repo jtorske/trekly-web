@@ -32,6 +32,8 @@ from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError
 
 BUCKET = "trail-photos"
 HERO_WIDTH = 1600
+# For phones: a 412 px screen at 2-2.6x needs ~800-1070 px, well short of the hero.
+MEDIUM_WIDTH = 1000
 THUMB_WIDTH = 640
 # Smallest source we publish; the search script asks for more (--min-width).
 MIN_SOURCE_WIDTH = 1000
@@ -82,6 +84,8 @@ class ProcessedPhoto:
     thumb: bytes
     hero_width: int
     hero_height: int
+    # None when the hero is MEDIUM_WIDTH or narrower: it would be the same picture.
+    medium: bytes | None = None
 
 
 # ---------------------------------------------------------------- processing
@@ -142,7 +146,28 @@ def process_image(data: bytes) -> ProcessedPhoto:
         thumb=_webp(_resized(image, THUMB_WIDTH)),
         hero_width=hero.width,
         hero_height=hero.height,
+        medium=_webp(_resized(image, MEDIUM_WIDTH)) if hero.width > MEDIUM_WIDTH else None,
     )
+
+
+def medium_from_hero(hero: bytes) -> bytes | None:
+    """A medium rendition made from a stored hero (our own WebP), or None when
+    the hero isn't wider than MEDIUM_WIDTH. For photos approved before the
+    medium size existed (scripts/trail_photo_medium.py)."""
+    with Image.open(io.BytesIO(hero)) as image:
+        if image.format != "WEBP":
+            raise PhotoError("Stored heroes are WebP; this isn't one.")
+        image.load()
+        if image.width <= MEDIUM_WIDTH:
+            return None
+        return _webp(_resized(image.convert("RGB"), MEDIUM_WIDTH))
+
+
+def medium_path_for(hero_path: str) -> str:
+    """`{trail_id}/{uuid}-hero.webp` -> `{trail_id}/{uuid}-medium.webp`."""
+    if not hero_path.endswith("-hero.webp"):
+        raise ValueError(f"not a hero path: {hero_path}")
+    return hero_path[: -len("-hero.webp")] + "-medium.webp"
 
 
 POST_PHOTO_MIN_WIDTH = 600

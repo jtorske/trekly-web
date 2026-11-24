@@ -46,6 +46,9 @@ class TrailPhoto(Base):
     # `{trail_id}/{uuid}-hero.webp` / `-thumb.webp` in the trail-photos bucket.
     hero_path = Column(Text, nullable=False)
     thumb_path = Column(Text, nullable=False)
+    # `{trail_id}/{uuid}-medium.webp`, ~1000 px wide, for phones (migration
+    # d5f8a1c3e7b2). Null when not made yet or the hero is no wider.
+    medium_path = Column(Text)
     hero_width = Column(Integer, nullable=False)
     hero_height = Column(Integer, nullable=False)
     approved_by = Column(Uuid, nullable=False)
