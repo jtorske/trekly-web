@@ -133,3 +133,25 @@ def test_unsourced_values_are_noted_not_overwritten():
         "distance_km": {"value": 180.0, "kind": "published", "source": "https://sunshinecoasttrail.com/"}}))
     assert route["unsourced"]["fields"] == ["elevation_gain_m", "max_elevation_m"]
     assert "elevation_gain_m" not in route  # the catalogue's old value stays in place
+
+
+def test_trailhead_comes_from_the_route_start_not_high_point_minus_gain():
+    """East Coast Trail climbs 8477 m in total but tops out at 253 m: high -
+    gain would put the trailhead 8 km below sea level. The route's own start
+    point (Fort Amherst, 9 m) is what the forecast uses."""
+    from app.routers.trails import route_trailhead
+
+    trail = Trail(name="East Coast Trail", province_code="NL")
+    entry = trail_routes.route_for("East Coast Trail", "NL")
+    assert entry["max_elevation_m"] - entry["elevation_gain_m"] < 0  # the old formula's failure
+    trailhead = route_trailhead(trail)
+    assert trailhead is not None
+    assert (round(trailhead.latitude, 3), round(trailhead.longitude, 3)) == (47.544, -52.918)
+    assert trailhead.elevation_m == 9
+    assert 0 <= trailhead.elevation_m <= entry["max_elevation_m"]
+
+
+def test_trailhead_is_none_without_a_mapped_route():
+    from app.routers.trails import route_trailhead
+
+    assert route_trailhead(Trail(name="Not A Real Trail", province_code="AB")) is None

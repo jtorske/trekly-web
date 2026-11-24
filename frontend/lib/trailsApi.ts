@@ -105,6 +105,15 @@ export interface TrailDetail extends TrailListItem, TrailAlerts {
   climate_zone: string | null;
   description: string | null;
   seasonal_conditions: SeasonalCondition[];
+  /** Where the mapped route starts; null without a matched route (the forecast then uses the trail's coordinates). */
+  trailhead: Trailhead | null;
+}
+
+export interface Trailhead {
+  latitude: number;
+  longitude: number;
+  /** NRCan MRDEM elevation at the start point. */
+  elevation_m: number | null;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";

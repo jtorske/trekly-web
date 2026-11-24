@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   cacheKey,
+  clampElevation,
   forecastPoints,
   forecastUrl,
   getTrailForecast,
@@ -18,10 +19,22 @@ const FIXTURE = JSON.parse(readFileSync(join(import.meta.dirname, "fixtures", "o
 const clone = () => structuredClone(FIXTURE);
 
 const TRAILS: Record<string, ForecastTrail> = {
-  both: { id: "agnes", latitude: 51.4159, longitude: -116.2112, max_elevation_m: 2135, elevation_gain_m: 400 },
-  flat: { id: "marsh", latitude: 51.18, longitude: -115.57, max_elevation_m: 1400, elevation_gain_m: 20 },
-  unknown: { id: "mystery", latitude: 50.1, longitude: -122.9, max_elevation_m: null, elevation_gain_m: null },
-  nowhere: { id: "nowhere", latitude: null, longitude: null, max_elevation_m: 2000, elevation_gain_m: 500 },
+  both: {
+    id: "agnes", latitude: 51.4159, longitude: -116.2112, max_elevation_m: 2135,
+    trailhead: { latitude: 51.4159, longitude: -116.2112, elevation_m: 1735 },
+  },
+  flat: {
+    id: "marsh", latitude: 51.18, longitude: -115.57, max_elevation_m: 1400,
+    trailhead: { latitude: 51.18, longitude: -115.57, elevation_m: 1380 },
+  },
+  unknown: { id: "mystery", latitude: 50.1, longitude: -122.9, max_elevation_m: null, trailhead: null },
+  nowhere: { id: "nowhere", latitude: null, longitude: null, max_elevation_m: 2000, trailhead: null },
+  // Values from catalog_data/trail_routes.json: 8477 m of gain over 301 km,
+  // a 253 m high point, and the route starting at Fort Amherst (9 m).
+  eastCoast: {
+    id: "ect", latitude: 47.5615, longitude: -52.7126, max_elevation_m: 253,
+    trailhead: { latitude: 47.54409, longitude: -52.91772, elevation_m: 9 },
+  },
 };
 
 const query = (url: string) => Object.fromEntries(new URL(url).searchParams);
@@ -80,7 +93,7 @@ test("one request asks for both elevations", () => {
   const params = query(forecastUrl(forecastPoints(TRAILS.both)!));
   assert.equal(params.latitude, "51.4159,51.4159");
   assert.equal(params.longitude, "-116.2112,-116.2112");
-  // Trailhead = high point - elevation gain.
+  // The route start's measured elevation, then the high point.
   assert.equal(params.elevation, "1735,2135");
   assert.equal(params.forecast_days, "5");
   assert.equal(params.timezone, "auto");
@@ -102,8 +115,36 @@ test("without elevation data the trailhead uses Open-Meteo's terrain", () => {
   assert.equal(query(forecastUrl(points)).elevation, undefined);
 });
 
+test("East Coast Trail: the trailhead is the route start at 9 m, not high point - gain", () => {
+  const points = forecastPoints(TRAILS.eastCoast)!;
+  // The old formula: 253 - 8477 = -8224 m.
+  assert.equal(points.trailhead_m, 9);
+  assert.equal(points.summit_m, 253);
+  // Forecast at the start point, not the catalogue's pin.
+  assert.equal(points.latitude, 47.54409);
+  assert.equal(points.longitude, -52.91772);
+  const params = query(forecastUrl(points));
+  assert.equal(params.elevation, "9,253");
+  assert.equal(params.latitude, "47.5441,47.5441");
+});
+
+test("trailhead elevations are clamped between sea level and the high point", () => {
+  assert.equal(clampElevation(-12, 253), 0);
+  assert.equal(clampElevation(9.4, 253), 9);
+  assert.equal(clampElevation(400, 253), 253);
+  assert.equal(clampElevation(1735, null), 1735);
+  const above = forecastPoints({ ...TRAILS.eastCoast, trailhead: { latitude: 47.5, longitude: -52.9, elevation_m: 300 } })!;
+  assert.deepEqual([above.trailhead_m, above.summit_m], [253, null]);
+});
+
+test("without a mapped route the trailhead uses the trail's pin and Open-Meteo's terrain", () => {
+  const points = forecastPoints({ ...TRAILS.eastCoast, trailhead: null })!;
+  assert.deepEqual([points.latitude, points.longitude, points.trailhead_m], [47.5615, -52.7126, null]);
+  assert.equal(query(forecastUrl(points)).elevation, "nan,253");
+});
+
 test("only the high point known: the trailhead asks for the terrain model", () => {
-  const points = forecastPoints({ id: "x", latitude: 50.1, longitude: -122.9, max_elevation_m: 2100, elevation_gain_m: null })!;
+  const points = forecastPoints({ id: "x", latitude: 50.1, longitude: -122.9, max_elevation_m: 2100, trailhead: null })!;
   assert.deepEqual([points.trailhead_m, points.summit_m], [null, 2100]);
   assert.equal(query(forecastUrl(points)).elevation, "nan,2100");
 });
@@ -161,7 +202,8 @@ test("the cache key changes when the catalogue changes", async () => {
   await getTrailForecast(TRAILS.both);
   await getTrailForecast({ ...TRAILS.both, max_elevation_m: 2200 });
   assert.equal(urls.length, 2);
-  assert.equal(query(urls[1]).elevation, "1800,2200");
+  // The trailhead stays at its measured start; only the high point moved.
+  assert.equal(query(urls[1]).elevation, "1735,2200");
 });
 
 test("Open-Meteo failures throw and are never cached", async () => {

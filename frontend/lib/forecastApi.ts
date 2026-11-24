@@ -6,10 +6,13 @@
  *
  * One request covers both points we forecast: the trailhead and, when we
  * know it, the high point. Open-Meteo corrects temperatures for the
- * elevation it's given, so both use the trail's coordinates with different
- * elevations. The trailhead follows the catalogue's own definition
- * (elevation gain = high point - trailhead); without it, Open-Meteo uses its
- * terrain model at the coordinates, which is where trails start.
+ * elevation it's given, so both use the trailhead's coordinates with
+ * different elevations. The trailhead is the mapped route's start point and
+ * its measured elevation (clamped between sea level and the high point);
+ * without a route, the trail's coordinates and Open-Meteo's terrain model.
+ * Never high point - elevation gain: gain counts every climb, including the
+ * way back, so on long or rolling trails that lands far below sea level
+ * (East Coast Trail: 253 - 8477 m).
  *
  * Results are kept in sessionStorage for an hour per trail. Data is CC BY
  * 4.0: the weather section credits Open-Meteo. Values are metric; lib/units
@@ -70,7 +73,8 @@ export interface ForecastTrail {
   latitude: number | null;
   longitude: number | null;
   max_elevation_m: number | null;
-  elevation_gain_m: number | null;
+  /** The mapped route's start (TrailDetail.trailhead). */
+  trailhead: { latitude: number; longitude: number; elevation_m: number | null } | null;
 }
 
 export interface ForecastPoints {
@@ -83,11 +87,20 @@ export interface ForecastPoints {
 
 /** Where to forecast, or null when the trail has no coordinates. */
 export function forecastPoints(trail: ForecastTrail): ForecastPoints | null {
-  if (trail.latitude == null || trail.longitude == null) return null;
+  const start = trail.trailhead;
+  const latitude = start?.latitude ?? trail.latitude;
+  const longitude = start?.longitude ?? trail.longitude;
+  if (latitude == null || longitude == null) return null;
   const high = trail.max_elevation_m;
-  const trailhead = high != null && trail.elevation_gain_m != null ? high - trail.elevation_gain_m : null;
+  const trailhead = start?.elevation_m != null ? clampElevation(start.elevation_m, high) : null;
   const summit = high != null && (trailhead == null || high - trailhead >= MIN_SUMMIT_RISE_M) ? high : null;
-  return { latitude: trail.latitude, longitude: trail.longitude, trailhead_m: trailhead, summit_m: summit };
+  return { latitude, longitude, trailhead_m: trailhead, summit_m: summit };
+}
+
+/** Rounded, never below sea level and never above the trail's high point. */
+export function clampElevation(meters: number, high: number | null): number {
+  const floor = Math.max(0, Math.round(meters));
+  return high != null ? Math.min(floor, Math.max(0, high)) : floor;
 }
 
 export function forecastUrl(points: ForecastPoints): string {

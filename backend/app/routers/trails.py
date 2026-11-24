@@ -37,6 +37,7 @@ from app.schemas.trail import (
     TrailCampgroundsOut,
     TrailDetailOut,
     TrailFacetsOut,
+    TrailheadOut,
     TrailPickItemOut,
     TrailRouteOut,
     TrailSearchIn,
@@ -302,7 +303,22 @@ def trail_detail(db: Session, trail: Trail) -> TrailDetailOut:
         SeasonalConditionOut.model_validate(condition)
         for condition in sorted(conditions, key=lambda c: SEASON_ORDER.get(c.season, 99))
     ]
+    detail.trailhead = route_trailhead(trail)
     return detail
+
+
+def route_trailhead(trail: Trail) -> TrailheadOut | None:
+    """The mapped route's start point and its elevation, if the trail has one."""
+    entry = route_for(trail.name, trail.province_code) or {}
+    start = (entry.get("route") or {}).get("trailhead")
+    if not start or len(start) < 2 or start[0] is None or start[1] is None:
+        return None
+    elevation = start[2] if len(start) > 2 and start[2] is not None else None
+    return TrailheadOut(
+        latitude=start[0],
+        longitude=start[1],
+        elevation_m=round(elevation) if elevation is not None else None,
+    )
 
 
 @router.get("/{trail_id}/route", response_model=TrailRouteOut)

@@ -33,11 +33,16 @@ export type ForecastState = { status: "loading" } | { status: "ready"; forecast:
  * "none": weather is a nicety and must never break the page.
  */
 export function useTrailForecast(trail: ForecastTrail): ForecastState {
-  const { id: trailId, latitude, longitude, max_elevation_m, elevation_gain_m } = trail;
+  const { id: trailId, latitude, longitude, max_elevation_m } = trail;
+  const startLat = trail.trailhead?.latitude ?? null;
+  const startLon = trail.trailhead?.longitude ?? null;
+  const startElevation = trail.trailhead?.elevation_m ?? null;
   const [state, setState] = useState<{ id: string; value: ForecastState } | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    getTrailForecast({ id: trailId, latitude, longitude, max_elevation_m, elevation_gain_m }, controller.signal)
+    const trailhead =
+      startLat != null && startLon != null ? { latitude: startLat, longitude: startLon, elevation_m: startElevation } : null;
+    getTrailForecast({ id: trailId, latitude, longitude, max_elevation_m, trailhead }, controller.signal)
       .then((forecast) =>
         setState({ id: trailId, value: forecast && forecast.trailhead.days.length ? { status: "ready", forecast } : { status: "none" } }),
       )
@@ -45,7 +50,7 @@ export function useTrailForecast(trail: ForecastTrail): ForecastState {
         if ((error as { name?: string }).name !== "AbortError") setState({ id: trailId, value: { status: "none" } });
       });
     return () => controller.abort();
-  }, [trailId, latitude, longitude, max_elevation_m, elevation_gain_m]);
+  }, [trailId, latitude, longitude, max_elevation_m, startLat, startLon, startElevation]);
   return state?.id === trailId ? state.value : { status: "loading" };
 }
 

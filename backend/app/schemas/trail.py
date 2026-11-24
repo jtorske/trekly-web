@@ -223,6 +223,15 @@ class SeasonalConditionOut(BaseModel):
     notes: str | None = None
 
 
+class TrailheadOut(BaseModel):
+    """Where the mapped route starts (catalog_data/trail_routes.json)."""
+
+    latitude: float
+    longitude: float
+    # From NRCan MRDEM at the start point; null when the DEM had no value.
+    elevation_m: int | None = None
+
+
 class TrailDetailOut(TrailListItemOut, TrailAlertsOut):
     max_elevation_m: int | None = None
     latitude: float | None = None
@@ -230,6 +239,12 @@ class TrailDetailOut(TrailListItemOut, TrailAlertsOut):
     climate_zone: str | None = None
     description: str | None = None
     seasonal_conditions: list[SeasonalConditionOut] = []
+    # The mapped route's start, for the trailhead forecast. Null for trails
+    # without a matched route; the forecast then uses the trail's coordinates
+    # and Open-Meteo's terrain model. Never derived as high point - gain: gain
+    # counts every climb (return climbs too), so that goes far wrong on long
+    # or rolling trails (East Coast Trail: 253 - 8477 m).
+    trailhead: TrailheadOut | None = None
 
 
 class CampgroundParkOut(BaseModel):
