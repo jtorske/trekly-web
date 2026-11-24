@@ -1,0 +1,100 @@
+.page {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6.5rem 1rem 4rem;
+  color: var(--color-dark-olive);
+  font-family: var(--sans);
+  text-align: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 32rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 12%, transparent);
+  border-radius: 1.5rem;
+  background: color-mix(in srgb, var(--color-cream) 88%, white);
+  padding: 2rem 1.5rem 1.75rem;
+  box-shadow: 0 18px 40px -28px rgb(40 54 24 / 0.45);
+}
+
+.art {
+  display: block;
+  width: min(15rem, 100%);
+  height: auto;
+  margin: 0 auto 1.25rem;
+  overflow: visible;
+}
+
+.ridgeBack,
+.ridge,
+.trail {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ridgeBack {
+  stroke: color-mix(in srgb, var(--color-olive) 40%, transparent);
+  stroke-width: 2;
+}
+
+.ridge {
+  stroke: var(--color-olive);
+  stroke-width: 2.5;
+}
+
+/* The trail fades out before the marker: it "doesn't go anywhere". */
+.trail {
+  stroke: var(--color-rust);
+  stroke-width: 3;
+  stroke-dasharray: 2 7;
+}
+
+.marker {
+  fill: var(--color-tan);
+}
+
+.eyebrow {
+  margin-bottom: 0.25rem;
+  color: var(--color-muted-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-bottom: 0.75rem;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.body {
+  max-width: 26rem;
+  margin: 0 auto 1.5rem;
+  color: var(--color-muted-text);
+  line-height: 1.5;
+}
+
+.body p + p {
+  margin-top: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 0.75rem;
+}
+
+.actions a:focus-visible,
+.actions button:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}

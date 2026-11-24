@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { absoluteUrl, SITE_NAME, trailHref } from "@/lib/site";
-import { jsonLdScript, trailDescription, trailImage, trailJsonLd, trailTitle } from "@/lib/trailSeo";
+import { jsonLdScript, trailDescription, trailJsonLd, trailTitle } from "@/lib/trailSeo";
 import { getTrailBySlug, TrailApiUnavailable } from "@/lib/trailsServer";
 import TrailPageClient from "../TrailPageClient";
 import styles from "../page.module.css";
@@ -32,8 +32,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const path = trailHref(trail);
   const title = trailTitle(trail);
   const description = trailDescription(trail);
-  const image = trailImage(trail);
-  const images = image ? [{ url: image.url, width: image.width, height: image.height, alt: image.alt }] : undefined;
   return {
     title,
     description,
@@ -49,14 +47,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: path,
       title,
       description,
-      ...(images ? { images } : {}),
+      // The image is ./opengraph-image.tsx: the photo with the name and numbers on it.
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      ...(images ? { images } : {}),
-    },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

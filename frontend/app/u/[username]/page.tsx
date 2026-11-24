@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import type { PublicProfile } from "@/lib/profilesApi";
 import { displayName, robotsFor } from "@/lib/publicProfile";
-import { isIndexable } from "@/lib/site";
+import { isIndexable, SITE_NAME } from "@/lib/site";
 import PublicProfileView from "./PublicProfileView";
 
 type Props = { params: Promise<{ username: string }> };
@@ -25,9 +25,15 @@ async function fetchProfile(username: string): Promise<PublicProfile | null> {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const profile = await fetchProfile(username);
+  const title = profile ? `${displayName(profile)} (@${profile.username})` : "Profile";
+  const description = profile && !profile.is_private ? profile.bio ?? `${displayName(profile)}'s hikes and gear on Trekly.` : undefined;
   return {
-    title: profile ? `${displayName(profile)} (@${profile.username})` : "Profile",
-    description: profile && !profile.is_private ? profile.bio ?? `${displayName(profile)}'s hikes and gear on Trekly.` : undefined,
+    title,
+    description,
+    // The card is ./opengraph-image.tsx. A page's openGraph replaces the
+    // layout's whole object, so the site name and locale are repeated here.
+    openGraph: { type: "profile", siteName: SITE_NAME, locale: "en_CA", title, description },
+    twitter: { card: "summary_large_image", title, description },
     // noindex unless the owner turned on "Let search engines show my profile"
     // (and noindex if the API couldn't be reached to check).
     // Previews are never indexed, whatever the owner chose.

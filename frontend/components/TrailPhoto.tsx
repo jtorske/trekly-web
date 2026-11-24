@@ -22,6 +22,7 @@ export default function TrailPhoto({
   name,
   variant,
   mini = false,
+  priority = false,
 }: {
   photo: Photo | null | undefined;
   routeMap?: TrailRouteMap | null;
@@ -29,6 +30,8 @@ export default function TrailPhoto({
   variant: "hero" | "thumb";
   /** A very small thumb: the fallbacks leave out the trail name, which wouldn't fit. */
   mini?: boolean;
+  /** Above the fold on first paint (Explore's first cards): load now, at high priority. */
+  priority?: boolean;
 }) {
   const [failed, setFailed] = useState<readonly string[]>([]);
   const pick = (image: Photo | TrailRouteMap | null | undefined) =>
@@ -55,8 +58,8 @@ export default function TrailPhoto({
             alt={trailImageAlt(name, shown.kind, shown.kind === "photo" ? photo?.scope : null)}
             width={shown.image.width}
             height={shown.image.height}
-            loading={variant === "hero" ? "eager" : "lazy"}
-            fetchPriority={variant === "hero" ? "high" : "auto"}
+            loading={variant === "hero" || priority ? "eager" : "lazy"}
+            fetchPriority={variant === "hero" || priority ? "high" : "auto"}
             decoding="async"
             onError={() => setFailed((list) => [...list, shown.url])}
           />

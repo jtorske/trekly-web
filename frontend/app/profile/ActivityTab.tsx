@@ -220,7 +220,18 @@ export default function ActivityTab({
         </div>
       </div>
     ) : (
-      <p className={styles.quiet}>No activity yet.</p>
+      <div className={feedStyles.empty}>
+        <span className={styles.emptyIcon} aria-hidden="true">
+          <Activity size={24} />
+        </span>
+        <p className={feedStyles.emptyTitle}>No activity yet</p>
+        <p className={feedStyles.emptyText}>Hikes they log and badges they earn will show up here.</p>
+        <div className={feedStyles.emptyActions}>
+          <Link href="/activity" className={ui.secondary}>
+            See the Activity feed
+          </Link>
+        </div>
+      </div>
     );
   } else {
     body = (

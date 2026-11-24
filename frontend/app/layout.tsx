@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "en_CA",
-    images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "An alpine lake below snowy peaks in the Canadian Rockies" }],
+    // The card itself is app/opengraph-image.tsx (trail pages and profiles have their own).
   },
-  twitter: { card: "summary_large_image", images: ["/og-default.jpg"] },
+  twitter: { card: "summary_large_image" },
   // Previews and local builds are never indexed (see lib/site.ts).
   ...(isIndexable() ? {} : { robots: { index: false, follow: false } }),
   verification: { google: GOOGLE_VERIFICATION },

@@ -968,11 +968,18 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                 </button>
               </div>
             ) : sorted.length === 0 ? (
-              <p className={`${styles.status} ${isLoading ? styles.stale : ""}`}>
-                No trails match
-                {q ? <> &ldquo;{q}&rdquo;</> : null}
-                {activeFilters > 0 ? <> with these filters</> : null}. Try a broader search or remove a filter.
-              </p>
+              <div className={`${styles.status} ${isLoading ? styles.stale : ""}`}>
+                <p>
+                  No trails match
+                  {q ? <> &ldquo;{q}&rdquo;</> : null}
+                  {activeFilters > 0 ? <> with these filters</> : null}. Try a broader search or remove a filter.
+                </p>
+                {activeFilters > 0 && (
+                  <button type="button" className={`${ui.secondary} ${styles.retry}`} onClick={clearAll}>
+                    Clear filters
+                  </button>
+                )}
+              </div>
             ) : (
               <>
                 <div className={styles.resultsHead}>
@@ -1011,7 +1018,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                 {/* Split view: the only scroller, ending level with the map. */}
                 <div ref={scrollerRef} className={styles.scroller}>
                   <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
-                    {sorted.map((trail) => (
+                    {sorted.map((trail, index) => (
                       <TrailCard
                         key={trail.id}
                         ref={(node) => {
@@ -1027,6 +1034,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                         units={units}
                         selected={selectedId === trail.id}
                         onHover={setHoveredId}
+                        priority={index < 2}
                       />
                     ))}
                   </ul>

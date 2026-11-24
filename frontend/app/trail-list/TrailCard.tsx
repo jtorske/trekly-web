@@ -128,6 +128,8 @@ interface TrailCardProps {
   /** Picked on the map. */
   selected: boolean;
   onHover: (id: string | null) => void;
+  /** One of the first cards on screen: its photo loads eagerly (it's the page's LCP). */
+  priority?: boolean;
   ref?: Ref<HTMLLIElement>;
 }
 
@@ -141,6 +143,7 @@ export default function TrailCard({
   units,
   selected,
   onHover,
+  priority = false,
   ref,
 }: TrailCardProps) {
   const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
@@ -168,7 +171,7 @@ export default function TrailCard({
           button and the photo credit sit above it. */}
       <div className={styles.card}>
         <div className={styles.cardPhoto}>
-          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" />
+          <TrailPhoto photo={trail.photo} routeMap={trail.route_map} name={trail.name} variant="thumb" priority={priority} />
           {trail.photo && <PhotoInfo photo={trail.photo} />}
         </div>
         <div className={styles.cardBody}>

@@ -181,7 +181,15 @@ export default function FollowListDialog({
           ))}
         </div>
       ) : current.items.length === 0 ? (
-        <p className={styles.empty}>{emptyText}</p>
+        <div className={styles.empty}>
+          <p>{emptyText}</p>
+          {/* Your own empty lists: point to where people are found. */}
+          {owner && !search && tab !== "requests" && (
+            <Link href="/trail-list?tab=hikers" className={ui.secondary} onClick={onClose}>
+              Find hikers to follow
+            </Link>
+          )}
+        </div>
       ) : (
         <>
           <ul className={styles.list}>

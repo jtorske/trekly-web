@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { setQueryParam, useQueryParam } from "@/lib/useQueryParam";
 import { preloadTrailCatalogue } from "@/lib/useTrailCatalogue";
 import Link from "next/link";
-import { Flag, FlaskConical } from "lucide-react";
+import { Backpack, BookOpen, Bookmark, Flag, FlaskConical, Tent } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import Avatar from "@/components/Avatar";
 import GearThumb from "@/components/GearThumb";
@@ -31,7 +31,7 @@ import { getProfileActivity } from "@/lib/activityApi";
 import shell from "@/app/profile/shell.module.css";
 import ui from "@/components/ui.module.css";
 import GearList from "@/app/gear/GearList";
-import { TrailThumb, TripThumb } from "@/app/profile/sections";
+import { EmptyState, TrailThumb, TripThumb } from "@/app/profile/sections";
 import { slotForItem } from "@/app/gear/slots";
 import profileStyles from "@/app/profile/page.module.css";
 import { ApiError } from "@/lib/api";
@@ -290,6 +290,9 @@ export default function PublicProfileView({ username }: { username: string }) {
       ) : tabs.length === 0 ? (
         <div className={styles.messageCard}>
           <p className={styles.quiet}>{name} hasn&apos;t shared anything else yet.</p>
+          <Link href="/trail-list" className={ui.secondary}>
+            Explore trails
+          </Link>
         </div>
       ) : (
         <>
@@ -359,7 +362,9 @@ function JournalSection({ journal }: { journal: NonNullable<PublicProfile["journ
   return (
     <SectionCard id="all-hikes" title="All hikes" count={journal.entries.length}>
       {journal.entries.length === 0 ? (
-        <p className={styles.quiet}>No hikes logged yet.</p>
+        <EmptyState icon={BookOpen} title="No hikes logged yet" action={{ href: "/trail-list", label: "Find your next hike" }}>
+          Trails they mark as hiked will show up here.
+        </EmptyState>
       ) : (
         <ul className={styles.journal}>
           {journal.entries.map((entry) => (
@@ -424,7 +429,9 @@ function GearSection({ gear, units }: { gear: NonNullable<PublicProfile["gear"]>
         </ul>
       )}
       {gear.items.length === 0 ? (
-        <p className={styles.quiet}>No gear added yet.</p>
+        <EmptyState icon={Backpack} title="No gear added yet" action={{ href: "/gear", label: "Start your own gear list" }}>
+          Gear they own will show up here, with the weight of each piece.
+        </EmptyState>
       ) : (
         <GearList items={gear.items.map(asGearItem)} units={units} />
       )}
@@ -436,7 +443,9 @@ function SavedTrailsSection({ trails }: { trails: NonNullable<PublicProfile["sav
   return (
     <SectionCard id="saved" title="Saved trails" count={trails.length}>
       {trails.length === 0 ? (
-        <p className={styles.quiet}>No saved trails yet.</p>
+        <EmptyState icon={Bookmark} title="No saved trails yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+          Trails they bookmark for later will show up here.
+        </EmptyState>
       ) : (
         <ul className={profileStyles.trails}>
           {trails.map((trail) => (
@@ -468,7 +477,9 @@ function TripPlansSection({ plans }: { plans: NonNullable<PublicProfile["trip_pl
   return (
     <SectionCard id="plans" title="Trip plans" count={plans.length}>
       {plans.length === 0 ? (
-        <p className={styles.quiet}>No trip plans yet.</p>
+        <EmptyState icon={Tent} title="No trip plans yet" action={{ href: "/trail-list", label: "Explore trails" }}>
+          Overnight trips they plan will show up here.
+        </EmptyState>
       ) : (
         <ul className={profileStyles.trips}>
           {plans.map((plan) => (

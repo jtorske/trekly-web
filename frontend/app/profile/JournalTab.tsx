@@ -43,7 +43,9 @@ export default function JournalTab({
             Mark a trail as hiked to start your journal.
           </EmptyState>
         ) : (
-          <p className={styles.quiet}>No hikes logged yet.</p>
+          <EmptyState icon={BookOpen} title="No hikes logged yet" action={{ href: "/trail-list", label: "Find your next hike" }}>
+            Trails they mark as hiked will show up here.
+          </EmptyState>
         )}
       </SectionCard>
     );

@@ -49,8 +49,19 @@ export default function Avatar({
     >
       {showImage ? (
         // Storage URLs (and local previews) don't go through next/image.
+        // Lazy: avatars are small extras (hiked-by rows, feed posts) and
+        // shouldn't compete with a page's main photo for the connection.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url!} alt={alt ?? ""} className={styles.image} onError={() => setFailed(url)} />
+        <img
+          src={url!}
+          alt={alt ?? ""}
+          className={styles.image}
+          width={size}
+          height={size}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(url)}
+        />
       ) : (
         initialsFor(name, email)
       )}
