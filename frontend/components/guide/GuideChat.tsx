@@ -102,6 +102,8 @@ export default function GuideChat({
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  // Blocks a second send while one is in flight (state updates arrive a render late).
+  const inFlight = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => saveHistory(history), [history]);
@@ -113,7 +115,8 @@ export default function GuideChat({
 
   const send = async (text: string, base: ChatTurn[] = history) => {
     const message = text.trim().slice(0, MAX_MESSAGE_CHARS);
-    if (!message || sending) return;
+    if (!message || sending || inFlight.current) return;
+    inFlight.current = true;
     const next: ChatTurn[] = [...base, { role: "user", content: message }];
     setHistory(next);
     setDraft("");
@@ -134,6 +137,7 @@ export default function GuideChat({
       // A network or server error: keep their message so they can retry.
       setError(caught instanceof Error ? caught.message : "That didn't go through.");
     } finally {
+      inFlight.current = false;
       setSending(false);
       inputRef.current?.focus({ preventScroll: true });
     }

@@ -156,6 +156,26 @@ def test_scrub():
     assert scrub("Hike 12 km with 800 m gain in 2027") == "Hike 12 km with 800 m gain in 2027"
 
 
+def test_plain_strips_markdown():
+    from app.guide.chat import plain
+
+    assert plain("**Chester Lake** – easy.  \n\n- **Rawson Lake**\n# Tip\nBring `spikes`") == (
+        "Chester Lake – easy. Rawson Lake Tip Bring spikes")
+
+
+def test_markdown_reply_comes_out_plain(make_ctx, catalogue):
+    provider = ScriptedProvider([call("search_trails", {}),
+                                 lambda m: say(f"**{last_tool_name(m)}** is a good pick.\n\n- Bring water")])
+    reply = run_chat(provider, user("Hike?"), make_ctx(), {t.name for t in catalogue}, TODAY)
+    assert "**" not in reply.text and "\n" not in reply.text and "- Bring" not in reply.text
+
+
+def last_tool_name(messages):
+    for m in reversed(messages):
+        if m["role"] == "tool":
+            return json.loads(m["content"])["results"][0]["name"]
+
+
 def test_check_reply_and_trim():
     names = {"Ha Ling Peak", "Panorama Ridge"}
     assert check_reply("Try Ha Ling Peak.", {"Ha Ling Peak"}, names) == ("Try Ha Ling Peak.", False)
