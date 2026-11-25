@@ -794,6 +794,56 @@
   height: 0.95rem;
 }
 
+/* Summer / Winter: a two-option switch above the quick chips. */
+.seasonToggle {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  padding: 0.2rem;
+  border: 1px solid var(--hair);
+  border-radius: 9999px;
+  background: color-mix(in srgb, white 55%, transparent);
+}
+
+.seasonOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.3rem 0.95rem;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seasonOption:hover:not([aria-pressed="true"]) {
+  background: var(--hair-soft);
+}
+
+.seasonOption[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.seasonOption:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.seasonOption:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.chipWithInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
 .quickChips + .geoMessage {
   margin-top: 0.5rem;
 }

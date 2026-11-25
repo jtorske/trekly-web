@@ -24,6 +24,8 @@ from app.models.activity import ActivityPost
 from app.models.trail import Trail
 from app.models.trail_photo import TrailPhoto
 from app.models.trail_seasonal_condition import TrailSeasonalCondition
+from app.season import by_date, pick_season
+from app.trail_winter import HAS_WINTER_ACTIVITY, WINTER_ONLY, activities_phrase
 
 SPARSE_BELOW = 10
 SPARSE_DAYS = 7
@@ -31,10 +33,7 @@ NEW_PHOTO_DAYS = 30
 
 PickKind = Literal["trending", "new_photos", "seasonal"]
 
-SEASONS = {12: "winter", 1: "winter", 2: "winter", 3: "spring", 4: "spring", 5: "spring",
-           6: "summer", 7: "summer", 8: "summer", 9: "fall", 10: "fall", 11: "fall"}
 SEASON_TEXT = {
-    "winter": ("A winter pick", "Short days and cold nights: this one stays among the milder trails in winter."),
     "spring": ("A spring pick", "Snow lingers up high in spring. This trail is one of the first to warm up."),
     "summer": ("A summer pick", "Long days and open passes: a good one for the height of summer."),
     "fall": ("A fall pick", "Cool air and changing colours. This trail holds its warmth into the fall."),
@@ -55,24 +54,42 @@ def real_posts_this_week(db: Session, today: date) -> int:
     return db.scalar(select(func.count()).select_from(query.with_only_columns(ActivityPost.id).subquery())) or 0
 
 
-def season_of(day: date) -> str:
-    return SEASONS[day.month]
+def winter_pick_text(trail: Trail) -> str:
+    """Says what the park lists it for, never that it's safe."""
+    return (f"Listed for {activities_phrase(trail.winter_activities)} in winter. "
+            "Check conditions and the avalanche forecast before you go.")
 
 
-def _seasonal(db: Session, today: date, live, skip: set) -> Trail | None:
-    """The warmest trails this season, taking a different one each week."""
-    season = season_of(today)
+def _seasonal(db: Session, today: date, live, skip: set) -> tuple[Trail, str, str] | None:
+    """(trail, title, text) for this week's seasonal pick, from app/season.py.
+
+    Winter: one of the trails recommended in winter, a different one each week.
+    Spring, summer and fall: the warmest trails that season. Early November
+    has no pick (no fall picks once the snow comes)."""
+    season = pick_season(today)
+    week = today.isocalendar().week
+    if season is None:
+        return None
+    if season == "winter":
+        trails = [t for t in db.scalars(
+            select(Trail).where(*live, HAS_WINTER_ACTIVITY).order_by(Trail.popularity_rank, Trail.name)
+        ).all() if t.id not in skip]
+        if not trails:
+            return None
+        trail = trails[week % len(trails)]
+        return trail, "A winter pick", winter_pick_text(trail)
     trails = db.scalars(
         select(Trail)
         .join(TrailSeasonalCondition, TrailSeasonalCondition.trail_id == Trail.id)
-        .where(*live, TrailSeasonalCondition.season == season)
+        .where(*live, ~WINTER_ONLY, TrailSeasonalCondition.season == season)
         .order_by(TrailSeasonalCondition.avg_high_c.desc(), Trail.popularity_rank, Trail.name)
         .limit(6)
     ).all()
     trails = [t for t in trails if t.id not in skip]
     if not trails:
         return None
-    return trails[today.isocalendar().week % len(trails)]
+    title, text = SEASON_TEXT[season]
+    return trails[week % len(trails)], title, text
 
 
 def picks(db: Session, today: date, trending: list, live) -> list[Pick]:
@@ -96,7 +113,9 @@ def picks(db: Session, today: date, trending: list, live) -> list[Pick]:
     since = datetime.now(timezone.utc) - timedelta(days=NEW_PHOTO_DAYS)
     photo_trail = db.scalars(
         select(Trail).join(TrailPhoto, TrailPhoto.trail_id == Trail.id)
-        .where(*live, TrailPhoto.created_at >= since, Trail.id.not_in(used) if used else True)
+        .where(*live, TrailPhoto.created_at >= since, Trail.id.not_in(used) if used else True,
+               # Winter-only roads and ski tracks aren't suggested in summer.
+               ~WINTER_ONLY if by_date(today) == "summer" else True)
         .order_by(TrailPhoto.created_at.desc())
         .limit(1)
     ).first()
@@ -107,6 +126,6 @@ def picks(db: Session, today: date, trending: list, live) -> list[Pick]:
 
     seasonal = _seasonal(db, today, live, used)
     if seasonal is not None:
-        title, text = SEASON_TEXT[season_of(today)]
-        out.append(Pick(kind="seasonal", title=title, text=text, trail=seasonal))
+        trail, title, text = seasonal
+        out.append(Pick(kind="seasonal", title=title, text=text, trail=trail))
     return out

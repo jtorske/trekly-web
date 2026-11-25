@@ -37,6 +37,7 @@ from app.routers import (
     me_visit,
     notifications,
     public_profiles,
+    season,
     signup_email,
     trail_hikers,
     trails,
@@ -128,6 +129,7 @@ app.add_middleware(CORSMiddleware, **cors_options())
 app.include_router(trails.router)
 app.include_router(guide.router)
 app.include_router(guide.settings_router)
+app.include_router(season.router)
 app.include_router(signup_email.router)
 app.include_router(trail_hikers.router)
 app.include_router(activity.router)

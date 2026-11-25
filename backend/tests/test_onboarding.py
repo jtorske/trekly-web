@@ -74,6 +74,7 @@ def test_a_new_account_starts_with_the_flow_pending_and_nothing_answered(client,
         "experience": None,
         "favourite_regions": [],
         "onboarding": {"step": None, "status": None, "finished_at": None},
+        "season_mode": None,
     }
 
 
@@ -264,6 +265,20 @@ def test_preferences_are_only_your_own(client, people):
     assert client.get(PREFS).status_code == 401
     assert client.patch(PREFS, json={"hiking_style": "day"}).status_code == 401
     assert client.get(RECS).status_code == 401
+
+
+def test_season_mode_is_remembered_and_can_go_back_to_following_the_season(client, people):
+    _, alice = people["alice"]
+    _, bob = people["bob"]
+    assert client.get(PREFS, headers=alice).json()["season_mode"] is None
+    assert patch_prefs(client, alice, season_mode="summer")["season_mode"] == "summer"
+    assert client.get(PREFS, headers=alice).json()["season_mode"] == "summer"
+    assert client.get(PREFS, headers=bob).json()["season_mode"] is None
+    # Other answers are untouched by the toggle, and null follows the season again.
+    patch_prefs(client, alice, hiking_style="day")
+    assert client.get(PREFS, headers=alice).json()["season_mode"] == "summer"
+    assert patch_prefs(client, alice, season_mode=None)["season_mode"] is None
+    assert client.patch(PREFS, json={"season_mode": "fall"}, headers=alice).status_code == 422
 
 
 def test_deleting_the_account_deletes_the_preferences(client, people, session_factory):

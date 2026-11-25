@@ -266,6 +266,8 @@ export interface TreklyPostTypeInfo {
   ai: boolean;
   /** On by default (the config); turned off here, drafts wait for an admin. */
   auto_publish: boolean;
+  /** Always reviewed (spotlights): the switch can't be turned on. */
+  auto_publish_locked?: boolean;
 }
 
 export interface TreklyDraft {

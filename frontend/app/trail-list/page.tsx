@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { exploreRequest, exploreRequestKey, parseExploreParams } from "@/lib/exploreFilters";
-import { searchExploreOnServer } from "@/lib/trailsServer";
+import { getSeasonOnServer, searchExploreOnServer } from "@/lib/trailsServer";
 import ExploreClient, { type ExploreInitial } from "./ExploreClient";
 
 export const metadata: Metadata = {
@@ -26,11 +26,14 @@ export default async function ExplorePage({ searchParams }: Props) {
   }
   const filters = parseExploreParams(params);
   let initial: ExploreInitial | null = null;
+  // The season's default mode; a person's own Summer / Winter choice is
+  // applied in the browser (it may search again).
+  const season = await getSeasonOnServer();
   // "Near me" needs the browser's position; that search can't run here.
   if (!filters.near) {
-    const request = exploreRequest(filters);
+    const request = exploreRequest(filters, { season });
     const found = await searchExploreOnServer(request);
     if (found) initial = { key: exploreRequestKey(request), trails: found.trails, total: found.total, facets: found.facets };
   }
-  return <ExploreClient initial={initial} />;
+  return <ExploreClient initial={initial} season={season} />;
 }

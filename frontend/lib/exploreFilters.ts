@@ -18,7 +18,7 @@
 
 import { TERRAIN_LABELS, type Terrain } from "./terrain.ts";
 import { isTrailSort, type TrailSort } from "./trailOrder.ts";
-import type { ParkTypeFilter, TrailSearchRequest, TripType } from "./trailsApi";
+import type { ParkTypeFilter, SeasonMode, TrailSearchRequest, TripType, WinterActivity } from "./trailsApi";
 import { kmFromDistance } from "./units.ts";
 
 export type DistanceUnit = "km" | "mi";
@@ -47,9 +47,22 @@ export interface ExploreFilters {
   /** Only with `near`. */
   within?: Within;
   sort: TrailSort;
+  /** Winter mode: any of these activities. */
+  winterActivities: WinterActivity[];
+  /** Winter mode: ATES simple terrain only (unknown is never included). */
+  simpleTerrain: boolean;
 }
 
-export const EMPTY_FILTERS: ExploreFilters = { q: "", provinces: [], parkTypes: [], parks: [], near: false, sort: "popular" };
+export const EMPTY_FILTERS: ExploreFilters = {
+  q: "", provinces: [], parkTypes: [], parks: [], near: false, sort: "popular", winterActivities: [], simpleTerrain: false,
+};
+
+export const WINTER_ACTIVITY_LABELS: Record<WinterActivity, string> = {
+  winter_hike: "Winter hike",
+  snowshoe: "Snowshoe",
+  xc_ski: "XC ski",
+};
+export const SIMPLE_TERRAIN_LABEL = "Simple terrain only (ATES)";
 
 /** West to east, then the territories: the order the chips show in. */
 export const PROVINCE_NAMES: Record<string, string> = {
@@ -129,6 +142,10 @@ export function parseExploreParams(params: URLSearchParams): ExploreFilters {
     within: near ? parseWithin(params.get("within")) : undefined,
     // "Nearest" needs a location to sort by.
     sort: isTrailSort(sort) && (sort !== "nearest" || near) ? sort : "popular",
+    winterActivities: unique(
+      params.getAll("winter_activity").flatMap((a) => pick(Object.keys(WINTER_ACTIVITY_LABELS) as WinterActivity[], a) ?? []),
+    ),
+    simpleTerrain: params.get("simple_terrain") === "1",
   };
 }
 
@@ -146,6 +163,8 @@ export function exploreSearch(filters: ExploreFilters): string {
     if (filters.within) params.set("within", `${filters.within.value}${filters.within.unit}`);
   }
   if (filters.sort !== "popular" && (filters.sort !== "nearest" || filters.near)) params.set("sort", filters.sort);
+  for (const activity of filters.winterActivities) params.append("winter_activity", activity);
+  if (filters.simpleTerrain) params.set("simple_terrain", "1");
   return params.toString();
 }
 
@@ -163,7 +182,9 @@ export function activeFilterCount(filters: ExploreFilters): number {
     filters.provinces.length +
     filters.parkTypes.length +
     filters.parks.length +
-    (filters.near ? 1 : 0)
+    (filters.near ? 1 : 0) +
+    filters.winterActivities.length +
+    (filters.simpleTerrain ? 1 : 0)
   );
 }
 
@@ -336,8 +357,14 @@ export const RESULT_LIMIT = 100;
  */
 export function exploreRequest(
   filters: ExploreFilters,
-  { near, bounds }: { near?: { lat: number; lng: number }; bounds?: Bounds } = {},
+  {
+    near,
+    bounds,
+    season,
+  }: { near?: { lat: number; lng: number }; bounds?: Bounds; season?: SeasonMode | null } = {},
 ): TrailSearchRequest {
+  // The winter filters only apply in winter mode.
+  const winter = season === "winter";
   return {
     q: filters.q,
     terrain: filters.terrain,
@@ -347,6 +374,9 @@ export function exploreRequest(
     parks: filters.parks,
     near: near ? { ...near, ...(filters.within ? { radius_km: withinKm(filters.within) } : {}) } : undefined,
     bounds,
+    ...(season ? { season } : {}),
+    ...(winter && filters.winterActivities.length ? { winter_activities: filters.winterActivities } : {}),
+    ...(winter && filters.simpleTerrain ? { simple_terrain: true } : {}),
     limit: RESULT_LIMIT,
   };
 }

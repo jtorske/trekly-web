@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  exploreRequest,
   EMPTY_FILTERS,
   activeFilterCount,
   clearFilters,
@@ -45,14 +46,36 @@ test("every filter round-trips through the URL", () => {
     near: true,
     within: { value: 50, unit: "km" },
     sort: "nearest",
+    winterActivities: ["snowshoe", "xc_ski"],
+    simpleTerrain: true,
   };
   const search = exploreSearch(filters);
   assert.equal(
     search,
     "q=lake&trip=day&terrain=easy&province=AB&province=BC&park_type=national&park_type=other" +
-      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km&sort=nearest",
+      "&park=Banff+National+Park&park=Parc+national+de+la+Gasp%C3%A9sie&near=1&within=50km&sort=nearest" +
+      "&winter_activity=snowshoe&winter_activity=xc_ski&simple_terrain=1",
   );
   assert.deepEqual(parse(search), filters);
+});
+
+test("winter filters only reach the API in winter mode", () => {
+  const filters = { ...EMPTY_FILTERS, winterActivities: ["snowshoe" as const], simpleTerrain: true };
+  const winter = exploreRequest(filters, { season: "winter" });
+  assert.equal(winter.season, "winter");
+  assert.deepEqual(winter.winter_activities, ["snowshoe"]);
+  assert.equal(winter.simple_terrain, true);
+  const summer = exploreRequest(filters, { season: "summer" });
+  assert.equal(summer.season, "summer");
+  assert.equal(summer.winter_activities, undefined);
+  assert.equal(summer.simple_terrain, undefined);
+  assert.equal(exploreRequest(EMPTY_FILTERS).season, undefined);
+});
+
+test("unknown winter activities are dropped from the URL", () => {
+  const parsed = parse("winter_activity=ski_touring&winter_activity=snowshoe&simple_terrain=yes");
+  assert.deepEqual(parsed.winterActivities, ["snowshoe"]);
+  assert.equal(parsed.simpleTerrain, false);
 });
 
 test("the URL never carries a position, only that location is on", () => {

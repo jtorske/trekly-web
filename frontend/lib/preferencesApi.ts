@@ -1,6 +1,6 @@
 import { apiFetch } from "./api";
 import type { Experience, HikingStyle, StepKey } from "./onboarding";
-import type { TrailListItem } from "./trailsApi";
+import type { SeasonMode, TrailListItem } from "./trailsApi";
 
 /**
  * Private trail preferences and /welcome progress. Only the owner can read
@@ -12,11 +12,14 @@ export interface Preferences {
   experience: Experience | null;
   favourite_regions: string[];
   onboarding: { step: StepKey | null; status: "completed" | "skipped" | null; finished_at: string | null };
+  /** Explore's Summer / Winter choice; null follows the season. */
+  season_mode?: SeasonMode | null;
 }
 
 export type PreferencesUpdate = Partial<Pick<Preferences, "hiking_style" | "experience" | "favourite_regions">> & {
   onboarding_step?: StepKey;
   onboarding_status?: "completed" | "skipped";
+  season_mode?: SeasonMode | null;
 };
 
 const PREFERENCES_EVENT = "trekly:preferences-updated";

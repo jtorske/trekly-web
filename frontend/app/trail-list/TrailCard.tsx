@@ -5,6 +5,7 @@ import Link from "next/link";
 import AlertsChip from "@/components/AlertsChip";
 import SaveTrailButton from "@/components/SaveTrailButton";
 import TrailPhoto from "@/components/TrailPhoto";
+import WinterBadge from "@/components/WinterBadge";
 import ui from "@/components/ui.module.css";
 import { exploreHref } from "@/lib/exploreFilters";
 import { TERRAIN_LABELS } from "@/lib/terrain";
@@ -130,6 +131,8 @@ interface TrailCardProps {
   onHover: (id: string | null) => void;
   /** One of the first cards on screen: its photo loads eagerly (it's the page's LCP). */
   priority?: boolean;
+  /** Explore is in winter mode: show the winter badge, and no summer stats for a partial winter route. */
+  winter?: boolean;
   ref?: Ref<HTMLLIElement>;
 }
 
@@ -144,12 +147,17 @@ export default function TrailCard({
   selected,
   onHover,
   priority = false,
+  winter = false,
   ref,
 }: TrailCardProps) {
-  const distance = formatTrailDistance(trail.distance_km, trail.route_type, units);
-  const gain = formatTrailElevation(trail.elevation_gain_m, units);
+  const winterActivities = winter ? (trail.winter_activities ?? []) : [];
+  // A partial winter route: the summer distance and gain would mislead.
+  const partialWinter = winterActivities.length > 0 && Boolean(trail.winter_route_ends);
+  const distance = partialWinter ? null : formatTrailDistance(trail.distance_km, trail.route_type, units);
+  const gain = partialWinter ? null : formatTrailElevation(trail.elevation_gain_m, units);
   const meta = [
     trail.typical_duration_nights != null ? tripLengthLabel(trail.typical_duration_nights) : null,
+    partialWinter ? "Shorter winter route" : null,
     distance,
     gain ? `${gain} gain` : null,
     trail.distance_away_km != null ? `${formatWholeDistance(trail.distance_away_km, units)} away` : null,
@@ -192,9 +200,10 @@ export default function TrailCard({
                 </span>
               ))}
             </p>
-            {trail.has_watchable_campgrounds && (
+            {(trail.has_watchable_campgrounds || winterActivities.length > 0) && (
               <p className={styles.cardChips}>
-                <AlertsChip />
+                {winterActivities.length > 0 && <WinterBadge activities={winterActivities} />}
+                {trail.has_watchable_campgrounds && <AlertsChip />}
               </p>
             )}
           </div>

@@ -68,7 +68,20 @@ export interface TrailListItem extends TrailSummary {
   photo?: TrailPhoto | null;
   /** Null for trails without a stored route: they keep the plain topo. */
   route_map?: TrailRouteMap | null;
+  /** What the parks list it for in winter; empty means not recommended in winter. */
+  winter_activities?: WinterActivity[];
+  /** ATES class from an official rating; "unknown" without one (never shown as "none"). */
+  avalanche_exposure?: AvalancheExposure;
+  /** A road or ski track that isn't a summer hike: hidden in summer mode. */
+  winter_only?: boolean;
+  /** Only part of the trail is a winter route: where it ends (summer distance and gain don't apply). */
+  winter_route_ends?: string | null;
 }
+
+export type WinterActivity = "winter_hike" | "snowshoe" | "xc_ski";
+export type AvalancheExposure = "none" | "simple" | "challenging" | "complex" | "unknown";
+/** Explore's Summer / Winter mode. */
+export type SeasonMode = "summer" | "winter";
 
 /** "overnight" = backpacking trips (1+ typical nights), "day" = day hikes. */
 export type TripType = "overnight" | "day";
@@ -109,6 +122,12 @@ export interface TrailDetail extends TrailListItem, TrailAlerts {
   seasonal_conditions: SeasonalCondition[];
   /** Where the mapped route starts; null without a matched route (the forecast then uses the trail's coordinates). */
   trailhead: Trailhead | null;
+  avalanche_source_url?: string | null;
+  winter_access_note?: string | null;
+  winter_notes?: string | null;
+  winter_source_url?: string | null;
+  /** The official grooming / trail conditions report. */
+  winter_report_url?: string | null;
 }
 
 export interface Trailhead {
@@ -156,6 +175,12 @@ export interface TrailSearchRequest {
   near?: { lat: number; lng: number; radius_km?: number };
   /** Explore follows the map: trailheads inside its visible area. */
   bounds?: { west: number; south: number; east: number; north: number };
+  /** Summer hides winter-only trails; winter lists winter trails first. */
+  season?: SeasonMode;
+  /** Any of these winter activities. */
+  winter_activities?: WinterActivity[];
+  /** ATES simple terrain only, on trails recommended in winter (unknown never included). */
+  simple_terrain?: boolean;
   limit?: number;
 }
 

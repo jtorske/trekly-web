@@ -1,0 +1,48 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.button {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-dark-olive);
+  cursor: pointer;
+}
+
+.button:hover,
+.button[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--color-olive) 14%, transparent);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+}
+
+.tip {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 30;
+  width: min(19rem, calc(100vw - 2rem));
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.6rem;
+  background: var(--color-cream);
+  color: var(--color-dark-olive);
+  box-shadow: 0 6px 24px rgb(40 54 24 / 18%);
+  border: 1px solid color-mix(in srgb, var(--color-olive) 30%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.tip a {
+  color: var(--color-rust-text);
+  text-decoration: underline;
+}

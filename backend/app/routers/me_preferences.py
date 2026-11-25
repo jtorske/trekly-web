@@ -21,6 +21,8 @@ from app.models.account import Profile, SavedTrail
 from app.models.preferences import ProfilePreferences
 from app.models.privacy import ProfileSettings
 from app.models.trail import Trail
+from app import season as season_rules
+from app.schemas.trail import SeasonMode
 from app.preferences import (
     ONBOARDING_STEPS,
     REGION_SLUGS,
@@ -48,6 +50,8 @@ class PreferencesOut(BaseModel):
     experience: Experience | None
     favourite_regions: list[str]
     onboarding: OnboardingOut
+    # Explore's Summer / Winter choice; null follows the season.
+    season_mode: SeasonMode | None = None
 
 
 def _unique_in(allowed: tuple[str, ...], label: str):
@@ -74,6 +78,8 @@ class PreferencesUpdate(BaseModel):
     # Either needs an experience level and the profile visibility chosen
     # first (see update_preferences).
     onboarding_status: OnboardingOutcome | None = None
+    # Explore's toggle; null goes back to following the season.
+    season_mode: SeasonMode | None = None
 
     _check_regions = field_validator("favourite_regions")(_unique_in(REGION_SLUGS, "region"))
 
@@ -108,6 +114,7 @@ def preferences_out(row: ProfilePreferences | None) -> PreferencesOut:
             experience=None,
             favourite_regions=[],
             onboarding=OnboardingOut(step=None, status=None, finished_at=None),
+            season_mode=None,
         )
     return PreferencesOut(
         hiking_style=row.hiking_style,
@@ -116,6 +123,7 @@ def preferences_out(row: ProfilePreferences | None) -> PreferencesOut:
         onboarding=OnboardingOut(
             step=row.onboarding_step, status=row.onboarding_status, finished_at=row.onboarding_finished_at
         ),
+        season_mode=row.season_mode,
     )
 
 
@@ -178,6 +186,7 @@ def get_recommendations(
         experience=row.experience if row else None,
         favourite_regions=tuple(row.favourite_regions or ()) if row else (),
         home_province=profile.home_province if profile else None,
+        season=season_rules.season_for(season_rules.today()),
     )
     saved = select(SavedTrail.trail_id).where(SavedTrail.user_id == user.id)
     trails = db.scalars(select(Trail).where(Trail.retired_at.is_(None), Trail.id.not_in(saved))).all()

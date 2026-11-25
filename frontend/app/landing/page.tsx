@@ -3,11 +3,8 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FooterNotice } from "@/components/SiteFooter";
-import {
-  LANDING_PHOTOS,
-  LANDING_PHOTO_COOKIE,
-  pickLandingPhoto,
-} from "@/lib/landingPhotos";
+import { LANDING_PHOTO_COOKIE, landingPhotosFor, pickLandingPhoto } from "@/lib/landingPhotos";
+import { getSeasonOnServer } from "@/lib/trailsServer";
 import { FEATURED_DEMO, demoProfileHref } from "@/lib/demo";
 import {
   absoluteUrl,
@@ -81,24 +78,36 @@ export default async function LandingPage() {
   // first paint already shows this visit's photo: no client-side swap. The
   // carousel then rotates through the rest of the pool from there.
   const lastSrc = (await cookies()).get(LANDING_PHOTO_COOKIE)?.value;
-  const photo = pickLandingPhoto(LANDING_PHOTOS, lastSrc);
-  const start = LANDING_PHOTOS.indexOf(photo);
-  const showDemo = await demoProfileExists();
+  // Winter photos and words from Nov 15 to Apr 15 (app/season.py).
+  const [season, showDemo] = await Promise.all([getSeasonOnServer(), demoProfileExists()]);
+  const winter = season === "winter";
+  const photos = landingPhotosFor(season);
+  const photo = pickLandingPhoto(photos, lastSrc);
+  const start = photos.indexOf(photo);
 
   return (
     <main className={styles.hero}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(SITE_JSON_LD) }} />
-      <HeroCarousel photos={LANDING_PHOTOS} start={start}>
+      <HeroCarousel photos={photos} start={start}>
         <div aria-hidden="true" className={styles.scrim} />
 
         <section className={styles.section}>
           <div className={styles.content}>
-            <h1 className={styles.headline}>Your next trail is waiting</h1>
+            <h1 className={styles.headline}>
+              {winter ? "Winter trails are waiting" : "Your next trail is waiting"}
+            </h1>
 
-            <p className={styles.subtext}>
-              Trekly finds Canada&apos;s best hikes, from day trips to multi-night routes.
-              Check backcountry campsites, plan your trip and pack the right&nbsp;gear.
-            </p>
+            {winter ? (
+              <p className={styles.subtext}>
+                Snowshoe routes, winter walks and groomed ski trails from the parks&apos; own winter lists.
+                Check conditions and pack the right&nbsp;gear.
+              </p>
+            ) : (
+              <p className={styles.subtext}>
+                Trekly finds Canada&apos;s best hikes, from day trips to multi-night routes.
+                Check backcountry campsites, plan your trip and pack the right&nbsp;gear.
+              </p>
+            )}
 
             <TrailSearch />
 

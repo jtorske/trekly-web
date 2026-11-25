@@ -210,8 +210,9 @@ def client_from_env(model: str, max_chars: int) -> TextClient | None:
 def write(post_type: str, template_body: str, data: dict, *, use_ai: bool, client: TextClient | None,
           max_chars: int) -> Written:
     """The post's text: the AI's when allowed and it passes the check, else the template's."""
-    if post_type in NEVER_AI_TYPES:
-        # Never even offered to the AI, whatever the caller asked for.
+    if post_type in NEVER_AI_TYPES or data.get("reason") == "winter":
+        # Never even offered to the AI, whatever the caller asked for. Winter
+        # picks keep their exact wording, safety reminder included.
         return Written(template_body, "template")
     if not use_ai or client is None:
         return Written(template_body, "template")

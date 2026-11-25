@@ -12,6 +12,9 @@ ParkType = Literal["national", "provincial", "regional", "none"]
 # Explore's park-type filter: "other" is regional parks and trails in no park.
 ParkTypeFilter = Literal["national", "provincial", "other"]
 TripType = Literal["overnight", "day"]
+WinterActivity = Literal["winter_hike", "snowshoe", "xc_ski"]
+AvalancheExposure = Literal["none", "simple", "challenging", "complex", "unknown"]
+SeasonMode = Literal["summer", "winter"]
 
 
 class TrailOut(BaseModel):
@@ -109,6 +112,15 @@ class TrailListItemOut(TrailOut):
     photo: TrailPhotoOut | None = None
     # The trail's route drawn on the topo style (trails with a stored route).
     route_map: TrailRouteMapOut | None = None
+    # Winter use (app/trail_winter.py): empty means not recommended in winter.
+    winter_activities: list[WinterActivity] = []
+    # ATES class from an official rating; "unknown" (never "none") without one.
+    avalanche_exposure: AvalancheExposure = "unknown"
+    # A road or ski track that isn't a summer hike: hidden in summer mode.
+    winter_only: bool = Field(default=False, validation_alias=AliasChoices("is_winter_only", "winter_only"))
+    # Set when only part of the trail is a winter route: where it ends. The
+    # summer distance and gain then don't describe the winter outing.
+    winter_route_ends: str | None = None
 
 
 class BookedThroughOut(BaseModel):
@@ -171,6 +183,10 @@ class TrailSearchIn(BaseModel):
     parks: list[str] = Field(default=[], max_length=50)
     near: NearIn | None = None
     bounds: BoundsIn | None = None
+    # Explore's Summer / Winter mode (see the GET route for what each does).
+    season: SeasonMode | None = None
+    winter_activities: list[WinterActivity] = Field(default=[], max_length=3)
+    simple_terrain: bool = False
     limit: int = Field(default=10, ge=1)
 
 
@@ -248,6 +264,13 @@ class TrailDetailOut(TrailListItemOut, TrailAlertsOut):
     # counts every climb (return climbs too), so that goes far wrong on long
     # or rolling trails (East Coast Trail: 253 - 8477 m).
     trailhead: TrailheadOut | None = None
+    # Winter details; see TrailListItemOut for activities and avalanche exposure.
+    avalanche_source_url: str | None = None
+    winter_access_note: str | None = None
+    winter_notes: str | None = None
+    winter_source_url: str | None = None
+    # The official grooming / trail conditions report.
+    winter_report_url: str | None = None
 
 
 class CampgroundParkOut(BaseModel):

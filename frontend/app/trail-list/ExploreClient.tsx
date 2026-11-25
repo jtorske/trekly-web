@@ -17,10 +17,16 @@ import { useAuth } from "@/components/AuthProvider";
 import { useFavouriteParks } from "@/lib/useFavouriteParks";
 import ui from "@/components/ui.module.css";
 import GuideLauncher from "@/components/guide/GuideLauncher";
+import AtesInfo from "@/components/AtesInfo";
+import { WINTER_ACTIVITY_ICONS } from "@/components/WinterBadge";
+import { Snowflake, Sun } from "lucide-react";
+import { useSeasonMode } from "@/lib/useSeasonMode";
 import {
   PARK_TYPE_LABELS,
   PROVINCE_NAMES,
+  SIMPLE_TERRAIN_LABEL,
   TRIP_LABELS,
+  WINTER_ACTIVITY_LABELS,
   WITHIN_OPTIONS,
   activeFilterCount,
   clearFilters,
@@ -57,7 +63,9 @@ import {
   type ParkTypeFilter,
   type TrailFacets,
   type TrailSearchItem,
+  type SeasonMode,
   type TrailSearchRequest,
+  type WinterActivity,
   type TripType,
 } from "@/lib/trailsApi";
 import type { UnitSystem } from "@/lib/units";
@@ -371,12 +379,20 @@ export interface ExploreInitial {
   facets: TrailFacets;
 }
 
-function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
+function ExploreContent({ initial, season }: { initial: ExploreInitial | null; season: SeasonMode | null }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filters = useMemo(() => parseExploreParams(new URLSearchParams(searchParams.toString())), [searchParams]);
   const { q, trip, terrain, sort } = filters;
-  const activeFilters = activeFilterCount(filters);
+  // Summer / Winter: their own choice, else the season (the server's answer
+  // until the browser has its own, so the first search matches the HTML).
+  const seasonState = useSeasonMode();
+  const seasonMode: SeasonMode | null = seasonState.mode ?? season;
+  const winterMode = seasonMode === "winter";
+  // Winter filters stay in the URL in summer but don't apply, so they aren't counted.
+  const activeFilters = activeFilterCount(
+    winterMode ? filters : { ...filters, winterActivities: [], simpleTerrain: false },
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersId = useId();
 
@@ -546,6 +562,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   const request: TrailSearchRequest = exploreRequest(filters, {
     near: filters.near ? geo.position : undefined,
     bounds: area,
+    season: seasonMode,
   });
   const requestJson = JSON.stringify(request);
   // The map fits to each new search, never to a new area of its own.
@@ -685,6 +702,16 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
       label: park,
       next: { ...filters, parks: filters.parks.filter((p) => p !== park) },
     })),
+    ...(winterMode
+      ? filters.winterActivities.map((activity) => ({
+          key: `winter:${activity}`,
+          label: WINTER_ACTIVITY_LABELS[activity],
+          next: { ...filters, winterActivities: filters.winterActivities.filter((a) => a !== activity) },
+        }))
+      : []),
+    ...(winterMode && filters.simpleTerrain
+      ? [{ key: "ates", label: SIMPLE_TERRAIN_LABEL, next: { ...filters, simpleTerrain: false } }]
+      : []),
     ...(filters.near
       ? [{
           key: "near",
@@ -769,6 +796,60 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
 
             {!showingHikers && (
               <>
+                <div className={styles.seasonToggle} role="group" aria-label="Season">
+                  {(["summer", "winter"] as SeasonMode[]).map((value) => {
+                    const Icon = value === "winter" ? Snowflake : Sun;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        className={styles.seasonOption}
+                        aria-pressed={seasonMode === value}
+                        disabled={seasonMode === null}
+                        onClick={() => {
+                          if (seasonMode === value) return;
+                          setSelectedId(null);
+                          seasonState.setMode(value);
+                        }}
+                      >
+                        <Icon size={16} aria-hidden="true" />
+                        {value === "winter" ? "Winter" : "Summer"}
+                      </button>
+                    );
+                  })}
+                </div>
+                {winterMode && (
+                  <div className={styles.quickChips} role="group" aria-label="Winter filters">
+                    {(Object.keys(WINTER_ACTIVITY_LABELS) as WinterActivity[]).map((activity) => {
+                      const Icon = WINTER_ACTIVITY_ICONS[activity];
+                      return (
+                        <button
+                          key={activity}
+                          type="button"
+                          className={styles.chip}
+                          aria-pressed={filters.winterActivities.includes(activity)}
+                          onClick={() =>
+                            setFilter({ ...filters, winterActivities: toggle(filters.winterActivities, activity) })
+                          }
+                        >
+                          <Icon size={16} aria-hidden="true" className={styles.chipIcon} />
+                          {WINTER_ACTIVITY_LABELS[activity]}
+                        </button>
+                      );
+                    })}
+                    <span className={styles.chipWithInfo}>
+                      <button
+                        type="button"
+                        className={styles.chip}
+                        aria-pressed={filters.simpleTerrain}
+                        onClick={() => setFilter({ ...filters, simpleTerrain: !filters.simpleTerrain })}
+                      >
+                        {SIMPLE_TERRAIN_LABEL}
+                      </button>
+                      <AtesInfo />
+                    </span>
+                  </div>
+                )}
                 {/* Shortcuts into the same filters as the panel. */}
                 <div className={styles.quickChips} role="group" aria-label="Quick filters">
                   {(["day", "overnight"] as TripType[]).map((value) => (
@@ -1037,6 +1118,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                         selected={selectedId === trail.id}
                         onHover={setHoveredId}
                         priority={index === 0}
+                        winter={winterMode}
                       />
                     ))}
                   </ul>
@@ -1098,10 +1180,17 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
   );
 }
 
-export default function ExploreClient({ initial }: { initial: ExploreInitial | null }) {
+export default function ExploreClient({
+  initial,
+  season = null,
+}: {
+  initial: ExploreInitial | null;
+  /** The season's default mode, from the server render. */
+  season?: SeasonMode | null;
+}) {
   return (
     <Suspense fallback={<main className={styles.page} />}>
-      <ExploreContent initial={initial} />
+      <ExploreContent initial={initial} season={season} />
     </Suspense>
   );
 }

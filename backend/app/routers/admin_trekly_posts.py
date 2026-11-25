@@ -30,7 +30,7 @@ from app.routers.trails import live_trails
 from app.schemas.trail import TrailListItemOut
 from app.trekly_posts.config import PostsConfig, load_config
 from app.trekly_posts.service import (
-    PublishRefused, auto_publish_settings, is_busy, local_today, official_posts_on, official_profile, publish, publish_refusal,
+    ALWAYS_REVIEWED, PublishRefused, auto_publish_settings, is_busy, local_today, official_posts_on, official_profile, publish, publish_refusal,
 )
 
 router = APIRouter(prefix="/api/admin/trekly-posts", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -62,6 +62,8 @@ class TypeOut(BaseModel):
     days: list[str]
     ai: bool
     auto_publish: bool
+    # Can't be auto-published at all (spotlights): the page shows "Always reviewed".
+    auto_publish_locked: bool = False
 
 
 class DraftOut(BaseModel):
@@ -120,7 +122,8 @@ def _types(db: Session, config: PostsConfig) -> list[TypeOut]:
     auto = auto_publish_settings(db, config)
     return [
         TypeOut(post_type=name, label=TYPE_LABELS[name], enabled=config.type(name).enabled,
-                days=list(config.type(name).days), ai=config.type(name).ai, auto_publish=auto[name])
+                days=list(config.type(name).days), ai=config.type(name).ai, auto_publish=auto[name],
+                auto_publish_locked=name in ALWAYS_REVIEWED)
         for name in POST_TYPES
     ]
 
@@ -265,6 +268,8 @@ class AutoPublishIn(BaseModel):
 def set_auto_publish(post_type: PostType, payload: AutoPublishIn, admin: CurrentUser = Depends(require_admin),
                      db: Session = Depends(get_db), config: PostsConfig = Depends(get_posts_config),
                      now: datetime = Depends(get_now)):
+    if payload.auto_publish and post_type in ALWAYS_REVIEWED:
+        raise HTTPException(status_code=409, detail="This post type is always reviewed before it's published.")
     row = db.get(TreklyPostTypeSetting, post_type)
     if row is None:
         row = TreklyPostTypeSetting(post_type=post_type)

@@ -120,10 +120,18 @@ def release_lock(db: Session, now: datetime, result: str) -> None:
 
 # --- Rules -------------------------------------------------------------------
 
+# Types that always wait for a person: spotlights recommend a trail for the
+# season (in winter, a winter trail), so someone checks each one first. No
+# config value or admin toggle can turn their auto-publish on.
+ALWAYS_REVIEWED = frozenset({"spotlight"})
+
+
 def auto_publish_settings(db: Session, config: PostsConfig) -> dict[str, bool]:
-    """Each type's auto-publish: the config's default, unless an admin set the toggle."""
+    """Each type's auto-publish: the config's default, unless an admin set the
+    toggle. ALWAYS_REVIEWED types are always off."""
     chosen = dict(db.execute(select(TreklyPostTypeSetting.post_type, TreklyPostTypeSetting.auto_publish)).all())
-    return {name: bool(chosen.get(name, cfg.auto_publish)) for name, cfg in config.types.items()}
+    return {name: name not in ALWAYS_REVIEWED and bool(chosen.get(name, cfg.auto_publish))
+            for name, cfg in config.types.items()}
 
 
 def auto_publish_types(db: Session, config: PostsConfig) -> set[str]:

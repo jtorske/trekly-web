@@ -22,6 +22,42 @@ export const LANDING_PHOTOS: LandingPhoto[] = [
   { src: "/images/IMG_9336.jpeg" },
 ];
 
+/**
+ * Winter's pool (Nov 15 - Apr 15, by app/season.py through GET /api/season).
+ * Wikimedia Commons photos under Creative Commons licences, resized and
+ * re-encoded as WebP; each credits its author and licence and links to the
+ * file page.
+ */
+export const WINTER_LANDING_PHOTOS: LandingPhoto[] = [
+  {
+    src: "/images/winter-emerald-lake-dusk.webp",
+    credit: {
+      text: "Emerald Lake, Yoho: JLRPHOTO, CC BY-SA 4.0",
+      href: "https://commons.wikimedia.org/wiki/File:Emerald_Lake_Yoho_Winter_BC.jpg",
+    },
+  },
+  {
+    src: "/images/winter-lake-louise.webp",
+    credit: {
+      text: "Lake Louise in winter: Jack Borno, CC BY-SA 3.0",
+      href: "https://commons.wikimedia.org/wiki/File:Lake_Louise_Winter_-_panoramio.jpg",
+    },
+  },
+  {
+    src: "/images/winter-emerald-lake-ice.webp",
+    position: "center 65%",
+    credit: {
+      text: "Emerald Lake in winter: Natulive Canada, CC BY-SA 4.0",
+      href: "https://commons.wikimedia.org/wiki/File:Emerald_Lake_in_Winter.jpg",
+    },
+  },
+];
+
+/** The hero pool for the season (summer when the season isn't known). */
+export function landingPhotosFor(season: "summer" | "winter" | null): LandingPhoto[] {
+  return season === "winter" ? WINTER_LANDING_PHOTOS : LANDING_PHOTOS;
+}
+
 /** Remembers the last hero photo so the next visit shows a different one. */
 export const LANDING_PHOTO_COOKIE = "trekly_hero";
 

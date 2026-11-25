@@ -28,7 +28,9 @@ from app.account_labels import official_id, real_user
 from app.models.account import SavedTrail
 from app.models.activity import ActivityPost
 from app.models.hike_log import HikeLog
+from app import season as season_rules
 from app.models.trail import Trail
+from app.trail_winter import activities_phrase
 from app.models.trail_photo import TrailPhoto
 from app.models.trekly_post import TreklyFact, TreklyPostDraft
 from app.routers.trails import live_trails
@@ -132,6 +134,14 @@ def stats_sentence(trail: Trail) -> str:
     return text[0].upper() + text[1:] + "."
 
 
+def winter_stats(trail: Trail) -> str:
+    """The stats line for a winter post: a partial winter route says where it
+    ends instead of quoting the summer distance and gain."""
+    if trail.winter_route_ends:
+        return f"Winter route: {trail.winter_route_ends}"
+    return stats_sentence(trail)
+
+
 def _live(db: Session):
     return select(Trail).where(*live_trails())
 
@@ -194,6 +204,24 @@ def spotlight(ctx: GenContext) -> Candidate | None:
     if not trails:
         return None
     pick = ctx.today.toordinal()
+
+    # Winter (app/season.py): only trails the parks list for winter use, and
+    # spotlights are always reviewed before they go out (ALWAYS_REVIEWED).
+    if season_rules.by_date(ctx.today) == "winter":
+        options = [t for t in trails if t.winter_activities]
+        if not options:
+            return None
+        trail = options[pick % len(options)]
+        body = (f"Trail spotlight: a winter pick. {trail.name} in {place_of(trail)} is listed for "
+                f"{activities_phrase(trail.winter_activities)} in winter. {winter_stats(trail)} "
+                "Check trail conditions and the avalanche forecast before you go.")
+        return Candidate("spotlight", key, body,
+                         trail_data(trail) | {"reason": "winter", "winter_activities": list(trail.winter_activities)},
+                         trail_id=trail.id)
+    # Summer: winter-only roads and ski tracks aren't spotlighted.
+    trails = [t for t in trails if not t.is_winter_only]
+    if not trails:
+        return None
 
     larch = cfg.get("larch_window")
     if larch and _in_window(ctx.today, larch):

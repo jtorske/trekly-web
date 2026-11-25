@@ -48,7 +48,8 @@ min_hikers = 3
 
 [types.spotlight]
 enabled = true
-auto_publish = true
+# Always reviewed: app/trekly_posts/service.py ALWAYS_REVIEWED keeps this off.
+auto_publish = false
 days = ["wed", "sat"]
 ai = true
 expires_after_days = 5

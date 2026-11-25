@@ -27,6 +27,7 @@ from app.schemas.trail import (
     ParkFacetOut,
     ParkTypeFacetOut,
     ParkTypeFilter,
+    SeasonMode,
     ProvinceFacetOut,
     SeasonalConditionOut,
     Terrain,
@@ -44,9 +45,11 @@ from app.schemas.trail import (
     TrailSearchItemOut,
     TrailSearchOut,
     TripType,
+    WinterActivity,
 )
 from app.trail_campgrounds import MAPPING_PATH, load_mapping
 from app.trail_routes import route_for
+from app.trail_winter import HAS_WINTER_ACTIVITY, SIMPLE_TERRAIN, WINTER_ONLY, winter_activity_is
 
 router = APIRouter(prefix="/api/trails", tags=["trails"])
 
@@ -70,6 +73,13 @@ PARK_TYPE_BUCKET = case(
     else_="other",
 )
 PARK_TYPE_FILTERS: tuple[ParkTypeFilter, ...] = ("national", "provincial", "other")
+
+def season_order(season: SeasonMode | None) -> list:
+    """Explore's order: in winter, trails recommended for winter come first."""
+    order = [Trail.popularity_rank, Trail.name]
+    if season == "winter":
+        order.insert(0, case((HAS_WINTER_ACTIVITY, 0), else_=1))
+    return order
 EARTH_RADIUS_KM = 6371.0
 
 
@@ -104,6 +114,9 @@ def filter_conditions(
     parks: list[str] = (),
     within_ids: set[UUID] | None = None,
     bounds: BoundsIn | None = None,
+    season: SeasonMode | None = None,
+    winter_activities: list[WinterActivity] = (),
+    simple_terrain: bool = False,
 ) -> dict[str, list]:
     """WHERE clauses keyed by filter, so a facet can leave out its own."""
     conditions: dict[str, list] = {}
@@ -139,6 +152,13 @@ def filter_conditions(
             else or_(Trail.longitude >= bounds.west, Trail.longitude <= bounds.east)
         )
         conditions["area"] = [Trail.latitude.between(bounds.south, bounds.north), longitude]
+    if season == "summer":
+        # Winter-only roads and ski tracks aren't summer hikes.
+        conditions["season"] = [~WINTER_ONLY]
+    if winter_activities:
+        conditions["winter_activity"] = [or_(*(winter_activity_is(a) for a in winter_activities))]
+    if simple_terrain:
+        conditions["ates"] = list(SIMPLE_TERRAIN)
     return conditions
 
 
@@ -162,6 +182,9 @@ def search_trails(
     park_type: list[ParkTypeFilter] = Query([]),
     park: list[str] = Query([]),
     watchable: bool | None = None,
+    season: SeasonMode | None = None,
+    winter_activity: list[WinterActivity] = Query([]),
+    simple_terrain: bool = False,
     sort: Literal["popular", "watchable"] = "popular",
     limit: int = Query(10, ge=1, le=TRAIL_CATALOG_LIMIT),
     db: Session = Depends(get_db),
@@ -173,11 +196,15 @@ def search_trails(
     `province`, `park_type` and `park` repeat to match any of their values.
     `watchable` keeps only trails an alert can (true) or can't (false) watch;
     `sort=watchable` puts the watchable ones first, then by popularity.
+    `season=summer` leaves out winter-only trails; `season=winter` lists
+    trails recommended in winter first. `winter_activity` repeats (any of);
+    `simple_terrain` keeps winter trails in ATES simple terrain only.
     """
-    conditions = filter_conditions(q, terrain, trip, province, park_type, park)
+    conditions = filter_conditions(q, terrain, trip, province, park_type, park, season=season,
+                                   winter_activities=winter_activity, simple_terrain=simple_terrain)
     if watchable is not None:
         conditions["watchable"] = [TRAIL_IS_WATCHABLE if watchable else ~TRAIL_IS_WATCHABLE]
-    order = [Trail.popularity_rank, Trail.name]
+    order = season_order(season)
     if sort == "watchable":
         order.insert(0, TRAIL_IS_WATCHABLE.desc())
     rows = db.scalars(select(Trail).where(*where(conditions)).order_by(*order).limit(limit)).all()
@@ -234,12 +261,13 @@ def search_trails_with_facets(body: TrailSearchIn, db: Session = Depends(get_db)
     if body.near and body.near.radius_km is not None:
         within = {trail_id for trail_id, km in distances.items() if km <= body.near.radius_km}
     conditions = filter_conditions(
-        body.q.strip(), body.terrain, body.trip, body.provinces, body.park_types, body.parks, within, body.bounds
+        body.q.strip(), body.terrain, body.trip, body.provinces, body.park_types, body.parks, within, body.bounds,
+        season=body.season, winter_activities=body.winter_activities, simple_terrain=body.simple_terrain,
     )
 
     total = db.scalar(select(func.count()).select_from(Trail).where(*where(conditions)))
     rows = db.scalars(
-        select(Trail).where(*where(conditions)).order_by(Trail.popularity_rank, Trail.name).limit(limit)
+        select(Trail).where(*where(conditions)).order_by(*season_order(body.season)).limit(limit)
     ).all()
     alerts = trail_alerts(db, (row.id for row in rows))
     trails = []

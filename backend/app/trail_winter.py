@@ -19,6 +19,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from sqlalchemy import Text, cast
 from sqlalchemy.orm import Session
 
 from app.models.trail import Trail
@@ -40,6 +41,26 @@ DEFAULTS = {
     "winter_source_url": None,
     "winter_report_url": None,
 }
+
+
+# SQL for the winter fields: JSON arrays matched as text, the same on Postgres
+# (jsonb) and SQLite (tests).
+HAS_WINTER_ACTIVITY = cast(Trail.winter_activities, Text) != "[]"
+WINTER_ONLY = cast(Trail.tags, Text).like('%"winter_only"%')
+# "Simple terrain only": ATES simple (or rated no avalanche terrain), and only
+# trails recommended in winter. Unknown exposure never matches.
+SIMPLE_TERRAIN = (Trail.avalanche_exposure.in_(("none", "simple")), HAS_WINTER_ACTIVITY)
+ACTIVITY_WORDS = {"winter_hike": "winter hiking", "snowshoe": "snowshoeing", "xc_ski": "cross-country skiing"}
+
+
+def winter_activity_is(activity: str):
+    return cast(Trail.winter_activities, Text).like(f'%"{activity}"%')
+
+
+def activities_phrase(activities) -> str:
+    """'snowshoeing and cross-country skiing', always in WINTER_ACTIVITIES order."""
+    words = [ACTIVITY_WORDS[a] for a in WINTER_ACTIVITIES if a in set(activities or ())]
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1] if words else ""
 
 
 class WinterDataError(ValueError):

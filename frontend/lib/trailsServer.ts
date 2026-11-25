@@ -4,7 +4,8 @@
  * so crawlers and visitors don't each hit the API; a photo approved on
  * /admin/photos shows within that window.
  */
-import type { TrailDetail, TrailSearchRequest, TrailSearchResult } from "./trailsApi";
+import type { SeasonInfo } from "./seasonMode";
+import type { SeasonMode, TrailDetail, TrailSearchRequest, TrailSearchResult } from "./trailsApi";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const REVALIDATE_SECONDS = 300;
@@ -47,6 +48,15 @@ export async function searchExploreOnServer(request: TrailSearchRequest): Promis
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
     });
+  } catch {
+    return null;
+  }
+}
+
+/** The current season (GET /api/season, backend app/season.py); null when the API can't say. */
+export async function getSeasonOnServer(): Promise<SeasonMode | null> {
+  try {
+    return (await getJson<SeasonInfo>("/api/season"))?.season ?? null;
   } catch {
     return null;
   }

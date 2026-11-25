@@ -95,6 +95,14 @@ class Preferences:
     experience: str | None = None
     favourite_regions: tuple[str, ...] = ()
     home_province: str | None = None
+    # app/season.py's answer for today: "winter" lifts trails recommended in
+    # winter above everything else; "summer" leaves out winter-only ones.
+    season: str | None = None
+
+
+# Larger than every answer-based bonus combined, so in winter the trails the
+# parks list for winter come first.
+WINTER_FIT = 20.0
 
 
 def score(trail, prefs: Preferences) -> float:
@@ -112,6 +120,8 @@ def score(trail, prefs: Preferences) -> float:
         total += 4.0
     if prefs.home_province and trail.province_code == prefs.home_province:
         total += 1.5
+    if prefs.season == "winter" and getattr(trail, "winter_activities", None):
+        total += WINTER_FIT
     return total
 
 
@@ -125,6 +135,8 @@ def recommend(trails: Iterable, prefs: Preferences, limit: int = 5) -> list:
     def popularity(trail) -> int:
         return trail.popularity_rank if trail.popularity_rank is not None else 1_000_000
 
+    if prefs.season == "summer":
+        trails = [t for t in trails if not getattr(t, "is_winter_only", False)]
     ranked = sorted(trails, key=lambda trail: (-score(trail, prefs), popularity(trail), trail.name))
     picks: list = []
     per_park: dict[str, int] = {}

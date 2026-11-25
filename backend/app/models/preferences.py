@@ -28,6 +28,10 @@ class ProfilePreferences(Base):
             "onboarding_status is null or onboarding_status in ('completed', 'skipped')",
             name="profile_preferences_onboarding_status_check",
         ),
+        CheckConstraint(
+            "season_mode is null or season_mode in ('summer', 'winter')",
+            name="profile_preferences_season_mode_check",
+        ),
     )
 
     # Same value as auth.users.id; the FK to auth.users is added in the migration.
@@ -45,6 +49,9 @@ class ProfilePreferences(Base):
     hikes_with_dog = Column(Boolean, nullable=False, default=False, server_default=false())
     # Scenery they like (app/guide/estimate.py SCENERY_KEYS); nudges the ranking only.
     scenery = Column(JsonType, nullable=False, default=list, server_default="[]")
+    # Explore's Summer / Winter toggle (migration f3b8d2a6c4e1): null follows
+    # the season (app/season.py); 'summer' or 'winter' is their own choice.
+    season_mode = Column(Text)
     # The /welcome screen to resume at (ONBOARDING_STEPS).
     onboarding_step = Column(Text)
     # Null until they finish ("completed") or leave with "Skip for now" ("skipped").

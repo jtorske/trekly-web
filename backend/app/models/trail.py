@@ -128,3 +128,8 @@ class Trail(Base):
     photo = relationship("TrailPhoto", uselist=False, lazy="selectin", viewonly=True)
     # The generated route map, shown instead of the plain topo when there's no photo.
     route_map = relationship("TrailRouteMap", uselist=False, lazy="selectin", viewonly=True)
+
+    @property
+    def is_winter_only(self) -> bool:
+        """A road or ski track in the catalogue for winter only (tag "winter_only")."""
+        return "winter_only" in (self.tags or [])

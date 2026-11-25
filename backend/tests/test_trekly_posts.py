@@ -135,7 +135,9 @@ def test_the_shipped_config_reviews_facts_and_warnings_and_auto_publishes_the_re
     cfg = load_config()
     assert set(cfg.types) == set(GENERATORS)
     assert {name for name in GENERATORS if cfg.type(name).auto_publish} == {
-        "trending", "spotlight", "new_on_trekly", "roundup"}
+        "trending", "new_on_trekly", "roundup"}
+    # Spotlights recommend a trail for the season: always reviewed (user, 2026-11-24).
+    assert cfg.type("spotlight").auto_publish is False
     assert cfg.type("fun_fact").auto_publish is False
     assert cfg.type("conditions").auto_publish is False
     assert cfg.type("conditions").enabled is False
@@ -442,11 +444,18 @@ def auto(db, *types):
     db.commit()
 
 
+@pytest.fixture
+def spotlight_unlocked(monkeypatch):
+    """For tests of the publishing pipeline that use spotlight as their example
+    type: lift the always-reviewed lock (tested on its own below)."""
+    monkeypatch.setattr(service, "ALWAYS_REVIEWED", frozenset())
+
+
 def count(db, model, *where):
     return db.scalar(select(func.count()).select_from(model).where(*where))
 
 
-def test_running_twice_never_duplicates_drafts_or_posts(session_factory, trails):
+def test_running_twice_never_duplicates_drafts_or_posts(spotlight_unlocked, session_factory, trails):
     db = session_factory()
     make_official(db)
     auto(db, "spotlight", "trending", "fun_fact", "roundup", "new_on_trekly")
@@ -496,7 +505,7 @@ def test_a_scheduled_draft_is_published_on_its_day_and_once(session_factory, tra
     assert run(db, config(auto=False), now=tomorrow + timedelta(hours=1)).published is None
 
 
-def test_at_most_one_post_a_day_counting_manual_ones(session_factory, trails):
+def test_at_most_one_post_a_day_counting_manual_ones(spotlight_unlocked, session_factory, trails):
     db = session_factory()
     official_id = make_official(db)
     db.add(ActivityPost(user_id=official_id, kind="announcement", body="Manual post", created_at=NOW - timedelta(hours=1)))
@@ -507,7 +516,7 @@ def test_at_most_one_post_a_day_counting_manual_ones(session_factory, trails):
     assert any("already posted" in note for note in report.notes)
 
 
-def test_the_day_counts_in_alberta_time(session_factory, trails):
+def test_the_day_counts_in_alberta_time(spotlight_unlocked, session_factory, trails):
     db = session_factory()
     official_id = make_official(db)
     # 05:00 UTC on the 23rd is still the 22nd in Alberta.
@@ -594,13 +603,23 @@ def test_nothing_publishes_until_the_official_account_exists(session_factory, tr
     assert report.published is None and count(db, ActivityPost) == 0
 
 
-def test_by_default_every_type_auto_publishes(session_factory, trails):
+def test_by_default_spotlights_wait_for_review(session_factory, trails):
     db = session_factory()
-    official_id = make_official(db)
+    make_official(db)
     report = run(db)
-    assert report.published == "spotlight"
-    post = db.scalar(select(ActivityPost))
-    assert (post.user_id, post.trail_id) == (official_id, trails["Larch Valley"])
+    assert report.drafted == ["spotlight"] and report.published is None
+    assert count(db, ActivityPost) == 0
+    draft = db.scalar(select(TreklyPostDraft).where(TreklyPostDraft.post_type == "spotlight"))
+    assert draft.status == "draft" and draft.trail_id == trails["Larch Valley"]
+
+
+def test_spotlights_never_auto_publish_even_if_an_admin_row_says_so(session_factory, trails):
+    db = session_factory()
+    make_official(db)
+    db.add(TreklyPostTypeSetting(post_type="spotlight", auto_publish=True))  # e.g. set before the lock
+    db.commit()
+    assert service.auto_publish_settings(db, config())["spotlight"] is False
+    assert run(db).published is None and count(db, ActivityPost) == 0
 
 
 def test_an_admin_can_still_turn_a_type_off(session_factory, trails):
@@ -630,10 +649,11 @@ def test_a_post_that_fails_the_fact_check_is_skipped_not_queued(session_factory,
     assert "Skipped (the AI text failed the fact check)" in outbox.sent[0].text
 
 
-def test_the_digest_is_a_record_of_what_went_out_once_a_day(session_factory, trails, monkeypatch):
+def test_the_digest_is_a_record_of_what_went_out_once_a_day(spotlight_unlocked, session_factory, trails, monkeypatch):
     monkeypatch.setenv("APP_URL", "https://trekly.example")
     db = session_factory()
     make_official(db)
+    auto(db, "spotlight")
     outbox = Outbox()
     run(db, outbox=outbox)
     assert len(outbox.sent) == 1
@@ -654,9 +674,10 @@ def test_no_digest_when_nothing_went_out(session_factory, trails):
     assert outbox.sent == []
 
 
-def test_without_digest_recipients_it_still_runs_and_publishes(session_factory, trails):
+def test_without_digest_recipients_it_still_runs_and_publishes(spotlight_unlocked, session_factory, trails):
     db = session_factory()
     make_official(db)
+    auto(db, "spotlight")
     report = service.run_daily(db, config(), now=NOW, client=None, sender=None, recipients=[],
                                fetch=lambda url: "<html></html>")
     assert report.published == "spotlight" and report.digest_sent_to == 0
@@ -765,6 +786,68 @@ def test_auto_publish_toggle(api):
     assert response.status_code == 200 and response.json()["auto_publish"] is True
     assert next(t for t in queue(api)["types"] if t["post_type"] == "trending")["auto_publish"] is True
     assert c.put("/api/admin/trekly-posts/types/memes", json={"auto_publish": True}, headers=h).status_code == 422
+
+
+def test_spotlight_auto_publish_cannot_be_turned_on(api):
+    c, h = api["client"], api["headers"]
+    refused = c.put("/api/admin/trekly-posts/types/spotlight", json={"auto_publish": True}, headers=h)
+    assert refused.status_code == 409
+    spotlight = next(t for t in queue(api)["types"] if t["post_type"] == "spotlight")
+    assert spotlight["auto_publish"] is False and spotlight["auto_publish_locked"] is True
+    # Turning it off is always fine.
+    assert c.put("/api/admin/trekly-posts/types/spotlight", json={"auto_publish": False}, headers=h).status_code == 200
+
+
+# -------------------------------------------------------- winter spotlights
+
+WINTER_DAY = date(2026, 12, 2)  # a Wednesday in winter
+WINTER_NOW = datetime(2026, 12, 2, 16, tzinfo=timezone.utc)
+
+
+def _winterize(db, trails, name, acts, ends=None):
+    t = db.get(Trail, trails[name])
+    t.winter_activities, t.winter_source_url, t.winter_route_ends = acts, "https://parks.canada.ca/w", ends
+    db.commit()
+    return t
+
+
+def test_winter_spotlight_picks_only_winter_trails(session_factory, trails):
+    db = session_factory()
+    _winterize(db, trails, "Lake Low", ["snowshoe", "winter_hike"])
+    seen = {GENERATORS["spotlight"](ctx(db, today=WINTER_DAY + timedelta(days=k), now=WINTER_NOW)).trail_id
+            for k in range(0, 21, 7)}
+    assert seen == {trails["Lake Low"]}
+    candidate = GENERATORS["spotlight"](ctx(db, today=WINTER_DAY, now=WINTER_NOW))
+    assert candidate.data["reason"] == "winter"
+    assert "winter hiking and snowshoeing" in candidate.template_body
+    assert "avalanche forecast" in candidate.template_body and "safe" not in candidate.template_body.lower()
+
+
+def test_winter_spotlight_with_no_winter_trails_drafts_nothing(session_factory, trails):
+    db = session_factory()
+    assert GENERATORS["spotlight"](ctx(db, today=WINTER_DAY, now=WINTER_NOW)) is None
+
+
+def test_winter_spotlight_gives_a_partial_route_its_end_not_summer_stats(session_factory, trails):
+    db = session_factory()
+    _winterize(db, trails, "Lake Low", ["winter_hike"], ends="The Red Chairs viewpoint (about 3.4 km return).")
+    body = GENERATORS["spotlight"](ctx(db, today=WINTER_DAY, now=WINTER_NOW)).template_body
+    assert "Winter route: The Red Chairs viewpoint" in body and "elevation gain" not in body
+
+
+def test_winter_spotlight_keeps_its_template_wording():
+    written = writer.write("spotlight", "Trail spotlight: a winter pick. Check conditions.", {"reason": "winter"},
+                           use_ai=True, client=FakeAI("Totally different words."), max_chars=280)
+    assert (written.body, written.writer) == ("Trail spotlight: a winter pick. Check conditions.", "template")
+
+
+def test_summer_spotlight_skips_winter_only_trails(session_factory, trails):
+    db = session_factory()
+    for t in db.scalars(select(Trail)).all():
+        t.tags = ["winter_only"]
+    db.commit()
+    day = date(2026, 7, 15)
+    assert GENERATORS["spotlight"](ctx(db, today=day, now=datetime(2026, 7, 15, 15, tzinfo=timezone.utc))) is None
 
 
 def test_fact_bank_crud_and_reapproval_on_change(api, trails):

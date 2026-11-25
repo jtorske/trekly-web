@@ -333,7 +333,7 @@ function TypeRow({ type, onChanged }: { type: TreklyPostTypeInfo; onChanged: () 
       </label>
       <span className={page.typeSwitch}>
         <span className={styles.muted} aria-hidden="true">
-          Auto-publish
+          {type.auto_publish_locked ? "Always reviewed" : "Auto-publish"}
         </span>
         <input
           id={id}
@@ -341,8 +341,12 @@ function TypeRow({ type, onChanged }: { type: TreklyPostTypeInfo; onChanged: () 
           role="switch"
           className={page.switch}
           checked={type.auto_publish}
-          disabled={busy}
-          aria-label={`Auto-publish ${type.label}`}
+          disabled={busy || (type.auto_publish_locked && !type.auto_publish)}
+          aria-label={
+            type.auto_publish_locked
+              ? `${type.label}: always reviewed before publishing`
+              : `Auto-publish ${type.label}`
+          }
           onChange={(event) => {
             if (event.target.checked) setConfirming(true);
             else void set(false);
