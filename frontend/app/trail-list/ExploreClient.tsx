@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   Suspense,
   useCallback,
   useEffect,
@@ -77,6 +78,13 @@ import TrailCard, { TrailCardSkeleton } from "./TrailCard";
 import styles from "./page.module.css";
 
 // MapLibre is big and needs the browser: load it only when a map is on screen.
+/**
+ * Cards in the server HTML and the first (hydrating) render. The rest follow
+ * in a low-priority update straight after, so a phone parses, hydrates and
+ * paints ~24 cards before the first photo instead of every result.
+ */
+const FIRST_CARDS = 24;
+
 const ExploreMap = dynamic(() => import("./ExploreMap"), {
   ssr: false,
   loading: () => (
@@ -437,6 +445,11 @@ function ExploreContent({ initial, season }: { initial: ExploreInitial | null; s
   }, []);
 
   const split = useSyncExternalStore(subscribeSplit, isSplit, () => false);
+  // See FIRST_CARDS: the rest of the list once the page is up.
+  const [allCards, setAllCards] = useState(false);
+  useEffect(() => {
+    startTransition(() => setAllCards(true));
+  }, []);
   // Text in the box: Trails (this page's list and map) or Hikers tabs.
   const searching = input.trim() !== "";
   const tab: SearchTab = searchTab(searchParams.get("tab"), input);
@@ -1101,7 +1114,7 @@ function ExploreContent({ initial, season }: { initial: ExploreInitial | null; s
                 {/* Split view: the only scroller, ending level with the map. */}
                 <div ref={scrollerRef} className={styles.scroller}>
                   <ul className={`${styles.list} ${isLoading ? styles.stale : ""}`}>
-                    {sorted.map((trail, index) => (
+                    {(allCards ? sorted : sorted.slice(0, FIRST_CARDS)).map((trail, index) => (
                       <TrailCard
                         key={trail.id}
                         ref={(node) => {

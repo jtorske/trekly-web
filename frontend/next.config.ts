@@ -62,6 +62,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Sentry's tracing code is left out of the frontend (browser, Node and
+  // edge): it was ~70 KB more JavaScript on every page before the first
+  // paint. Errors are still reported; traces come from the API on Render
+  // (backend/app/observability.py, 10% in production). Next won't let
+  // defineServer override this key, so it can't be browser-only.
+  compiler: {
+    define: { __SENTRY_TRACING__: false },
+  },
   // next/image for the trail page hero and avatars: resized to what each
   // screen needs, as AVIF or WebP (components/TrailPhoto.tsx, Avatar.tsx).
   images: supabaseImages(),

@@ -8,7 +8,10 @@
  *   on previews, "local" everywhere else; release: the git commit SHA. Both
  *   are inlined at build time by next.config.ts.
  * - No personal data (sendDefaultPii off, lib/sentryScrub.ts on every event),
- *   no session replay, 10% of page loads traced in production only.
+ *   no session replay.
+ * - Errors only, no tracing: next.config.ts compiles Sentry's tracing code
+ *   out (__SENTRY_TRACING__ false), so phones download less before the
+ *   first paint. Performance traces come from the API on Render instead.
  */
 import { scrubEvent } from "./sentryScrub";
 
@@ -23,7 +26,6 @@ export function sentryOptions() {
     environment: SENTRY_ENVIRONMENT,
     release: SENTRY_RELEASE,
     sendDefaultPii: false,
-    tracesSampleRate: SENTRY_ENVIRONMENT === "production" ? 0.1 : 0,
     beforeSend: scrubEvent,
     beforeSendTransaction: scrubEvent,
     // Browser noise that isn't a Trekly bug.
