@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { preconnect } from "react-dom";
 import { Fraunces, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -25,6 +26,10 @@ const display = Fraunces({
   style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
+  // Not preloaded: its two files (~80 KB) would share a phone's bandwidth
+  // with Explore's first photo (the LCP). Headings show in the size-matched
+  // fallback for a moment, then swap. The body font below stays preloaded.
+  preload: false,
 });
 
 const sans = DM_Sans({
@@ -64,6 +69,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Trail photos and avatars come from Supabase Storage: open that
+  // connection while the HTML is still arriving, not when the first <img>
+  // is found (saves a DNS + TCP + TLS round trip on Explore's first photo).
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) preconnect(process.env.NEXT_PUBLIC_SUPABASE_URL);
   return (
     <html lang="en" className={`h-full ${display.variable} ${sans.variable}`}>
       <body className="flex min-h-full flex-col overflow-x-hidden">

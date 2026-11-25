@@ -1036,7 +1036,7 @@ function ExploreContent({ initial }: { initial: ExploreInitial | null }) {
                         units={units}
                         selected={selectedId === trail.id}
                         onHover={setHoveredId}
-                        priority={index < 2}
+                        priority={index === 0}
                       />
                     ))}
                   </ul>
