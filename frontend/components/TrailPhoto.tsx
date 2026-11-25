@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, type CSSProperties } from "react";
 import { DEFAULT_TOPO_MAP, TOPO_MAPS } from "@/lib/topoMaps";
 import { photoCredit, ROUTE_MAP_CREDIT, trailImageAlt } from "@/lib/trailPhoto";
@@ -47,20 +48,40 @@ export default function TrailPhoto({
 
   return (
     <div className={`${styles.frame} ${styles[variant]}`}>
-      {shown ? (
+      {shown && variant === "hero" ? (
         <>
-          {/* Plain <img>: the files are already resized WebP on Storage's CDN. */}
+          {/* The page's LCP: resized for each screen and served as AVIF/WebP
+              (next.config.ts images), preloaded at high priority. */}
+          <Image
+            key={shown.url}
+            className={styles.image}
+            src={shown.url}
+            alt={trailImageAlt(name, shown.kind, shown.kind === "photo" ? photo?.scope : null)}
+            width={shown.image.width}
+            height={shown.image.height}
+            sizes={HERO_SIZES}
+            priority
+            onError={() => setFailed((list) => [...list, shown.url])}
+          />
+          {shown.kind === "map" && (
+            <div className={`${styles.fallback} ${styles.mapLabel}`} aria-hidden="true">
+              {!mini && <span className={styles.fallbackName}>{name}</span>}
+            </div>
+          )}
+        </>
+      ) : shown ? (
+        <>
+          {/* Thumbs stay plain <img>: Storage's 640 px WebP already fits a card. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={shown.url}
             className={styles.image}
             src={shown.url}
-            {...heroSources(variant, shown.kind === "photo" ? photo : null)}
             alt={trailImageAlt(name, shown.kind, shown.kind === "photo" ? photo?.scope : null)}
             width={shown.image.width}
             height={shown.image.height}
-            loading={variant === "hero" || priority ? "eager" : "lazy"}
-            fetchPriority={variant === "hero" || priority ? "high" : "auto"}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
             onError={() => setFailed((list) => [...list, shown.url])}
           />
@@ -81,21 +102,10 @@ export default function TrailPhoto({
 }
 
 /**
- * The trail page hero's srcset: the ~1000 px rendition for phones, the
- * 1600 px hero for wider or denser screens. The hero spans the page up to
- * 48rem (app/trails/page.module.css .wrap). Nothing for thumbs, route maps
- * or photos without a medium file, which keep the plain src.
+ * How wide the trail page hero shows: the page width up to 48rem
+ * (app/trails/page.module.css .wrap). next/image picks the file from it.
  */
-export function heroSources(
-  variant: "hero" | "thumb",
-  photo: Pick<Photo, "hero_url" | "medium_url" | "width"> | null | undefined,
-): { srcSet?: string; sizes?: string } {
-  if (variant !== "hero" || !photo?.medium_url) return {};
-  return {
-    srcSet: `${photo.medium_url} 1000w, ${photo.hero_url} ${photo.width}w`,
-    sizes: "(max-width: 48rem) 100vw, 48rem",
-  };
-}
+const HERO_SIZES = "(max-width: 48rem) 100vw, 48rem";
 
 /**
  * The photo's credit; `place` (the park, or the region) is named for a photo

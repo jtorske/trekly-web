@@ -32,6 +32,22 @@ function connectSources(): string {
   return sources.join(" ");
 }
 
+/**
+ * Only Supabase Storage's public objects may be optimized. Paths are unique
+ * per upload (a new photo is a new path), so results are cached for 31 days.
+ * Against the local stack (http://127.0.0.1) Next won't fetch private
+ * addresses, so images are served as they are.
+ */
+function supabaseImages(): NextConfig["images"] {
+  const supabase = new URL(origin(process.env.NEXT_PUBLIC_SUPABASE_URL, "http://127.0.0.1:44321"));
+  if (supabase.protocol !== "https:") return { unoptimized: true };
+  return {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31 * 24 * 60 * 60,
+    remotePatterns: [{ protocol: "https", hostname: supabase.hostname, pathname: "/storage/v1/object/public/**" }],
+  };
+}
+
 const nextConfig: NextConfig = {
   // Inlined at build time for Sentry (lib/sentryOptions.ts): which
   // deployment this is, and the commit it was built from.
@@ -46,6 +62,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // next/image for the trail page hero and avatars: resized to what each
+  // screen needs, as AVIF or WebP (components/TrailPhoto.tsx, Avatar.tsx).
+  images: supabaseImages(),
   async redirects() {
     return [
       // The landing page is served at / only; old links and bookmarks to

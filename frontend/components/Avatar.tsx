@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { publicAvatarUrl } from "@/lib/storage";
 import styles from "./Avatar.module.css";
@@ -48,18 +49,17 @@ export default function Avatar({
       {...label}
     >
       {showImage ? (
-        // Storage URLs (and local previews) don't go through next/image.
-        // Lazy: avatars are small extras (hiked-by rows, feed posts) and
-        // shouldn't compete with a page's main photo for the connection.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        // Stored avatars are 512 px; next/image sends one sized for this
+        // spot (1x/2x of `size`) as AVIF/WebP. Local previews are blob: URLs
+        // the optimizer can't fetch, so they're shown as they are. Lazy:
+        // avatars shouldn't compete with a page's main photo.
+        <Image
           src={url!}
           alt={alt ?? ""}
           className={styles.image}
           width={size}
           height={size}
-          loading="lazy"
-          decoding="async"
+          unoptimized={Boolean(preview)}
           onError={() => setFailed(url)}
         />
       ) : (
