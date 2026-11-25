@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import ui from "@/components/ui.module.css";
-import { adminApi, type Overview } from "@/lib/adminApi";
+import { adminApi, type GuideChatDay, type GuideChatMetrics, type Overview } from "@/lib/adminApi";
 import { formatDate, formatDateTime, timeAgo } from "@/lib/adminView";
 import AuditList from "./AuditList";
 import AdminFrame from "./AdminFrame";
@@ -110,9 +110,64 @@ function Poller({ poller }: { poller: Overview["poller"] }) {
   );
 }
 
+const GUIDE_COLUMNS: { key: keyof Omit<GuideChatDay, "day">; label: string }[] = [
+  { key: "messages", label: "Messages" },
+  { key: "tool_calls", label: "Tool calls" },
+  { key: "fallbacks", label: "Fallbacks" },
+  { key: "provider_errors", label: "Provider errors" },
+  { key: "rate_limited", label: "Rate limited" },
+  { key: "moderation_blocked", label: "Blocked" },
+  { key: "cap_reached", label: "Cap reached" },
+  { key: "guarded", label: "Guarded replies" },
+];
+
+/** Trekly Guide chat over the last 14 days: counts only, never message content. */
+function GuideChatCard({ metrics }: { metrics: GuideChatMetrics }) {
+  const days = metrics.days.filter((day) => GUIDE_COLUMNS.some((c) => day[c.key] > 0));
+  return (
+    <section className={styles.card} aria-labelledby="guide-chat-title">
+      <h2 id="guide-chat-title" className={styles.cardTitle}>
+        Trekly Guide chat
+      </h2>
+      <p className={ui.hint}>
+        {metrics.enabled ? `On: ${metrics.provider} ${metrics.model}` : "Off (GUIDE_ENABLED or the provider key is missing)"}
+        {` · ${metrics.user_daily_limit} messages per user a day, ${metrics.global_daily_limit} across Trekly. Counts only.`}
+      </p>
+      {days.length === 0 ? (
+        <p className={ui.hint}>No chat in the last 14 days.</p>
+      ) : (
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th scope="col">Day</th>
+                {GUIDE_COLUMNS.map((c) => (
+                  <th key={c.key} scope="col">
+                    {c.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((day) => (
+                <tr key={day.day}>
+                  <th scope="row">{day.day}</th>
+                  {GUIDE_COLUMNS.map((c) => (
+                    <td key={c.key}>{NUMBER.format(day[c.key])}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function OverviewBody() {
   const { state } = useAdminData("overview", (signal) =>
-    Promise.all([adminApi.overview(signal), adminApi.audit(1, 8, signal)]),
+    Promise.all([adminApi.overview(signal), adminApi.audit(1, 8, signal), adminApi.guideMetrics(signal)]),
   );
   if (!state.data) {
     if (state.status === "error")
@@ -123,7 +178,7 @@ function OverviewBody() {
       );
     return <div className={`${ui.skeleton} ${styles.gateSkeleton}`} aria-busy="true" aria-label="Loading" />;
   }
-  const [overview, audit] = state.data;
+  const [overview, audit, guide] = state.data;
   const tiles: { label: string; value: number; note?: string; href?: string }[] = [
     { label: "Users", value: overview.users_total, note: "Not counting @trekly or demo accounts", href: "/admin/users" },
     {
@@ -170,6 +225,7 @@ function OverviewBody() {
         })}
       </div>
       <SignupChart weeks={overview.signups_by_week} />
+      <GuideChatCard metrics={guide} />
       <div className={styles.grid2}>
         <Poller poller={overview.poller} />
         <section className={styles.card} aria-labelledby="audit-title">

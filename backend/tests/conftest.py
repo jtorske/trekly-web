@@ -45,7 +45,7 @@ GEAR_TABLES = [
                 "admin_audit_log", "visit_streaks", "signup_email_requests", "activity_posts", "activity_reactions", "nudge_dismissals", "account_labels",
                 "activity_comments", "follows", "blocks", "notifications", "notification_preferences",
                 "trekly_post_drafts", "trekly_post_type_settings", "trekly_facts",
-                "moderation_items", "account_restrictions")
+                "moderation_items", "account_restrictions", "guide_chat_usage", "guide_chat_metrics")
 ]
 
 

@@ -1,0 +1,62 @@
+.form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.input {
+  flex: 1;
+  min-height: 2.75rem;
+  max-height: 8rem;
+  resize: none;
+  line-height: 1.4;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  color: var(--color-muted-text);
+  font-size: 0.78rem;
+}
+
+.readiness {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--color-dark-olive) 14%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, white 55%, var(--color-cream));
+  padding: 0.75rem 0.9rem;
+}
+
+.readinessHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verdict {
+  border-radius: 9999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ready {
+  background: var(--color-olive);
+  color: var(--color-cream);
+}
+
+.stretch {
+  background: var(--color-tan);
+  color: var(--color-dark-olive);
+}
+
+.notYet {
+  background: var(--color-rust-fill);
+  color: var(--color-cream);
+}

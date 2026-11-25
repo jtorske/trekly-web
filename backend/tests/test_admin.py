@@ -217,6 +217,26 @@ def test_overview_counts_expired_dog_rules(client, admin):
     del app.dependency_overrides[get_today]
 
 
+def test_guide_metrics_counts_only(client, admin, session_factory):
+    from datetime import date
+
+    from app.models.guide_chat import GuideChatMetrics
+    from app.routers.availability import get_today
+
+    app.dependency_overrides[get_today] = lambda: date(2026, 11, 24)
+    with session_factory() as db:
+        db.add(GuideChatMetrics(day=date(2026, 11, 24), messages=7, tool_calls=9, fallbacks=1, provider_errors=0,
+                                rate_limited=1, moderation_blocked=0, cap_reached=0, guarded=2))
+        db.commit()
+    body = client.get("/api/admin/guide-metrics", headers=admin).json()
+    assert len(body["days"]) == 14 and body["days"][0] == {
+        "day": "2026-11-24", "messages": 7, "tool_calls": 9, "fallbacks": 1, "provider_errors": 0,
+        "rate_limited": 1, "moderation_blocked": 0, "cap_reached": 0, "guarded": 2}
+    assert body["days"][1]["messages"] == 0 and "enabled" in body
+    assert client.get("/api/admin/guide-metrics").status_code == 401
+    del app.dependency_overrides[get_today]
+
+
 def test_users_table(client, admin, users):
     page = client.get("/api/admin/users", headers=admin).json()
     assert page["total"] == 4

@@ -20,6 +20,7 @@ from app.routers import (
     follows,
     gear,
     guide,
+    guide_chat,
     hiker_search,
     me_account,
     me_alerts,
@@ -130,6 +131,7 @@ app.include_router(trails.router)
 app.include_router(guide.router)
 app.include_router(guide.settings_router)
 app.include_router(season.router)
+app.include_router(guide_chat.router)
 app.include_router(signup_email.router)
 app.include_router(trail_hikers.router)
 app.include_router(activity.router)

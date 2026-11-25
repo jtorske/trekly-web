@@ -524,6 +524,51 @@ def overview(db: Session = Depends(get_db), today: date = Depends(get_today)):
     )
 
 
+class GuideChatDayOut(BaseModel):
+    day: date
+    messages: int
+    tool_calls: int
+    fallbacks: int
+    provider_errors: int
+    rate_limited: int
+    moderation_blocked: int
+    cap_reached: int
+    guarded: int
+
+
+class GuideChatMetricsOut(BaseModel):
+    """Trekly Guide chat, counts only: no message content is ever stored."""
+
+    enabled: bool
+    provider: str
+    model: str
+    user_daily_limit: int
+    global_daily_limit: int
+    days: list[GuideChatDayOut]
+
+
+GUIDE_METRIC_DAYS = 14
+
+
+@router.get("/guide-metrics", response_model=GuideChatMetricsOut)
+def guide_metrics(db: Session = Depends(get_db), today: date = Depends(get_today)):
+    from app.guide.llm import chat_config
+    from app.models.guide_chat import METRICS, GuideChatMetrics
+
+    config = chat_config()
+    since = today - timedelta(days=GUIDE_METRIC_DAYS - 1)
+    rows = {r.day: r for r in db.scalars(select(GuideChatMetrics).where(GuideChatMetrics.day >= since))}
+    days = []
+    for offset in range(GUIDE_METRIC_DAYS):
+        day = today - timedelta(days=offset)
+        row = rows.get(day)
+        days.append(GuideChatDayOut(day=day, **{m: (getattr(row, m) or 0) if row else 0 for m in METRICS}))
+    return GuideChatMetricsOut(
+        enabled=config.available, provider=config.provider, model=config.model,
+        user_daily_limit=config.user_daily_limit, global_daily_limit=config.global_daily_limit, days=days,
+    )
+
+
 @router.get("/users", response_model=UserPage)
 def list_users(
     db: Session = Depends(get_db),

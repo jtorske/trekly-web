@@ -163,6 +163,28 @@ export type UserAction = "hide" | "unhide" | "clear-username" | "ban" | "unban" 
 
 const BASE = "/api/admin";
 
+/** Trekly Guide chat, counts only (no message content is stored). */
+export interface GuideChatDay {
+  day: string;
+  messages: number;
+  tool_calls: number;
+  fallbacks: number;
+  provider_errors: number;
+  rate_limited: number;
+  moderation_blocked: number;
+  cap_reached: number;
+  guarded: number;
+}
+
+export interface GuideChatMetrics {
+  enabled: boolean;
+  provider: string;
+  model: string;
+  user_daily_limit: number;
+  global_daily_limit: number;
+  days: GuideChatDay[];
+}
+
 function query(params: Record<string, string | number>): string {
   return new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString();
 }
@@ -170,6 +192,8 @@ function query(params: Record<string, string | number>): string {
 export const adminApi = {
   me: (signal?: AbortSignal) => apiFetch<{ admin: true }>(`${BASE}/me`, { auth: true, signal }),
   overview: (signal?: AbortSignal) => apiFetch<Overview>(`${BASE}/overview`, { auth: true, signal }),
+  guideMetrics: (signal?: AbortSignal) =>
+    apiFetch<GuideChatMetrics>(`${BASE}/guide-metrics`, { auth: true, signal }),
   users: (q: UsersQuery, perPage: number, signal?: AbortSignal) =>
     apiFetch<Page<AdminUser>>(
       `${BASE}/users?${query({ q: q.q, sort: q.sort, dir: q.dir, filter: q.filter, page: q.page, per_page: perPage })}`,

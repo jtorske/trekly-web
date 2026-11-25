@@ -39,7 +39,7 @@ export function GuideAvatar({ size = "md" }: { size?: "sm" | "md" }) {
   );
 }
 
-function Typing() {
+export function Typing() {
   return (
     <div className={styles.guideRow}>
       <GuideAvatar size="sm" />
@@ -52,7 +52,7 @@ function Typing() {
   );
 }
 
-function GuideSays({ children }: { children: React.ReactNode }) {
+export function GuideSays({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${styles.guideRow} ${styles.enter}`}>
       <GuideAvatar size="sm" />
@@ -61,7 +61,7 @@ function GuideSays({ children }: { children: React.ReactNode }) {
   );
 }
 
-function YouSaid({ children }: { children: React.ReactNode }) {
+export function YouSaid({ children }: { children: React.ReactNode }) {
   return (
     <div className={`${styles.youRow} ${styles.enter}`}>
       <div className={`${styles.bubble} ${styles.you}`}>
@@ -73,9 +73,10 @@ function YouSaid({ children }: { children: React.ReactNode }) {
 }
 
 /** avalanche.ca as a link inside a reason. */
-function LinkedText({ text }: { text: string }) {
+export function LinkedText({ text }: { text: string }) {
+  // One inline span: the chat bubble lays its children out as a column.
   return (
-    <>
+    <span>
       {text.split(/(https:\/\/avalanche\.ca)/).map((part, index) =>
         part === "https://avalanche.ca" ? (
           <a key={index} href={part} target="_blank" rel="noopener noreferrer" className={styles.inlineLink}>
@@ -85,11 +86,17 @@ function LinkedText({ text }: { text: string }) {
           <span key={index}>{part}</span>
         ),
       )}
-    </>
+    </span>
   );
 }
 
-function ResultCard({ pick, returnTo }: { pick: Recommendation; returnTo: string }) {
+export function ResultCard({
+  pick,
+  returnTo,
+}: {
+  pick: Pick<Recommendation, "trail" | "reasons" | "est_label" | "dog_note" | "dog_policy">;
+  returnTo: string;
+}) {
   const [units] = useUnits();
   const saved = useSavedTrails();
   const { trail } = pick;
@@ -208,7 +215,7 @@ type Phase = { kind: "asking" } | { kind: "loading" } | { kind: "done"; response
  * trails with reasons. Everything comes from the deterministic engine
  * (POST /api/guide/recommend); nothing is stored.
  */
-export default function GuidePlanner({ onClose }: { onClose: () => void }) {
+export default function GuidePlanner({ onClose, intro }: { onClose: () => void; intro?: string }) {
   const { status } = useAuth();
   const signedIn = status === "signedIn";
   const pathname = usePathname() ?? "/";
@@ -360,6 +367,7 @@ export default function GuidePlanner({ onClose }: { onClose: () => void }) {
     >
       <div className={styles.planner}>
         <div className={styles.log} role="log" aria-live="polite" aria-label="Conversation with Trekly Guide">
+          {intro && <GuideSays>{intro}</GuideSays>}
           <GuideSays>
             Hi! I&apos;ll find a few trails that fit you.
             {signedIn ? " I'll use your Trail Journal unless you've turned that off in Settings." : ""}
